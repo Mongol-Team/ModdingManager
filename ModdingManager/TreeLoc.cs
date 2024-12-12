@@ -66,7 +66,7 @@ namespace ModdingManager
             // Формируем путь для файла локализации
             string outputFilePath = Path.Combine(
                 Path.GetDirectoryName(inputFilePath),
-                $"{countryTag}_localization.yml");
+                $"{countryTag}_focus_l_russian.yml");
 
             // Записываем в файл с кодировкой UTF-8-BOM
             File.WriteAllText(outputFilePath, localizationBuilder.ToString(), Encoding.UTF8);
