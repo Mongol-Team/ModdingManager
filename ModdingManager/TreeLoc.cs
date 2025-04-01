@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,6 +17,7 @@ namespace ModdingManager
         public TreeLoc()
         {
             InitializeComponent();
+            textBox1.Text = ModManager.directory;
         }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
@@ -87,6 +89,11 @@ namespace ModdingManager
                     GenerateLocalizationFile(textBox1.Text, textBox2.Text);
                 }
             }
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

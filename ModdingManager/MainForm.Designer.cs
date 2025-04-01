@@ -37,6 +37,9 @@
             LocIdeaButton = new Button();
             FlagCrtButton = new Button();
             CountryCrtButton = new Button();
+            DirBox = new TextBox();
+            label1 = new Label();
+            button1 = new Button();
             SuspendLayout();
             // 
             // LocConvertButton
@@ -124,18 +127,49 @@
             // 
             // CountryCrtButton
             // 
+            CountryCrtButton.BackColor = Color.FromArgb(0, 192, 0);
             CountryCrtButton.Location = new Point(684, 56);
             CountryCrtButton.Name = "CountryCrtButton";
             CountryCrtButton.Size = new Size(237, 56);
             CountryCrtButton.TabIndex = 8;
             CountryCrtButton.Text = "Создатель стран";
-            CountryCrtButton.UseVisualStyleBackColor = true;
+            CountryCrtButton.UseVisualStyleBackColor = false;
+            CountryCrtButton.Click += CountryCrtButton_Click;
+            // 
+            // DirBox
+            // 
+            DirBox.Location = new Point(44, 408);
+            DirBox.Name = "DirBox";
+            DirBox.Size = new Size(554, 27);
+            DirBox.TabIndex = 9;
+            DirBox.KeyDown += DirBox_KeyDown;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(638, 415);
+            label1.Name = "label1";
+            label1.Size = new Size(146, 20);
+            label1.TabIndex = 10;
+            label1.Text = "Дирректория мода ";
+            // 
+            // button1
+            // 
+            button1.Location = new Point(684, 134);
+            button1.Name = "button1";
+            button1.Size = new Size(237, 56);
+            button1.TabIndex = 11;
+            button1.Text = "Создатель персонажей";
+            button1.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(957, 395);
+            ClientSize = new Size(963, 458);
+            Controls.Add(button1);
+            Controls.Add(label1);
+            Controls.Add(DirBox);
             Controls.Add(CountryCrtButton);
             Controls.Add(FlagCrtButton);
             Controls.Add(LocIdeaButton);
@@ -147,7 +181,9 @@
             Controls.Add(LocConvertButton);
             Name = "MainForm";
             Text = "Form1";
+            Load += MainForm_Load;
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -161,5 +197,8 @@
         private Button LocIdeaButton;
         private Button FlagCrtButton;
         private Button CountryCrtButton;
+        private TextBox DirBox;
+        private Label label1;
+        private Button button1;
     }
 }

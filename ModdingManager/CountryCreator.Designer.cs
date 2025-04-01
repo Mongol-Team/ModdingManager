@@ -26,7 +26,7 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
+        public void InitializeComponent()
         {
             Label label4;
             TagBox = new TextBox();
@@ -69,7 +69,6 @@
             label20 = new Label();
             CountryStatesBox = new RichTextBox();
             label21 = new Label();
-            CountryColorPicker = new ColorDialog();
             label22 = new Label();
             ColorPickerButton = new Button();
             ApplyButton = new Button();
@@ -82,6 +81,11 @@
             label26 = new Label();
             label27 = new Label();
             label28 = new Label();
+            CountryNameBox = new TextBox();
+            label25 = new Label();
+            CountryColorDialog = new ColorDialog();
+            ConfigLoadButton = new Button();
+            SaveConfigButton = new Button();
             label4 = new Label();
             SuspendLayout();
             // 
@@ -404,7 +408,7 @@
             // label20
             // 
             label20.AutoSize = true;
-            label20.Location = new Point(616, 92);
+            label20.Location = new Point(616, 104);
             label20.Name = "label20";
             label20.Size = new Size(95, 20);
             label20.TabIndex = 41;
@@ -445,6 +449,7 @@
             ColorPickerButton.TabIndex = 45;
             ColorPickerButton.Text = "выбрать";
             ColorPickerButton.UseVisualStyleBackColor = false;
+            ColorPickerButton.Click += ColorPickerButton_Click;
             // 
             // ApplyButton
             // 
@@ -455,6 +460,7 @@
             ApplyButton.TabIndex = 46;
             ApplyButton.Text = "готово";
             ApplyButton.UseVisualStyleBackColor = false;
+            ApplyButton.Click += ApplyButton_Click;
             // 
             // label23
             // 
@@ -480,6 +486,8 @@
             CountryFascismFlagPanel.Name = "CountryFascismFlagPanel";
             CountryFascismFlagPanel.Size = new Size(82, 52);
             CountryFascismFlagPanel.TabIndex = 39;
+            CountryFascismFlagPanel.DragDrop += CountryFascismFlagPanel_DragDrop;
+            CountryFascismFlagPanel.DragEnter += CountryFascismFlagPanel_DragEnter;
             // 
             // CountryCommunismFlagPanel
             // 
@@ -489,6 +497,8 @@
             CountryCommunismFlagPanel.Name = "CountryCommunismFlagPanel";
             CountryCommunismFlagPanel.Size = new Size(82, 52);
             CountryCommunismFlagPanel.TabIndex = 40;
+            CountryCommunismFlagPanel.DragDrop += CountryCommunismFlagPanel_DragDrop;
+            CountryCommunismFlagPanel.DragEnter += CountryCommunismFlagPanel_DragEnter;
             // 
             // CountryDecmocraticFlagPanel
             // 
@@ -498,6 +508,8 @@
             CountryDecmocraticFlagPanel.Name = "CountryDecmocraticFlagPanel";
             CountryDecmocraticFlagPanel.Size = new Size(82, 52);
             CountryDecmocraticFlagPanel.TabIndex = 41;
+            CountryDecmocraticFlagPanel.DragDrop += CountryDecmocraticFlagPanel_DragDrop;
+            CountryDecmocraticFlagPanel.DragEnter += CountryDecmocraticFlagPanel_DragEnter;
             // 
             // label24
             // 
@@ -535,11 +547,54 @@
             label28.TabIndex = 53;
             label28.Text = "нейтралы";
             // 
+            // CountryNameBox
+            // 
+            CountryNameBox.Location = new Point(665, 346);
+            CountryNameBox.Name = "CountryNameBox";
+            CountryNameBox.Size = new Size(174, 27);
+            CountryNameBox.TabIndex = 54;
+            // 
+            // label25
+            // 
+            label25.AutoSize = true;
+            label25.Location = new Point(709, 311);
+            label25.Name = "label25";
+            label25.Size = new Size(91, 20);
+            label25.TabIndex = 55;
+            label25.Text = "имя страны";
+            // 
+            // ConfigLoadButton
+            // 
+            ConfigLoadButton.BackColor = Color.OliveDrab;
+            ConfigLoadButton.Location = new Point(461, 440);
+            ConfigLoadButton.Name = "ConfigLoadButton";
+            ConfigLoadButton.Size = new Size(194, 29);
+            ConfigLoadButton.TabIndex = 56;
+            ConfigLoadButton.Text = "загрузить конфиг";
+            ConfigLoadButton.UseVisualStyleBackColor = false;
+            ConfigLoadButton.Click += ConfigLoadButton_Click;
+            // 
+            // SaveConfigButton
+            // 
+            SaveConfigButton.BackColor = Color.Crimson;
+            SaveConfigButton.ForeColor = SystemColors.ControlText;
+            SaveConfigButton.Location = new Point(461, 482);
+            SaveConfigButton.Name = "SaveConfigButton";
+            SaveConfigButton.Size = new Size(194, 29);
+            SaveConfigButton.TabIndex = 57;
+            SaveConfigButton.Text = "сохранить конфиг";
+            SaveConfigButton.UseVisualStyleBackColor = false;
+            SaveConfigButton.Click += SaveConfigButton_Click;
+            // 
             // CountryCreator
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(886, 532);
+            ClientSize = new Size(885, 539);
+            Controls.Add(SaveConfigButton);
+            Controls.Add(ConfigLoadButton);
+            Controls.Add(label25);
+            Controls.Add(CountryNameBox);
             Controls.Add(label28);
             Controls.Add(label27);
             Controls.Add(label26);
@@ -601,58 +656,62 @@
 
         #endregion
 
-        private TextBox TagBox;
-        private Label label1;
-        private Label label2;
-        private RichTextBox TechBox;
-        private Label label3;
-        private TextBox ConvoyBox;
-        private Label label5;
-        private ComboBox RullingPartyBox;
-        private Label label6;
-        private Label label7;
-        private Label label8;
-        private Label label9;
-        private RichTextBox StartIdeasBox;
-        private TextBox StartOOBBox;
-        private TextBox StabBox;
-        private TextBox WarSupportBox;
-        private Label label10;
-        private RichTextBox RecruitBox;
-        private Label label11;
-        private TextBox LastElectionBox;
-        private Label label12;
-        private TextBox ElectionFreqBox;
-        private CheckBox IsElectionAllowedBox;
-        private Label label13;
-        private Label label14;
-        private Label label15;
-        private Label label16;
-        private Label label17;
-        private TextBox FascismPopularBox;
-        private TextBox CommunismPopularBox;
-        private TextBox DemocraticPopularBox;
-        private TextBox NeutralPopularBox;
-        private Label label18;
-        private Label label19;
-        private Panel CountryNeutralFlagPanel;
-        private TextBox CapitalBox;
-        private TextBox ResearchSlotBox;
-        private Label label20;
-        private RichTextBox CountryStatesBox;
-        private Label label21;
-        private ColorDialog CountryColorPicker;
-        private Label label22;
-        private Button ColorPickerButton;
-        private Button ApplyButton;
-        private Label label23;
-        private TextBox GrapficalCultureBox;
-        private Panel CountryFascismFlagPanel;
-        private Panel CountryCommunismFlagPanel;
-        private Panel CountryDecmocraticFlagPanel;
-        private Label label24;
-        private Label label26;
-        private Label label27;
-        private Label label28;
+        public TextBox TagBox;
+        public Label label1;
+        public Label label2;
+        public RichTextBox TechBox;
+        public Label label3;
+        public TextBox ConvoyBox;
+        public Label label5;
+        public ComboBox RullingPartyBox;
+        public Label label6;
+        public Label label7;
+        public Label label8;
+        public Label label9;
+        public RichTextBox StartIdeasBox;
+        public TextBox StartOOBBox;
+        public TextBox StabBox;
+        public TextBox WarSupportBox;
+        public Label label10;
+        public RichTextBox RecruitBox;
+        public Label label11;
+        public TextBox LastElectionBox;
+        public Label label12;
+        public TextBox ElectionFreqBox;
+        public CheckBox IsElectionAllowedBox;
+        public Label label13;
+        public Label label14;
+        public Label label15;
+        public Label label16;
+        public Label label17;
+        public TextBox FascismPopularBox;
+        public TextBox CommunismPopularBox;
+        public TextBox DemocraticPopularBox;
+        public TextBox NeutralPopularBox;
+        public Label label18;
+        public Label label19;
+        public Panel CountryNeutralFlagPanel;
+        public TextBox CapitalBox;
+        public TextBox ResearchSlotBox;
+        public Label label20;
+        public RichTextBox CountryStatesBox;
+        public Label label21;
+        public Label label22;
+        public Button ColorPickerButton;
+        public Button ApplyButton;
+        public Label label23;
+        public TextBox GrapficalCultureBox;
+        public Panel CountryFascismFlagPanel;
+        public Panel CountryCommunismFlagPanel;
+        public Panel CountryDecmocraticFlagPanel;
+        public Label label24;
+        public Label label26;
+        public Label label27;
+        public Label label28;
+        public TextBox CountryNameBox;
+        public Label label25;
+        public ColorDialog CountryColorDialog;
+        public Button ConfigLoadButton;
+        public Button SaveConfigButton;
     }
 }
