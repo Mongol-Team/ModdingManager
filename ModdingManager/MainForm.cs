@@ -135,5 +135,19 @@ namespace ModdingManager
 
             DirBox.Text = File.ReadAllText(fullPath);
         }
+
+        private void CharCreator_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(DirBox.Text))
+            {
+                ModManager.directory = DirBox.Text;
+                CharacterCreator fc = new CharacterCreator();
+                fc.Show();
+            }
+            else
+            {
+                MessageBox.Show("введите дирку", "директорию забыл", MessageBoxButtons.OK);
+            }
+        }
     }
 }

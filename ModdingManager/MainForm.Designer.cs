@@ -39,7 +39,7 @@
             CountryCrtButton = new Button();
             DirBox = new TextBox();
             label1 = new Label();
-            button1 = new Button();
+            CharCreator = new Button();
             SuspendLayout();
             // 
             // LocConvertButton
@@ -153,21 +153,22 @@
             label1.TabIndex = 10;
             label1.Text = "Дирректория мода ";
             // 
-            // button1
+            // CharCreator
             // 
-            button1.Location = new Point(684, 134);
-            button1.Name = "button1";
-            button1.Size = new Size(237, 56);
-            button1.TabIndex = 11;
-            button1.Text = "Создатель персонажей";
-            button1.UseVisualStyleBackColor = true;
+            CharCreator.Location = new Point(684, 134);
+            CharCreator.Name = "CharCreator";
+            CharCreator.Size = new Size(237, 56);
+            CharCreator.TabIndex = 11;
+            CharCreator.Text = "Создатель персонажей";
+            CharCreator.UseVisualStyleBackColor = true;
+            CharCreator.Click += CharCreator_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(963, 458);
-            Controls.Add(button1);
+            Controls.Add(CharCreator);
             Controls.Add(label1);
             Controls.Add(DirBox);
             Controls.Add(CountryCrtButton);
@@ -199,6 +200,6 @@
         private Button CountryCrtButton;
         private TextBox DirBox;
         private Label label1;
-        private Button button1;
+        private Button CharCreator;
     }
 }
