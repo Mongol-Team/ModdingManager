@@ -29,6 +29,7 @@ namespace ModdingManager
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CharacterCreator));
             BigIconPanel = new Panel();
             label1 = new Label();
             NameBox = new TextBox();
@@ -402,6 +403,7 @@ namespace ModdingManager
             Controls.Add(NameBox);
             Controls.Add(label1);
             Controls.Add(BigIconPanel);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "CharacterCreator";
             Text = "CharCreator";
             ResumeLayout(false);

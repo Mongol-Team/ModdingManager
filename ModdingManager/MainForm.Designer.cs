@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             LocConvertButton = new Button();
             Statebutton = new Button();
             LocTechButton = new Button();
@@ -180,6 +181,7 @@
             Controls.Add(LocTechButton);
             Controls.Add(Statebutton);
             Controls.Add(LocConvertButton);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
             Text = "Form1";
             Load += MainForm_Load;

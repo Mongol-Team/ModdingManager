@@ -431,9 +431,5 @@ namespace ModdingManager
             }
         }
 
-        private void BigIconPanel_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
     }
 }
