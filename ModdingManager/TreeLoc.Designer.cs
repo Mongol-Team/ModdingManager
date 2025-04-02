@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TreeLoc));
             label1 = new Label();
             textBox1 = new TextBox();
             textBox2 = new TextBox();
@@ -78,6 +79,7 @@
             Controls.Add(textBox2);
             Controls.Add(textBox1);
             Controls.Add(label1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "TreeLoc";
             Text = "лока по фокусам";
             ResumeLayout(false);

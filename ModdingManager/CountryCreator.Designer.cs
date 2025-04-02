@@ -29,6 +29,7 @@
         public void InitializeComponent()
         {
             Label label4;
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CountryCreator));
             TagBox = new TextBox();
             label1 = new Label();
             label2 = new Label();
@@ -648,6 +649,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(TagBox);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "CountryCreator";
             Text = "CountryCreator";
             ResumeLayout(false);

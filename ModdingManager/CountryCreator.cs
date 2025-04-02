@@ -709,14 +709,6 @@ namespace ModdingManager
             }
         }
 
-        private void ConfigNameBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-
-            }
-        }
-
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
             string configName = Microsoft.VisualBasic.Interaction.InputBox("Введите имя конфигурации:", "Загрузка конфигурации");

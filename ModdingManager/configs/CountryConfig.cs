@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManager
+namespace ModdingManager.configs
 {
     public class CountryConfig
     {
@@ -17,8 +17,8 @@ namespace ModdingManager
         public List<string> Technologies { get; set; } = new List<string>();
         public int Convoys { get; set; }
         public string OOB { get; set; }
-        public int Stab {  get; set; }
-        public int WarSup {  get; set; }
+        public int Stab { get; set; }
+        public int WarSup { get; set; }
         public int ResearchSlots { get; set; }
         public string RulingParty { get; set; }
         public string LastElection { get; set; }
@@ -32,4 +32,5 @@ namespace ModdingManager
         public List<string> Characters { get; set; } = new List<string>();
         public Dictionary<int, bool> States { get; set; } = new Dictionary<int, bool>();
     }
+
 }

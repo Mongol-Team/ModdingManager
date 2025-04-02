@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ModifierCreator));
             ыва = new Label();
             label1 = new Label();
             label2 = new Label();
@@ -623,6 +624,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(ыва);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximumSize = new Size(2000000, 2000000);
             Name = "ModifierCreator";
             Text = "ModifierCreator";

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TechnologyGenerator));
             dataGridView1 = new DataGridView();
             label1 = new Label();
             label2 = new Label();
@@ -231,6 +232,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(dataGridView1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "TechnologyGenerator";
             Text = "TechnologyGenerator";
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();

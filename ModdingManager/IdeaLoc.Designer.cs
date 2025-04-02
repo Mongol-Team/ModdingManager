@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IdeaLoc));
             label2 = new Label();
             textBox2 = new TextBox();
             textBox1 = new TextBox();
@@ -77,6 +78,7 @@
             Controls.Add(textBox2);
             Controls.Add(textBox1);
             Controls.Add(label1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "IdeaLoc";
             Text = "IdeaLoc";
             ResumeLayout(false);

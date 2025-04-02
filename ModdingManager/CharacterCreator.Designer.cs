@@ -1,7 +1,7 @@
 ﻿
 namespace ModdingManager
 {
-    partial class CharacterCreator
+    public partial class CharacterCreator
     {
         /// <summary>
         /// Required designer variable.
@@ -65,6 +65,8 @@ namespace ModdingManager
             label17 = new Label();
             ExpireBox = new TextBox();
             ApplyButton = new Button();
+            SaveButton = new Button();
+            LoadButton = new Button();
             SuspendLayout();
             // 
             // BigIconPanel
@@ -325,7 +327,6 @@ namespace ModdingManager
             AiDoBox.Name = "AiDoBox";
             AiDoBox.Size = new Size(166, 27);
             AiDoBox.TabIndex = 39;
-            AiDoBox.TextChanged += textBox1_TextChanged;
             // 
             // label16
             // 
@@ -363,11 +364,35 @@ namespace ModdingManager
             ApplyButton.UseVisualStyleBackColor = false;
             ApplyButton.Click += ApplyButton_Click;
             // 
+            // SaveButton
+            // 
+            SaveButton.BackColor = Color.FromArgb(192, 64, 0);
+            SaveButton.Location = new Point(29, 655);
+            SaveButton.Name = "SaveButton";
+            SaveButton.Size = new Size(94, 29);
+            SaveButton.TabIndex = 48;
+            SaveButton.Text = "сохранить";
+            SaveButton.UseVisualStyleBackColor = false;
+            SaveButton.Click += SaveButton_Click;
+            // 
+            // LoadButton
+            // 
+            LoadButton.BackColor = Color.Green;
+            LoadButton.Location = new Point(155, 655);
+            LoadButton.Name = "LoadButton";
+            LoadButton.Size = new Size(94, 29);
+            LoadButton.TabIndex = 49;
+            LoadButton.Text = "загрузить";
+            LoadButton.UseVisualStyleBackColor = false;
+            LoadButton.Click += LoadButton_Click;
+            // 
             // CharacterCreator
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(417, 696);
+            Controls.Add(LoadButton);
+            Controls.Add(SaveButton);
             Controls.Add(ApplyButton);
             Controls.Add(ExpireBox);
             Controls.Add(label17);
@@ -422,32 +447,34 @@ namespace ModdingManager
         public CheckBox checkBox1;
         public RichTextBox richTextBox2;
         public TextBox IdBox;
-        private Label label8;
-        private Label label4;
+        public Label label8;
+        public Label label4;
         public TextBox SkillBox;
         public TextBox AtkBox;
         public TextBox DefBox;
         public TextBox SupplyBox;
         public TextBox SpdBox;
         public TextBox AdvisorCost;
-        private Label label5;
-        private Label label6;
+        public Label label5;
+        public Label label6;
         public ComboBox AdvisorSlot;
-        private Label label7;
-        private Label label9;
-        private Label label10;
-        private Label label11;
-        private Label label12;
-        private Label label13;
-        private Label label14;
+        public Label label7;
+        public Label label9;
+        public Label label10;
+        public Label label11;
+        public Label label12;
+        public Label label13;
+        public Label label14;
         public RichTextBox CharTypesBox;
         public TextBox TagBox;
         public Label label15;
         public Panel SmalIconPanel;
         public TextBox AiDoBox;
-        private Label label16;
-        private Label label17;
+        public Label label16;
+        public Label label17;
         public TextBox ExpireBox;
         public Button ApplyButton;
+        public Button SaveButton;
+        public Button LoadButton;
     }
 }

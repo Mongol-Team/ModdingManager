@@ -1,4 +1,5 @@
 ﻿using ModdingManager;
+using ModdingManager.configs;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -148,5 +149,94 @@ public static class ConfigManager
         }
 
         return states;
+    }
+
+    private static readonly string CharactersPath = Path.Combine("data", "characters");
+
+    // Сохраняем персонажа из формы
+    public static void SaveCharConfigToForm(CharacterCreator form, string configName)
+    {
+        try
+        {
+            string dirPath = Path.Combine("data", "characters");
+            Directory.CreateDirectory(dirPath);
+            Directory.CreateDirectory(CharactersPath);
+
+            string json = JsonSerializer.Serialize(new
+            {
+                // Основные свойства
+                Id = form.IdBox.Text,
+                Name = form.NameBox.Text,
+                Description = form.DescBox.Text,
+                Tag = form.TagBox.Text,
+
+                // Статистика
+                Skill = int.Parse(form.SkillBox.Text),
+                Attack = int.Parse(form.AtkBox.Text),
+                Defense = int.Parse(form.DefBox.Text),
+                Supply = int.Parse(form.SupplyBox.Text),
+                Speed = int.Parse(form.SpdBox.Text),
+
+                // Советник
+                AdvisorSlot = form.AdvisorSlot.Text,
+                AdvisorCost = int.Parse(form.AdvisorCost.Text),
+                AiWillDo = form.AiDoBox.Text,
+
+                // Дополнительные
+                Expire = form.ExpireBox.Text,
+                Types = new List<string>(form.CharTypesBox.Text.Split('\n')),
+                Traits = new List<string>(form.PercBox.Text.Split('\n')),
+
+                // Иконки
+                BigIconPath = form.currentCharacter?.BigIconPath ?? "",
+                SmallIconPath = form.currentCharacter?.SmallIconPath ?? ""
+            }, JsonOptions);
+
+            string filePath = Path.Combine(CharactersPath, $"{configName}.json");
+            File.WriteAllText(Path.Combine(dirPath, configName), json);
+            MessageBox.Show("Персонаж сохранен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    public static void LoadCharConfigToForm(CharacterCreator form, string configName)
+    {
+        try
+        {
+            string filePath = Path.Combine(CharactersPath, $"{configName}.json");
+            if (!File.Exists(filePath))
+            {
+                MessageBox.Show("Файл не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var character = JsonSerializer.Deserialize<CountryCharacterConfig>(File.ReadAllText(filePath));
+
+            // Заполняем форму
+            form.IdBox.Text = character.Id;
+            form.NameBox.Text = character.Name;
+            form.DescBox.Text = character.Description;
+            form.TagBox.Text = character.Tag;
+            form.SkillBox.Text = character.Skill.ToString();
+            form.AtkBox.Text = character.Attack.ToString();
+            form.DefBox.Text = character.Defense.ToString();
+            form.SupplyBox.Text = character.Supply.ToString();
+            form.SpdBox.Text = character.Speed.ToString();
+            form.AdvisorSlot.Text = character.AdvisorSlot;
+            form.AdvisorCost.Text = character.AdvisorCost.ToString();
+            form.AiDoBox.Text = character.AiWillDo;
+            form.ExpireBox.Text = character.Expire;
+            form.CharTypesBox.Text = string.Join("\n", character.Types);
+            form.PercBox.Text = string.Join("\n", character.Traits);
+
+            MessageBox.Show("Персонаж загружен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка загрузки: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 }

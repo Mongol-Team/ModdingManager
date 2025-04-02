@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using Microsoft.VisualBasic;
+using ModdingManager.configs;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -10,6 +12,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -17,16 +20,11 @@ namespace ModdingManager
 {
     public partial class CharacterCreator : Form
     {
+        public CountryCharacterConfig currentCharacter = new ();
         public CharacterCreator()
         {
             InitializeComponent();
         }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         public static void CreateCharacterLocalizationFiles(Form form, string modPath)
         {
             try
@@ -111,9 +109,9 @@ namespace ModdingManager
                 Panel bigIconPanel = (Panel)form.Controls["BigIconPanel"];
                 Panel smallIconPanel = (Panel)form.Controls["SmalIconPanel"];
 
-                if (bigIconPanel.BackgroundImage == null || smallIconPanel.BackgroundImage == null)
+                if (bigIconPanel.BackgroundImage == null && smallIconPanel.BackgroundImage == null)
                 {
-                    MessageBox.Show("Необходимо добавить оба изображения!",
+                    MessageBox.Show("Необходимо добавить хотябы 1 изображение!",
                                   "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
@@ -431,5 +429,176 @@ namespace ModdingManager
             }
         }
 
+        private void LoadButton_Click(object sender, EventArgs e)
+        {
+            var files = Directory.GetFiles(
+        Path.Combine("data", "characters"),
+        "*.json"
+    );
+
+            if (files.Length == 0)
+            {
+                MessageBox.Show("Нет сохранённых персонажей!", "Ошибка");
+                return;
+            }
+
+            // Показываем список файлов в диалоге
+            string fileList = string.Join("\n", files.Select(Path.GetFileNameWithoutExtension));
+
+            string selectedFile = Interaction.InputBox(
+                $"Доступные персонажи:\n{fileList}\n\nВведите имя файла:",
+                "Загрузка персонажа",
+                "");
+
+            if (string.IsNullOrWhiteSpace(selectedFile))
+            {
+                MessageBox.Show("Загрузка отменена!");
+                return;
+            }
+
+            // Загружаем через ConfigManager
+            ConfigManager.LoadCharConfigToForm(this, selectedFile);
+        }
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+            string fileName = Interaction.InputBox(
+        "Введите имя файла для сохранения (без .json):",
+        "Сохранение персонажа",
+        $"{IdBox.Text.ToLower()}_character");
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                MessageBox.Show("Сохранение отменено!");
+                return;
+            }
+
+            // Сохраняем через ConfigManager
+            ConfigManager.SaveCharConfigToForm(this, fileName);
+        }
+        private void SaveCharacter(string filePath)
+        {
+            try
+            {
+                // Обновляем данные из формы
+                UpdateCharacterFromForm();
+
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+
+                string json = JsonSerializer.Serialize(currentCharacter, options);
+                File.WriteAllText(filePath, json);
+
+                // Сохраняем иконки, если пути указаны
+                if (!string.IsNullOrEmpty(currentCharacter.BigIconPath))
+                {
+                    string bigIconDest = Path.Combine(Path.GetDirectoryName(filePath), $"{currentCharacter.Id}_big.png");
+                    File.Copy(currentCharacter.BigIconPath, bigIconDest, true);
+                }
+
+                if (!string.IsNullOrEmpty(currentCharacter.SmallIconPath))
+                {
+                    string smallIconDest = Path.Combine(Path.GetDirectoryName(filePath), $"{currentCharacter.Id}_small.png");
+                    File.Copy(currentCharacter.SmallIconPath, smallIconDest, true);
+                }
+                MessageBox.Show("Персонаж успешно сохранен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void LoadCharacter(string filePath)
+        {
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                currentCharacter = JsonSerializer.Deserialize<CountryCharacterConfig>(json);
+
+                // Загружаем данные в форму
+                UpdateFormFromCharacter();
+
+                // Загружаем иконки, если они существуют
+                string directory = Path.GetDirectoryName(filePath);
+                string bigIconPath = Path.Combine(directory, $"{currentCharacter.Id}_big.png");
+                string smallIconPath = Path.Combine(directory, $"{currentCharacter.Id}_small.png");
+
+                if (File.Exists(bigIconPath))
+                {
+                    // Здесь должна быть логика загрузки изображения в BigIconPanel
+                    currentCharacter.BigIconPath = bigIconPath;
+                }
+
+                if (File.Exists(smallIconPath))
+                {
+                    // Здесь должна быть логика загрузки изображения в SmalIconPanel
+                    currentCharacter.SmallIconPath = smallIconPath;
+                }
+
+                MessageBox.Show("Персонаж успешно загружен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void UpdateCharacterFromForm()
+        {
+            // Основные свойства
+            currentCharacter.Id = IdBox.Text;
+            currentCharacter.Name = NameBox.Text;
+            currentCharacter.Description = DescBox.Text;
+            currentCharacter.Traits = new List<string>(PercBox.Text.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            currentCharacter.Tag = TagBox.Text;
+
+            // Типы персонажа
+            currentCharacter.Types = new List<string>(CharTypesBox.Text.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+
+            // Статистика
+            if (int.TryParse(SkillBox.Text, out int skill)) currentCharacter.Skill = skill;
+            if (int.TryParse(AtkBox.Text, out int attack)) currentCharacter.Attack = attack;
+            if (int.TryParse(DefBox.Text, out int defense)) currentCharacter.Defense = defense;
+            if (int.TryParse(SupplyBox.Text, out int supply)) currentCharacter.Supply = supply;
+            if (int.TryParse(SpdBox.Text, out int speed)) currentCharacter.Speed = speed;
+
+            // Свойства советника
+            currentCharacter.AdvisorSlot = AdvisorSlot.Text;
+            if (int.TryParse(AdvisorCost.Text, out int cost)) currentCharacter.AdvisorCost = cost;
+            currentCharacter.AiWillDo = AiDoBox.Text;
+
+            // Дополнительные свойства
+            currentCharacter.Expire = ExpireBox.Text;
+        }
+
+        private void UpdateFormFromCharacter()
+        {
+            // Основные свойства
+            IdBox.Text = currentCharacter.Id;
+            NameBox.Text = currentCharacter.Name;
+            DescBox.Text = currentCharacter.Description;
+            PercBox.Text = string.Join("\n", currentCharacter.Traits);
+            TagBox.Text = currentCharacter.Tag;
+
+            // Типы персонажа
+            CharTypesBox.Text = string.Join("\n", currentCharacter.Types);
+
+            // Статистика
+            SkillBox.Text = currentCharacter.Skill.ToString();
+            AtkBox.Text = currentCharacter.Attack.ToString();
+            DefBox.Text = currentCharacter.Defense.ToString();
+            SupplyBox.Text = currentCharacter.Supply.ToString();
+            SpdBox.Text = currentCharacter.Speed.ToString();
+
+            // Свойства советника
+            AdvisorSlot.Text = currentCharacter.AdvisorSlot;
+            AdvisorCost.Text = currentCharacter.AdvisorCost.ToString();
+            AiDoBox.Text = currentCharacter.AiWillDo;
+
+            // Дополнительные свойства
+            ExpireBox.Text = currentCharacter.Expire;
+        }
     }
 }
