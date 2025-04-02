@@ -58,7 +58,7 @@ namespace ModdingManager
             CharTypesBox = new RichTextBox();
             TagBox = new TextBox();
             label15 = new Label();
-            SmallIconPanel = new Panel();
+            SmalIconPanel = new Panel();
             AiDoBox = new TextBox();
             label16 = new Label();
             label17 = new Label();
@@ -68,6 +68,7 @@ namespace ModdingManager
             // 
             // BigIconPanel
             // 
+            BigIconPanel.AllowDrop = true;
             BigIconPanel.BackColor = SystemColors.ActiveCaption;
             BigIconPanel.Location = new Point(29, 94);
             BigIconPanel.Name = "BigIconPanel";
@@ -306,15 +307,16 @@ namespace ModdingManager
             label15.TabIndex = 38;
             label15.Text = "Принадлежность тегу";
             // 
-            // SmallIconPanel
+            // SmalIconPanel
             // 
-            SmallIconPanel.BackColor = SystemColors.ActiveCaption;
-            SmallIconPanel.Location = new Point(29, 330);
-            SmallIconPanel.Name = "SmallIconPanel";
-            SmallIconPanel.Size = new Size(67, 65);
-            SmallIconPanel.TabIndex = 1;
-            SmallIconPanel.DragDrop += SmallIconPanel_DragDrop;
-            SmallIconPanel.DragEnter += SmallIconPanel_DragEnter;
+            SmalIconPanel.AllowDrop = true;
+            SmalIconPanel.BackColor = SystemColors.ActiveCaption;
+            SmalIconPanel.Location = new Point(29, 330);
+            SmalIconPanel.Name = "SmalIconPanel";
+            SmalIconPanel.Size = new Size(67, 65);
+            SmalIconPanel.TabIndex = 1;
+            SmalIconPanel.DragDrop += SmallIconPanel_DragDrop;
+            SmalIconPanel.DragEnter += SmallIconPanel_DragEnter;
             // 
             // AiDoBox
             // 
@@ -370,7 +372,7 @@ namespace ModdingManager
             Controls.Add(label17);
             Controls.Add(label16);
             Controls.Add(AiDoBox);
-            Controls.Add(SmallIconPanel);
+            Controls.Add(SmalIconPanel);
             Controls.Add(label15);
             Controls.Add(TagBox);
             Controls.Add(CharTypesBox);
@@ -407,29 +409,28 @@ namespace ModdingManager
         }
 
         #endregion
-        private TextBox NameBox;
-        private RichTextBox PercBox;
-        private TextBox DescBox;
-        private Panel BigIconPanel;
-        private Label label1;
-        private Label label2;
-        private RichTextBox richTextBox1;
-        private Label label3;
-        private CheckBox checkBox1;
-        private Panel panel2;
-        private RichTextBox richTextBox2;
-        private TextBox IdBox;
+        public TextBox NameBox;
+        public RichTextBox PercBox;
+        public TextBox DescBox;
+        public Panel BigIconPanel;
+        public Label label1;
+        public Label label2;
+        public RichTextBox richTextBox1;
+        public Label label3;
+        public CheckBox checkBox1;
+        public RichTextBox richTextBox2;
+        public TextBox IdBox;
         private Label label8;
         private Label label4;
-        private TextBox SkillBox;
-        private TextBox AtkBox;
-        private TextBox DefBox;
-        private TextBox SupplyBox;
-        private TextBox SpdBox;
-        private TextBox AdvisorCost;
+        public TextBox SkillBox;
+        public TextBox AtkBox;
+        public TextBox DefBox;
+        public TextBox SupplyBox;
+        public TextBox SpdBox;
+        public TextBox AdvisorCost;
         private Label label5;
         private Label label6;
-        private ComboBox AdvisorSlot;
+        public ComboBox AdvisorSlot;
         private Label label7;
         private Label label9;
         private Label label10;
@@ -437,14 +438,14 @@ namespace ModdingManager
         private Label label12;
         private Label label13;
         private Label label14;
-        private RichTextBox CharTypesBox;
-        private TextBox TagBox;
-        private Label label15;
-        private Panel SmallIconPanel;
-        private TextBox AiDoBox;
+        public RichTextBox CharTypesBox;
+        public TextBox TagBox;
+        public Label label15;
+        public Panel SmalIconPanel;
+        public TextBox AiDoBox;
         private Label label16;
         private Label label17;
-        private TextBox ExpireBox;
+        public TextBox ExpireBox;
         public Button ApplyButton;
     }
 }
