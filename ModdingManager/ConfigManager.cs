@@ -151,24 +151,20 @@ public static class ConfigManager
         return states;
     }
 
-    private static readonly string CharactersPath = Path.Combine("data", "characters");
+    private static readonly string CharactersPath = Path.Combine(ConfigsPath, "characters");
 
     // Сохраняем персонажа из формы
-    public static void SaveCharConfigToForm(CharacterCreator form, string configName)
+    public static bool SaveCharacterConfig(CharacterCreator form, string configName)
     {
         try
         {
-            string dirPath = Path.Combine("data", "characters");
-            Directory.CreateDirectory(dirPath);
-            Directory.CreateDirectory(CharactersPath);
-
-            string json = JsonSerializer.Serialize(new
+            var character = new CountryCharacterConfig
             {
                 // Основные свойства
-                Id = form.IdBox.Text,
-                Name = form.NameBox.Text,
-                Description = form.DescBox.Text,
-                Tag = form.TagBox.Text,
+                Id = form.IdBox.Text.Trim(),
+                Name = form.NameBox.Text.Trim(),
+                Description = form.DescBox.Text.Trim(),
+                Tag = form.TagBox.Text.Trim(),
 
                 // Статистика
                 Skill = int.Parse(form.SkillBox.Text),
@@ -180,63 +176,166 @@ public static class ConfigManager
                 // Советник
                 AdvisorSlot = form.AdvisorSlot.Text,
                 AdvisorCost = int.Parse(form.AdvisorCost.Text),
-                AiWillDo = form.AiDoBox.Text,
+                AiWillDo = form.AiDoBox.Text.Trim(),
 
                 // Дополнительные
-                Expire = form.ExpireBox.Text,
-                Types = new List<string>(form.CharTypesBox.Text.Split('\n')),
-                Traits = new List<string>(form.PercBox.Text.Split('\n')),
+                Expire = form.ExpireBox.Text.Trim(),
+                Types = form.CharTypesBox.Text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList(),
+                Traits = form.PercBox.Text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList(),
 
                 // Иконки
                 BigIconPath = form.currentCharacter?.BigIconPath ?? "",
                 SmallIconPath = form.currentCharacter?.SmallIconPath ?? ""
-            }, JsonOptions);
+            };
 
+            // Сохраняем JSON
             string filePath = Path.Combine(CharactersPath, $"{configName}.json");
-            File.WriteAllText(Path.Combine(dirPath, configName), json);
-            MessageBox.Show("Персонаж сохранен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            File.WriteAllText(filePath, JsonSerializer.Serialize(character, JsonOptions));
+
+           
+
+            return true;
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка",
+                          MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return false;
         }
     }
-
-    public static void LoadCharConfigToForm(CharacterCreator form, string configName)
+    public static List<string> GetAvailableCharacterConfigs()
     {
         try
         {
-            string filePath = Path.Combine(CharactersPath, $"{configName}.json");
-            if (!File.Exists(filePath))
+            if (!Directory.Exists(CharactersPath))
             {
-                MessageBox.Show("Файл не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Directory.CreateDirectory(CharactersPath);
+                return new List<string>();
+            }
+
+            return Directory.GetFiles(CharactersPath, "*.json")
+                          .Select(Path.GetFileNameWithoutExtension)
+                          .ToList();
+        }
+        catch
+        {
+            return new List<string>();
+        }
+    }
+
+    public static async Task LoadCharacterConfigAsync(CharacterCreator form)
+    {
+        try
+        {
+            // Получаем конфиги в фоновом потоке
+            var configs = await Task.Run(() => GetAvailableCharacterConfigs());
+
+            if (configs.Count == 0)
+            {
+                form.Invoke((MethodInvoker)delegate
+                {
+                    MessageBox.Show(form, "Нет сохранённых персонажей", "Информация",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Information);
+                });
                 return;
             }
 
-            var character = JsonSerializer.Deserialize<CountryCharacterConfig>(File.ReadAllText(filePath));
+            // Создаем диалог в UI-потоке
+            string selectedConfig = null;
+            await Task.Run(() =>
+            {
+                form.Invoke((MethodInvoker)delegate
+                {
+                    using (var dialog = new Form()
+                    {
+                        Text = "Выберите персонажа",
+                        Width = 350,
+                        Height = 450,
+                        StartPosition = FormStartPosition.CenterParent
+                    })
+                    {
+                        var listBox = new ListBox
+                        {
+                            Dock = DockStyle.Fill,
+                            DataSource = configs,
+                            Font = new Font("Arial", 12)
+                        };
 
-            // Заполняем форму
-            form.IdBox.Text = character.Id;
-            form.NameBox.Text = character.Name;
-            form.DescBox.Text = character.Description;
-            form.TagBox.Text = character.Tag;
-            form.SkillBox.Text = character.Skill.ToString();
-            form.AtkBox.Text = character.Attack.ToString();
-            form.DefBox.Text = character.Defense.ToString();
-            form.SupplyBox.Text = character.Supply.ToString();
-            form.SpdBox.Text = character.Speed.ToString();
-            form.AdvisorSlot.Text = character.AdvisorSlot;
-            form.AdvisorCost.Text = character.AdvisorCost.ToString();
-            form.AiDoBox.Text = character.AiWillDo;
-            form.ExpireBox.Text = character.Expire;
-            form.CharTypesBox.Text = string.Join("\n", character.Types);
-            form.PercBox.Text = string.Join("\n", character.Traits);
+                        var btnLoad = new Button
+                        {
+                            Text = "Загрузить",
+                            Dock = DockStyle.Bottom,
+                            Height = 40,
+                            DialogResult = DialogResult.OK
+                        };
 
-            MessageBox.Show("Персонаж загружен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        dialog.Controls.Add(listBox);
+                        dialog.Controls.Add(btnLoad);
+                        dialog.AcceptButton = btnLoad;
+
+                        if (dialog.ShowDialog(form) == DialogResult.OK)
+                        {
+                            selectedConfig = listBox.SelectedItem?.ToString();
+                        }
+                    }
+                });
+            });
+
+            if (!string.IsNullOrEmpty(selectedConfig))
+            {
+                await LoadCharacterConfigInternalAsync(form, selectedConfig);
+            }
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Ошибка загрузки: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            form.Invoke((MethodInvoker)delegate
+            {
+                MessageBox.Show(form, $"Ошибка загрузки: {ex.Message}", "Ошибка",
+                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+            });
         }
+    }
+
+    private static async Task LoadCharacterConfigInternalAsync(CharacterCreator form, string configName)
+    {
+        var character = await Task.Run(() =>
+        {
+            string filePath = Path.Combine(CharactersPath, $"{configName}.json");
+            return JsonSerializer.Deserialize<CountryCharacterConfig>(File.ReadAllText(filePath));
+        });
+
+        form.Invoke((MethodInvoker)delegate
+        {
+            form.IdBox.Text = character.Id;
+            form.NameBox.Text = character.Name;
+            form.DescBox.Text = character.Description;
+            form.AdvisorCost.Text = character.AdvisorCost.ToString();
+            form.AiDoBox.Text = character.AiWillDo;
+            form.ExpireBox.Text = character.Expire;
+            form.SpdBox.Text = character.Speed.ToString();
+            form.SupplyBox.Text = character.Supply.ToString();
+            form.DefBox.Text = character.Defense.ToString();
+            form.AtkBox.Text = character.Attack.ToString();
+            form.SkillBox.Text = character.Skill.ToString();
+            form.ExpireBox.Text = character.Expire;
+            form.AdvisorSlot.Text = character.AdvisorSlot.ToString();
+            form.TagBox.Text = character.Tag.ToString();
+            form.PercBox.Lines = character.Traits.ToArray(); 
+
+            string bigIconPath = Path.Combine(CharactersPath, $"{character.Id}_big.png");
+            string smallIconPath = Path.Combine(CharactersPath, $"{character.Id}_small.png");
+
+            if (File.Exists(bigIconPath))
+            {
+                form.BigIconPanel.BackgroundImage = Image.FromFile(bigIconPath);
+            }
+            if (File.Exists(smallIconPath))
+            {
+                form.SmalIconPanel.BackgroundImage = Image.FromFile(smallIconPath);
+            }
+
+            MessageBox.Show(form, $"Персонаж {character.Name} загружен!", "Успех",
+                          MessageBoxButtons.OK, MessageBoxIcon.Information);
+        });
     }
 }

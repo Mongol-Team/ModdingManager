@@ -378,7 +378,7 @@ namespace ModdingManager
             // LoadButton
             // 
             LoadButton.BackColor = Color.Green;
-            LoadButton.Location = new Point(155, 655);
+            LoadButton.Location = new Point(159, 655);
             LoadButton.Name = "LoadButton";
             LoadButton.Size = new Size(94, 29);
             LoadButton.TabIndex = 49;
