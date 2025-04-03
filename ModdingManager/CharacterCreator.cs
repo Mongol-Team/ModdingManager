@@ -322,9 +322,9 @@ namespace ModdingManager
 
         private void ApplyButton_Click(object sender, EventArgs e)
         {
-            //CreateCharacterFile(this, ModManager.directory);
-            //SaveCharacterPortraits(this, ModManager.directory);
-            CreateCharacterLocalizationFiles(this, ModManager.directory);
+            CreateCharacterFile(this, ModManager.Directory);
+            SaveCharacterPortraits(this, ModManager.Directory);
+            CreateCharacterLocalizationFiles(this, ModManager.Directory);
         }
 
         private void BigIconBox_DragEnter(object sender, DragEventArgs e)

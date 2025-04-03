@@ -14,7 +14,7 @@ namespace ModdingManager
         {
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
-                ModManager.directory = DirBox.Text;
+                ModManager.Directory = DirBox.Text;
                 TreeLoc treeLoc = new TreeLoc();
                 treeLoc.Show();
             }
@@ -30,7 +30,7 @@ namespace ModdingManager
         {
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
-                ModManager.directory = DirBox.Text;
+                ModManager.Directory = DirBox.Text;
             }
             else
             {
@@ -42,7 +42,7 @@ namespace ModdingManager
         {
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
-                ModManager.directory = DirBox.Text;
+                ModManager.Directory = DirBox.Text;
             }
             else
             {
@@ -54,7 +54,7 @@ namespace ModdingManager
         {
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
-                ModManager.directory = DirBox.Text;
+                ModManager.Directory = DirBox.Text;
                 IdeaLoc ideaLoc = new IdeaLoc();
                 ideaLoc.Show();
             }
@@ -68,7 +68,7 @@ namespace ModdingManager
         {
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
-                ModManager.directory = DirBox.Text;
+                ModManager.Directory = DirBox.Text;
                 StateLoc stateLoc = new StateLoc();
                 stateLoc.Show();
             }
@@ -82,7 +82,7 @@ namespace ModdingManager
         {
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
-                ModManager.directory = DirBox.Text;
+                ModManager.Directory = DirBox.Text;
             }
             else
             {
@@ -94,7 +94,7 @@ namespace ModdingManager
         {
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
-                ModManager.directory = DirBox.Text;
+                ModManager.Directory = DirBox.Text;
                 FlagCreator fc = new FlagCreator();
                 fc.Show();
             }
@@ -108,7 +108,7 @@ namespace ModdingManager
         {
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
-                ModManager.directory = DirBox.Text;
+                ModManager.Directory = DirBox.Text;
                 CountryCreator fc = new CountryCreator();
                 fc.Show();
             }
@@ -140,8 +140,22 @@ namespace ModdingManager
         {
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
-                ModManager.directory = DirBox.Text;
+                ModManager.Directory = DirBox.Text;
                 CharacterCreator fc = new CharacterCreator();
+                fc.Show();
+            }
+            else
+            {
+                MessageBox.Show("введите дирку", "директорию забыл", MessageBoxButtons.OK);
+            }
+        }
+
+        private void IdeaCreatorButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(DirBox.Text))
+            {
+                ModManager.Directory = DirBox.Text;
+                IdeaCreator fc = new IdeaCreator();
                 fc.Show();
             }
             else

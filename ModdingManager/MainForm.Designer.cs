@@ -41,6 +41,7 @@
             DirBox = new TextBox();
             label1 = new Label();
             CharCreator = new Button();
+            IdeaCreatorButton = new Button();
             SuspendLayout();
             // 
             // LocConvertButton
@@ -117,7 +118,7 @@
             // 
             // FlagCrtButton
             // 
-            FlagCrtButton.BackColor = Color.FromArgb(0, 192, 0);
+            FlagCrtButton.BackColor = Color.FromArgb(192, 192, 0);
             FlagCrtButton.Location = new Point(361, 294);
             FlagCrtButton.Name = "FlagCrtButton";
             FlagCrtButton.Size = new Size(237, 56);
@@ -156,19 +157,31 @@
             // 
             // CharCreator
             // 
+            CharCreator.BackColor = Color.FromArgb(0, 192, 0);
             CharCreator.Location = new Point(684, 134);
             CharCreator.Name = "CharCreator";
             CharCreator.Size = new Size(237, 56);
             CharCreator.TabIndex = 11;
             CharCreator.Text = "Создатель персонажей";
-            CharCreator.UseVisualStyleBackColor = true;
+            CharCreator.UseVisualStyleBackColor = false;
             CharCreator.Click += CharCreator_Click;
+            // 
+            // IdeaCreatorButton
+            // 
+            IdeaCreatorButton.Location = new Point(684, 210);
+            IdeaCreatorButton.Name = "IdeaCreatorButton";
+            IdeaCreatorButton.Size = new Size(237, 56);
+            IdeaCreatorButton.TabIndex = 12;
+            IdeaCreatorButton.Text = "Создатель идей";
+            IdeaCreatorButton.UseVisualStyleBackColor = true;
+            IdeaCreatorButton.Click += IdeaCreatorButton_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(963, 458);
+            Controls.Add(IdeaCreatorButton);
             Controls.Add(CharCreator);
             Controls.Add(label1);
             Controls.Add(DirBox);
@@ -203,5 +216,6 @@
         private TextBox DirBox;
         private Label label1;
         private Button CharCreator;
+        private Button IdeaCreatorButton;
     }
 }

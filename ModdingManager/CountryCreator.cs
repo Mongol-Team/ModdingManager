@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using ModdingManager.configs;
 
 namespace ModdingManager
 {
@@ -130,7 +131,7 @@ namespace ModdingManager
                 return;
             }
 
-            string tagsDir = Path.Combine(ModManager.directory, "common", "country_tags");
+            string tagsDir = Path.Combine(ModManager.Directory, "common", "country_tags");
             string countryTag = TagBox.Text;
             string countryFileName = $"{countryTag}_{CapitalBox.Text}.txt";
 
@@ -181,7 +182,7 @@ namespace ModdingManager
                 return;
             }
 
-            string statesDir = Path.Combine(ModManager.directory, "history", "states");
+            string statesDir = Path.Combine(ModManager.Directory, "history", "states");
             if (!Directory.Exists(statesDir))
             {
                 MessageBox.Show($"Директория штатов не найдена: {statesDir}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -303,7 +304,7 @@ namespace ModdingManager
             }
 
             string fileName = $"{TagBox.Text} - {CountryNameBox.Text}.txt";
-            string filePath = Path.Combine(ModManager.directory, "history", "countries", fileName);
+            string filePath = Path.Combine(ModManager.Directory, "history", "countries", fileName);
 
             try
             {
@@ -453,7 +454,7 @@ namespace ModdingManager
                 return;
             }
             string fileName = $"{CountryNameBox.Text}.txt";
-            string filePath = Path.Combine(ModManager.directory, "common", "countries", fileName);
+            string filePath = Path.Combine(ModManager.Directory, "common", "countries", fileName);
 
             try
             {
@@ -492,7 +493,7 @@ namespace ModdingManager
                 return;
             }
 
-            string flagsDir = Path.Combine(ModManager.directory, "gfx", "flags");
+            string flagsDir = Path.Combine(ModManager.Directory, "gfx", "flags");
             string countryTag = TagBox.Text;
 
             try
@@ -543,7 +544,7 @@ namespace ModdingManager
             CreateCommonCountriesFile();
             CreateCountryFlags();
             AddCountryTag();
-            CreateLocalizationFiles(ModManager.directory, TagBox.Text);
+            CreateLocalizationFiles(ModManager.Directory, TagBox.Text);
         }
 
         private void ColorPickerButton_Click(object sender, EventArgs e)
@@ -711,11 +712,7 @@ namespace ModdingManager
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            string configName = Microsoft.VisualBasic.Interaction.InputBox("Введите имя конфигурации:", "Загрузка конфигурации");
-            if (!string.IsNullOrEmpty(configName))
-            {
-                ConfigManager.LoadConfigToForm(this, configName);
-            }
+            ConfigManager.LoadCountryConfigAsync(this);
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
@@ -723,7 +720,7 @@ namespace ModdingManager
             string configName = Microsoft.VisualBasic.Interaction.InputBox("Введите имя конфигурации:", "Сохранение конфигурации");
             if (!string.IsNullOrEmpty(configName))
             {
-                ConfigManager.SaveCurrentConfig(this, configName);
+                ConfigManager.SaveCountryConfig(this, configName);
             }
         }
     }

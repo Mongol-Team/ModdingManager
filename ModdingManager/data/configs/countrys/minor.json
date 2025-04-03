@@ -3,7 +3,7 @@
   "Name": "Вольная Территория Юкатана",
   "Capital": 474,
   "GraphicalCulture": "european",
-  "Color": "0 0 0",
+  "Color": "128 128 64",
   "Technologies": [
     "infantry_weapons:1",
     "tech_support:1\u000Belectronic_mechanical_engineering:1"

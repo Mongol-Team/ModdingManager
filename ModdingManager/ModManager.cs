@@ -12,7 +12,7 @@ namespace ModdingManager
 {
     public class ModManager
     {
-        public static string directory;
+        public static string Directory;
         public static void SaveCountryFlag(System.Drawing.Image fascismImage,
                                    System.Drawing.Image neutralityImage,
                                    System.Drawing.Image communismImage,
@@ -24,9 +24,9 @@ namespace ModdingManager
             {
                 string flagsDir = modPath;
 
-                Directory.CreateDirectory(flagsDir);
-                Directory.CreateDirectory(Path.Combine(flagsDir, "small"));
-                Directory.CreateDirectory(Path.Combine(flagsDir, "medium"));
+                System.IO.Directory.CreateDirectory(flagsDir);
+                System.IO.Directory.CreateDirectory(Path.Combine(flagsDir, "small"));
+                System.IO.Directory.CreateDirectory(Path.Combine(flagsDir, "medium"));
 
                 SaveFlagSet(neutralityImage, flagsDir, countryTag, "neutrality");
                 SaveFlagSet(fascismImage, flagsDir, countryTag, "fascism");
@@ -64,7 +64,21 @@ namespace ModdingManager
                 }
             }
         }
+        public static void SaveIdeaGFX(System.Drawing.Image image, string dir, string id, string tag)
+        {
+            var path = Path.Combine(dir, "gfx", "interface", "ideas", tag);
 
+            // Создаем директорию, если она не существует
+            System.IO.Directory.CreateDirectory(path);
+
+            using (var imageSharp = ConvertToImageSharp(image))
+            {
+                using (var resized = ResizeStretch(imageSharp, 64, 64))
+                {
+                    SaveTga(resized, Path.Combine(path, $"{id}.tga"));
+                }
+            }
+        }
         private static SixLabors.ImageSharp.Image<Rgba32> ConvertToImageSharp(System.Drawing.Image systemDrawingImage)
         {
             if (systemDrawingImage == null)
