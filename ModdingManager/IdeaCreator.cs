@@ -136,7 +136,7 @@ namespace ModdingManager
             // Формат нового SpriteType
             string newEntry = $"\tSpriteType = {{\n" +
                              $"\t\tname = \"GFX_idea_{ideaId}\"\n" +
-                             $"\t\ttexturefile = \"gfx/interface/ideas/MEM/{ideaId}.dds\"\n" +
+                             $"\t\ttexturefile = \"gfx/interface/ideas/{tag}/{ideaId}.dds\"\n" +
                              $"\t}}\n";
 
             // Если файл не существует, создаём его с новым ентри
@@ -174,28 +174,61 @@ namespace ModdingManager
         }
         public static void GenerateLocalizationFiles(string tag, string ideaId, string name, string description)
         {
-            // Пути к файлам локализации
             string englishFilePath = Path.Combine(ModManager.Directory, "localisation", "english", $"{tag}_ideas_l_english.yml");
             string russianFilePath = Path.Combine(ModManager.Directory, "localisation", "russian", $"{tag}_ideas_l_russian.yml");
 
-            // Содержимое для английского файла (пустые кавычки после :0)
-            string englishContent = $"l_english:\n" +
-                                   $" {ideaId}:0 \"\"\n" +
-                                   $" {ideaId}_desc:0 \"\"\n";
+            // Форматируем новые строки для добавления
+            string englishEntry = $"{ideaId}:0 \"\"\n{ideaId}_desc:0 \"\"\n";
+            string russianEntry = $"{ideaId}:0 \"{name}\"\n{ideaId}_desc:0 \"{description}\"\n";
 
-            // Содержимое для русского файла (значения из NameBox и DescBox)
-            string russianContent = $"l_russian:\n" +
-                                    $" {ideaId}:0 \"{name}\"\n" +
-                                    $" {ideaId}_desc:0 \"{description}\"\n";
+            // Обрабатываем английский файл
+            UpdateLocalizationFile(englishFilePath, "l_english", englishEntry, ideaId);
 
-            // Создаём директории, если их нет
-            Directory.CreateDirectory(Path.GetDirectoryName(englishFilePath));
-            Directory.CreateDirectory(Path.GetDirectoryName(russianFilePath));
-
-            // Записываем файлы в UTF-8-BOM
-            WriteFileWithBOM(englishFilePath, englishContent);
-            WriteFileWithBOM(russianFilePath, russianContent);
+            // Обрабатываем русский файл
+            UpdateLocalizationFile(russianFilePath, "l_russian", russianEntry, ideaId);
         }
+
+        private static void UpdateLocalizationFile(string filePath, string languageHeader, string newEntry, string ideaId)
+        {
+            // Создаём директорию, если её нет
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            StringBuilder content = new StringBuilder();
+
+            // Если файл существует, читаем его и проверяем дубли
+            if (File.Exists(filePath))
+            {
+                string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
+
+                // Проверяем, есть ли уже такой ID в файле
+                bool entryExists = lines.Any(line => line.TrimStart().StartsWith($"{ideaId}:"));
+                if (entryExists)
+                {
+                    Console.WriteLine($"Локализация для '{ideaId}' уже существует в {filePath}!");
+                    return;
+                }
+
+                // Добавляем все старые строки (кроме закрывающих пробелов/пустых строк)
+                foreach (string line in lines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                        content.AppendLine(line.TrimEnd());
+                }
+
+                // Добавляем новый ентри
+                content.AppendLine(newEntry.TrimEnd());
+            }
+            else
+            {
+                // Если файла нет, создаём новый с языковым заголовком и сразу добавляем ентри
+                content.AppendLine($"{languageHeader}:");
+                content.AppendLine(newEntry.TrimEnd());
+            }
+
+            // Сохраняем файл в UTF-8-BOM
+            WriteFileWithBOM(filePath, content.ToString());
+        }
+
 
         private static void WriteFileWithBOM(string filePath, string content)
         {
@@ -206,9 +239,9 @@ namespace ModdingManager
         }
         private void ApplyButton_Click(object sender, EventArgs e)
         {
-            //CreateCountryIdea();
-            //GenerateOrUpdateIdeaGFX(IdBox.Text, TagBox.Text);
-            //GenerateLocalizationFiles(TagBox.Text, IdBox.Text, NameBox.Text, DescBox.Text);
+            CreateCountryIdea();
+            GenerateOrUpdateIdeaGFX(IdBox.Text, TagBox.Text);
+            GenerateLocalizationFiles(TagBox.Text, IdBox.Text, NameBox.Text, DescBox.Text);
             if (ImagePanel.BackgroundImage != null)
             {
                 ModManager.SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManager.Directory, IdBox.Text, TagBox.Text);
