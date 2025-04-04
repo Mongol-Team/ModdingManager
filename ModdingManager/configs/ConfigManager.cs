@@ -11,7 +11,7 @@ namespace ModdingManager.configs
     {
         private static readonly string ConfigsPath = Path.Combine("..", "..", "..", "data", "configs");
         private static readonly string CharactersPath = Path.Combine(ConfigsPath, "characters");
-        
+        private static readonly string IdeasPath = Path.Combine(ConfigsPath, "ideas");
         private static readonly string CountrysPath = Path.Combine(ConfigsPath, "countrys");
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
@@ -219,7 +219,6 @@ namespace ModdingManager.configs
                     ElectionFrequency = int.TryParse(form.ElectionFreqBox.Text, out var freq) ? freq : 0,
                     ElectionsAllowed = form.IsElectionAllowedBox.Checked,
 
-                    // Популярность
                     NeutralityPopularity = int.TryParse(form.NeutralPopularBox.Text, out var neutral) ? neutral : 0,
                     FascismPopularity = int.TryParse(form.FascismPopularBox.Text, out var fascism) ? fascism : 0,
                     CommunismPopularity = int.TryParse(form.CommunismPopularBox.Text, out var communism) ? communism : 0,
@@ -243,67 +242,6 @@ namespace ModdingManager.configs
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка сохранения конфигурации: {ex.Message}", "Ошибка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-        public static void LoadCountryConfig(CountryCreator form, string configName)
-        {
-            try
-            {
-                string filePath = Path.Combine(ConfigsPath, $"{configName}.json");
-
-                if (!File.Exists(filePath))
-                {
-                    MessageBox.Show($"Конфигурация '{configName}' не найдена!", "Ошибка",
-                                  MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                string json = File.ReadAllText(filePath);
-                var config = JsonSerializer.Deserialize<CountryConfig>(json);
-
-                form.TagBox.Text = config.Tag;
-                form.CapitalBox.Text = config.Capital.ToString();
-                form.GrapficalCultureBox.Text = config.GraphicalCulture;
-
-                var colorParts = config.Color.Split(' ');
-                if (colorParts.Length == 3)
-                {
-                    form.CountryColorDialog.Color = Color.FromArgb(
-                        int.Parse(colorParts[0]),
-                        int.Parse(colorParts[1]),
-                        int.Parse(colorParts[2]));
-                }
-
-                form.TechBox.Text = string.Join(Environment.NewLine, config.Technologies);
-                form.ConvoyBox.Text = config.Convoys.ToString();
-                form.StartOOBBox.Text = config.OOB;
-                form.ResearchSlotBox.Text = config.ResearchSlots.ToString();
-                form.WarSupportBox.Text = config.WarSup.ToString();
-                form.StabBox.Text = config.Stab.ToString();
-                form.CountryNameBox.Text = config.Name;
-                form.RullingPartyBox.SelectedItem = config.RulingParty;
-                form.LastElectionBox.Text = config.LastElection;
-                form.ElectionFreqBox.Text = config.ElectionFrequency.ToString();
-                form.IsElectionAllowedBox.Checked = config.ElectionsAllowed;
-
-                form.NeutralPopularBox.Text = config.NeutralityPopularity.ToString();
-                form.FascismPopularBox.Text = config.FascismPopularity.ToString();
-                form.CommunismPopularBox.Text = config.CommunismPopularity.ToString();
-                form.DemocraticPopularBox.Text = config.DemocraticPopularity.ToString();
-
-                form.StartIdeasBox.Text = string.Join(Environment.NewLine, config.Ideas);
-                form.RecruitBox.Text = string.Join(Environment.NewLine, config.Characters);
-
-                form.CountryStatesBox.Text = string.Join(Environment.NewLine,
-                    config.States.Select(s => $"{s.Key}:{(s.Value ? "1" : "0")}"));
-
-                MessageBox.Show($"Конфигурация '{configName}' успешно загружена!", "Успех",
-                              MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка загрузки конфигурации: {ex.Message}", "Ошибка",
                               MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -488,6 +426,193 @@ namespace ModdingManager.configs
                 MessageBox.Show(form, $"Персонаж {character.Name} загружен!", "Успех",
                               MessageBoxButtons.OK, MessageBoxIcon.Information);
             });
+        }
+
+        public static bool SaveIdeaConfig(IdeaCreator form, string configName)
+        {
+            try
+            {
+                Directory.CreateDirectory(IdeasPath);
+
+                var config = new IdeaConfig
+                {
+                    Id = form.IdBox.Text.Trim(),
+                    Name = form.NameBox.Text.Trim(),
+                    Description = form.DescBox.Text.Trim(),
+                    Tag = form.TagBox.Text.Trim(),
+                    Modifiers = form.ModifBox.Text,
+                    RemovalCost = form.RemovalCostBox.Text.Trim(),
+                    Available = form.AvaibleBox.Text,
+                    AvailableCivilWar = form.AvaibleCivBox.Text,
+                    OnAdd = form.OnAddBox.Text
+                };
+
+                string filePath = Path.Combine(IdeasPath, $"{configName}.json");
+                string json = JsonSerializer.Serialize(config, JsonOptions);
+                File.WriteAllText(filePath, json);
+
+                // Сохраняем иконку, если она есть
+                if (form.ImagePanel.BackgroundImage != null)
+                {
+                    string iconPath = Path.Combine(IdeasPath, $"{configName}.png");
+                    form.ImagePanel.BackgroundImage.Save(iconPath, System.Drawing.Imaging.ImageFormat.Png);
+                }
+
+                MessageBox.Show($"Конфигурация '{configName}' успешно сохранена!", "Успех",
+                              MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка сохранения конфигурации: {ex.Message}", "Ошибка",
+                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        public static async Task LoadIdeaConfigAsync(IdeaCreator form)
+        {
+            try
+            {
+                // Блокируем UI на время загрузки
+                form.Invoke((MethodInvoker)(() =>
+                {
+                    form.Enabled = false;
+                    form.Cursor = Cursors.WaitCursor;
+                }));
+
+                // Асинхронно получаем список доступных конфигов
+                var availableConfigs = await GetAvailableIdeaConfigsAsync();
+
+                if (availableConfigs.Count == 0)
+                {
+                    form.Invoke((MethodInvoker)(() =>
+                        MessageBox.Show(form, "Нет сохранённых конфигураций идей", "Информация",
+                                      MessageBoxButtons.OK, MessageBoxIcon.Information)));
+                    return;
+                }
+
+                // Диалог выбора конфига
+                string selectedConfig = await ShowIdeaConfigSelectionDialog(form, availableConfigs);
+
+                if (!string.IsNullOrEmpty(selectedConfig))
+                {
+                    await LoadIdeaConfigInternalAsync(form, selectedConfig);
+                }
+            }
+            catch (Exception ex)
+            {
+                form.Invoke((MethodInvoker)(() =>
+                    MessageBox.Show(form, $"Ошибка: {ex.Message}", "Ошибка",
+                                  MessageBoxButtons.OK, MessageBoxIcon.Error)));
+            }
+            finally
+            {
+                // Восстанавливаем UI
+                form.Invoke((MethodInvoker)(() =>
+                {
+                    form.Enabled = true;
+                    form.Cursor = Cursors.Default;
+                }));
+            }
+        }
+
+        public static async Task<List<string>> GetAvailableIdeaConfigsAsync()
+        {
+            return await Task.Run(() =>
+            {
+                if (!Directory.Exists(IdeasPath))
+                {
+                    Directory.CreateDirectory(IdeasPath);
+                    return new List<string>();
+                }
+
+                return Directory.GetFiles(IdeasPath, "*.json")
+                    .Select(Path.GetFileNameWithoutExtension)
+                    .ToList();
+            });
+        }
+
+        private static async Task<string> ShowIdeaConfigSelectionDialog(IdeaCreator form, List<string> configs)
+        {
+            string selectedConfig = null;
+
+            await Task.Run(() =>
+            {
+                form.Invoke((MethodInvoker)(() =>
+                {
+                    using (var dialog = new Form()
+                    {
+                        Text = "Выберите конфигурацию идеи",
+                        Width = 400,
+                        Height = 500,
+                        StartPosition = FormStartPosition.CenterParent,
+                        FormBorderStyle = FormBorderStyle.FixedDialog
+                    })
+                    {
+                        var listBox = new ListBox
+                        {
+                            Dock = DockStyle.Fill,
+                            DataSource = configs,
+                            Font = new Font("Arial", 11),
+                            SelectionMode = SelectionMode.One
+                        };
+
+                        var btnPanel = new Panel { Dock = DockStyle.Bottom, Height = 45 };
+                        var btnLoad = new Button
+                        {
+                            Text = "Загрузить",
+                            DialogResult = DialogResult.OK,
+                            Width = 100,
+                            Anchor = AnchorStyles.Right
+                        };
+
+                        btnPanel.Controls.Add(btnLoad);
+                        dialog.Controls.Add(listBox);
+                        dialog.Controls.Add(btnPanel);
+                        dialog.AcceptButton = btnLoad;
+
+                        if (dialog.ShowDialog(form) == DialogResult.OK)
+                        {
+                            selectedConfig = listBox.SelectedItem?.ToString();
+                        }
+                    }
+                }));
+            });
+
+            return selectedConfig;
+        }
+
+        private static async Task LoadIdeaConfigInternalAsync(IdeaCreator form, string configName)
+        {
+            var config = await Task.Run(() =>
+            {
+                string filePath = Path.Combine(IdeasPath, $"{configName}.json");
+                return JsonSerializer.Deserialize<IdeaConfig>(File.ReadAllText(filePath));
+            });
+
+            form.Invoke((MethodInvoker)(() =>
+            {
+                form.IdBox.Text = config.Id;
+                form.NameBox.Text = config.Name;
+                form.DescBox.Text = config.Description;
+                form.TagBox.Text = config.Tag;
+                form.ModifBox.Text = config.Modifiers;
+                form.RemovalCostBox.Text = config.RemovalCost;
+                form.AvaibleBox.Text = config.Available;
+                form.AvaibleCivBox.Text = config.AvailableCivilWar;
+                form.OnAddBox.Text = config.OnAdd;
+
+                // Загружаем иконку, если она есть
+                string iconPath = Path.Combine(IdeasPath, $"{configName}.png");
+                if (File.Exists(iconPath))
+                {
+                    form.ImagePanel.BackgroundImage = Image.FromFile(iconPath);
+                }
+
+                MessageBox.Show(form, $"Конфигурация '{configName}' успешно загружена",
+                              "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }));
         }
     }
 }

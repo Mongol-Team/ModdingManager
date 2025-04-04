@@ -243,6 +243,7 @@
             ConfigLoadButton.TabIndex = 57;
             ConfigLoadButton.Text = "загрузить конфиг";
             ConfigLoadButton.UseVisualStyleBackColor = false;
+            ConfigLoadButton.Click += ConfigLoadButton_Click;
             // 
             // SaveConfigButton
             // 
@@ -254,6 +255,7 @@
             SaveConfigButton.TabIndex = 58;
             SaveConfigButton.Text = "сохранить конфиг";
             SaveConfigButton.UseVisualStyleBackColor = false;
+            SaveConfigButton.Click += SaveConfigButton_Click;
             // 
             // IdeaCreator
             // 

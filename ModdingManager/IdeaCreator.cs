@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModdingManager.configs;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -302,6 +303,20 @@ namespace ModdingManager
             {
                 e.Effect = DragDropEffects.None;
             }
+        }
+
+        private void SaveConfigButton_Click(object sender, EventArgs e)
+        {
+            string configName = Microsoft.VisualBasic.Interaction.InputBox("Введите имя конфигурации:", "Сохранение конфигурации");
+            if (!string.IsNullOrEmpty(configName))
+            {
+                ConfigManager.SaveIdeaConfig(this, configName);
+            }
+        }
+
+        private void ConfigLoadButton_Click(object sender, EventArgs e)
+        {
+            ConfigManager.LoadIdeaConfigAsync(this);
         }
     }
 }

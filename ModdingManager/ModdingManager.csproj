@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Folder Include="data\configs\characters\" />
+    <Folder Include="data\configs\ideas\" />
   </ItemGroup>
 
 </Project>

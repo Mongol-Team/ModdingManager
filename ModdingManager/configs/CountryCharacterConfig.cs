@@ -9,39 +9,6 @@ namespace ModdingManager.configs
     public class CountryCharacterConfig
     {
         public CountryCharacterConfig() { }
-        public CountryCharacterConfig(
-            string id,
-            string name,
-            string description,
-            List<string> types,
-            string tag,
-            List<string> traits,
-            int skill,
-            int attack,
-            int defense,
-            int supply,
-            int speed,
-            string advisorSlot,
-            int advisorCost,
-            string aiWillDo,
-            string expire)
-        {
-            Id = id;
-            Name = name;
-            Description = description;
-            Types = types ?? new List<string>();
-            Tag = tag;
-            Traits = traits ?? new List<string>();
-            Skill = skill;
-            Attack = attack;
-            Defense = defense;
-            Supply = supply;
-            Speed = speed;
-            AdvisorSlot = advisorSlot;
-            AdvisorCost = advisorCost;
-            AiWillDo = aiWillDo;
-            Expire = expire;
-        }
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
