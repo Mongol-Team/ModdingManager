@@ -211,7 +211,7 @@ namespace ModdingManager
             //GenerateLocalizationFiles(TagBox.Text, IdBox.Text, NameBox.Text, DescBox.Text);
             if (ImagePanel.BackgroundImage != null)
             {
-                ModManager.SaveIdeaGFX(ImagePanel.BackgroundImage, ModManager.Directory, IdBox.Text, TagBox.Text);
+                ModManager.SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManager.Directory, IdBox.Text, TagBox.Text);
             }
             else
             {

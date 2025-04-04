@@ -168,12 +168,13 @@
             // 
             // IdeaCreatorButton
             // 
+            IdeaCreatorButton.BackColor = Color.FromArgb(0, 192, 0);
             IdeaCreatorButton.Location = new Point(684, 210);
             IdeaCreatorButton.Name = "IdeaCreatorButton";
             IdeaCreatorButton.Size = new Size(237, 56);
             IdeaCreatorButton.TabIndex = 12;
             IdeaCreatorButton.Text = "Создатель идей";
-            IdeaCreatorButton.UseVisualStyleBackColor = true;
+            IdeaCreatorButton.UseVisualStyleBackColor = false;
             IdeaCreatorButton.Click += IdeaCreatorButton_Click;
             // 
             // MainForm

@@ -50,6 +50,8 @@
             label10 = new Label();
             OnAddBox = new RichTextBox();
             ApplyButton = new Button();
+            ConfigLoadButton = new Button();
+            SaveConfigButton = new Button();
             SuspendLayout();
             // 
             // ModifBox
@@ -232,10 +234,33 @@
             ApplyButton.UseVisualStyleBackColor = false;
             ApplyButton.Click += ApplyButton_Click;
             // 
+            // ConfigLoadButton
+            // 
+            ConfigLoadButton.BackColor = Color.OliveDrab;
+            ConfigLoadButton.Location = new Point(26, 602);
+            ConfigLoadButton.Name = "ConfigLoadButton";
+            ConfigLoadButton.Size = new Size(194, 29);
+            ConfigLoadButton.TabIndex = 57;
+            ConfigLoadButton.Text = "загрузить конфиг";
+            ConfigLoadButton.UseVisualStyleBackColor = false;
+            // 
+            // SaveConfigButton
+            // 
+            SaveConfigButton.BackColor = Color.Crimson;
+            SaveConfigButton.ForeColor = SystemColors.ControlText;
+            SaveConfigButton.Location = new Point(305, 602);
+            SaveConfigButton.Name = "SaveConfigButton";
+            SaveConfigButton.Size = new Size(194, 29);
+            SaveConfigButton.TabIndex = 58;
+            SaveConfigButton.Text = "сохранить конфиг";
+            SaveConfigButton.UseVisualStyleBackColor = false;
+            // 
             // IdeaCreator
             // 
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(716, 643);
+            Controls.Add(SaveConfigButton);
+            Controls.Add(ConfigLoadButton);
             Controls.Add(ApplyButton);
             Controls.Add(OnAddBox);
             Controls.Add(label10);
@@ -287,5 +312,7 @@
         public Label label10;
         public RichTextBox OnAddBox;
         public Button ApplyButton;
+        public Button ConfigLoadButton;
+        public Button SaveConfigButton;
     }
 }

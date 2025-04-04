@@ -6,8 +6,15 @@ using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
+using System.Drawing;
+using System.IO;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
+using System.Net;
+using TeximpNet;
+using TeximpNet.Compression;
+using TeximpNet.DDS;
+using System.Runtime.InteropServices;
 namespace ModdingManager
 {
     public class ModManager
@@ -64,21 +71,47 @@ namespace ModdingManager
                 }
             }
         }
-        public static void SaveIdeaGFX(System.Drawing.Image image, string dir, string id, string tag)
+     
+
+
+        public static void SaveIdeaGFXAsDDS(System.Drawing.Image image, string dir, string id, string tag)
         {
             var path = Path.Combine(dir, "gfx", "interface", "ideas", tag);
 
-            // Создаем директорию, если она не существует
+            // Создаем директорию, если её нет
             System.IO.Directory.CreateDirectory(path);
 
             using (var imageSharp = ConvertToImageSharp(image))
+            using (var resized = ResizeStretch(imageSharp, 64, 64))
             {
-                using (var resized = ResizeStretch(imageSharp, 64, 64))
+                string outputPath = Path.Combine(path, $"{id}.dds");
+
+                // Получаем raw-данные изображения в формате R8G8B8A8
+                byte[] pixelData = new byte[resized.Width * resized.Height * 4];
+                resized.CopyPixelDataTo(pixelData);
+
+                // Конвертируем R8G8B8A8 → B8G8R8A8 (меняем порядок каналов)
+                for (int i = 0; i < pixelData.Length; i += 4)
                 {
-                    SaveTga(resized, Path.Combine(path, $"{id}.tga"));
+                    byte r = pixelData[i];
+                    byte b = pixelData[i + 2];
+                    pixelData[i] = b;     // B
+                    pixelData[i + 2] = r; // R
+                }
+
+                // Создаем Surface из данных
+                using (var surface = new Surface(resized.Width, resized.Height))
+                {
+                    // Копируем данные в Surface
+                    var surfacePtr = surface.DataPtr;
+                    Marshal.Copy(pixelData, 0, surfacePtr, pixelData.Length);
+
+                    // Сохраняем в DDS (формат B8G8R8A8)
+                    DDSFile.Write(outputPath, surface, TextureDimension.Two, DDSFlags.None);
                 }
             }
         }
+
         private static SixLabors.ImageSharp.Image<Rgba32> ConvertToImageSharp(System.Drawing.Image systemDrawingImage)
         {
             if (systemDrawingImage == null)
