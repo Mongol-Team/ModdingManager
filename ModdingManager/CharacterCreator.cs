@@ -432,24 +432,13 @@ namespace ModdingManager
         private void LoadButton_Click(object sender, EventArgs e)
         {
             Task.Run(() => {
-                ConfigManager.LoadCharacterConfigAsync(this);
+                 ConfigManager.LoadConfigAsync(this);
             });
         }
         private void SaveButton_Click(object sender, EventArgs e)
         {
-            string fileName = Interaction.InputBox(
-        "Введите имя файла для сохранения (без .json):",
-        "Сохранение персонажа",
-        $"{IdBox.Text.ToLower()}_character");
-
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                MessageBox.Show("Сохранение отменено!");
-                return;
-            }
-
-            // Сохраняем через ConfigManager
-            ConfigManager.SaveCharacterConfig(this, fileName);
+           
+            ConfigManager.SaveConfigWrapper(this);
         }
 
         private void UpdateCharacterFromForm()

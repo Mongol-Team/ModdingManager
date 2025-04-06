@@ -19,6 +19,7 @@
   <ItemGroup>
     <Folder Include="data\configs\characters\" />
     <Folder Include="data\configs\ideas\" />
+    <Folder Include="data\configs\modifiers\" />
   </ItemGroup>
 
 </Project>

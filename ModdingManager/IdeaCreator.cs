@@ -307,16 +307,12 @@ namespace ModdingManager
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            string configName = Microsoft.VisualBasic.Interaction.InputBox("Введите имя конфигурации:", "Сохранение конфигурации");
-            if (!string.IsNullOrEmpty(configName))
-            {
-                ConfigManager.SaveIdeaConfig(this, configName);
-            }
+            ConfigManager.SaveConfigWrapper(this);
         }
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            ConfigManager.LoadIdeaConfigAsync(this);
+           ConfigManager.LoadConfigAsync(this);
         }
     }
 }

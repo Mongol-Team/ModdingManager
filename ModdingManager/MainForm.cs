@@ -163,5 +163,19 @@ namespace ModdingManager
                 MessageBox.Show("введите дирку", "директорию забыл", MessageBoxButtons.OK);
             }
         }
+
+        private void ModButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(DirBox.Text))
+            {
+                ModManager.Directory = DirBox.Text;
+                ModifierCreator fc = new ModifierCreator();
+                fc.Show();
+            }
+            else
+            {
+                MessageBox.Show("введите дирку", "директорию забыл", MessageBoxButtons.OK);
+            }
+        }
     }
 }

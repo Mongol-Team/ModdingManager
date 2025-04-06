@@ -712,16 +712,12 @@ namespace ModdingManager
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            ConfigManager.LoadCountryConfigAsync(this);
+            ConfigManager.LoadConfigAsync(this);
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            string configName = Microsoft.VisualBasic.Interaction.InputBox("Введите имя конфигурации:", "Сохранение конфигурации");
-            if (!string.IsNullOrEmpty(configName))
-            {
-                ConfigManager.SaveCountryConfig(this, configName);
-            }
+            ConfigManager.SaveConfigWrapper(this);
         }
     }
 }

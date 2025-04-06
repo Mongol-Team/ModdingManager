@@ -83,6 +83,7 @@
             ModButton.TabIndex = 3;
             ModButton.Text = "Создатель модификаторов";
             ModButton.UseVisualStyleBackColor = true;
+            ModButton.Click += ModButton_Click;
             // 
             // TechButton
             // 
