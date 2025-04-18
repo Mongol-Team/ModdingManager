@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
+	<UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -20,6 +21,38 @@
     <Folder Include="data\configs\characters\" />
     <Folder Include="data\configs\ideas\" />
     <Folder Include="data\configs\modifiers\" />
+    <Folder Include="data\configs\techtrees\" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ApplicationDefinition Remove="App.xaml" />
+	<None Remove="data\gfx\interface\technology_available_item_bg.png" />
+	<None Remove="data\gfx\interface\tech_industry_available_item_bg.png" />
+	<None Remove="data\gfx\interface\tiled_plain_bg.png" />
+	<Resource Include="data\gfx\interface\technology_available_item_bg.png">
+	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	</Resource>
+	<Resource Include="data\gfx\interface\tech_industry_available_item_bg.png">
+	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	</Resource>
+	<Resource Include="data\gfx\interface\tiled_plain_bg.png">
+	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	</Resource>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="TechTreeCreator.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

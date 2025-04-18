@@ -1,5 +1,6 @@
 using static System.Runtime.InteropServices.JavaScript.JSType;
-
+using System.IO;
+using ModdingManager.managers;
 namespace ModdingManager
 {
     public partial class MainForm : Form
@@ -83,6 +84,8 @@ namespace ModdingManager
             if (!string.IsNullOrEmpty(DirBox.Text))
             {
                 ModManager.Directory = DirBox.Text;
+                TechTreeCreator fc = new TechTreeCreator();
+                fc.Show();
             }
             else
             {
@@ -171,6 +174,19 @@ namespace ModdingManager
                 ModManager.Directory = DirBox.Text;
                 ModifierCreator fc = new ModifierCreator();
                 fc.Show();
+            }
+            else
+            {
+                MessageBox.Show("введите дирку", "директорию забыл", MessageBoxButtons.OK);
+            }
+        }
+
+        private void TestButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(DirBox.Text))
+            {
+                ModManager.Directory = DirBox.Text;
+                
             }
             else
             {

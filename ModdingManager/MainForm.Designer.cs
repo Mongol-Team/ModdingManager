@@ -1,6 +1,8 @@
-﻿namespace ModdingManager
+﻿using ModdingManager;
+
+namespace ModdingManager
 {
-    partial class MainForm
+    partial class MainForm : Form
     {
         /// <summary>
         ///  Required designer variable.
@@ -42,6 +44,7 @@
             label1 = new Label();
             CharCreator = new Button();
             IdeaCreatorButton = new Button();
+            TestButton = new Button();
             SuspendLayout();
             // 
             // LocConvertButton
@@ -87,12 +90,13 @@
             // 
             // TechButton
             // 
+            TechButton.BackColor = Color.FromArgb(0, 192, 192);
             TechButton.Location = new Point(361, 210);
             TechButton.Name = "TechButton";
             TechButton.Size = new Size(237, 56);
             TechButton.TabIndex = 4;
             TechButton.Text = "Создатель технологий";
-            TechButton.UseVisualStyleBackColor = true;
+            TechButton.UseVisualStyleBackColor = false;
             TechButton.Click += TechButton_Click;
             // 
             // LocStateButton
@@ -178,11 +182,22 @@
             IdeaCreatorButton.UseVisualStyleBackColor = false;
             IdeaCreatorButton.Click += IdeaCreatorButton_Click;
             // 
+            // TestButton
+            // 
+            TestButton.Location = new Point(684, 294);
+            TestButton.Name = "TestButton";
+            TestButton.Size = new Size(237, 56);
+            TestButton.TabIndex = 13;
+            TestButton.Text = "Test";
+            TestButton.UseVisualStyleBackColor = true;
+            TestButton.Click += TestButton_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(963, 458);
+            Controls.Add(TestButton);
             Controls.Add(IdeaCreatorButton);
             Controls.Add(CharCreator);
             Controls.Add(label1);
@@ -219,5 +234,6 @@
         private Label label1;
         private Button CharCreator;
         private Button IdeaCreatorButton;
+        private Button TestButton;
     }
 }

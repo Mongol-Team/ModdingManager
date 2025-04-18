@@ -8,9 +8,11 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using ModdingManager.configs;
+using ModdingManager.managers;
 
 namespace ModdingManager
 {
@@ -712,12 +714,12 @@ namespace ModdingManager
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            ConfigManager.LoadConfigAsync(this);
+            WinFormConfigManager.LoadConfigAsync(this);
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            ConfigManager.SaveConfigWrapper(this);
+            WinFormConfigManager.SaveConfigWrapper(this);
         }
     }
 }

@@ -5,6 +5,7 @@ using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +16,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ModdingManager.managers;
 
 namespace ModdingManager
 {
@@ -431,14 +433,15 @@ namespace ModdingManager
 
         private void LoadButton_Click(object sender, EventArgs e)
         {
-            Task.Run(() => {
-                 ConfigManager.LoadConfigAsync(this);
+            Task.Run(() =>
+            {
+                WinFormConfigManager.LoadConfigAsync(this);
             });
         }
         private void SaveButton_Click(object sender, EventArgs e)
         {
            
-            ConfigManager.SaveConfigWrapper(this);
+            WinFormConfigManager.SaveConfigWrapper(this);
         }
 
         private void UpdateCharacterFromForm()

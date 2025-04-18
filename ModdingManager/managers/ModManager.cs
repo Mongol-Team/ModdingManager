@@ -15,7 +15,7 @@ using TeximpNet;
 using TeximpNet.Compression;
 using TeximpNet.DDS;
 using System.Runtime.InteropServices;
-namespace ModdingManager
+namespace ModdingManager.managers
 {
     public class ModManager
     {
@@ -71,7 +71,7 @@ namespace ModdingManager
                 }
             }
         }
-     
+
 
 
         public static void SaveIdeaGFXAsDDS(System.Drawing.Image image, string dir, string id, string tag)
@@ -112,11 +112,11 @@ namespace ModdingManager
             }
         }
 
-        private static SixLabors.ImageSharp.Image<Rgba32> ConvertToImageSharp(System.Drawing.Image systemDrawingImage)
+        private static Image<Rgba32> ConvertToImageSharp(System.Drawing.Image systemDrawingImage)
         {
             if (systemDrawingImage == null)
             {
-                var emptyFlag = new SixLabors.ImageSharp.Image<Rgba32>(82, 52);
+                var emptyFlag = new Image<Rgba32>(82, 52);
                 emptyFlag.Mutate(x => x.BackgroundColor(new Rgba32(255, 0, 255, 255)));
                 return emptyFlag;
             }
@@ -129,13 +129,13 @@ namespace ModdingManager
             }
         }
 
-        private static SixLabors.ImageSharp.Image<Rgba32> ResizeStretch(SixLabors.ImageSharp.Image<Rgba32> image, int width, int height)
+        private static Image<Rgba32> ResizeStretch(Image<Rgba32> image, int width, int height)
         {
             // Просто растягиваем изображение на весь размер без сохранения пропорций
             return image.Clone(x => x.Resize(width, height));
         }
 
-        private static void SaveTga(SixLabors.ImageSharp.Image<Rgba32> image, string path)
+        private static void SaveTga(Image<Rgba32> image, string path)
         {
             var encoder = new TgaEncoder
             {

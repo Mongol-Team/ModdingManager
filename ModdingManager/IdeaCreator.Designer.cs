@@ -52,6 +52,8 @@
             ApplyButton = new Button();
             ConfigLoadButton = new Button();
             SaveConfigButton = new Button();
+            AddIdeaButtn = new Button();
+            AddToTagBox = new TextBox();
             SuspendLayout();
             // 
             // ModifBox
@@ -237,7 +239,7 @@
             // ConfigLoadButton
             // 
             ConfigLoadButton.BackColor = Color.OliveDrab;
-            ConfigLoadButton.Location = new Point(26, 602);
+            ConfigLoadButton.Location = new Point(165, 602);
             ConfigLoadButton.Name = "ConfigLoadButton";
             ConfigLoadButton.Size = new Size(194, 29);
             ConfigLoadButton.TabIndex = 57;
@@ -249,7 +251,7 @@
             // 
             SaveConfigButton.BackColor = Color.Crimson;
             SaveConfigButton.ForeColor = SystemColors.ControlText;
-            SaveConfigButton.Location = new Point(305, 602);
+            SaveConfigButton.Location = new Point(377, 602);
             SaveConfigButton.Name = "SaveConfigButton";
             SaveConfigButton.Size = new Size(194, 29);
             SaveConfigButton.TabIndex = 58;
@@ -257,10 +259,29 @@
             SaveConfigButton.UseVisualStyleBackColor = false;
             SaveConfigButton.Click += SaveConfigButton_Click;
             // 
+            // AddIdeaButtn
+            // 
+            AddIdeaButtn.Location = new Point(26, 602);
+            AddIdeaButtn.Name = "AddIdeaButtn";
+            AddIdeaButtn.Size = new Size(30, 29);
+            AddIdeaButtn.TabIndex = 59;
+            AddIdeaButtn.Text = "+";
+            AddIdeaButtn.UseVisualStyleBackColor = true;
+            AddIdeaButtn.Click += AddIdeaButtn_Click;
+            // 
+            // AddToTagBox
+            // 
+            AddToTagBox.Location = new Point(62, 604);
+            AddToTagBox.Name = "AddToTagBox";
+            AddToTagBox.Size = new Size(84, 27);
+            AddToTagBox.TabIndex = 60;
+            // 
             // IdeaCreator
             // 
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(716, 643);
+            Controls.Add(AddToTagBox);
+            Controls.Add(AddIdeaButtn);
             Controls.Add(SaveConfigButton);
             Controls.Add(ConfigLoadButton);
             Controls.Add(ApplyButton);
@@ -316,5 +337,7 @@
         public Button ApplyButton;
         public Button ConfigLoadButton;
         public Button SaveConfigButton;
+        private Button AddIdeaButtn;
+        public TextBox AddToTagBox;
     }
 }

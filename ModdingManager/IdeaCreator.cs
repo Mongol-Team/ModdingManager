@@ -6,8 +6,11 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ModdingManager.managers;
 
 namespace ModdingManager
 {
@@ -229,8 +232,6 @@ namespace ModdingManager
             // Сохраняем файл в UTF-8-BOM
             WriteFileWithBOM(filePath, content.ToString());
         }
-
-
         private static void WriteFileWithBOM(string filePath, string content)
         {
             using (var writer = new StreamWriter(filePath, false, new UTF8Encoding(true)))
@@ -240,17 +241,24 @@ namespace ModdingManager
         }
         private void ApplyButton_Click(object sender, EventArgs e)
         {
-            CreateCountryIdea();
-            GenerateOrUpdateIdeaGFX(IdBox.Text, TagBox.Text);
-            GenerateLocalizationFiles(TagBox.Text, IdBox.Text, NameBox.Text, DescBox.Text);
-            if (ImagePanel.BackgroundImage != null)
-            {
-                ModManager.SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManager.Directory, IdBox.Text, TagBox.Text);
+            if (!(IdBox.Text.Contains(" ")))
+            { 
+                CreateCountryIdea();
+                GenerateOrUpdateIdeaGFX(IdBox.Text, TagBox.Text);
+                GenerateLocalizationFiles(TagBox.Text, IdBox.Text, NameBox.Text, DescBox.Text);
+                if (ImagePanel.BackgroundImage != null)
+                {
+                    ModManager.SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManager.Directory, IdBox.Text, TagBox.Text);
+                }
+                else
+                {
+                    MessageBox.Show("Картинку добавь алкаш", "алкаш", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
             }
             else
             {
-                MessageBox.Show("Картинку добавь алкаш", "алкаш", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                MessageBox.Show("Пробела в айди не должно быть", "алкаш", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -307,12 +315,73 @@ namespace ModdingManager
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            ConfigManager.SaveConfigWrapper(this);
+            WinFormConfigManager.SaveConfigWrapper(this);
         }
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-           ConfigManager.LoadConfigAsync(this);
+            WinFormConfigManager.LoadConfigAsync(this);
+        }
+
+        private void AddIdeaButtn_Click(object sender, EventArgs e)
+        {
+            AddIdeaToCountryFile();
+        }
+
+        public void AddIdeaToCountryFile()
+        {
+            try
+            {
+
+                string historyCountriesPath = Path.Combine(ModManager.Directory, "history", "countries");
+
+                // Проверяем существование папки
+                if (!Directory.Exists(historyCountriesPath))
+                {
+                    MessageBox.Show("Папка history/countries не найдена!");
+                    return;
+                }
+
+                // Ищем файл, содержащий в названии текст из AddToTagBox
+                string[] countryFiles = Directory.GetFiles(historyCountriesPath, $"*{AddToTagBox.Text}*");
+                if (countryFiles.Length == 0)
+                {
+                    MessageBox.Show($"Файл страны с тегом {AddToTagBox.Text} не найден!");
+                    return;
+                }
+
+                string countryFile = countryFiles[0]; // Берем первый найденный файл
+
+                // Читаем содержимое файла
+                string fileContent = File.ReadAllText(countryFile, Encoding.UTF8);
+
+                // Ищем блок add_ideas
+                string pattern = @"add_ideas\s*=\s*\{([^}]*)\}";
+                Match match = Regex.Match(fileContent, pattern);
+
+                if (!match.Success)
+                {
+                    MessageBox.Show("Блок add_ideas не найден в файле страны!");
+                    return;
+                }
+
+                // Получаем содержимое блока и добавляем новую идею
+                string ideasContent = match.Groups[1].Value;
+                ideasContent += $"\n\t{IdBox.Text}";
+
+                // Заменяем старый блок на новый
+                string newIdeasBlock = $"add_ideas = {{{ideasContent}\n}}";
+                string newContent = Regex.Replace(fileContent, pattern, newIdeasBlock);
+
+                // Записываем изменения обратно в файл
+                File.WriteAllText(countryFile, newContent, Encoding.UTF8);
+
+                MessageBox.Show($"Идея {IdBox.Text} успешно добавлена в файл {Path.GetFileName(countryFile)}!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
     }
 }

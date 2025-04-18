@@ -2,13 +2,18 @@
 using ModdingManager;
 using System.Text.Json;
 using Microsoft.VisualBasic;
+using System.IO;
+using System.IO.Compression;
+using System.Windows.Media.Imaging;
+using System.Windows;
 
-public static class ConfigManager
+public static class WinFormConfigManager
 {
     private static readonly string ConfigsPath = Path.Combine("..", "..", "..", "data", "configs");
     private static readonly string CharactersPath = Path.Combine(ConfigsPath, "characters");
     private static readonly string IdeasPath = Path.Combine(ConfigsPath, "ideas");
     private static readonly string CountrysPath = Path.Combine(ConfigsPath, "countrys");
+    private static readonly string TechTreesPath = Path.Combine(ConfigsPath, "techtrees");
 
     private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
     {
@@ -20,94 +25,265 @@ public static class ConfigManager
     {
         try
         {
-            // Блокируем UI на время загрузки
-            form.Invoke((MethodInvoker)(() =>
-            {
-                form.Enabled = false;
-                form.Cursor = Cursors.WaitCursor;
-            }));
-
-            // Определяем путь и тип конфигурации на основе типа формы
             var (configPath, configType) = GetConfigInfo<TForm>();
 
-            // Асинхронно получаем список доступных конфигов
+            if (form is System.Windows.FrameworkElement wpfForm)
+            {
+                wpfForm.IsEnabled = false;
+                wpfForm.Cursor = System.Windows.Input.Cursors.Wait;
+            }
+            else if (form is Form winFormsForm)
+            {
+                winFormsForm.Invoke((MethodInvoker)(() =>
+                {
+                    winFormsForm.Enabled = false;
+                    winFormsForm.Cursor = Cursors.WaitCursor;
+                }));
+            }
+
             var availableConfigs = await GetAvailableConfigsAsync(configPath);
 
             if (availableConfigs.Count == 0)
             {
-                form.Invoke((MethodInvoker)(() =>
-                    MessageBox.Show(form, $"Нет сохранённых конфигураций {configType}", "Информация",
-                                  MessageBoxButtons.OK, MessageBoxIcon.Information)));
+                ShowMessage($"Нет сохранённых конфигураций {configType}", "Информация", MessageBoxImage.Information, form);
                 return;
             }
 
-            // Диалог выбора конфига
             string selectedConfig = await ShowConfigSelectionDialog(form, availableConfigs, $"Выберите конфигурацию {configType}");
 
             if (!string.IsNullOrEmpty(selectedConfig))
             {
-                await LoadConfigInternalAsync(form, configPath, selectedConfig);
+                if (form is TechTreeCreator techTreeForm)
+                {
+                    string filePath = Path.Combine(configPath, $"{selectedConfig}.tech");
+                    var config = await LoadTechTreeFromArchive(filePath);
+                    ApplyTechTreeConfig(techTreeForm, config);
+                }
+                else
+                {
+                    await LoadConfigInternalAsync(form, configPath, selectedConfig);
+                }
             }
         }
         catch (Exception ex)
         {
-            form.Invoke((MethodInvoker)(() =>
-                MessageBox.Show(form, $"Ошибка: {ex.Message}", "Ошибка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error)));
+            ShowMessage($"Ошибка: {ex.Message}", "Ошибка", MessageBoxImage.Error, form);
         }
         finally
         {
             // Восстанавливаем UI
-            form.Invoke((MethodInvoker)(() =>
+            if (form is System.Windows.FrameworkElement wpfForm)
             {
-                form.Enabled = true;
-                form.Cursor = Cursors.Default;
-            }));
+                wpfForm.IsEnabled = true;
+                wpfForm.Cursor = System.Windows.Input.Cursors.Arrow;
+            }
+            else if (form is Form winFormsForm)
+            {
+                winFormsForm.Invoke((MethodInvoker)(() =>
+                {
+                    winFormsForm.Enabled = true;
+                    winFormsForm.Cursor = Cursors.Default;
+                }));
+            }
         }
     }
 
-    public static bool SaveConfig<TForm>(TForm form, string configName) where TForm : Form
+    private static void ShowMessage(string message, string title, MessageBoxImage image, object form)
+    {
+        if (form is System.Windows.FrameworkElement wpfForm)
+        {
+            wpfForm.Dispatcher.Invoke(() =>
+                System.Windows.MessageBox.Show(message, title, System.Windows.MessageBoxButton.OK, image));
+        }
+        else if (form is Form winFormsForm)
+        {
+            winFormsForm.Invoke((MethodInvoker)(() =>
+                System.Windows.Forms.MessageBox.Show(winFormsForm, message, title, MessageBoxButtons.OK, GetMessageBoxIcon(image))));
+        }
+    }
+
+    private static MessageBoxIcon GetMessageBoxIcon(MessageBoxImage image)
+    {
+        return image switch
+        {
+            MessageBoxImage.Information => MessageBoxIcon.Information,
+            MessageBoxImage.Error => MessageBoxIcon.Error,
+            MessageBoxImage.Warning => MessageBoxIcon.Warning,
+            _ => MessageBoxIcon.None
+        };
+    }
+
+    private static async Task<string> ShowConfigSelectionDialog(object form, List<string> configs, string title)
+    {
+        if (form is System.Windows.FrameworkElement wpfForm)
+        {
+            return await ShowWpfSelectionDialog(wpfForm, configs, title);
+        }
+        else if (form is Form winFormsForm)
+        {
+            return await ShowWinFormsSelectionDialog(winFormsForm, configs, title);
+        }
+        throw new NotSupportedException("Unsupported form type");
+    }
+
+    private static async Task<string> ShowWpfSelectionDialog(System.Windows.FrameworkElement owner, List<string> configs, string title)
+    {
+        var tcs = new TaskCompletionSource<string>();
+
+        owner.Dispatcher.Invoke(() =>
+        {
+            var dialog = new System.Windows.Window
+            {
+                Title = title,
+                Width = 400,
+                Height = 500,
+                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner,
+                ResizeMode = System.Windows.ResizeMode.NoResize
+            };
+
+            var listBox = new System.Windows.Controls.ListBox
+            {
+                ItemsSource = configs,
+                FontSize = 14,
+                SelectionMode = System.Windows.Controls.SelectionMode.Single
+            };
+
+            var button = new System.Windows.Controls.Button
+            {
+                Content = "Загрузить",
+                Height = 40,
+                IsDefault = true
+            };
+
+            button.Click += (s, e) =>
+            {
+                tcs.SetResult(listBox.SelectedItem?.ToString());
+                dialog.Close();
+            };
+
+            var stackPanel = new System.Windows.Controls.StackPanel();
+            stackPanel.Children.Add(listBox);
+            stackPanel.Children.Add(button);
+
+            dialog.Content = stackPanel;
+            dialog.Owner = System.Windows.Window.GetWindow(owner);
+            dialog.ShowDialog();
+        });
+
+        return await tcs.Task;
+    }
+
+    private static async Task<string> ShowWinFormsSelectionDialog(Form owner, List<string> configs, string title)
+    {
+        string selectedConfig = null;
+
+        await Task.Run(() =>
+        {
+            owner.Invoke((MethodInvoker)(() =>
+            {
+                using (var dialog = new Form()
+                {
+                    Text = title,
+                    Width = 400,
+                    Height = 500,
+                    StartPosition = FormStartPosition.CenterParent,
+                    FormBorderStyle = FormBorderStyle.FixedDialog
+                })
+                {
+                    var listBox = new ListBox
+                    {
+                        Dock = DockStyle.Fill,
+                        DataSource = configs,
+                        Font = new Font("Arial", 11),
+                        SelectionMode = SelectionMode.One
+                    };
+
+                    var btnLoad = new Button
+                    {
+                        Text = "Загрузить",
+                        Dock = DockStyle.Bottom,
+                        Height = 40,
+                        DialogResult = DialogResult.OK
+                    };
+
+                    dialog.Controls.Add(btnLoad);
+                    dialog.Controls.Add(listBox);
+                    dialog.AcceptButton = btnLoad;
+
+                    if (dialog.ShowDialog(owner) == DialogResult.OK)
+                    {
+                        selectedConfig = listBox.SelectedItem?.ToString();
+                    }
+                }
+            }));
+        });
+
+        return selectedConfig;
+    }
+    public static async Task<bool> SaveConfig<TForm>(TForm form, string configName) where TForm : Form
     {
         try
         {
-            var (configPath, _) = GetConfigInfo<TForm>();
-            Directory.CreateDirectory(configPath);
-
-            object config = form switch
+            if (form is TechTreeCreator techTreeForm)
             {
-                CountryCreator countryForm => CreateCountryConfig(countryForm),
-                CharacterCreator characterForm => CreateCharacterConfig(characterForm),
-                IdeaCreator ideaForm => CreateIdeaConfig(ideaForm),
-                ModifierCreator modifierForm => CreateModifierConfig(modifierForm),
-                _ => throw new NotSupportedException($"Тип формы {typeof(TForm)} не поддерживается")
-            };
+                var config = techTreeForm.CurrentTechTree;
+                foreach (var item in config.Items)
+                {
+                    if (item.Image != null)
+                    {
+                        item.ImageData = null;
+                    }
+                }
 
-            string filePath = Path.Combine(configPath, $"{configName}.json");
-            string json = JsonSerializer.Serialize(config, JsonOptions);
-            File.WriteAllText(filePath, json);
-
-            if (form is CharacterCreator charForm && charForm.currentCharacter != null)
-            {
-                SaveCharacterImages(charForm, configName);
+                string filePath = Path.Combine(TechTreesPath, $"{configName}.tech");
+                await SaveTechTreeToArchive(config, filePath);
+                return true;
             }
-            else if (form is IdeaCreator ideaForm && ideaForm.ImagePanel.BackgroundImage != null)
+            else
             {
-                string iconPath = Path.Combine(configPath, $"{configName}.png");
-                ideaForm.ImagePanel.BackgroundImage.Save(iconPath, System.Drawing.Imaging.ImageFormat.Png);
+                var (configPath, _) = GetConfigInfo<TForm>();
+                Directory.CreateDirectory(configPath);
+                object config = form switch
+                {
+                    CountryCreator countryForm => CreateCountryConfig(countryForm),
+                    CharacterCreator characterForm => CreateCharacterConfig(characterForm),
+                    IdeaCreator ideaForm => CreateIdeaConfig(ideaForm),
+                    ModifierCreator modifierForm => CreateModifierConfig(modifierForm),
+                    _ => throw new NotSupportedException($"Тип формы {typeof(TForm)} не поддерживается")
+                };
+                string filePath = Path.Combine(configPath, $"{configName}.json");
+                string json = JsonSerializer.Serialize(config, JsonOptions);
+                File.WriteAllText(filePath, json);
+                if (form is CharacterCreator charForm && charForm.currentCharacter != null)
+                {
+                    SaveCharacterImages(charForm, configName);
+                }
+                else if (form is IdeaCreator ideaForm && ideaForm.ImagePanel.BackgroundImage != null)
+                {
+                    string iconPath = Path.Combine(configPath, $"{configName}.png");
+                    ideaForm.ImagePanel.BackgroundImage.Save(iconPath, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                System.Windows.Forms.MessageBox.Show($"Конфигурация '{configName}' успешно сохранена!", "Успех",
+                              MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return true;
             }
-
-            MessageBox.Show($"Конфигурация '{configName}' успешно сохранена!", "Успех",
-                          MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return true;
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Ошибка сохранения конского фига: {ex.Message}", "Ошибка",
-                          MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (form is System.Windows.Threading.DispatcherObject wpfForm)
+            {
+                wpfForm.Dispatcher.Invoke(() =>
+                    System.Windows.MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка"));
+            }
+            else if (form is Form winFormsForm)
+            {
+                winFormsForm.Invoke((MethodInvoker)(() =>
+                    System.Windows.Forms.MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка")));
+            }
+
             return false;
         }
     }
-
     private static (string Path, string Type) GetConfigInfo<TForm>() where TForm : Form
     {
         return typeof(TForm).Name switch
@@ -115,11 +291,37 @@ public static class ConfigManager
             nameof(CountryCreator) => (CountrysPath, "страны"),
             nameof(CharacterCreator) => (CharactersPath, "персонажа"),
             nameof(IdeaCreator) => (IdeasPath, "идеи"),
+            nameof(TechTreeCreator) => (TechTreesPath, "дерева технологий"),
             nameof(ModifierCreator) => (Path.Combine(ConfigsPath, "modifiers"), "модификатора"),
             _ => throw new NotSupportedException($"Тип формы {typeof(TForm)} не поддерживается")
         };
     }
+    #region TechTree Config Methods
+    private static TechTreeConfig CreateTechTreeConfig(TechTreeCreator form)
+    {
+        return form.CurrentTechTree;
+    }
 
+    private static void ApplyTechTreeConfig(TechTreeCreator form, TechTreeConfig config)
+    {
+        // Устанавливаем конфиг в WPF свойство
+        form.CurrentTechTree = config;
+
+        // Используем Dispatcher для WPF
+        form.Dispatcher.Invoke(() =>
+        {
+            form.RefreshTechTreeView();
+
+            // Для WPF MessageBox используем System.Windows.MessageBox
+            System.Windows.MessageBox.Show(
+                $"Дерево технологий '{config.Name}' успешно загружено",
+                "Успех",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information
+            );
+        });
+    }
+    #endregion
     #region Modifier Config Methods
     private static ModifierConfig CreateModifierConfig(ModifierCreator form)
     {
@@ -147,7 +349,6 @@ public static class ConfigManager
             IconPath = "" // будет заполнено при сохранении изображения
         };
     }
-
     private static void ApplyModifierConfig(ModifierCreator form, ModifierConfig config)
     {
         form.IdBox.Text = config.Id;
@@ -178,17 +379,7 @@ public static class ConfigManager
             form.ImagePanel.BackgroundImage = Image.FromFile(config.IconPath);
         }
     }
-
-    private static void SaveModifierImage(ModifierCreator form, string configName)
-    {
-        if (form.ImagePanel.BackgroundImage != null)
-        {
-            string iconPath = Path.Combine(ConfigsPath, "modifiers", $"{configName}.png");
-            form.ImagePanel.BackgroundImage.Save(iconPath, System.Drawing.Imaging.ImageFormat.Png);
-        }
-    }
     #endregion
-
     private static async Task<List<string>> GetAvailableConfigsAsync(string configPath)
     {
         return await Task.Run(() =>
@@ -199,12 +390,12 @@ public static class ConfigManager
                 return new List<string>();
             }
 
-            return Directory.GetFiles(configPath, "*.json")
-                .Select(Path.GetFileNameWithoutExtension)
-                .ToList();
+            return Directory.EnumerateFiles(configPath)
+             .Where(f => f.EndsWith(".json") || f.EndsWith(".tech"))
+             .Select(Path.GetFileNameWithoutExtension)
+             .ToList();
         });
     }
-
     private static async Task<string> ShowConfigSelectionDialog(Form parentForm, List<string> configs, string title)
     {
         string selectedConfig = null;
@@ -252,7 +443,6 @@ public static class ConfigManager
 
         return selectedConfig;
     }
-
     private static async Task LoadConfigInternalAsync<TForm>(TForm form, string configPath, string configName) where TForm : Form
     {
         string filePath = Path.Combine(configPath, $"{configName}.json");
@@ -260,37 +450,44 @@ public static class ConfigManager
         await Task.Run(() =>
         {
             string json = File.ReadAllText(filePath);
-
-            form.Invoke((MethodInvoker)(() =>
+            if (form is TechTreeCreator techTreeForm)
             {
-                switch (form)
+                var config = JsonSerializer.Deserialize<TechTreeConfig>(json);
+                ApplyTechTreeConfig(techTreeForm, config);
+            }
+            else
+            {
+                form.Invoke((MethodInvoker)(() =>
                 {
-                    case CountryCreator countryForm:
-                        var countryConfig = JsonSerializer.Deserialize<CountryConfig>(json);
-                        ApplyCountryConfig(countryForm, countryConfig);
-                        break;
+                    switch (form)
+                    {
+                        case CountryCreator countryForm:
+                            var countryConfig = JsonSerializer.Deserialize<CountryConfig>(json);
+                            ApplyCountryConfig(countryForm, countryConfig);
+                            break;
 
-                    case CharacterCreator characterForm:
-                        var characterConfig = JsonSerializer.Deserialize<CountryCharacterConfig>(json);
-                        ApplyCharacterConfig(characterForm, characterConfig);
-                        break;
+                        case CharacterCreator characterForm:
+                            var characterConfig = JsonSerializer.Deserialize<CountryCharacterConfig>(json);
+                            ApplyCharacterConfig(characterForm, characterConfig);
+                            break;
 
-                    case IdeaCreator ideaForm:
-                        var ideaConfig = JsonSerializer.Deserialize<IdeaConfig>(json);
-                        ApplyIdeaConfig(ideaForm, ideaConfig);
-                        break;
-                    case ModifierCreator modifierForm:
-                        var modifierConfig = JsonSerializer.Deserialize<ModifierConfig>(json);
-                        ApplyModifierConfig(modifierForm, modifierConfig);
-                        break;
-                }
+                        case IdeaCreator ideaForm:
+                            var ideaConfig = JsonSerializer.Deserialize<IdeaConfig>(json);
+                            ApplyIdeaConfig(ideaForm, ideaConfig);
+                            break;
+                        case ModifierCreator modifierForm:
+                            var modifierConfig = JsonSerializer.Deserialize<ModifierConfig>(json);
+                            ApplyModifierConfig(modifierForm, modifierConfig);
+                            break;
+                    
+                    }
 
-                MessageBox.Show(form, $"Конфигурация '{configName}' успешно загружена",
-                              "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }));
+                    System.Windows.Forms.MessageBox.Show(form, $"Конфигурация '{configName}' успешно загружена",
+                                  "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }));
+            }
         });
     }
-
     #region Country Config Methods
     private static CountryConfig CreateCountryConfig(CountryCreator form)
     {
@@ -320,7 +517,6 @@ public static class ConfigManager
             States = ParseStates(form.CountryStatesBox.Text)
         };
     }
-
     private static void ApplyCountryConfig(CountryCreator form, CountryConfig config)
     {
         form.TagBox.Text = config.Tag;
@@ -360,7 +556,6 @@ public static class ConfigManager
             config.States.Select(s => $"{s.Key}:{(s.Value ? "1" : "0")}"));
     }
     #endregion
-
     #region Character Config Methods
     private static CountryCharacterConfig CreateCharacterConfig(CharacterCreator form)
     {
@@ -414,7 +609,6 @@ public static class ConfigManager
             form.SmalIconPanel.BackgroundImage = Image.FromFile(smallIconPath);
         }
     }
-
     private static void SaveCharacterImages(CharacterCreator form, string configName)
     {
         if (form.BigIconPanel.BackgroundImage != null)
@@ -430,7 +624,6 @@ public static class ConfigManager
         }
     }
     #endregion
-
     #region Idea Config Methods
     private static IdeaConfig CreateIdeaConfig(IdeaCreator form)
     {
@@ -488,9 +681,81 @@ public static class ConfigManager
 
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            MessageBox.Show("Сохранение отменено!");
+
+            System.Windows.Forms.MessageBox.Show("Сохранение отменено!");
             return;
         }
         SaveConfig(form, fileName);
+    }
+
+    private static async Task<bool> SaveTechTreeToArchive(TechTreeConfig config, string filePath)
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            // Сериализуем конфиг в JSON
+            string json = JsonSerializer.Serialize(config, JsonOptions);
+
+            // Создаем архив в памяти
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            {
+                // Добавляем JSON
+                var jsonEntry = archive.CreateEntry("config.json");
+                using (var writer = new StreamWriter(jsonEntry.Open()))
+                {
+                    await writer.WriteAsync(json);
+                }
+
+                // Добавляем изображения
+                foreach (var item in config.Items.Where(i => i.Image != null))
+                {
+                    var imageEntry = archive.CreateEntry($"images/{item.Id}.png");
+                    using (var stream = imageEntry.Open())
+                    {
+                        var encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create((BitmapSource)item.Image));
+                        encoder.Save(stream);
+                    }
+                }
+            }
+
+            // Сохраняем архив на диск
+            await File.WriteAllBytesAsync(filePath, memoryStream.ToArray());
+            return true;
+        }
+    }
+
+    private static async Task<TechTreeConfig> LoadTechTreeFromArchive(string filePath)
+    {
+        using (var fileStream = new FileStream(filePath, FileMode.Open))
+        using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read))
+        {
+            // Читаем JSON
+            var jsonEntry = archive.GetEntry("config.json");
+            using (var reader = new StreamReader(jsonEntry.Open()))
+            {
+                string json = await reader.ReadToEndAsync();
+                var config = JsonSerializer.Deserialize<TechTreeConfig>(json);
+
+                // Загружаем изображения
+                foreach (var item in config.Items)
+                {
+                    var imageEntry = archive.GetEntry($"images/{item.Id}.png");
+                    if (imageEntry != null)
+                    {
+                        using (var stream = imageEntry.Open())
+                        {
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.StreamSource = stream;
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.EndInit();
+                            item.Image = bitmap;
+                        }
+                    }
+                }
+
+                return config;
+            }
+        }
     }
 }

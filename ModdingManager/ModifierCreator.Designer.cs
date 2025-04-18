@@ -95,7 +95,7 @@
             // 
             SaveConfigButton.BackColor = Color.Crimson;
             SaveConfigButton.ForeColor = SystemColors.ControlText;
-            SaveConfigButton.Location = new Point(447, 757);
+            SaveConfigButton.Location = new Point(434, 757);
             SaveConfigButton.Name = "SaveConfigButton";
             SaveConfigButton.Size = new Size(315, 29);
             SaveConfigButton.TabIndex = 61;
@@ -187,10 +187,12 @@
             ImagePanel.AllowDrop = true;
             ImagePanel.BackColor = SystemColors.ActiveCaption;
             ImagePanel.ForeColor = SystemColors.ControlLightLight;
-            ImagePanel.Location = new Point(498, 44);
+            ImagePanel.Location = new Point(520, 58);
             ImagePanel.Name = "ImagePanel";
-            ImagePanel.Size = new Size(64, 64);
+            ImagePanel.Size = new Size(30, 30);
             ImagePanel.TabIndex = 70;
+            ImagePanel.DragDrop += ImagePanel_DragDrop;
+            ImagePanel.DragEnter += ImagePanel_DragEnter;
             // 
             // label2
             // 
@@ -373,7 +375,7 @@
             // 
             // MaxTrustBox
             // 
-            MaxTrustBox.Location = new Point(926, 81);
+            MaxTrustBox.Location = new Point(908, 81);
             MaxTrustBox.Name = "MaxTrustBox";
             MaxTrustBox.Size = new Size(48, 27);
             MaxTrustBox.TabIndex = 98;
@@ -390,7 +392,7 @@
             // label16
             // 
             label16.AutoSize = true;
-            label16.Location = new Point(932, 58);
+            label16.Location = new Point(914, 58);
             label16.Name = "label16";
             label16.Size = new Size(42, 20);
             label16.TabIndex = 100;
@@ -399,7 +401,7 @@
             // label17
             // 
             label17.AutoSize = true;
-            label17.Location = new Point(836, 38);
+            label17.Location = new Point(822, 38);
             label17.Name = "label17";
             label17.Size = new Size(138, 20);
             label17.TabIndex = 101;

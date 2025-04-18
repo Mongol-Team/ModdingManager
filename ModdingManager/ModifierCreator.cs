@@ -4,11 +4,18 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using TeximpNet.Compression;
+using TeximpNet.DDS;
+using TeximpNet;
+using ModdingManager.managers;
 
 namespace ModdingManager
 {
@@ -176,6 +183,8 @@ namespace ModdingManager
                             case "province":
                                 filePath = Path.Combine(directory, "modifiers", $"{tag}_province_modifiers.txt");
                                 content = CreateStaticModifier();
+                                SaveModifierIconWithTexImpNet();
+                                UpdateInterfaceFiles();
                                 break;
 
                             case "default":
@@ -428,17 +437,260 @@ namespace ModdingManager
         private void ApplyButton_Click(object sender, EventArgs e)
         {
             //CreateModifier();
-            UpdateLocalizationFiles();
+            //UpdateLocalizationFiles();
+            //UpdateInterfaceFiles();
+            SaveModifierIconWithTexImpNet();
         }
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            ConfigManager.LoadConfigAsync(this);
+            WinFormConfigManager.LoadConfigAsync(this);
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            ConfigManager.SaveConfigWrapper(this);
+            WinFormConfigManager.SaveConfigWrapper(this);
+        }
+
+        public void UpdateInterfaceFiles()
+        {
+            string tag = TagBox.Text;
+            string id = IdBox.Text;
+
+            if (string.IsNullOrEmpty(tag)) tag = "custom";
+            if (string.IsNullOrEmpty(id))
+            {
+                MessageBox.Show("ID cannot be empty for interface files!");
+                return;
+            }
+
+            try
+            {
+                // 1. Обновляем файл иконок (*_ideas.gfx)
+                UpdateIdeasGfxFile(tag, id);
+
+                // 2. Обновляем countrystateview.gui
+                UpdateCountryStateViewGui(tag, id);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error updating interface files: {ex.Message}");
+            }
+        }
+
+        private void UpdateIdeasGfxFile(string tag, string id)
+        {
+            string filePath = Path.Combine(ModManager.Directory, "interface", $"{tag}_ideas.gfx");
+            string spriteEntry = $"\tspriteType = {{\n\t\tname = \"GFX_modifiers_{id}_icon\"\n\t\ttextureFile = \"gfx/interface/modifiers_{id}_icon.dds\"\n\t}}";
+
+            // Создаем директорию, если ее нет
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            if (File.Exists(filePath))
+            {
+                string content = File.ReadAllText(filePath);
+
+                if (content.Contains("spriteTypes = {"))
+                {
+                    if (content.Contains($"name = \"GFX_modifiers_{id}_icon\""))
+                    {
+                        // Обновляем существующую запись (если нужно)
+                        string pattern = $@"spriteType\s*=\s*{{\s*name\s*=\s*""GFX_modifiers_{id}_icon""[^}}*}}";
+                        content = Regex.Replace(content, pattern, spriteEntry);
+                    }
+                    else
+                    {
+                        // Добавляем новую запись перед закрывающей скобкой
+                        int insertPos = content.LastIndexOf('}');
+                        content = content.Substring(0, insertPos) + spriteEntry + "\n}";
+                    }
+                }
+                else
+                {
+                    // Создаем новый файл с базовой структурой
+                    content = $"spriteTypes = {{\n{spriteEntry}\n}}";
+                }
+
+                File.WriteAllText(filePath, content);
+            }
+            else
+            {
+                // Создаем новый файл
+                string content = $"spriteTypes = {{\n{spriteEntry}\n}}";
+                File.WriteAllText(filePath, content);
+            }
+        }
+
+        private void UpdateCountryStateViewGui(string tag, string id)
+        {
+            string filePath = Path.Combine(ModManager.Directory, "interface", "countrystateview.gui");
+
+            if (!File.Exists(filePath))
+            {
+                MessageBox.Show("countrystateview.gui not found! Skipping icon registration.");
+                return;
+            }
+
+            string content = File.ReadAllText(filePath);
+            string iconEntry = $"\t\ticonType = {{\n\t\t\tname = \"{id}_icon\"\n\t\t\tspriteType = \"GFX_modifiers_{id}_icon\"\n\t\t\tposition = {{ x = 0 y = 0 }}\n\t\t\tOrientation = \"UPPER_LEFT\"\n\t\t}}";
+
+            if (content.Contains("name = \"custom_icon_container\""))
+            {
+                if (content.Contains($"name = \"{id}_icon\""))
+                {
+                    // Обновляем существующую запись (если нужно)
+                    string pattern = $@"iconType\s*=\s*{{\s*name\s*=\s*""{id}_icon""[^}}*}}";
+                    content = Regex.Replace(content, pattern, iconEntry);
+                }
+                else
+                {
+                    // Добавляем новую запись перед закрывающим containerWindowType
+                    int containerPos = content.IndexOf("name = \"custom_icon_container\"");
+                    int insertPos = content.IndexOf("}", containerPos);
+
+                    // Ищем последнюю закрывающую скобку перед containerWindowType
+                    while (insertPos > 0 && content.Substring(insertPos).Contains("containerWindowType"))
+                    {
+                        insertPos = content.LastIndexOf("}", insertPos - 1);
+                    }
+
+                    content = content.Insert(insertPos, iconEntry + "\n\t\t");
+                }
+
+                File.WriteAllText(filePath, content);
+            }
+            else
+            {
+                MessageBox.Show("custom_icon_container not found in countrystateview.gui! Skipping icon registration.");
+            }
+        }
+
+        private void ImagePanel_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            if (files.Length > 0)
+            {
+                string filePath = files[0];
+
+                if (Path.GetExtension(filePath).ToLower() == ".jpg" || Path.GetExtension(filePath).ToLower() == ".png")
+                {
+                    try
+                    {
+                        System.Drawing.Image image = System.Drawing.Image.FromFile(filePath);
+
+                        ImagePanel.BackgroundImage = image;
+
+                        ImagePanel.BackgroundImageLayout = ImageLayout.Stretch;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка загрузки изображения: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Пожалуйста, перетащите изображение в формате JPG или PNG.");
+                }
+            }
+        }
+
+        private void ImagePanel_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (files.Length > 0 && (Path.GetExtension(files[0]).ToLower() == ".jpg" || Path.GetExtension(files[0]).ToLower() == ".png"))
+                {
+                    e.Effect = DragDropEffects.Copy;
+                }
+                else
+                {
+                    e.Effect = DragDropEffects.None;
+                }
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        public void SaveModifierIconWithTexImpNet()
+        {
+            string id = IdBox.Text;
+            string tag = TagBox.Text;
+
+            if (string.IsNullOrEmpty(id))
+            {
+                MessageBox.Show("ID cannot be empty for icon saving!");
+                return;
+            }
+
+            if (ImagePanel.BackgroundImage == null)
+            {
+                MessageBox.Show("No image selected in ImagePanel!");
+                return;
+            }
+
+            try
+            {
+                string directory = Path.Combine(ModManager.Directory, "gfx", "interface", "modifiers");
+                Directory.CreateDirectory(directory);
+
+                string outputPath = Path.Combine(directory, $"modifiers_{id}_icon.dds");
+
+                // Получаем изображение и ресайзим до 30x30
+                using (var resized = new Bitmap(ImagePanel.BackgroundImage, 30, 30))
+                {
+                    // Конвертируем в формат 32bpp ARGB
+                    using (var bmp = new Bitmap(resized.Width, resized.Height, PixelFormat.Format32bppArgb))
+                    using (var g = Graphics.FromImage(bmp))
+                    {
+                        g.DrawImage(resized, 0, 0, resized.Width, resized.Height);
+
+                        // Получаем raw-данные изображения
+                        BitmapData bmpData = bmp.LockBits(
+                            new Rectangle(0, 0, bmp.Width, bmp.Height),
+                            ImageLockMode.ReadOnly,
+                            PixelFormat.Format32bppArgb);
+
+                        try
+                        {
+                            byte[] pixelData = new byte[bmpData.Stride * bmp.Height];
+                            Marshal.Copy(bmpData.Scan0, pixelData, 0, pixelData.Length);
+
+                            // Конвертируем BGRA → RGBA (если нужно)
+                            for (int i = 0; i < pixelData.Length; i += 4)
+                            {
+                                byte b = pixelData[i];
+                                byte r = pixelData[i + 2];
+                                pixelData[i] = r;
+                                pixelData[i + 2] = b;
+                            }
+
+                            // Создаем Surface из данных
+                            using (var surface = new Surface(bmp.Width, bmp.Height))
+                            {
+                                Marshal.Copy(pixelData, 0, surface.DataPtr, pixelData.Length);
+
+                                // Сохраняем в DDS
+                                DDSFile.Write(outputPath, surface, TextureDimension.Three, DDSFlags.None);
+                            }
+                        }
+                        finally
+                        {
+                            bmp.UnlockBits(bmpData);
+                        }
+                    }
+                }
+
+                MessageBox.Show($"Icon saved successfully to:\n{outputPath}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving icon: {ex.Message}\n\n{ex.StackTrace}");
+            }
         }
     }
 }
