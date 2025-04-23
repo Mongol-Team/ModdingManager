@@ -48,23 +48,58 @@ namespace ModdingManager
             {
                 var args = e.StagingItem.Input as System.Windows.Input.KeyEventArgs;
 
-                if (args != null && args.Key == Key.Enter)
+                if (args == null) return;
+
+                var focused = Keyboard.FocusedElement as System.Windows.Controls.RichTextBox;
+                if (focused == null) return;
+
+                var caret = focused.CaretPosition;
+                if (!caret.IsAtInsertionPosition)
+                    caret = caret.GetInsertionPosition(LogicalDirection.Forward);
+
+                if (args.Key == Key.Enter)
                 {
-                    var focused = Keyboard.FocusedElement as System.Windows.Controls.RichTextBox;
-                    if (focused != null)
+                    caret = caret.InsertLineBreak();
+                    focused.CaretPosition = caret;
+                    args.Handled = true;
+                }
+                else if (args.Key == Key.Left)
+                {
+                    var next = caret.GetNextInsertionPosition(LogicalDirection.Backward);
+                    if (next != null)
                     {
-                        var caret = focused.CaretPosition;
-                        if (!caret.IsAtInsertionPosition)
-                            caret = caret.GetInsertionPosition(LogicalDirection.Forward);
-
-                        caret = caret.InsertLineBreak();
-                        focused.CaretPosition = caret;
-
+                        focused.CaretPosition = next;
+                        args.Handled = true;
+                    }
+                }
+                else if (args.Key == Key.Right)
+                {
+                    var next = caret.GetNextInsertionPosition(LogicalDirection.Forward);
+                    if (next != null)
+                    {
+                        focused.CaretPosition = next;
+                        args.Handled = true;
+                    }
+                }
+                else if (args.Key == Key.Up)
+                {
+                    var lineStart = caret.GetLineStartPosition(-1);
+                    if (lineStart != null)
+                    {
+                        focused.CaretPosition = lineStart;
+                        args.Handled = true;
+                    }
+                }
+                else if (args.Key == Key.Down)
+                {
+                    var lineStart = caret.GetLineStartPosition(1);
+                    if (lineStart != null)
+                    {
+                        focused.CaretPosition = lineStart;
                         args.Handled = true;
                     }
                 }
             };
-
         }
 
         private void DrawGrid()
@@ -163,8 +198,6 @@ namespace ModdingManager
             }
             return null;
         }
-
-
         public void RefreshTechTreeView()
         {
             var nonConnectionElements = GridCanvas.Children
@@ -209,10 +242,6 @@ namespace ModdingManager
             }
             RedrawAllConnections();
         }
-
-
-
-
 
         private UIElement CreateTechElement(TechTreeItemConfig item)
         {
@@ -326,8 +355,6 @@ namespace ModdingManager
             }
         }
 
-
-
         private void AddElement(int col, int row)
         {
             string newName = TechIdBox.Text;
@@ -413,6 +440,39 @@ namespace ModdingManager
 
             if (!IsCellOccupied(col, row))
             {
+                var itemConfig = new TechTreeItemConfig();
+                try
+                {
+                    itemConfig = new TechTreeItemConfig
+                    {
+                        GridX = col,
+                        GridY = row,
+                        Id = TechIdBox?.Text ?? "",
+                        LocDescription = TechDescBox?.Text ?? "",
+                        LocName = TechNameBox?.Text ?? "",
+                        Cost = int.TryParse(TechCostBox?.Text, out var cost) ? cost : 0,
+                        Folder = FolderBox?.Text ?? "",
+                        StartYear = int.TryParse(StartYeatBox?.Text, out var year) ? year : 0,
+                        ModifCost = int.TryParse(TechCostModifBox?.Text, out var modifCost) ? modifCost : 0,
+
+                        Categories = CathegoryModdifierBox != null ? GetRichTextBoxText(CathegoryModdifierBox) : "",
+                        Dependencies = DependenciesBox != null ? GetRichTextBoxLines(DependenciesBox) : new List<string>(),
+                        Allowed = AllowedBox != null ? GetRichTextBoxLines(AllowedBox) : new List<string>(),
+                        Modifiers = ModdifierBox != null ? GetRichTextBoxLines(ModdifierBox) : new List<string>(),
+                        Effects = EffectBox != null ? GetRichTextBoxLines(EffectBox) : new List<string>(),
+                        Enables = EnablesBox != null ? GetRichTextBoxLines(EnablesBox) : new List<string>(),
+
+                        AiWillDo = GetRichTextBoxText(AiWillDoBox) ?? "",
+                        IsBig = isBig,
+                        Image = overlayimg?.Source
+                    };
+
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show("Заполните все поля.", "ашибькя", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
                 double cellX = col * CellSize;
                 double cellY = row * CellSize;
 
@@ -426,27 +486,7 @@ namespace ModdingManager
                 panel.MouseRightButtonDown += Element_MouseRightButtonDown;
 
                 GridCanvas.Children.Add(panel);
-                TextRange textRange = new TextRange(CategoriesBox.Document.ContentStart, CategoriesBox.Document.ContentEnd);
-                var itemConfig = new TechTreeItemConfig
-                {
-                    GridX = col,
-                    GridY = row,
-                    Id = TechIdBox.Text,
-                    LocDescription = TechDescBox.Text,
-                    LocName = TechNameBox.Text,
-                    Cost = TechCostBox.Text,
-                    Folder = FolderBox.Text,
-                    StartYear = StartYeatBox.Text,
-                    Dependencies = new TextRange(DependenciesBox.Document.ContentStart, DependenciesBox.Document.ContentEnd).Text.Trim(),
-                    Allowed = new TextRange(AllowedBox.Document.ContentStart, AllowedBox.Document.ContentEnd).Text.Trim(),
-                    Modifiers = new TextRange(ModdifierBox.Document.ContentStart, ModdifierBox.Document.ContentEnd).Text.Trim(),
-                    Effects = new TextRange(EffectBox.Document.ContentStart, EffectBox.Document.ContentEnd).Text.Trim(),
-                    AiWillDo = new TextRange(AiWillDoBox.Document.ContentStart, AiWillDoBox.Document.ContentEnd).Text.Trim(),
-                    IsBig = isBig,
-                    Image = overlayimg.Source,
-                    Categories = textRange.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList()
-
-                };
+                
 
                 CurrentTechTree.Items.Add(itemConfig);
             }
@@ -522,18 +562,38 @@ namespace ModdingManager
         private void SetRichTextBoxText(System.Windows.Controls.RichTextBox box, string text)
         {
             if (box == null || string.IsNullOrWhiteSpace(text)) return;
+
             box.Document.Blocks.Clear();
-            box.Document.Blocks.Add(new Paragraph(new Run(text)));
+            var paragraph = new Paragraph();
+
+            var lines = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                paragraph.Inlines.Add(new Run(lines[i]));
+                if (i < lines.Length - 1)
+                    paragraph.Inlines.Add(new LineBreak());
+            }
+
+            box.Document.Blocks.Add(paragraph);
         }
+
         private void SetRichTextBoxText(System.Windows.Controls.RichTextBox box, List<string> lines)
         {
-            if(box == null || lines == null) return;
+            if (box == null || lines == null) return;
+
             box.Document.Blocks.Clear();
-            foreach (var line in lines)
+            var paragraph = new Paragraph();
+
+            for (int i = 0; i < lines.Count; i++)
             {
-                box.Document.Blocks.Add(new Paragraph(new Run(line)));
+                paragraph.Inlines.Add(new Run(lines[i]));
+                if (i < lines.Count - 1)
+                    paragraph.Inlines.Add(new LineBreak());
             }
+
+            box.Document.Blocks.Add(paragraph);
         }
+
 
         private void EditElement(Border element)
         {
@@ -550,11 +610,12 @@ namespace ModdingManager
             TechCostBox.Text = item.Cost.ToString();
             TechCostModifBox.Text = item.ModifCost.ToString();
 
-            SetRichTextBoxText(CategoriesBox, item.Categories);
+            SetRichTextBoxText(EnablesBox, item.Enables);
             SetRichTextBoxText(AllowedBox, item.Allowed);
             SetRichTextBoxText(EffectBox, item.Effects);
             SetRichTextBoxText(AiWillDoBox, item.AiWillDo);
             SetRichTextBoxText(ModdifierBox, item.Modifiers);
+            SetRichTextBoxText(CathegoryModdifierBox, item.Categories);
             SetRichTextBoxText(DependenciesBox, item.Dependencies);
         }
         private void DeleteElement(Border element)
@@ -586,7 +647,6 @@ namespace ModdingManager
         {
             bool isMarked = (bool)element.Tag;
 
-            // Получаем Canvas внутри Border
             var canvas = element.Child as Canvas;
             if (canvas == null)
                 return;
@@ -739,48 +799,51 @@ namespace ModdingManager
                 int y1 = GetGridY(first);
                 int x2 = GetGridX(second);
                 int y2 = GetGridY(second);
-
-                bool isHorizontal = OrientationBox.SelectedItem.ToString() == "horizontal";
+                var val = (OrientationBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+                bool isHorizontal = val == "horizontal";
 
                 if (isHorizontal)
                 {
                     if (y1 != y2)
                     {
-                        System.Windows.MessageBox.Show("Для горизонтальной связи элементы должны быть на одной линии по Y.", "Ошибка связи");
+                        System.Windows.MessageBox.Show($"Элементы “{first.Name}” и “{second.Name}” находятся в разных строках\n(Y={y1} и Y={y2}).\nДля горизонтальной связи они должны быть на одной линии по Y.", "Ошибка связи");
                         continue;
                     }
                     if (x1 == x2)
                     {
-                        System.Windows.MessageBox.Show("Для горизонтальной связи X координаты не могут совпадать.", "Ошибка связи");
+                        System.Windows.MessageBox.Show($"Элементы “{first.Name}” и “{second.Name}” находятся в одном столбце\n(X={x1}).\nДля горизонтальной связи они должны быть в разных колонках.", "Ошибка связи");
                         continue;
                     }
                 }
-                else 
+                else // vertical
                 {
                     if (x1 != x2)
                     {
-                        System.Windows.MessageBox.Show("Для вертикальной связи элементы должны быть в одном столбце по X.", "Ошибка связи");
+                        System.Windows.MessageBox.Show($"Элементы “{first.Name}” и “{second.Name}” находятся в разных колонках\n(X={x1} и X={x2}).\nДля вертикальной связи они должны быть в одном столбце по X.", "Ошибка связи");
                         continue;
                     }
                     if (y1 == y2)
                     {
-                        System.Windows.MessageBox.Show("Для вертикальной связи Y координаты не могут совпадать.", "Ошибка связи");
+                        System.Windows.MessageBox.Show($"Элементы “{first.Name}” и “{second.Name}” находятся в одной строке\n(Y={y1}).\nДля вертикальной связи они должны быть в разных строках.", "Ошибка связи");
                         continue;
                     }
                 }
 
+                // определяем родителя и ребёнка по правильной оси
                 Border parent = null;
                 Border child = null;
 
                 if (isHorizontal)
                 {
-                    parent = x1 < x2 ? first : second;
-                    child = x1 < x2 ? second : first;
+                    int deltaX = x2 - x1;
+                    parent = deltaX > 0 ? first : second;
+                    child = deltaX > 0 ? second : first;
                 }
-                else // vertical
+                else
                 {
-                    parent = y1 < y2 ? first : second;
-                    child = y1 < y2 ? second : first;
+                    int deltaY = y2 - y1;
+                    parent = deltaY > 0 ? first : second;
+                    child = deltaY > 0 ? second : first;
                 }
 
                 string parentName = parent.Name;
@@ -852,8 +915,6 @@ namespace ModdingManager
                 IsMutual = isMutual
             });
         }
-
-
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
@@ -1020,35 +1081,94 @@ namespace ModdingManager
             if (richText == null) return;
 
             var caret = richText.CaretPosition;
-            if (!caret.IsAtInsertionPosition)
-                caret = caret.GetInsertionPosition(LogicalDirection.Backward);
 
-            if (e.Key == Key.Back)
+            if (!caret.IsAtInsertionPosition)
+                caret = caret.GetInsertionPosition(LogicalDirection.Forward);
+
+            if (e.Key == Key.Left)
             {
-                var backPos = caret.GetPositionAtOffset(-1, LogicalDirection.Backward);
-                if (backPos != null)
-                {
-                    var range = new TextRange(backPos, caret);
-                    range.Text = ""; 
-                    richText.CaretPosition = backPos;
-                }
+                var next = caret.GetNextInsertionPosition(LogicalDirection.Backward);
+                if (next != null)
+                    richText.CaretPosition = next;
+                e.Handled = true;
+                return;
+            }
+            else if (e.Key == Key.Right)
+            {
+                var next = caret.GetNextInsertionPosition(LogicalDirection.Forward);
+                if (next != null)
+                    richText.CaretPosition = next;
+                e.Handled = true;
+                return;
+            }
+            else if (e.Key == Key.Up)
+            {
+                var lineStart = caret.GetLineStartPosition(-1);
+                if (lineStart != null)
+                    richText.CaretPosition = lineStart;
+                e.Handled = true;
+                return;
+            }
+            else if (e.Key == Key.Down)
+            {
+                var lineStart = caret.GetLineStartPosition(1);
+                if (lineStart != null)
+                    richText.CaretPosition = lineStart;
                 e.Handled = true;
                 return;
             }
 
+
+            if (e.Key == Key.Enter)
+            {
+                caret = caret.InsertLineBreak();
+                richText.CaretPosition = caret;
+                e.Handled = true;
+                return;
+            }
+
+            if (e.Key == Key.Back)
+            {
+                var currentLineStart = caret.GetLineStartPosition(0);
+                var isAtStartOfLine = caret.CompareTo(currentLineStart) == 0;
+
+                if (isAtStartOfLine)
+                {
+                    var paragraph = caret.Paragraph;
+                    if (paragraph != null && new TextRange(paragraph.ContentStart, paragraph.ContentEnd).IsEmpty)
+                    {
+                        var parent = paragraph.Parent as FlowDocument;
+                        if (parent != null)
+                        {
+                            parent.Blocks.Remove(paragraph);
+                            e.Handled = true;
+                            return;
+                        }
+                    }
+                }
+
+                var backPos = caret.GetPositionAtOffset(-1, LogicalDirection.Backward);
+                if (backPos != null)
+                {
+                    var range = new TextRange(backPos, caret);
+                    range.Text = "";
+                    richText.CaretPosition = backPos;
+                }
+
+                e.Handled = true;
+                return;
+            }
+
+            // Вставка текстового символа
             string typedChar = GetCharFromKey(e.Key);
             if (!string.IsNullOrEmpty(typedChar))
             {
                 caret.InsertTextInRun(typedChar);
-                richText.CaretPosition = caret.GetPositionAtOffset(typedChar.Length, LogicalDirection.Forward);
+                richText.CaretPosition = caret.GetPositionAtOffset(1, LogicalDirection.Forward);
                 e.Handled = true;
             }
-            else
-            {
-                var insertionPos = caret.GetPositionAtOffset(typedChar.Length, LogicalDirection.Forward);
-                insertionPos.InsertTextInRun(typedChar);
-            }
         }
+
 
         private void InsertTextAtCaret(System.Windows.Controls.RichTextBox richText, string typedChar)
         {
@@ -1158,15 +1278,18 @@ namespace ModdingManager
             {
                 sb.AppendLine($"\t{item.Id} = {{");
 
-                if (!string.IsNullOrWhiteSpace(item.EnableType) && !string.IsNullOrWhiteSpace(item.Enable))
+                foreach (var modif in item.Modifiers)
                 {
-                    sb.AppendLine($"\t\tenable_{item.EnableType} = {{");
-                    sb.AppendLine($"\t\t\t{item.Enable}");
-                    sb.AppendLine($"\t\t}}");
+                    var splited = modif.Split(':');
+                    if (!string.IsNullOrWhiteSpace(modif) && splited.Length == 2)
+                        sb.AppendLine($"\t\t{splited[0]} = {splited[1]}");
                 }
 
-                var children = CurrentTechTree.ChildOf.Where(pair => pair.Count == 2 && pair[0] == item.Id).Select(pair => pair[1]);
-                var penis = children;
+                // path блоки
+                var children = CurrentTechTree.ChildOf
+                    .Where(pair => pair.Count == 2 && pair[0] == item.Id)
+                    .Select(pair => pair[1]);
+
                 foreach (var child in children)
                 {
                     sb.AppendLine($"\t\tpath = {{");
@@ -1178,19 +1301,111 @@ namespace ModdingManager
                 sb.AppendLine($"\t\tresearch_cost = {item.ModifCost}");
                 sb.AppendLine($"\t\tstart_year = {item.StartYear}");
 
+                // folder блок
                 sb.AppendLine($"\t\tfolder = {{");
                 sb.AppendLine($"\t\t\tname = {item.Folder}");
-                sb.AppendLine($"\t\t\tposition = {{ x = {item.GridX} y = @{item.StartYear} }}");
+                sb.AppendLine($"\t\t\tposition = {{ x = {item.GridX} y = {item.GridY} }}");
                 sb.AppendLine($"\t\t}}");
 
-                if (item.Categories != null && item.Categories.Any())
+                var usedEnableTypes = new HashSet<string>();
+
+                foreach (var unlock in item.Enables.Where(e => !string.IsNullOrWhiteSpace(e) && e.Contains(":")))
                 {
-                    sb.AppendLine("\t\tcategories = {");
-                    foreach (var cat in item.Categories)
-                        sb.AppendLine($"\t\t\t{cat}");
+                    var typeSplit = unlock.Split(new[] { ':' }, 2);
+                    if (typeSplit.Length != 2 || string.IsNullOrWhiteSpace(typeSplit[0]))
+                        continue;
+
+                    var enableType = typeSplit[0].Trim();
+                    var parameters = typeSplit[1].Trim();
+
+                    if (usedEnableTypes.Contains(enableType))
+                        continue;
+
+                    if (string.IsNullOrEmpty(parameters))
+                        continue;
+
+                    var values = parameters.Split(',').Select(p => p.Trim()).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+                    if (values.Count == 0)
+                        continue;
+
+                    sb.AppendLine($"\t\tenable_{enableType} = {{");
+
+                    foreach (var val in values)
+                    {
+                        if (val.Contains(":"))
+                        {
+                            var kv = val.Split(':');
+                            if (kv.Length == 2 && !string.IsNullOrWhiteSpace(kv[1]))
+                            {
+                                sb.AppendLine($"\t\t\t{kv[0]} = {kv[1]}");
+                            }
+                        }
+                        else
+                        {
+                            sb.AppendLine($"\t\t\t{val}");
+                        }
+                    }
+
                     sb.AppendLine("\t\t}");
+
+                    usedEnableTypes.Add(enableType);
                 }
 
+
+
+
+                if (!string.IsNullOrWhiteSpace(item.Categories))
+                {
+                    var lines = item.Categories.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (lines.Length > 0)
+                    {
+                        string categoryName = lines[0].Trim();
+                        var sbCat = new StringBuilder();
+                        sbCat.AppendLine($"\t\t{categoryName} = {{");
+
+                        Dictionary<string, List<string>> terrarians = new();
+                        string currentTerrarian = null;
+
+                        for (int i = 1; i < lines.Length; i++)
+                        {
+                            var line = lines[i].Trim();
+                            if (string.IsNullOrEmpty(line)) continue;
+
+                            if (line.StartsWith("-"))
+                            {
+                                currentTerrarian = line.Substring(1).Trim();
+                                if (!terrarians.ContainsKey(currentTerrarian))
+                                    terrarians[currentTerrarian] = new List<string>();
+                            }
+                            else if (line.Contains(":"))
+                            {
+                                var parts = line.Split(':');
+                                if (parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[1]))
+                                {
+                                    string formatted = $"{parts[0]} = {parts[1]}";
+                                    if (currentTerrarian == null)
+                                        sbCat.AppendLine($"\t\t\t{formatted}");
+                                    else
+                                        terrarians[currentTerrarian].Add($"\t\t\t\t{formatted}");
+                                }
+                            }
+                        }
+
+                        foreach (var kvp in terrarians)
+                        {
+                            sbCat.AppendLine($"\t\t\t{kvp.Key} = {{");
+                            foreach (var mod in kvp.Value)
+                                sbCat.AppendLine(mod);
+                            sbCat.AppendLine("\t\t\t}");
+                        }
+
+                        sbCat.AppendLine("\t\t}");
+                        sb.AppendLine(sbCat.ToString());
+                    }
+                }
+
+
+                // ai_will_do
                 if (!string.IsNullOrWhiteSpace(item.AiWillDo))
                 {
                     sb.AppendLine("\t\tai_will_do = {");
@@ -1198,6 +1413,7 @@ namespace ModdingManager
                     sb.AppendLine("\t\t}");
                 }
 
+                // XOR
                 var mutalItems = CurrentTechTree.Mutal
                     .Where(group => group.Contains(item.Id))
                     .SelectMany(group => group)
@@ -1224,6 +1440,7 @@ namespace ModdingManager
 
             System.Windows.MessageBox.Show($"Файл сохранён в: {fullPath}");
         }
+
 
         private void DebugButton_Click(object sender, RoutedEventArgs e)
         {
@@ -1306,15 +1523,15 @@ namespace ModdingManager
             item.LocName = TechNameBox.Text;
             item.LocDescription = TechDescBox.Text;
             item.ModifCost = int.TryParse(TechCostModifBox.Text, out int modifCost) ? modifCost : 0;
-            item.Cost = TechCostBox.Text;
+            item.Cost = Convert.ToInt32(TechCostBox.Text);
             item.Folder = FolderBox.Text;
-            item.StartYear = StartYeatBox.Text;
-            item.Categories = GetRichTextBoxLines(CategoriesBox);
-            item.Allowed = GetRichTextBoxText(AllowedBox);
-            item.Effects = GetRichTextBoxText(EffectBox);
-            item.Modifiers = GetRichTextBoxText(ModdifierBox);
+            item.StartYear = Convert.ToInt32(StartYeatBox.Text);
+            item.Enables = GetRichTextBoxLines(EnablesBox);
+            item.Allowed = GetRichTextBoxLines(AllowedBox);
+            item.Effects = GetRichTextBoxLines(EffectBox);
+            item.Modifiers = GetRichTextBoxLines(ModdifierBox);
             item.AiWillDo = GetRichTextBoxText(AiWillDoBox);
-            item.Dependencies = GetRichTextBoxText(DependenciesBox);
+            item.Dependencies = GetRichTextBoxLines(DependenciesBox);
             item.Image = item.IsBig ? BigOverlayImage.Source : SmallOverlayImage.Source;
             var overlayimg = item.IsBig ? BigOverlayImage : SmallOverlayImage;
             var backgroundimg = item.IsBig ? BigBackgroundImage : BigOverlayImage;
@@ -1351,6 +1568,29 @@ namespace ModdingManager
         private async void SaveEvent(object sender, RoutedEventArgs e)
         {
             await WpfConfigManager.SaveConfigAsync(this, TechTreeNameBox.Text);
+        }
+
+        private void CategoriesBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextRange textRange = new TextRange(
+               EnablesBox.Document.ContentStart,
+               EnablesBox.Document.ContentEnd
+           );
+            string fullText = textRange.Text;
+
+            // Создаем FormattedText для измерения ширины текста
+            var formattedText = new FormattedText(
+                fullText,
+                System.Globalization.CultureInfo.CurrentCulture,
+                System.Windows.FlowDirection.LeftToRight,
+                new Typeface(EnablesBox.FontFamily, EnablesBox.FontStyle, EnablesBox.FontWeight, EnablesBox.FontStretch),
+                EnablesBox.FontSize,
+                System.Windows.Media.Brushes.Black,  // Цвет не важен, нужен только для измерения
+                VisualTreeHelper.GetDpi(EnablesBox).PixelsPerDip
+            );
+
+            // Устанавливаем новую ширину FlowDocument (+ небольшой отступ)
+            EnablesBox.Document.PageWidth = formattedText.Width + 20;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace ModdingManager
 {
     public partial class CharacterCreator : Form
     {
-        public CountryCharacterConfig currentCharacter = new ();
+        public CountryCharacterConfig currentCharacter = new();
         public CharacterCreator()
         {
             InitializeComponent();
@@ -273,7 +273,7 @@ namespace ModdingManager
                 {
                     content.AppendLine("\t\tcountry_leader = {");
                     content.AppendLine($"\t\t\texpire = \"{((TextBox)form.Controls["ExpireBox"]).Text}\"");
-                    content.AppendLine("\t\t\tideology = neutrality");
+                    content.AppendLine($"\t\t\tideology = \"{((TextBox)form.Controls["IdeologyBox"]).Text}\"");
                     content.AppendLine("\t\t\ttraits = {");
                     foreach (var trait in traits.Split(new[] { ' ', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries))
                     {
@@ -440,7 +440,7 @@ namespace ModdingManager
         }
         private void SaveButton_Click(object sender, EventArgs e)
         {
-           
+
             WinFormConfigManager.SaveConfigWrapper(this);
         }
 
@@ -499,5 +499,7 @@ namespace ModdingManager
             // Дополнительные свойства
             ExpireBox.Text = currentCharacter.Expire;
         }
+
+        
     }
 }

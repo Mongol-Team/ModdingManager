@@ -67,6 +67,8 @@ namespace ModdingManager
             ApplyButton = new Button();
             SaveButton = new Button();
             LoadButton = new Button();
+            IdeologyBox = new TextBox();
+            label18 = new Label();
             SuspendLayout();
             // 
             // BigIconPanel
@@ -83,7 +85,7 @@ namespace ModdingManager
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(211, 145);
+            label1.Location = new Point(221, 145);
             label1.Name = "label1";
             label1.Size = new Size(75, 20);
             label1.TabIndex = 1;
@@ -91,7 +93,7 @@ namespace ModdingManager
             // 
             // NameBox
             // 
-            NameBox.Location = new Point(211, 168);
+            NameBox.Location = new Point(221, 168);
             NameBox.Name = "NameBox";
             NameBox.Size = new Size(166, 27);
             NameBox.TabIndex = 2;
@@ -99,7 +101,7 @@ namespace ModdingManager
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(211, 198);
+            label2.Location = new Point(221, 198);
             label2.Name = "label2";
             label2.Size = new Size(79, 20);
             label2.TabIndex = 3;
@@ -107,23 +109,23 @@ namespace ModdingManager
             // 
             // DescBox
             // 
-            DescBox.Location = new Point(211, 221);
+            DescBox.Location = new Point(221, 221);
             DescBox.Name = "DescBox";
             DescBox.Size = new Size(166, 27);
             DescBox.TabIndex = 4;
             // 
             // PercBox
             // 
-            PercBox.Location = new Point(211, 330);
+            PercBox.Location = new Point(219, 330);
             PercBox.Name = "PercBox";
-            PercBox.Size = new Size(166, 88);
+            PercBox.Size = new Size(166, 83);
             PercBox.TabIndex = 5;
             PercBox.Text = "";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(211, 307);
+            label3.Location = new Point(219, 307);
             label3.Name = "label3";
             label3.Size = new Size(53, 20);
             label3.TabIndex = 6;
@@ -191,7 +193,7 @@ namespace ModdingManager
             // 
             // AdvisorCost
             // 
-            AdvisorCost.Location = new Point(219, 500);
+            AdvisorCost.Location = new Point(219, 514);
             AdvisorCost.Name = "AdvisorCost";
             AdvisorCost.Size = new Size(166, 27);
             AdvisorCost.TabIndex = 25;
@@ -199,7 +201,7 @@ namespace ModdingManager
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(219, 468);
+            label5.Location = new Point(219, 491);
             label5.Name = "label5";
             label5.Size = new Size(158, 20);
             label5.TabIndex = 26;
@@ -208,7 +210,7 @@ namespace ModdingManager
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(220, 530);
+            label6.Location = new Point(220, 544);
             label6.Name = "label6";
             label6.Size = new Size(116, 20);
             label6.TabIndex = 27;
@@ -218,7 +220,7 @@ namespace ModdingManager
             // 
             AdvisorSlot.FormattingEnabled = true;
             AdvisorSlot.Items.AddRange(new object[] { "political_advisor", "theorist", "army_chief", "navy_chief", "air_chief", "high_command" });
-            AdvisorSlot.Location = new Point(220, 555);
+            AdvisorSlot.Location = new Point(220, 569);
             AdvisorSlot.Name = "AdvisorSlot";
             AdvisorSlot.Size = new Size(165, 28);
             AdvisorSlot.TabIndex = 28;
@@ -244,7 +246,7 @@ namespace ModdingManager
             // label10
             // 
             label10.AutoSize = true;
-            label10.Location = new Point(262, 433);
+            label10.Location = new Point(262, 471);
             label10.Name = "label10";
             label10.Size = new Size(74, 20);
             label10.TabIndex = 31;
@@ -296,7 +298,7 @@ namespace ModdingManager
             // 
             // TagBox
             // 
-            TagBox.Location = new Point(211, 277);
+            TagBox.Location = new Point(219, 277);
             TagBox.Name = "TagBox";
             TagBox.Size = new Size(166, 27);
             TagBox.TabIndex = 37;
@@ -304,7 +306,7 @@ namespace ModdingManager
             // label15
             // 
             label15.AutoSize = true;
-            label15.Location = new Point(211, 254);
+            label15.Location = new Point(221, 254);
             label15.Name = "label15";
             label15.Size = new Size(160, 20);
             label15.TabIndex = 38;
@@ -323,7 +325,7 @@ namespace ModdingManager
             // 
             // AiDoBox
             // 
-            AiDoBox.Location = new Point(219, 617);
+            AiDoBox.Location = new Point(219, 631);
             AiDoBox.Name = "AiDoBox";
             AiDoBox.Size = new Size(166, 27);
             AiDoBox.TabIndex = 39;
@@ -331,7 +333,7 @@ namespace ModdingManager
             // label16
             // 
             label16.AutoSize = true;
-            label16.Location = new Point(221, 594);
+            label16.Location = new Point(221, 608);
             label16.Name = "label16";
             label16.Size = new Size(156, 20);
             label16.TabIndex = 40;
@@ -356,7 +358,7 @@ namespace ModdingManager
             // ApplyButton
             // 
             ApplyButton.BackColor = Color.RosyBrown;
-            ApplyButton.Location = new Point(291, 655);
+            ApplyButton.Location = new Point(291, 673);
             ApplyButton.Name = "ApplyButton";
             ApplyButton.Size = new Size(94, 29);
             ApplyButton.TabIndex = 47;
@@ -367,7 +369,7 @@ namespace ModdingManager
             // SaveButton
             // 
             SaveButton.BackColor = Color.FromArgb(192, 64, 0);
-            SaveButton.Location = new Point(29, 655);
+            SaveButton.Location = new Point(29, 673);
             SaveButton.Name = "SaveButton";
             SaveButton.Size = new Size(94, 29);
             SaveButton.TabIndex = 48;
@@ -378,7 +380,7 @@ namespace ModdingManager
             // LoadButton
             // 
             LoadButton.BackColor = Color.Green;
-            LoadButton.Location = new Point(159, 655);
+            LoadButton.Location = new Point(159, 673);
             LoadButton.Name = "LoadButton";
             LoadButton.Size = new Size(94, 29);
             LoadButton.TabIndex = 49;
@@ -386,11 +388,29 @@ namespace ModdingManager
             LoadButton.UseVisualStyleBackColor = false;
             LoadButton.Click += LoadButton_Click;
             // 
+            // IdeologyBox
+            // 
+            IdeologyBox.Location = new Point(219, 441);
+            IdeologyBox.Name = "IdeologyBox";
+            IdeologyBox.Size = new Size(166, 27);
+            IdeologyBox.TabIndex = 50;
+            // 
+            // label18
+            // 
+            label18.AutoSize = true;
+            label18.Location = new Point(219, 418);
+            label18.Name = "label18";
+            label18.Size = new Size(76, 20);
+            label18.TabIndex = 51;
+            label18.Text = "Иделогия";
+            // 
             // CharacterCreator
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(417, 696);
+            ClientSize = new Size(417, 714);
+            Controls.Add(label18);
+            Controls.Add(IdeologyBox);
             Controls.Add(LoadButton);
             Controls.Add(SaveButton);
             Controls.Add(ApplyButton);
@@ -476,5 +496,7 @@ namespace ModdingManager
         public Button ApplyButton;
         public Button SaveButton;
         public Button LoadButton;
+        public TextBox IdeologyBox;
+        public Label label18;
     }
 }

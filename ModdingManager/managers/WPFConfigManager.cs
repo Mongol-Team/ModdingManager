@@ -324,7 +324,6 @@ namespace ModdingManager
             using (var fileStream = new FileStream(filePath, FileMode.Open))
             using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read))
             {
-                // Загружаем конфиг
                 var jsonEntry = archive.GetEntry("config.json");
                 using (var reader = new StreamReader(jsonEntry.Open()))
                 {

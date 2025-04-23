@@ -559,27 +559,34 @@ public static class WinFormConfigManager
     #region Character Config Methods
     private static CountryCharacterConfig CreateCharacterConfig(CharacterCreator form)
     {
+        int SafeParseInt(string text)
+        {
+            return int.TryParse(text, out var result) ? result : 0;
+        }
+
         return new CountryCharacterConfig
         {
-            Id = form.IdBox.Text.Trim(),
-            Name = form.NameBox.Text.Trim(),
-            Description = form.DescBox.Text.Trim(),
-            Tag = form.TagBox.Text.Trim(),
-            Skill = int.Parse(form.SkillBox.Text),
-            Attack = int.Parse(form.AtkBox.Text),
-            Defense = int.Parse(form.DefBox.Text),
-            Supply = int.Parse(form.SupplyBox.Text),
-            Speed = int.Parse(form.SpdBox.Text),
-            AdvisorSlot = form.AdvisorSlot.Text,
-            AdvisorCost = int.Parse(form.AdvisorCost.Text),
-            AiWillDo = form.AiDoBox.Text.Trim(),
-            Expire = form.ExpireBox.Text.Trim(),
-            Types = form.CharTypesBox.Text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList(),
-            Traits = form.PercBox.Text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList(),
+            Id = form.IdBox.Text?.Trim() ?? "",
+            Name = form.NameBox.Text?.Trim() ?? "",
+            Description = form.DescBox.Text?.Trim() ?? "",
+            Tag = form.TagBox.Text?.Trim() ?? "",
+            Skill = SafeParseInt(form.SkillBox.Text),
+            Attack = SafeParseInt(form.AtkBox.Text),
+            Defense = SafeParseInt(form.DefBox.Text),
+            Supply = SafeParseInt(form.SupplyBox.Text),
+            Speed = SafeParseInt(form.SpdBox.Text),
+            AdvisorSlot = form.AdvisorSlot.Text?.Trim() ?? "",
+            Ideology = form.IdeologyBox.Text?.Trim() ?? "",
+            AdvisorCost = SafeParseInt(form.AdvisorCost.Text),
+            AiWillDo = form.AiDoBox.Text?.Trim() ?? "",
+            Expire = form.ExpireBox.Text?.Trim() ?? "",
+            Types = form.CharTypesBox.Text?.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
+            Traits = form.PercBox.Text?.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
             BigIconPath = form.currentCharacter?.BigIconPath ?? "",
             SmallIconPath = form.currentCharacter?.SmallIconPath ?? ""
         };
     }
+
     private static void ApplyCharacterConfig(CharacterCreator form, CountryCharacterConfig config)
     {
         form.IdBox.Text = config.Id;

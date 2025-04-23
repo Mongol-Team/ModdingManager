@@ -26,17 +26,16 @@ namespace ModdingManager.configs
         public int ModifCost { get; set; }
         public string LocName { get; set; }
         public string LocDescription { get; set; }
-        public List<string> Categories { get; set; }
-        public string Enable { get; set; }
-        public string EnableType { get; set; }
-        public string Cost { get; set; }
+        public string Categories { get; set; }
+        public List<string> Enables { get; set; }
+        public int Cost { get; set; }
         public string Folder { get; set; }
-        public string StartYear { get; set; }
-        public string Allowed { get; set; }
-        public string Modifiers { get; set; }
-        public string Effects { get; set; }
+        public int StartYear { get; set; }
+        public List<string> Allowed { get; set; }
+        public List<string> Modifiers { get; set; }
+        public List<string> Effects { get; set; }
         public string AiWillDo { get; set; }
-        public string Dependencies { get; set; }
+        public List<string> Dependencies { get; set; }
         [JsonIgnore]
         public ImageSource Image { get; set; }
         public byte[] ImageData { get; set; }

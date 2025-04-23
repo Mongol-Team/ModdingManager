@@ -12,6 +12,7 @@ namespace ModdingManager.configs
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
+        public string Ideology { get; set; } = "";
         public List<string> Types { get; set; } = new List<string>();
         public string Tag { get; set; } = "";
         public List<string> Traits { get; set; } = new List<string>();
