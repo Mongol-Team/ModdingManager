@@ -45,6 +45,8 @@ namespace ModdingManager
             CharCreator = new Button();
             IdeaCreatorButton = new Button();
             TestButton = new Button();
+            GameDirBox = new TextBox();
+            label2 = new Label();
             SuspendLayout();
             // 
             // LocConvertButton
@@ -192,11 +194,30 @@ namespace ModdingManager
             TestButton.UseVisualStyleBackColor = true;
             TestButton.Click += TestButton_Click;
             // 
+            // GameDirBox
+            // 
+            GameDirBox.Location = new Point(44, 455);
+            GameDirBox.Name = "GameDirBox";
+            GameDirBox.Size = new Size(554, 27);
+            GameDirBox.TabIndex = 14;
+            GameDirBox.KeyDown += DirBox_KeyDown;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(638, 455);
+            label2.Name = "label2";
+            label2.Size = new Size(145, 20);
+            label2.TabIndex = 15;
+            label2.Text = "Дирректория игры ";
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(963, 458);
+            ClientSize = new Size(963, 494);
+            Controls.Add(label2);
+            Controls.Add(GameDirBox);
             Controls.Add(TestButton);
             Controls.Add(IdeaCreatorButton);
             Controls.Add(CharCreator);
@@ -235,5 +256,7 @@ namespace ModdingManager
         private Button CharCreator;
         private Button IdeaCreatorButton;
         private Button TestButton;
+        private TextBox GameDirBox;
+        private Label label2;
     }
 }

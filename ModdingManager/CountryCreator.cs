@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using ModdingManager.configs;
 using ModdingManager.managers;
+using System.Reflection.Metadata;
 
 namespace ModdingManager
 {
@@ -135,26 +136,27 @@ namespace ModdingManager
 
             string tagsDir = Path.Combine(ModManager.Directory, "common", "country_tags");
             string countryTag = TagBox.Text;
-            string countryFileName = $"{countryTag}_{CapitalBox.Text}.txt";
+            string countryFileName = $"{countryTag} - {CountryNameBox.Text}.txt";
 
             try
             {
-                // Находим первый файл в директории country_tags
+                if (!Directory.Exists(tagsDir))
+                {
+                    Directory.CreateDirectory(tagsDir);
+                }
+
                 var tagFiles = Directory.GetFiles(tagsDir, "*.txt");
+
+                string newEntry = $"{countryTag} = \"countries/{countryFileName}\"";
+
                 if (tagFiles.Length == 0)
                 {
-                    // Создаем новый файл, если нет существующих
                     string newTagFile = Path.Combine(tagsDir, "00_countries.txt");
-                    Directory.CreateDirectory(tagsDir);
-                    File.WriteAllText(newTagFile, $"{countryTag} = \"countries/{countryFileName}\"", Encoding.UTF8);
+                    File.WriteAllText(newTagFile, newEntry,  new UTF8Encoding(false));
                 }
                 else
                 {
-                    // Добавляем в первый найденный файл тегов
                     string tagFile = tagFiles[0];
-                    string newEntry = $"{countryTag} = \"countries/{countryFileName}\"";
-
-                    // Проверяем, нет ли уже такого тега
                     string content = File.ReadAllText(tagFile);
                     if (content.Contains($"{countryTag} ="))
                     {
@@ -162,18 +164,15 @@ namespace ModdingManager
                         return;
                     }
 
-                    // Добавляем новую запись в конец файла
                     using (StreamWriter writer = File.AppendText(tagFile))
                     {
                         writer.WriteLine(newEntry);
                     }
                 }
-
-                MessageBox.Show($"Тег страны {countryTag} успешно добавлен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при добавлении тега страны: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Ошибка при добавлении тега страны:\n{ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void UpdateStateOwnership()
@@ -184,17 +183,16 @@ namespace ModdingManager
                 return;
             }
 
-            string statesDir = Path.Combine(ModManager.Directory, "history", "states");
-            if (!Directory.Exists(statesDir))
+            string modStatesDir = Path.Combine(ModManager.Directory, "history", "states");
+            string gameStatesDir = Path.Combine(ModManager.GameDirectory, "history", "states");
+
+            if (!Directory.Exists(modStatesDir))
             {
-                MessageBox.Show($"Директория штатов не найдена: {statesDir}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                Directory.CreateDirectory(modStatesDir);
             }
 
             string countryTag = TagBox.Text;
             string[] stateEntries = CountryStatesBox.Text.Split(new[] { "\r\n", "\r", "\n", "\v" }, StringSplitOptions.RemoveEmptyEntries);
-
-            // Создаем кодировку UTF-8 без BOM
             Encoding utf8WithoutBom = new UTF8Encoding(false);
 
             foreach (string entry in stateEntries)
@@ -204,17 +202,32 @@ namespace ModdingManager
 
                 string stateId = parts[0].Trim();
                 bool isCore = parts[1].Trim() == "1";
+                string[] stateFiles = Directory.GetFiles(modStatesDir, $"{stateId}-*.txt");
 
-                try
+                if (stateFiles.Length == 0)
                 {
-                    string[] stateFiles = Directory.GetFiles(statesDir, $"*{stateId}*.txt");
-                    if (stateFiles.Length == 0)
+                    string[] gameStateFiles = Directory.GetFiles(gameStatesDir, $"{stateId}-*.txt");
+                    if (gameStateFiles.Length > 0)
                     {
-                        MessageBox.Show($"Файл штата с ID {stateId} не найден", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        foreach (string gameStateFile in gameStateFiles)
+                        {
+                            string fileName = Path.GetFileName(gameStateFile);
+                            string destinationPath = Path.Combine(modStatesDir, fileName);
+                            File.Copy(gameStateFile, destinationPath, true);
+                        }
+
+                        stateFiles = Directory.GetFiles(modStatesDir, $"{stateId}-*.txt");
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Файл штата с ID {stateId} не найден ни в моде, ни в игре.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         continue;
                     }
+                }
 
-                    foreach (string filePath in stateFiles)
+                foreach (string filePath in stateFiles)
+                {
+                    try
                     {
                         string[] lines = File.ReadAllLines(filePath, utf8WithoutBom);
                         bool modified = false;
@@ -227,15 +240,12 @@ namespace ModdingManager
 
                             if (trimmedLine.StartsWith("owner ="))
                             {
-                                // Сохраняем оригинальные отступы
-                                string indent = new string(line.TakeWhile(c => char.IsWhiteSpace(c)).ToArray());
+                                string indent = new string(line.TakeWhile(char.IsWhiteSpace).ToArray());
                                 lines[i] = $"{indent}owner = {countryTag}";
                                 modified = true;
 
-                                // Проверяем следующий элемент на add_core_of
                                 if (isCore && i + 1 < lines.Length && !lines[i + 1].Trim().StartsWith($"add_core_of = {countryTag}"))
                                 {
-                                    // Вставляем add_core_of после owner
                                     var newLines = lines.ToList();
                                     newLines.Insert(i + 1, $"{indent}add_core_of = {countryTag}");
                                     lines = newLines.ToArray();
@@ -247,12 +257,11 @@ namespace ModdingManager
                             {
                                 if (!isCore)
                                 {
-                                    // Удаляем core если не нужно
                                     var newLines = lines.ToList();
                                     newLines.RemoveAt(i);
                                     lines = newLines.ToArray();
                                     modified = true;
-                                    i--; // Корректируем индекс после удаления
+                                    i--;
                                 }
                                 else
                                 {
@@ -261,14 +270,13 @@ namespace ModdingManager
                             }
                         }
 
-                        // Добавляем core если нужно и его еще нет
                         if (isCore && !hasCore)
                         {
                             for (int i = 0; i < lines.Length; i++)
                             {
                                 if (lines[i].Trim().StartsWith("owner ="))
                                 {
-                                    string indent = new string(lines[i].TakeWhile(c => char.IsWhiteSpace(c)).ToArray());
+                                    string indent = new string(lines[i].TakeWhile(char.IsWhiteSpace).ToArray());
                                     var newLines = lines.ToList();
                                     newLines.Insert(i + 1, $"{indent}add_core_of = {countryTag}");
                                     lines = newLines.ToArray();
@@ -283,15 +291,16 @@ namespace ModdingManager
                             File.WriteAllLines(filePath, lines, utf8WithoutBom);
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при обработке штата {stateId}: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при обработке штата {stateId}: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
 
             MessageBox.Show("Обновление владельцев штатов завершено!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
         private void CreateCountryHistoryFile()
         {
             if (TagBox.Text.Length != 3)
@@ -455,7 +464,7 @@ namespace ModdingManager
                 MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            string fileName = $"{CountryNameBox.Text}.txt";
+            string fileName = $"{TagBox.Text} - {CountryNameBox.Text}.txt";
             string filePath = Path.Combine(ModManager.Directory, "common", "countries", fileName);
 
             try
@@ -464,7 +473,6 @@ namespace ModdingManager
 
                 using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
                 {
-                    // Графическая культура
                     if (!string.IsNullOrWhiteSpace(GrapficalCultureBox.Text))
                     {
                         writer.WriteLine($"graphical_culture = {GrapficalCultureBox.Text}_gfx");
@@ -472,7 +480,6 @@ namespace ModdingManager
                         writer.WriteLine();
                     }
 
-                    // Цвет страны
                     if (CountryColorDialog.Color != Color.Empty)
                     {
                         Color color = CountryColorDialog.Color;

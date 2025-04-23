@@ -20,6 +20,7 @@ namespace ModdingManager.managers
     public class ModManager
     {
         public static string Directory;
+        public static string GameDirectory;
         public static void SaveCountryFlag(System.Drawing.Image fascismImage,
                                    System.Drawing.Image neutralityImage,
                                    System.Drawing.Image communismImage,

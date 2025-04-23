@@ -491,7 +491,7 @@ public static class WinFormConfigManager
     #region Country Config Methods
     private static CountryConfig CreateCountryConfig(CountryCreator form)
     {
-        return new CountryConfig
+        var conf = new CountryConfig
         {
             Tag = form.TagBox.Text,
             Capital = int.TryParse(form.CapitalBox.Text, out var capital) ? capital : 0,
@@ -516,6 +516,8 @@ public static class WinFormConfigManager
             Characters = form.RecruitBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
             States = ParseStates(form.CountryStatesBox.Text)
         };
+        var sosi = 23;
+        return conf;
     }
     private static void ApplyCountryConfig(CountryCreator form, CountryConfig config)
     {
