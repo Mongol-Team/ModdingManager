@@ -17,6 +17,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ModdingManager.managers;
+using ModdingManager.managers.gfx;
 
 namespace ModdingManager
 {
@@ -37,21 +38,17 @@ namespace ModdingManager
                 string charDesc = ((TextBox)form.Controls["DescBox"]).Text;
                 string charTypes = ((RichTextBox)form.Controls["CharTypesBox"]).Text;
 
-                // Создаем директории
                 string ruLocPath = Path.Combine(modPath, "localisation", "russian");
                 string enLocPath = Path.Combine(modPath, "localisation", "english");
                 Directory.CreateDirectory(ruLocPath);
                 Directory.CreateDirectory(enLocPath);
 
-                // Пути к файлам
                 string ruFilePath = Path.Combine(ruLocPath, $"{tag}_characters_l_russian.yml");
                 string enFilePath = Path.Combine(enLocPath, $"{tag}_characters_l_english.yml");
 
-                // Генерируем содержимое
                 string ruEntries = GenerateLocalizationEntries(charId, charName, charDesc, charTypes.Contains("country_leader"), false);
                 string enEntries = GenerateLocalizationEntries(charId, "", "", charTypes.Contains("country_leader"), true);
 
-                // Обрабатываем файлы
                 ProcessLocalizationFile(ruFilePath, "l_russian", ruEntries);
                 ProcessLocalizationFile(enFilePath, "l_english", enEntries);
 
@@ -124,27 +121,12 @@ namespace ModdingManager
                 Directory.CreateDirectory(leadersDir);
                 Directory.CreateDirectory(advisorsDir);
 
-                // Пути для файлов
-                string largeArmyPath = Path.Combine(leadersDir, $"{charId}_army.tga");
-                string largeCivilianPath = Path.Combine(leadersDir, $"{charId}_civilian.tga");
-                string smallArmyPath = Path.Combine(advisorsDir, $"{charId}_army.tga");
-                string smallCivilianPath = Path.Combine(advisorsDir, $"{charId}_civilian.tga");
 
-                // Обработка больших изображений (156x210)
-                using (var largeImage = ConvertToImageSharp(bigIconPanel.BackgroundImage))
-                {
-                    largeImage.Mutate(x => x.Resize(156, 210));
-                    SaveTgaImage(largeImage, largeArmyPath);
-                    SaveTgaImage(largeImage, largeCivilianPath);
-                }
-
-                // Обработка маленьких изображений (65x67)
-                using (var smallImage = ConvertToImageSharp(smallIconPanel.BackgroundImage))
-                {
-                    smallImage.Mutate(x => x.Resize(65, 67));
-                    SaveTgaImage(smallImage, smallArmyPath);
-                    SaveTgaImage(smallImage, smallCivilianPath);
-                }
+                DDSManager.SaveAsDDS(bigIconPanel.BackgroundImage, leadersDir, $"{charId}_army.dds", 156, 210);
+                DDSManager.SaveAsDDS(bigIconPanel.BackgroundImage, leadersDir, $"{charId}_civilian.dds", 156, 210);
+              
+                DDSManager.SaveAsDDS(smallIconPanel.BackgroundImage, advisorsDir, $"{charId}_army.dds",65, 67);
+                DDSManager.SaveAsDDS(smallIconPanel.BackgroundImage, advisorsDir, $"{charId}_civilian.dds",65, 67);
 
                 MessageBox.Show("Портреты сохранены успешно!", "Успех",
                               MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -156,29 +138,6 @@ namespace ModdingManager
             }
         }
 
-        private static Image<Rgba32> ConvertToImageSharp(System.Drawing.Image systemDrawingImage)
-        {
-            using (var ms = new MemoryStream())
-            {
-                systemDrawingImage.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                ms.Seek(0, SeekOrigin.Begin);
-                return SixLabors.ImageSharp.Image.Load<Rgba32>(ms);
-            }
-        }
-
-        private static void SaveTgaImage(Image<Rgba32> image, string filePath)
-        {
-            var encoder = new TgaEncoder
-            {
-                BitsPerPixel = TgaBitsPerPixel.Pixel32,
-                Compression = TgaCompression.None
-            };
-
-            using (var fileStream = File.Create(filePath))
-            {
-                image.Save(fileStream, encoder);
-            }
-        }
         public static void CreateCharacterFile(Form form, string modPath)
         {
             try
@@ -327,6 +286,7 @@ namespace ModdingManager
             CreateCharacterFile(this, ModManager.Directory);
             SaveCharacterPortraits(this, ModManager.Directory);
             CreateCharacterLocalizationFiles(this, ModManager.Directory);
+            
         }
 
         private void BigIconBox_DragEnter(object sender, DragEventArgs e)
