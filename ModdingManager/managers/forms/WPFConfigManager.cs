@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using SixLabors.ImageSharp;
 
-namespace ModdingManager
+namespace ModdingManager.managers.forms
 {
     public static class WpfConfigManager
     {
@@ -80,7 +80,34 @@ namespace ModdingManager
                             }
                         }
 
+                        // Проверяем наличие специальных иконок и загружаем с диска при необходимости
+
+
+
                         return (config, images);
+                    }
+                });
+
+                var rootImages = await Task.Run(() =>
+                {
+                    using (var archive = ZipFile.OpenRead(openDialog.FileName))
+                    {
+                        var images = new Dictionary<string, byte[]>();
+
+                        foreach (var entry in archive.Entries)
+                        {
+                            // Загружаем только те картинки, которые находятся в корне архива (без "images/" в пути)
+                            if (!entry.FullName.StartsWith("images/") && entry.Name.EndsWith(".png"))
+                            {
+                                using (var ms = new MemoryStream())
+                                {
+                                    entry.Open().CopyTo(ms);
+                                    images.Add(entry.Name, ms.ToArray());
+                                }
+                            }
+                        }
+
+                        return images;
                     }
                 });
 
@@ -88,6 +115,18 @@ namespace ModdingManager
                 await window.Dispatcher.InvokeAsync(() =>
                 {
                     window.CurrentTechTree = config;
+
+                    // Загружаем TabFolderFirstImage
+                    if (rootImages.TryGetValue($"{config.Name}_first.png", out var firstImageBytes))
+                    {
+                        window.TabFolderFirstImage.Source = LoadImageFromBytes(firstImageBytes);
+                    }
+
+                    // Загружаем TabFolderSecondImage
+                    if (rootImages.TryGetValue($"{config.Name}_second.png", out var secondImageBytes))
+                    {
+                        window.TabFolderSecondImage.Source = LoadImageFromBytes(secondImageBytes);
+                    }
 
                     foreach (var item in window.CurrentTechTree.Items)
                     {
@@ -174,13 +213,22 @@ namespace ModdingManager
             });
         }
 
+        private static BitmapSource FreezeClone(ImageSource source)
+        {
+            if (source == null)
+                return null;
+
+            var clone = (BitmapSource)source.Clone();
+            clone.Freeze();
+            return clone;
+        }
+
+
         public static async Task SaveConfigAsync(TechTreeCreator window, string configName)
         {
-            // 1. Подготовка (в UI-потоке)
             string archivePath = Path.Combine(TechTreesPath, $"{configName}.tech");
             Directory.CreateDirectory(TechTreesPath);
 
-            // 2. Собираем данные для сохранения в UI-потоке
             var saveData = await window.Dispatcher.InvokeAsync(() =>
             {
                 return new
@@ -192,30 +240,29 @@ namespace ModdingManager
                             item => $"{item.Id}.png",
                             item =>
                             {
-                                var imgCopy = item.Image.Clone(); // создаём копию
-                                imgCopy.Freeze();                 // делаем потокобезопасным
+                                var imgCopy = item.Image.Clone();
+                                imgCopy.Freeze();               
                                 return (BitmapSource)imgCopy;
                             }
-                        )
+                        ),
+                    SecondTabImage = FreezeClone(window.TabFolderSecondImage.Source),
+                    FirstTabImage = FreezeClone(window.TabFolderFirstImage.Source),
                 };
             });
 
 
-            // 3. Сохранение в фоновом потоке
             await Task.Run(() =>
             {
                 using (var memoryStream = new MemoryStream())
                 {
                     using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                     {
-                        // 3.1. Сохраняем JSON
                         var jsonEntry = archive.CreateEntry("config.json");
                         using (var writer = new StreamWriter(jsonEntry.Open()))
                         {
                             writer.Write(saveData.Config);
                         }
 
-                        // 3.2. Сохраняем изображения через временные файлы
                         foreach (var img in saveData.Images)
                         {
                             var imageEntry = archive.CreateEntry($"images/{img.Key}");
@@ -224,14 +271,25 @@ namespace ModdingManager
                                 SaveBitmapSourceToStream(EnsureRenderable(img.Value), stream);
                             }
                         }
+
+                        var firstImageEntry = archive.CreateEntry($"{window.CurrentTechTree.Name}_first.png");
+                        var first = saveData.FirstTabImage;
+                        using (var stream = firstImageEntry.Open())
+                        {
+                            SaveBitmapSourceToStream(EnsureRenderable(first), stream);
+                        }
+                        var secondImageEntry = archive.CreateEntry($"{window.CurrentTechTree.Name}_second.png");
+                        var second = saveData.SecondTabImage;
+                        using (var stream = secondImageEntry.Open())
+                        {
+                            SaveBitmapSourceToStream(EnsureRenderable(second), stream);
+                        }
                     }
 
-                    // 3.3. Сохраняем архив на диск
                     File.WriteAllBytes(archivePath, memoryStream.ToArray());
                 }
             });
 
-            // 4. Уведомление (в UI-потоке)
             await window.Dispatcher.InvokeAsync(() =>
                 System.Windows.MessageBox.Show("Сохранение завершено!", "Успех"));
         }
@@ -257,7 +315,6 @@ namespace ModdingManager
             return source;
         }
 
-        // Вспомогательный метод для потокобезопасного сохранения изображений
         private static void SaveBitmapSourceToStream(BitmapSource source, Stream stream)
         {
             var wb = new WriteableBitmap(source);

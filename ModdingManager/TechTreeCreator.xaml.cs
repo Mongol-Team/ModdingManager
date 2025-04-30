@@ -15,12 +15,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ModdingManager.configs;
 using System.IO;
-using static System.Windows.Forms.LinkLabel;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using System.Security.Cryptography;
-using System.Windows.Forms;
 using ModdingManager.managers;
+using System.Text.RegularExpressions;
+using ModdingManager.managers.forms;
+using ModdingManager.classes;
+using ModdingManager.managers.gfx;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 namespace ModdingManager
 {
     /// <summary>
@@ -37,11 +40,8 @@ namespace ModdingManager
         private List<UIElement> marked = new List<UIElement>();
         public TechTreeConfig CurrentTechTree = new();
 
-        public ObservableCollection<string> Lines { get; set; } = new ObservableCollection<string>();
         public TechTreeCreator()
         {
-            Lines.Add("строка 1");
-            Lines.Add("строка 2");
             InitializeComponent();
             DrawGrid();
             InputManager.Current.PreProcessInput += (sender, e) =>
@@ -137,7 +137,7 @@ namespace ModdingManager
             double baseX = Canvas.GetLeft(border);
             double baseY = Canvas.GetTop(border);
 
-            var image = GetImageFromBorder(border);
+            var image = ImageManager.GetImageFromBorder(border);
             if (image == null) return new System.Windows.Point(baseX + CellSize / 2, baseY + CellSize / 2);
 
             var transform = image.RenderTransform as TranslateTransform;
@@ -152,7 +152,7 @@ namespace ModdingManager
 
         private double GetVisualRadius(Border border, Vector direction)
         {
-            var image = GetImageFromBorder(border);
+            var image = ImageManager.GetImageFromBorder(border);
             if (image == null) return CellSize / 2;
 
             double halfWidth = image.Width / 2;
@@ -165,39 +165,7 @@ namespace ModdingManager
         }
 
 
-        private ImageSource GetCombinedTechImage(System.Windows.Media.ImageSource overlayimg, System.Windows.Media.ImageSource backgroundimg, bool isBig)
-        {
-            double renderWidth = isBig ? 183 : 62;
-            double renderHeight = isBig ? 84 : 62;
-
-            DrawingVisual dv = new DrawingVisual();
-            using (DrawingContext dc = dv.RenderOpen())
-            {
-                if (backgroundimg != null)
-                {
-                    dc.DrawImage(backgroundimg, new Rect(0, 0, renderWidth, renderHeight));
-                }
-
-                if (overlayimg != null)
-                {
-                    dc.DrawImage(overlayimg, new Rect(0, 0, renderWidth, renderHeight));
-                }
-            }
-
-            RenderTargetBitmap bmp = new RenderTargetBitmap((int)renderWidth, (int)renderHeight, 96, 96, PixelFormats.Pbgra32);
-            bmp.Render(dv);
-
-            return bmp;
-        }
-
-        private System.Windows.Controls.Image GetImageFromBorder(Border border)
-        {
-            if (border.Child is Canvas canvas)
-            {
-                return canvas.Children.OfType<System.Windows.Controls.Image>().FirstOrDefault();
-            }
-            return null;
-        }
+        
         public void RefreshTechTreeView()
         {
             var nonConnectionElements = GridCanvas.Children
@@ -219,6 +187,17 @@ namespace ModdingManager
 
                         connections.Remove(conn);
                     }
+                }
+            }
+
+            TreeLedgerBox.Text = CurrentTechTree.Ledger;
+            TechTreeNameBox.Text = CurrentTechTree.Name;
+            foreach (ComboBoxItem item in OrientationBox.Items)
+            {
+                if (item.Content.ToString() == CurrentTechTree.Orientation)
+                {
+                    OrientationBox.SelectedItem = item;
+                    break;
                 }
             }
 
@@ -250,7 +229,7 @@ namespace ModdingManager
 
             var image = new System.Windows.Controls.Image
             {
-                Source = GetCombinedTechImage(item.Image, item.IsBig ? BigBackgroundImage.Source : SmallBackgroundImage.Source ,item.IsBig),
+                Source = ImageManager.GetCombinedTechImage(item.Image, item.IsBig ? BigBackgroundImage.Source : SmallBackgroundImage.Source , item.IsBig ? 1 : 2),
                 Width = imageWidth,
                 Height = imageHeight,
                 IsHitTestVisible = false
@@ -355,6 +334,190 @@ namespace ModdingManager
             }
         }
 
+
+        static string GetTabs(int count) => new string('\t', count);
+
+        public void InsertGUITechTreeEntries(string modFolderPath, TechTreeConfig techTree, string gameFolderPath)
+        {
+            string filePath = GetOrCopyGuiFile(modFolderPath, gameFolderPath);
+            if (filePath == null) return;
+
+            string[] lines = File.ReadAllLines(filePath);
+            List<string> newLines = new List<string>();
+            bool isVertical = techTree.Orientation?.ToLower() == "vertical";
+
+            // 1. Находим контейнер countrytechtreeview
+            int containerStart = -1, containerEnd = -1;
+            int braceLevel = 0;
+            bool inTargetContainer = false;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+
+                if (!inTargetContainer && line.Contains("containerWindowType = {") &&
+                    i + 1 < lines.Length && lines[i + 1].Trim().Contains("name = \"countrytechtreeview\""))
+                {
+                    containerStart = i;
+                    inTargetContainer = true;
+                    braceLevel = 1;
+                    i++; // Пропускаем строку с name
+                    continue;
+                }
+
+                if (inTargetContainer)
+                {
+                    braceLevel += line.Count(c => c == '{');
+                    braceLevel -= line.Count(c => c == '}');
+
+                    if (braceLevel == 0)
+                    {
+                        containerEnd = i;
+                        break;
+                    }
+                }
+            }
+
+            if (containerStart == -1 || containerEnd == -1)
+            {
+                Console.WriteLine("Could not find countrytechtreeview container");
+                return;
+            }
+
+            // 2. Вставляем контент перед закрывающей скобкой
+            string content = GenerateTechTreeContent(techTree, isVertical,
+                lines[containerStart].TakeWhile(c => c == '\t').Count() + 1);
+
+            List<string> result = new List<string>();
+            result.AddRange(lines.Take(containerEnd));
+            result.Add(content);
+            result.AddRange(lines.Skip(containerEnd));
+
+            File.WriteAllLines(filePath, result);
+            Console.WriteLine("Successfully inserted tech tree entries");
+        }
+        private string GenerateTechTreeContent(TechTreeConfig techTree, bool isVertical, int innerTabCount)
+        {
+            string techTreeName = techTree.Name;
+            var rootItems = FindRootItems(techTree);
+
+            StringBuilder entries = new StringBuilder();
+
+            // Вставляем новый containerWindowType
+            entries.AppendLine($"{GetTabs(innerTabCount)}containerWindowType = {{");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}name = \"{techTreeName}\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}position = {{ x=0 y=47 }}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}size = {{ width = 100%% height = 100%% }}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}margin = {{ top = 13 left = 13 bottom = 24 right = 25}}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}drag_scroll = {{ left middle }}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}verticalScrollbar = \"right_vertical_slider\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}horizontalScrollbar = \"bottom_horizontal_slider\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}scroll_wheel_factor = 40");
+            entries.AppendLine();
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}background = {{");
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}name = \"Background\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}quadTextureSprite =\"GFX_tiled_window_2b_border\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}}}");
+            entries.AppendLine();
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}containerWindowType = {{");
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}name = \"techtree_stripes\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}position = {{ x= 0 y= 0 }}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}size = {{");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}width = 1400 height = 1675");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}min = {{ width = 100%% height = 100%% }}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}}}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}clipping = no");
+            entries.AppendLine();
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}iconType = {{");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}name =\"{techTreeName}_techtree_bg\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}spriteType = \"GFX_{techTreeName}_techtree_bg\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}position = {{ x=0 y=0 }}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}alwaystransparent = yes");
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}}}");
+            entries.AppendLine();
+
+            // Добавляем годовые метки
+            int startCoord = isVertical ? 50 : 130;
+            int fixedCoord = 50;
+            int year = techTree.Items.Any() ? techTree.Items.Min(i => i.StartYear) : 1955;
+
+            for (int j = 2; j <= 14; j++)
+            {
+                entries.AppendLine($"{GetTabs(innerTabCount + 2)}instantTextBoxType = {{");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}name = \"{techTreeName}_year{j}\"");
+
+                if (isVertical)
+                    entries.AppendLine($"{GetTabs(innerTabCount + 3)}position = {{ x = {fixedCoord} y = {startCoord} }}");
+                else
+                    entries.AppendLine($"{GetTabs(innerTabCount + 3)}position = {{ x = {startCoord} y = {fixedCoord} }}");
+
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}textureFile = \"\"");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}font = \"hoi_36header\"");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}borderSize = {{ x = 0 y = 0}}");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}text = \"{year}\"");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}maxWidth = 170");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}maxHeight = 32");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}format = left");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}Orientation = \"UPPER_LEFT\"");
+                entries.AppendLine($"{GetTabs(innerTabCount + 2)}}}");
+                entries.AppendLine();
+
+                startCoord += 140;
+                year += 2;
+            }
+
+            // Добавляем gridbox для корневых элементов
+        
+
+            // Добавляем highlight иконку
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}iconType = {{");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}name = \"highlight_{techTreeName}_1\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}spriteType = \"GFX_tutorial_research_small_item_icon_glow\"");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}position = {{ x=135 y=170}}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}hide = yes");
+            entries.AppendLine($"{GetTabs(innerTabCount + 3)}alwaystransparent = yes");
+            entries.AppendLine($"{GetTabs(innerTabCount + 2)}}}");
+            entries.AppendLine($"{GetTabs(innerTabCount + 1)}}}"); // Закрываем внутренний containerWindowType
+
+            foreach (var item in rootItems)
+            {
+                entries.AppendLine($"{GetTabs(innerTabCount + 2)}gridboxType = {{");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}name = \"{item.Id}_tree\"");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}position = {{ x = {10 + item.GridX} y = {70 + item.GridY} }}");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}slotsize = {{ width = 70 height = 70 }}");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}format = \"LEFT\"");
+                entries.AppendLine($"{GetTabs(innerTabCount + 2)}}}");
+                entries.AppendLine();
+            }
+            entries.AppendLine($"{GetTabs(innerTabCount)}}}"); // Закрываем основной containerWindowType
+
+            return entries.ToString();
+        }
+
+
+        private List<TechTreeItemConfig> FindRootItems(TechTreeConfig techTree)
+        {
+            var rootItems = new List<TechTreeItemConfig>();
+            var allChildren = techTree.ChildOf.SelectMany(pair => pair.Skip(1)).ToHashSet();
+
+            foreach (var item in techTree.Items)
+            {
+                // Проверяем, есть ли у элемента дети
+                bool hasChildren = techTree.ChildOf.Any(pair => pair[0] == item.Id);
+
+                // Проверяем, является ли элемент чьим-то ребенком
+                bool isChild = allChildren.Contains(item.Id);
+
+                if (hasChildren && !isChild)
+                {
+                    rootItems.Add(item);
+                }
+            }
+
+            return rootItems;
+        }
+
+
         private void AddElement(int col, int row)
         {
             string newName = TechIdBox.Text;
@@ -401,7 +564,7 @@ namespace ModdingManager
 
             var image = new System.Windows.Controls.Image
             {
-                Source = GetCombinedTechImage(overlayimg.Source, backgroundimg.Source, isBig),
+                Source = ImageManager.GetCombinedTechImage(overlayimg.Source, backgroundimg.Source, isBig ? 1 : 2),
                 Width = imageWidth,
                 Height = imageHeight,
                 IsHitTestVisible = false
@@ -434,7 +597,7 @@ namespace ModdingManager
             }
             catch(Exception ex)
             {
-                System.Windows.MessageBox.Show("Введите коректное имя", "ашибькя", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Введите коректное имя", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -451,7 +614,6 @@ namespace ModdingManager
                         LocDescription = TechDescBox?.Text ?? "",
                         LocName = TechNameBox?.Text ?? "",
                         Cost = int.TryParse(TechCostBox?.Text, out var cost) ? cost : 0,
-                        Folder = FolderBox?.Text ?? "",
                         StartYear = int.TryParse(StartYeatBox?.Text, out var year) ? year : 0,
                         ModifCost = int.TryParse(TechCostModifBox?.Text, out var modifCost) ? modifCost : 0,
 
@@ -470,7 +632,7 @@ namespace ModdingManager
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show("Заполните все поля.", "ашибькя", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show("Заполните все поля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 double cellX = col * CellSize;
@@ -517,7 +679,6 @@ namespace ModdingManager
             }
         }
 
-
         private void Element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             draggedElement = sender as UIElement;
@@ -530,8 +691,6 @@ namespace ModdingManager
             GridCanvas.CaptureMouse();
             
         }
-
-
 
         private void Element_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -605,7 +764,6 @@ namespace ModdingManager
             TechIdBox.Text = item.Id;
             TechNameBox.Text = item.LocName;
             TechDescBox.Text = item.LocDescription;
-            FolderBox.Text = item.Folder;
             StartYeatBox.Text = item.StartYear.ToString();
             TechCostBox.Text = item.Cost.ToString();
             TechCostModifBox.Text = item.ModifCost.ToString();
@@ -815,7 +973,7 @@ namespace ModdingManager
                         continue;
                     }
                 }
-                else // vertical
+                else
                 {
                     if (x1 != x2)
                     {
@@ -829,7 +987,6 @@ namespace ModdingManager
                     }
                 }
 
-                // определяем родителя и ребёнка по правильной оси
                 Border parent = null;
                 Border child = null;
 
@@ -919,6 +1076,10 @@ namespace ModdingManager
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             AddElement(1, 1);
+            if (!string.IsNullOrEmpty(TechTreeNameBox.Text) || !string.IsNullOrEmpty(TreeLedgerBox.Text) || !string.IsNullOrEmpty((OrientationBox.SelectedItem as ComboBoxItem)?.Content.ToString()))
+            {
+                DoneTreeButton_Click(sender, e);
+            }
         }
 
 
@@ -1075,6 +1236,307 @@ namespace ModdingManager
             e.Handled = true; 
         }
 
+        public void InsertGUITechTreeContainers(string modFolderPath, TechTreeConfig techTree, string gamePath)
+        {
+            string filePath = GetOrCopyGuiFile(modFolderPath, gamePath);
+            if (filePath == null) return;
+
+            string[] lines = File.ReadAllLines(filePath);
+
+            int lastBrace = -1;
+            for (int i = lines.Length - 1; i >= 0; i--)
+            {
+                if (lines[i].Trim() == "}")
+                {
+                    lastBrace = i;
+                    break;
+                }
+            }
+
+            if (lastBrace == -1)
+            {
+                Console.WriteLine("Could not find guiTypes closing brace");
+                return;
+            }
+
+            string content = GenerateTechTreeContainersContent(techTree);
+
+            List<string> result = new List<string>();
+            result.AddRange(lines.Take(lastBrace));
+            result.Add(content);
+            result.AddRange(lines.Skip(lastBrace));
+
+            File.WriteAllLines(filePath, result);
+            Console.WriteLine("Successfully added tech tree containers");
+        }
+
+        private string GenerateTechTreeContainersContent(TechTreeConfig techTree, int baseTabCount = 1)
+        {
+            string techTreeName = techTree.Name;
+            string tab = new string('\t', baseTabCount);
+            string innerTab = new string('\t', baseTabCount + 1);
+            string doubleInnerTab = new string('\t', baseTabCount + 2);
+
+            var sb = new StringBuilder();
+
+            // Первый контейнер (small_item)
+            sb.AppendLine($"{tab}containerWindowType = {{");
+            sb.AppendLine($"{innerTab}name = \"techtree_{techTreeName}_small_item\"");
+            sb.AppendLine($"{innerTab}position = {{ x=0 y=0 }}");
+            sb.AppendLine($"{innerTab}size = {{ width = 72 height = 72 }}");
+            sb.AppendLine($"{innerTab}clipping = no");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}background = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"bg\"");
+            sb.AppendLine($"{doubleInnerTab}quadTextureSprite =\"GFX_technology_unavailable_item_bg\"");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}iconType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"Icon\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x=3 y=3 }}");
+            sb.AppendLine($"{doubleInnerTab}spriteType = \"GFX_technology_medium\"");
+            sb.AppendLine($"{doubleInnerTab}alwaystransparent = yes");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}iconType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"bonus_icon\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x=-1 y=-22 }}");
+            sb.AppendLine($"{doubleInnerTab}spriteType = \"GFX_tech_bonus\"");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}instantTextBoxType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"bonus\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x = -1 y = -21 }}");
+            sb.AppendLine($"{doubleInnerTab}textureFile = \"\"");
+            sb.AppendLine($"{doubleInnerTab}font = \"hoi_16mbs\"");
+            sb.AppendLine($"{doubleInnerTab}borderSize = {{x = 4 y = 4}}");
+            sb.AppendLine($"{doubleInnerTab}text = \"lol boat\"");
+            sb.AppendLine($"{doubleInnerTab}maxWidth = 80");
+            sb.AppendLine($"{doubleInnerTab}maxHeight = 20");
+            sb.AppendLine($"{doubleInnerTab}format = center");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}iconType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"can_assign_design_team_icon\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x=0 y=42 }}");
+            sb.AppendLine($"{doubleInnerTab}spriteType = \"GFX_design_team_icon\"");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine($"{tab}}}");
+            sb.AppendLine();
+
+            // Второй контейнер (item)
+            sb.AppendLine($"{tab}containerWindowType = {{");
+            sb.AppendLine($"{innerTab}name = \"techtree_{techTreeName}_item\"");
+            sb.AppendLine($"{innerTab}position = {{ x=-56 y=-7 }}");
+            sb.AppendLine($"{innerTab}size = {{ width = 183 height = 84 }}");
+            sb.AppendLine($"{innerTab}clipping = no");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}background = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"Background\"");
+            sb.AppendLine($"{doubleInnerTab}quadTextureSprite =\"GFX_technology_unavailable_item_bg\"");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}iconType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"Icon\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x=91 y=50 }}");
+            sb.AppendLine($"{doubleInnerTab}spriteType = \"GFX_technology_medium\"");
+            sb.AppendLine($"{doubleInnerTab}centerposition = yes");
+            sb.AppendLine($"{doubleInnerTab}alwaystransparent = yes");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}instantTextBoxType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"Name\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x = 3 y = -3 }}");
+            sb.AppendLine($"{doubleInnerTab}textureFile = \"\"");
+            sb.AppendLine($"{doubleInnerTab}font = \"hoi_20bs\"");
+            sb.AppendLine($"{doubleInnerTab}borderSize = {{x = 4 y = 4}}");
+            sb.AppendLine($"{doubleInnerTab}text = \"Happy-Go-Lucky-Tank\"");
+            sb.AppendLine($"{doubleInnerTab}maxWidth = 160");
+            sb.AppendLine($"{doubleInnerTab}maxHeight = 20");
+            sb.AppendLine($"{doubleInnerTab}fixedsize = yes");
+            sb.AppendLine($"{doubleInnerTab}format = left");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}iconType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"bonus_icon\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x=111 y=-22 }}");
+            sb.AppendLine($"{doubleInnerTab}spriteType = \"GFX_tech_bonus\"");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}instantTextBoxType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"bonus\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x = 111 y = -22 }}");
+            sb.AppendLine($"{doubleInnerTab}textureFile = \"\"");
+            sb.AppendLine($"{doubleInnerTab}font = \"hoi_16mbs\"");
+            sb.AppendLine($"{doubleInnerTab}borderSize = {{x = 4 y = 4}}");
+            sb.AppendLine($"{doubleInnerTab}text = \"lol boat\"");
+            sb.AppendLine($"{doubleInnerTab}maxWidth = 80");
+            sb.AppendLine($"{doubleInnerTab}maxHeight = 20");
+            sb.AppendLine($"{doubleInnerTab}format = center");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+
+            // Подконтейнеры (sub_technology_slot)
+            sb.AppendLine($"{innerTab}containerWindowType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"sub_technology_slot_0\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x=141 y=1 }}");
+            sb.AppendLine($"{doubleInnerTab}size = {{ width = 35 height = 26 }}");
+            sb.AppendLine($"{doubleInnerTab}clipping = no");
+            sb.AppendLine();
+            sb.AppendLine($"{doubleInnerTab}background = {{");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}name = \"Background\"");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}spriteType =\"GFX_subtechnology_unavailable_item_bg\"");
+            sb.AppendLine($"{doubleInnerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{doubleInnerTab}iconType = {{");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}name = \"picture\"");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}position = {{ x=2 y=2 }}");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}spriteType = \"GFX_subtech_rocket\"");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}alwaystransparent = yes");
+            sb.AppendLine($"{doubleInnerTab}}}");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}containerWindowType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"sub_technology_slot_1\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x=141 y=1 }}");
+            sb.AppendLine($"{doubleInnerTab}size = {{ width = 35 height = 26 }}");
+            sb.AppendLine($"{doubleInnerTab}clipping = no");
+            sb.AppendLine();
+            sb.AppendLine($"{doubleInnerTab}background = {{");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}name = \"Background\"");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}spriteType =\"GFX_subtechnology_unavailable_item_bg\"");
+            sb.AppendLine($"{doubleInnerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{doubleInnerTab}iconType = {{");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}name = \"picture\"");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}position = {{ x=2 y=2 }}");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}spriteType = \"GFX_subtech_td\"");
+            sb.AppendLine($"{new string('\t', baseTabCount + 3)}alwaystransparent = yes");
+            sb.AppendLine($"{doubleInnerTab}}}");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{innerTab}iconType = {{");
+            sb.AppendLine($"{doubleInnerTab}name = \"can_assign_design_team_icon\"");
+            sb.AppendLine($"{doubleInnerTab}position = {{ x=5 y=55 }}");
+            sb.AppendLine($"{doubleInnerTab}spriteType = \"GFX_design_team_icon\"");
+            sb.AppendLine($"{innerTab}}}");
+            sb.AppendLine($"{tab}}}");
+
+            return sb.ToString().TrimEnd();
+        }
+
+        private string GetOrCopyGuiFile(string modFolderPath, string gamePath)
+        {
+            string modFilePath = System.IO.Path.Combine(modFolderPath, "interface", "countrytechtreeview.gui");
+            string gameFilePath = System.IO.Path.Combine(gamePath, "interface", "countrytechtreeview.gui");
+
+            if (File.Exists(modFilePath)) return modFilePath;
+
+            if (File.Exists(gameFilePath))
+            {
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(modFilePath));
+                File.Copy(gameFilePath, modFilePath);
+                return modFilePath;
+            }
+
+            Console.WriteLine("GUI file not found in both mod and game directories");
+            return null;
+        }
+
+        public void InsertGUIFolderTabButton(string modFolderPath, TechTreeConfig techTree, string gamePath)
+        {
+            string filePath = GetOrCopyGuiFile(modFolderPath, gamePath);
+            if (filePath == null) return;
+
+            string[] lines = File.ReadAllLines(filePath);
+
+            // 1. Находим контейнер folder_tabs
+            int tabsStart = -1, tabsEnd = -1;
+            int braceLevel = 0;
+            bool inTabsContainer = false;
+            int lastButtonX = 22; // Значение по умолчанию
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+
+                if (!inTabsContainer && line.Contains("containerWindowType = {") &&
+                    i + 1 < lines.Length && lines[i + 1].Trim().Contains("name = \"folder_tabs\""))
+                {
+                    tabsStart = i;
+                    inTabsContainer = true;
+                    braceLevel = 1;
+                    i++; // Пропускаем строку с name
+                    continue;
+                }
+
+                if (inTabsContainer)
+                {
+                    if (line.Trim().StartsWith("buttonType = {"))
+                    {
+                        for (int j = i + 1; j < lines.Length; j++)
+                        {
+                            string nextLine = lines[j];
+                            if (nextLine.Trim().StartsWith("}")) break; 
+
+                            if (nextLine.Contains("position = { x ="))
+                            {
+                                var xMatch = Regex.Match(nextLine, @"position\s*=\s*\{\s*x\s*=\s*(\d+)");
+                                if (xMatch.Success)
+                                {
+                                    lastButtonX = int.Parse(xMatch.Groups[1].Value);
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    braceLevel += line.Count(c => c == '{');
+                    braceLevel -= line.Count(c => c == '}');
+
+                    if (braceLevel == 0)
+                    {
+                        tabsEnd = i;
+                        break;
+                    }
+                }
+            }
+
+            if (tabsStart == -1 || tabsEnd == -1)
+            {
+                Console.WriteLine("Could not find folder_tabs container");
+                return;
+            }
+
+            // 2. Создаем новую кнопку
+            int tabCount = lines[tabsStart].TakeWhile(c => c == '\t').Count();
+            string tabStr = new string('\t', tabCount);
+            string innerTabStr = new string('\t', tabCount + 1);
+
+            string buttonContent = $@"{tabStr}buttonType = {{
+            {innerTabStr}name = ""{techTree.Name}_tab""
+            {innerTabStr}position = {{ x = {lastButtonX + 89} y = 0 }}
+            {innerTabStr}quadTextureSprite = ""GFX_{techTree.Name}_tab""
+            {innerTabStr}frame = 1
+            {innerTabStr}clicksound = ui_research_tab_infantry
+            {tabStr}}}";
+
+            // 3. Вставляем перед закрывающей скобкой
+            List<string> result = new List<string>();
+            result.AddRange(lines.Take(tabsEnd));
+
+            // Добавляем пустую строку перед кнопкой, если нужно
+            if (tabsEnd > 0 && !string.IsNullOrWhiteSpace(lines[tabsEnd - 1]))
+            {
+                result.Add("");
+            }
+
+            result.Add(buttonContent);
+            result.AddRange(lines.Skip(tabsEnd));
+
+            File.WriteAllLines(filePath, result);
+            Console.WriteLine($"Added {techTree.Name}_tab button at x={lastButtonX + 89}");
+        }
         private void MyRichBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             var richText = sender as System.Windows.Controls.RichTextBox;
@@ -1118,7 +1580,6 @@ namespace ModdingManager
                 return;
             }
 
-
             if (e.Key == Key.Enter)
             {
                 caret = caret.InsertLineBreak();
@@ -1129,24 +1590,6 @@ namespace ModdingManager
 
             if (e.Key == Key.Back)
             {
-                var currentLineStart = caret.GetLineStartPosition(0);
-                var isAtStartOfLine = caret.CompareTo(currentLineStart) == 0;
-
-                if (isAtStartOfLine)
-                {
-                    var paragraph = caret.Paragraph;
-                    if (paragraph != null && new TextRange(paragraph.ContentStart, paragraph.ContentEnd).IsEmpty)
-                    {
-                        var parent = paragraph.Parent as FlowDocument;
-                        if (parent != null)
-                        {
-                            parent.Blocks.Remove(paragraph);
-                            e.Handled = true;
-                            return;
-                        }
-                    }
-                }
-
                 var backPos = caret.GetPositionAtOffset(-1, LogicalDirection.Backward);
                 if (backPos != null)
                 {
@@ -1159,16 +1602,23 @@ namespace ModdingManager
                 return;
             }
 
-            // Вставка текстового символа
             string typedChar = GetCharFromKey(e.Key);
             if (!string.IsNullOrEmpty(typedChar))
             {
-                caret.InsertTextInRun(typedChar);
-                richText.CaretPosition = caret.GetPositionAtOffset(1, LogicalDirection.Forward);
+                // Создаём текстовую вставку вручную через TextRange
+                var range = new TextRange(caret, caret);
+                range.Text = typedChar;
+
+                // Двигаем каретку ВРУЧНУЮ на символ вперёд
+                var newCaret = range.End.GetInsertionPosition(LogicalDirection.Forward);
+                if (newCaret != null)
+                    richText.CaretPosition = newCaret;
+                else
+                    richText.CaretPosition = caret;
+
                 e.Handled = true;
             }
         }
-
 
         private void InsertTextAtCaret(System.Windows.Controls.RichTextBox richText, string typedChar)
         {
@@ -1186,10 +1636,6 @@ namespace ModdingManager
             richText.CaretPosition = insertionPos;
             richText.CaretPosition.InsertTextInRun(typedChar);
         }
-
-
-
-
 
         private void TechIconCanvas_Drop(object sender, System.Windows.DragEventArgs e)
         {
@@ -1244,6 +1690,32 @@ namespace ModdingManager
             return target;
         }
 
+        private void TabFolderImageCanvas_Drop(object sender, System.Windows.DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
+                if (files.Length > 0)
+                {
+                    string imagePath = files[0];
+
+                    try
+                    {
+                        BitmapImage original = new BitmapImage(new Uri(imagePath));
+
+                        var resizedFirst = ResizeToBitmap(original, 25, 25);
+                        TabFolderFirstImage.Source = resizedFirst;
+
+                        var resizedSecond = ResizeToBitmap(original, 25, 25);
+                        TabFolderSecondImage.Source = resizedSecond;
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Windows.MessageBox.Show($"Ошибка при загрузке изображения: {ex.Message}");
+                    }
+                }
+            }
+        }
 
         private void RemoveImageEvent(object sender, MouseButtonEventArgs e)
         {
@@ -1258,17 +1730,230 @@ namespace ModdingManager
                 {
                     BigOverlayImage.Source = null;
                 }
+                if (current.Name.Contains("Folder"))
+                {
+                    TabFolderFirstImage.Source = null;
+                    TabFolderSecondImage.Source = null;
+                }
             }
         }
 
+        public static void SaveFolderTabIcon(TechTreeCreator window)
+        {
+            
+            System.Drawing.Bitmap ConvertImageSourceToBitmap(ImageSource imageSource)
+            {
+                if (imageSource is BitmapSource bitmapSource)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        var encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                        encoder.Save(memoryStream);
+
+                        using (var tempBitmap = new System.Drawing.Bitmap(memoryStream))
+                        {
+                            return new System.Drawing.Bitmap(tempBitmap);
+                        }
+                    }
+                }
+
+                throw new ArgumentException("Невозможно преобразовать ImageSource в Bitmap — неподдерживаемый формат.");
+            }
+            string techIconDir = System.IO.Path.Combine(ModManager.Directory, "gfx", "interface", "techtree");
+            Directory.CreateDirectory(techIconDir);
+            var firstCopy = window.TabFolderFirstImage.Source.Clone();
+            var secondCopy = window.TabFolderFirstImage.Source.Clone();
+            var bgCopy = window.TabFolderBackgroundImage.Source.Clone();
+            var shadowingCopy = window.TabFolderShadowingImage.Source.Clone();
+
+            List<ImageSourceArg> args = new List<ImageSourceArg>
+            {
+                new ImageSourceArg { Source = bgCopy, IsCompresed = true },
+                new ImageSourceArg { Source = firstCopy, OffsetX = 45, OffsetY = 8 + 20 },
+                new ImageSourceArg { Source = secondCopy, OffsetX = 124 + 12, OffsetY = 12 + 12, ScaleX = 0.825, ScaleY = 0.825  },
+                new ImageSourceArg { Source = shadowingCopy, IsCompresed = true },
+            };
+            var img = ImageManager.GetCombinedImages(args, 182, 61);
+
+           
+            using (var bmp = ConvertImageSourceToBitmap(img))
+            {
+                DDSManager.SaveAsDDS(bmp, techIconDir, $"techtree_{window.CurrentTechTree.Name}_tab", 182, 61);
+            }
+        }
+        
+
+        public static void GenerateGfxFile(TechTreeConfig techTree)
+        {
+            string interfaceDir = System.IO.Path.Combine(ModManager.Directory, "interface");
+            Directory.CreateDirectory(interfaceDir);
+
+            string gfxFilePath = System.IO.Path.Combine(interfaceDir, $"{techTree.Name}.gfx");
+
+            var sb = new StringBuilder();
+            sb.AppendLine("spriteTypes = {");
+
+            foreach (var item in techTree.Items)
+            {
+                if (string.IsNullOrWhiteSpace(item.Id))
+                    continue;
+
+                sb.AppendLine("    spriteType = {");
+                sb.AppendLine($"        name = \"GFX_{item.Id}_medium\"");
+                sb.AppendLine($"        texturefile = \"gfx/interface/technologies/{item.Id}.dds\"");
+                sb.AppendLine("    }");
+            }
+            sb.Append(
+                $@"spriteType = {{
+                    name = ""GFX_technology_{techTree.Name}_small_unavailable_item_bg""
+                    textureFile = ""gfx//interface//techtree//tech_doctrine_unavailable_item_bg.dds""
+                }}    
+
+                spriteType = {{
+                    name = ""GFX_technology_{techTree.Name}_small_available_item_bg""
+                    textureFile = ""gfx//interface//techtree//tech_doctrine_available_item_bg.dds""
+                }}
+
+                spriteType = {{
+                    name = ""GFX_technology_{techTree.Name}_small_researched_item_bg""
+                    textureFile = ""gfx//interface//techtree//tech_landdoctrine_researched_item_bg.dds""
+                }}    
+
+                spriteType = {{
+                    name = ""GFX_technology_{techTree.Name}_small_branch_item_bg""
+                    textureFile = ""gfx/interface/techtree/tech_doctrine_branch_item_bg.dds""
+                }}");
+            sb.Append(
+                $@"spriteType = {{
+                    name = ""GFX_{techTree.Name}_tab""
+                    textureFile = ""gfx/interface/techtree/techtree_{techTree.Name}_tab.dds""
+                    noOfFrames = 2	
+                }}");
+            sb.AppendLine("}");
+            
+            var utf8WithoutBom = new UTF8Encoding(false);
+            File.WriteAllText(gfxFilePath, sb.ToString(), utf8WithoutBom);
+        }
+
+        private void DoneTreeButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentTechTree.Name = TechTreeNameBox.Text;
+            string value = (OrientationBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+            CurrentTechTree.Ledger = TreeLedgerBox.Text;
+        }
+
+        public void CreateTAGTreeFolderName(string modFolderPath, TechTreeConfig techTree, string backupSourcePath = null)
+        {
+            string tagsFolderPath = System.IO.Path.Combine(modFolderPath, "common", "technology_tags");
+            string tagsFilePath = null;
+
+            if (Directory.Exists(tagsFolderPath))
+            {
+                var files = Directory.GetFiles(tagsFolderPath, "*.txt");
+                tagsFilePath = files.FirstOrDefault();
+            }
+
+            if (tagsFilePath == null && !string.IsNullOrEmpty(backupSourcePath))
+            {
+                string backupTagsFolder = System.IO.Path.Combine(backupSourcePath, "common", "technology_tags");
+
+                if (Directory.Exists(backupTagsFolder))
+                {
+                    var backupFiles = Directory.GetFiles(backupTagsFolder, "*.txt");
+                    if (backupFiles.Length > 0)
+                    {
+                        Directory.CreateDirectory(tagsFolderPath);
+
+                        string backupFile = backupFiles[0];
+                        string newFileName = System.IO.Path.GetFileName(backupFile);
+                        tagsFilePath = System.IO.Path.Combine(tagsFolderPath, newFileName);
+
+                        File.Copy(backupFile, tagsFilePath);
+                        Console.WriteLine($"Created new technology_tags file from backup: {tagsFilePath}");
+                    }
+                }
+            }
+            if (tagsFilePath == null)
+            {
+                Directory.CreateDirectory(tagsFolderPath);
+                tagsFilePath = System.IO.Path.Combine(tagsFolderPath, "technology_tags.txt");
+
+                File.WriteAllText(tagsFilePath,
+                    "technology_folders = {\n" +
+                    "\t# Add your technology folders here\n" +
+                    "}");
+
+                Console.WriteLine($"Created new technology_tags file: {tagsFilePath}");
+            }
+
+            string[] lines = File.ReadAllLines(tagsFilePath);
+            List<string> newLines = new List<string>();
+            bool foundFoldersBlock = false;
+            bool insertedEntry = false;
+            int braceLevel = 0;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                newLines.Add(line);
+
+                if (!foundFoldersBlock && line.Trim().StartsWith("technology_folders = {"))
+                {
+                    foundFoldersBlock = true;
+                    braceLevel = 1;
+                    continue;
+                }
+
+                if (foundFoldersBlock && !insertedEntry)
+                {
+                    braceLevel += line.Count(c => c == '{');
+                    braceLevel -= line.Count(c => c == '}');
+
+                    // Вставляем либо в пустую строку, либо перед закрывающей скобкой
+                    if ((braceLevel > 0 && string.IsNullOrWhiteSpace(line.Trim())) ||
+                        (braceLevel <= 0 && !insertedEntry))
+                    {
+                        string entry = $"\t{techTree.Name} = {{\n" +
+                                     $"\t\tledger = {techTree.Ledger}\n" +
+                                     $"\t}}";
+
+                        newLines.Insert(newLines.Count - 1, entry);
+                        if (braceLevel <= 0) newLines.Insert(newLines.Count - 2, ""); // Добавляем пустую строку перед закрытием
+                        insertedEntry = true;
+                    }
+                }
+            }
+
+            // Если блок не найден, добавляем в конец файла
+            if (!foundFoldersBlock)
+            {
+                newLines.Add("");
+                newLines.Add("technology_folders = {");
+                newLines.Add($"\t{techTree.Name} = {{");
+                newLines.Add($"\t\tledger = {techTree.Ledger}");
+                newLines.Add("\t}");
+                newLines.Add("}");
+            }
+
+            File.WriteAllLines(tagsFilePath, newLines);
+            Console.WriteLine($"Successfully added {techTree.Name} to {System.IO.Path.GetFileName(tagsFilePath)}");
+        }
         private void DoneButton_Click(object sender, RoutedEventArgs e)
         {
             ExportTechTreeToFile();
+            DDSManager.SaveAllTechIconsAsDDS(CurrentTechTree);
+            GenerateGfxFile(CurrentTechTree);
+            InsertGUITechTreeEntries(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
+            InsertGUIFolderTabButton(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
+            InsertGUITechTreeContainers(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
+            CreateTAGTreeFolderName(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
+            SaveFolderTabIcon(this);
         }
 
         private void ExportTechTreeToFile()
         {
-            string fileName = $"{TechTreeNameBox.Text}.txt";
+            string fileName = $"{CurrentTechTree.Name}.txt";
             string fullPath = System.IO.Path.Combine(ModManager.Directory, "common", "technologies", fileName);
 
             var sb = new StringBuilder();
@@ -1280,12 +1965,11 @@ namespace ModdingManager
 
                 foreach (var modif in item.Modifiers)
                 {
-                    var splited = modif.Split(':');
+                    var splited = modif.Split('=');
                     if (!string.IsNullOrWhiteSpace(modif) && splited.Length == 2)
                         sb.AppendLine($"\t\t{splited[0]} = {splited[1]}");
                 }
 
-                // path блоки
                 var children = CurrentTechTree.ChildOf
                     .Where(pair => pair.Count == 2 && pair[0] == item.Id)
                     .Select(pair => pair[1]);
@@ -1300,11 +1984,9 @@ namespace ModdingManager
 
                 sb.AppendLine($"\t\tresearch_cost = {item.ModifCost}");
                 sb.AppendLine($"\t\tstart_year = {item.StartYear}");
-
-                // folder блок
                 sb.AppendLine($"\t\tfolder = {{");
-                sb.AppendLine($"\t\t\tname = {item.Folder}");
-                sb.AppendLine($"\t\t\tposition = {{ x = {item.GridX} y = {item.GridY} }}");
+                sb.AppendLine($"\t\t\tname = {CurrentTechTree.Name}");
+                sb.AppendLine($"\t\t\tposition = {{ x = {item.GridY} y = {item.GridX} }}");
                 sb.AppendLine($"\t\t}}");
 
                 var usedEnableTypes = new HashSet<string>();
@@ -1328,7 +2010,7 @@ namespace ModdingManager
                     if (values.Count == 0)
                         continue;
 
-                    sb.AppendLine($"\t\tenable_{enableType} = {{");
+                    sb.AppendLine($"\t\t{enableType} = {{");
 
                     foreach (var val in values)
                     {
@@ -1405,15 +2087,12 @@ namespace ModdingManager
                 }
 
 
-                // ai_will_do
                 if (!string.IsNullOrWhiteSpace(item.AiWillDo))
                 {
                     sb.AppendLine("\t\tai_will_do = {");
                     sb.AppendLine($"\t\t\t{item.AiWillDo}");
                     sb.AppendLine("\t\t}");
                 }
-
-                // XOR
                 var mutalItems = CurrentTechTree.Mutal
                     .Where(group => group.Contains(item.Id))
                     .SelectMany(group => group)
@@ -1480,7 +2159,7 @@ namespace ModdingManager
             double centerY = top + CellSize / 2;
             return (int)(centerY / CellSize);
         }
-
+        
         private string GetRichTextBoxText(System.Windows.Controls.RichTextBox rtb)
         {
             return new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd).Text.Trim();
@@ -1488,7 +2167,9 @@ namespace ModdingManager
 
         private List<string> GetRichTextBoxLines(System.Windows.Controls.RichTextBox rtb)
         {
-            return GetRichTextBoxText(rtb).Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var str = GetRichTextBoxText(rtb);
+            var stroke = GetRichTextBoxText(rtb).Split(new[] { '\r', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            return stroke;
         }
 
 
@@ -1516,15 +2197,12 @@ namespace ModdingManager
                 return;
             }
 
-            // Запоминаем старый Id
             CurrentTechTree.Items.FirstOrDefault(x => x.Id == selected.Name).OldId = item.Id;
 
-            // Обновляем поля из UI
             item.LocName = TechNameBox.Text;
             item.LocDescription = TechDescBox.Text;
             item.ModifCost = int.TryParse(TechCostModifBox.Text, out int modifCost) ? modifCost : 0;
             item.Cost = Convert.ToInt32(TechCostBox.Text);
-            item.Folder = FolderBox.Text;
             item.StartYear = Convert.ToInt32(StartYeatBox.Text);
             item.Enables = GetRichTextBoxLines(EnablesBox);
             item.Allowed = GetRichTextBoxLines(AllowedBox);
@@ -1535,22 +2213,19 @@ namespace ModdingManager
             item.Image = item.IsBig ? BigOverlayImage.Source : SmallOverlayImage.Source;
             var overlayimg = item.IsBig ? BigOverlayImage : SmallOverlayImage;
             var backgroundimg = item.IsBig ? BigBackgroundImage : BigOverlayImage;
-            // Обновляем изображение, если оно выбрано
             if (selected is Border border && border.Child is Canvas canavas)
             {
                 foreach (var elem in canavas.Children)
                 {
                     if (elem is System.Windows.Controls.Image img)
                     {
-                        img.Source = GetCombinedTechImage(overlayimg.Source, backgroundimg.Source, item.IsBig);
+                        img.Source = ImageManager.GetCombinedTechImage(overlayimg.Source, backgroundimg.Source, item.IsBig ? 1 : 2);
                     }
                 }
             }
 
-            // Обновляем имя Border
             selected.Name = item.Id;
 
-            // Обновляем элемент в списке Items
             var index = CurrentTechTree.Items.FindIndex(x => x.OldId == item.OldId);
             if (index >= 0)
             {
@@ -1560,9 +2235,9 @@ namespace ModdingManager
             System.Windows.MessageBox.Show("Элемент успешно обновлён!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void LoadEvent(object sender, RoutedEventArgs e)
+        private async void LoadEvent(object sender, RoutedEventArgs e)
         {
-            WpfConfigManager.LoadConfigAsync(this);
+            await WpfConfigManager.LoadConfigAsync(this);
         }
 
         private async void SaveEvent(object sender, RoutedEventArgs e)
@@ -1592,5 +2267,7 @@ namespace ModdingManager
             // Устанавливаем новую ширину FlowDocument (+ небольшой отступ)
             EnablesBox.Document.PageWidth = formattedText.Width + 20;
         }
+
+ 
     }
 }

@@ -6,6 +6,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Windows.Media.Imaging;
 using System.Windows;
+using System.Text.RegularExpressions;
+using System.Text;
+using System.Windows.Media.Media3D;
 
 public static class WinFormConfigManager
 {
@@ -516,7 +519,6 @@ public static class WinFormConfigManager
             Characters = form.RecruitBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
             States = ParseStates(form.CountryStatesBox.Text)
         };
-        var sosi = 23;
         return conf;
     }
     private static void ApplyCountryConfig(CountryCreator form, CountryConfig config)
@@ -696,6 +698,8 @@ public static class WinFormConfigManager
         }
         SaveConfig(form, fileName);
     }
+   
+
 
     private static async Task<bool> SaveTechTreeToArchive(TechTreeConfig config, string filePath)
     {

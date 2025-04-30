@@ -27,9 +27,17 @@
   <ItemGroup>
 	<ApplicationDefinition Remove="App.xaml" />
 	<None Remove="data\gfx\interface\technology_available_item_bg.png" />
+	<None Remove="data\gfx\interface\techtree_tabs.png" />
+	<None Remove="data\gfx\interface\techtree_tabs_shadowing.png" />
 	<None Remove="data\gfx\interface\tech_industry_available_item_bg.png" />
 	<None Remove="data\gfx\interface\tiled_plain_bg.png" />
 	<Resource Include="data\gfx\interface\technology_available_item_bg.png">
+	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	</Resource>
+	<Resource Include="data\gfx\interface\techtree_tabs.png">
+	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	</Resource>
+	<Resource Include="data\gfx\interface\techtree_tabs_shadowing.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
 	<Resource Include="data\gfx\interface\tech_industry_available_item_bg.png">

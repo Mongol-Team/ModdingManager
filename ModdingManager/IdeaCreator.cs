@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ModdingManager.managers;
+using ModdingManager.managers.gfx;
 
 namespace ModdingManager
 {
@@ -129,28 +130,23 @@ namespace ModdingManager
         }
         public static void GenerateOrUpdateIdeaGFX(string ideaId, string tag)
         {
-            // Путь к файлу tag.gfx
 
             string gfxFilePath = Path.Combine(ModManager.Directory, "interface", $"{tag}.gfx");
 
-            // Стандартное начало файла, если он создаётся с нуля
             string defaultHeader = "spriteTypes = {\n";
             string defaultFooter = "}\n";
 
-            // Формат нового SpriteType
             string newEntry = $"\tSpriteType = {{\n" +
                              $"\t\tname = \"GFX_idea_{ideaId}\"\n" +
                              $"\t\ttexturefile = \"gfx/interface/ideas/{tag}/{ideaId}.dds\"\n" +
                              $"\t}}\n";
 
-            // Если файл не существует, создаём его с новым ентри
             if (!File.Exists(gfxFilePath))
             {
                 File.WriteAllText(gfxFilePath, defaultHeader + newEntry + defaultFooter);
                 return;
             }
 
-            // Если файл существует, проверяем, не добавлен ли уже такой SpriteType
             string currentContent = File.ReadAllText(gfxFilePath);
 
             if (currentContent.Contains($"GFX_idea_{ideaId}"))
@@ -159,16 +155,13 @@ namespace ModdingManager
                 return;
             }
 
-            // Ищем закрывающую скобку `spriteTypes` и вставляем новый ентри перед ней
             int lastBraceIndex = currentContent.LastIndexOf('}');
             if (lastBraceIndex == -1)
             {
-                // Если структура файла нарушена, пересоздаём его
                 File.WriteAllText(gfxFilePath, defaultHeader + newEntry + defaultFooter);
                 return;
             }
 
-            // Вставляем новый ентри перед последней `}`
             string updatedContent = currentContent.Substring(0, lastBraceIndex) +
                                    newEntry +
                                    currentContent.Substring(lastBraceIndex);
@@ -248,7 +241,7 @@ namespace ModdingManager
                 GenerateLocalizationFiles(TagBox.Text, IdBox.Text, NameBox.Text, DescBox.Text);
                 if (ImagePanel.BackgroundImage != null)
                 {
-                    ModManager.SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManager.Directory, IdBox.Text, TagBox.Text);
+                    DDSManager.SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManager.Directory, IdBox.Text, TagBox.Text);
                 }
                 else
                 {
@@ -335,14 +328,12 @@ namespace ModdingManager
 
                 string historyCountriesPath = Path.Combine(ModManager.Directory, "history", "countries");
 
-                // Проверяем существование папки
                 if (!Directory.Exists(historyCountriesPath))
                 {
                     MessageBox.Show("Папка history/countries не найдена!");
                     return;
                 }
 
-                // Ищем файл, содержащий в названии текст из AddToTagBox
                 string[] countryFiles = Directory.GetFiles(historyCountriesPath, $"*{AddToTagBox.Text}*");
                 if (countryFiles.Length == 0)
                 {
@@ -350,12 +341,9 @@ namespace ModdingManager
                     return;
                 }
 
-                string countryFile = countryFiles[0]; // Берем первый найденный файл
-
-                // Читаем содержимое файла
+                string countryFile = countryFiles[0]; 
                 string fileContent = File.ReadAllText(countryFile, Encoding.UTF8);
 
-                // Ищем блок add_ideas
                 string pattern = @"add_ideas\s*=\s*\{([^}]*)\}";
                 Match match = Regex.Match(fileContent, pattern);
 
@@ -364,16 +352,11 @@ namespace ModdingManager
                     MessageBox.Show("Блок add_ideas не найден в файле страны!");
                     return;
                 }
-
-                // Получаем содержимое блока и добавляем новую идею
                 string ideasContent = match.Groups[1].Value;
                 ideasContent += $"\n\t{IdBox.Text}";
-
-                // Заменяем старый блок на новый
                 string newIdeasBlock = $"add_ideas = {{{ideasContent}\n}}";
                 string newContent = Regex.Replace(fileContent, pattern, newIdeasBlock);
 
-                // Записываем изменения обратно в файл
                 File.WriteAllText(countryFile, newContent, Encoding.UTF8);
 
                 MessageBox.Show($"Идея {IdBox.Text} успешно добавлена в файл {Path.GetFileName(countryFile)}!");

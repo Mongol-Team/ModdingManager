@@ -86,7 +86,7 @@ namespace ModdingManager
             ModButton.Name = "ModButton";
             ModButton.Size = new Size(237, 56);
             ModButton.TabIndex = 3;
-            ModButton.Text = "Создатель модификаторов";
+            ModButton.Text = "Создатель снаряжения";
             ModButton.UseVisualStyleBackColor = true;
             ModButton.Click += ModButton_Click;
             // 
@@ -190,7 +190,7 @@ namespace ModdingManager
             TestButton.Name = "TestButton";
             TestButton.Size = new Size(237, 56);
             TestButton.TabIndex = 13;
-            TestButton.Text = "Test";
+            TestButton.Text = "Создатель стартовых юнитов";
             TestButton.UseVisualStyleBackColor = true;
             TestButton.Click += TestButton_Click;
             // 

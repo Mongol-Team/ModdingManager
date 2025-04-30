@@ -83,6 +83,26 @@ namespace ModdingManager.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap techtree_tabs {
+            get {
+                object obj = ResourceManager.GetObject("techtree_tabs", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap techtree_tabs_shadowing {
+            get {
+                object obj = ResourceManager.GetObject("techtree_tabs_shadowing", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap tiled_plain_bg {
             get {
                 object obj = ResourceManager.GetObject("tiled_plain_bg", resourceCulture);

@@ -14,6 +14,7 @@ namespace ModdingManager.configs
         public List<TechTreeItemConfig> Items { get; set; } = new List<TechTreeItemConfig>();
         public List<List<string>> ChildOf { get; set; } = new List<List<string>>(); // Связи типа "родитель-ребенок"
         public List<List<string>> Mutal { get; set; } = new List<List<string>>(); // Взаимные связи
+        public string Ledger { get; set; }
     }
 
     public class TechTreeItemConfig
@@ -29,7 +30,6 @@ namespace ModdingManager.configs
         public string Categories { get; set; }
         public List<string> Enables { get; set; }
         public int Cost { get; set; }
-        public string Folder { get; set; }
         public int StartYear { get; set; }
         public List<string> Allowed { get; set; }
         public List<string> Modifiers { get; set; }
