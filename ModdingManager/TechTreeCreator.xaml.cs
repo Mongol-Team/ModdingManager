@@ -15,15 +15,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ModdingManager.configs;
 using System.IO;
-using System.Collections.ObjectModel;
-using System.Windows.Threading;
-using System.Security.Cryptography;
 using ModdingManager.managers;
 using System.Text.RegularExpressions;
 using ModdingManager.managers.forms;
 using ModdingManager.classes;
-using ModdingManager.managers.gfx;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
+using ModdingManager.classes.gfx;
 namespace ModdingManager
 {
     /// <summary>
@@ -435,9 +431,8 @@ namespace ModdingManager
             entries.AppendLine($"{GetTabs(innerTabCount + 3)}alwaystransparent = yes");
             entries.AppendLine($"{GetTabs(innerTabCount + 2)}}}");
             entries.AppendLine();
-
-            // Добавляем годовые метки
-            int startCoord = isVertical ? 50 : 130;
+            
+            int startCoord = isVertical ? 80 : 170;
             int fixedCoord = 50;
             int year = techTree.Items.Any() ? techTree.Items.Min(i => i.StartYear) : 1955;
 
@@ -466,10 +461,6 @@ namespace ModdingManager
                 year += 2;
             }
 
-            // Добавляем gridbox для корневых элементов
-        
-
-            // Добавляем highlight иконку
             entries.AppendLine($"{GetTabs(innerTabCount + 2)}iconType = {{");
             entries.AppendLine($"{GetTabs(innerTabCount + 3)}name = \"highlight_{techTreeName}_1\"");
             entries.AppendLine($"{GetTabs(innerTabCount + 3)}spriteType = \"GFX_tutorial_research_small_item_icon_glow\"");
@@ -483,7 +474,7 @@ namespace ModdingManager
             {
                 entries.AppendLine($"{GetTabs(innerTabCount + 2)}gridboxType = {{");
                 entries.AppendLine($"{GetTabs(innerTabCount + 3)}name = \"{item.Id}_tree\"");
-                entries.AppendLine($"{GetTabs(innerTabCount + 3)}position = {{ x = {10 + item.GridX} y = {70 + item.GridY} }}");
+                entries.AppendLine($"{GetTabs(innerTabCount + 3)}position = {{ x = {item.GridX*10 + (isVertical ? 15 : 0)} y = {item.GridY*10 + (isVertical ? 15 :55)} }}");
                 entries.AppendLine($"{GetTabs(innerTabCount + 3)}slotsize = {{ width = 70 height = 70 }}");
                 entries.AppendLine($"{GetTabs(innerTabCount + 3)}format = \"LEFT\"");
                 entries.AppendLine($"{GetTabs(innerTabCount + 2)}}}");
@@ -1279,7 +1270,6 @@ namespace ModdingManager
 
             var sb = new StringBuilder();
 
-            // Первый контейнер (small_item)
             sb.AppendLine($"{tab}containerWindowType = {{");
             sb.AppendLine($"{innerTab}name = \"techtree_{techTreeName}_small_item\"");
             sb.AppendLine($"{innerTab}position = {{ x=0 y=0 }}");
@@ -1324,7 +1314,6 @@ namespace ModdingManager
             sb.AppendLine($"{tab}}}");
             sb.AppendLine();
 
-            // Второй контейнер (item)
             sb.AppendLine($"{tab}containerWindowType = {{");
             sb.AppendLine($"{innerTab}name = \"techtree_{techTreeName}_item\"");
             sb.AppendLine($"{innerTab}position = {{ x=-56 y=-7 }}");
@@ -1376,7 +1365,6 @@ namespace ModdingManager
             sb.AppendLine($"{innerTab}}}");
             sb.AppendLine();
 
-            // Подконтейнеры (sub_technology_slot)
             sb.AppendLine($"{innerTab}containerWindowType = {{");
             sb.AppendLine($"{doubleInnerTab}name = \"sub_technology_slot_0\"");
             sb.AppendLine($"{doubleInnerTab}position = {{ x=141 y=1 }}");
@@ -1741,25 +1729,7 @@ namespace ModdingManager
         public static void SaveFolderTabIcon(TechTreeCreator window)
         {
             
-            System.Drawing.Bitmap ConvertImageSourceToBitmap(ImageSource imageSource)
-            {
-                if (imageSource is BitmapSource bitmapSource)
-                {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        var encoder = new PngBitmapEncoder();
-                        encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-                        encoder.Save(memoryStream);
-
-                        using (var tempBitmap = new System.Drawing.Bitmap(memoryStream))
-                        {
-                            return new System.Drawing.Bitmap(tempBitmap);
-                        }
-                    }
-                }
-
-                throw new ArgumentException("Невозможно преобразовать ImageSource в Bitmap — неподдерживаемый формат.");
-            }
+          
             string techIconDir = System.IO.Path.Combine(ModManager.Directory, "gfx", "interface", "techtree");
             Directory.CreateDirectory(techIconDir);
             var firstCopy = window.TabFolderFirstImage.Source.Clone();
@@ -1771,13 +1741,13 @@ namespace ModdingManager
             {
                 new ImageSourceArg { Source = bgCopy, IsCompresed = true },
                 new ImageSourceArg { Source = firstCopy, OffsetX = 45, OffsetY = 8 + 20 },
-                new ImageSourceArg { Source = secondCopy, OffsetX = 124 + 12, OffsetY = 12 + 12, ScaleX = 0.825, ScaleY = 0.825  },
+                new ImageSourceArg { Source = secondCopy, OffsetX = 124 + 12, OffsetY = 12 + 12  },
                 new ImageSourceArg { Source = shadowingCopy, IsCompresed = true },
             };
             var img = ImageManager.GetCombinedImages(args, 182, 61);
 
            
-            using (var bmp = ConvertImageSourceToBitmap(img))
+            using (var bmp = ImageManager.ConvertImageSourceToBitmap(img))
             {
                 DDSManager.SaveAsDDS(bmp, techIconDir, $"techtree_{window.CurrentTechTree.Name}_tab", 182, 61);
             }
@@ -1830,6 +1800,14 @@ namespace ModdingManager
                     textureFile = ""gfx/interface/techtree/techtree_{techTree.Name}_tab.dds""
                     noOfFrames = 2	
                 }}");
+            sb.Append(
+                $@"
+                spriteType = {{
+		            name = ""GFX_{techTree.Name}_techtree_bg""
+		            textureFile = ""gfx//interface//techtree//techtree_{techTree.Name}_bg.dds""
+	            }}
+                "
+                );
             sb.AppendLine("}");
             
             var utf8WithoutBom = new UTF8Encoding(false);
@@ -1910,7 +1888,6 @@ namespace ModdingManager
                     braceLevel += line.Count(c => c == '{');
                     braceLevel -= line.Count(c => c == '}');
 
-                    // Вставляем либо в пустую строку, либо перед закрывающей скобкой
                     if ((braceLevel > 0 && string.IsNullOrWhiteSpace(line.Trim())) ||
                         (braceLevel <= 0 && !insertedEntry))
                     {
@@ -1949,6 +1926,17 @@ namespace ModdingManager
             InsertGUITechTreeContainers(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
             CreateTAGTreeFolderName(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
             SaveFolderTabIcon(this);
+            SaveFolderBG();
+        }
+
+        private void SaveFolderBG()
+        {
+            string techIconDir = System.IO.Path.Combine(ModManager.Directory, "gfx", "interface", "techtree");
+            Directory.CreateDirectory(techIconDir);
+            using (var bmp = ImageManager.ConvertImageSourceToBitmap(TechBGImage.ImageSource))
+            {
+                DDSManager.SaveAsDDS(bmp, techIconDir, $"techtree_{CurrentTechTree.Name}_bg", bmp.Width, bmp.Height);
+            }
         }
 
         private void ExportTechTreeToFile()
@@ -2181,7 +2169,6 @@ namespace ModdingManager
                 return;
             }
 
-            // Берем выделенный Border
             Border selected = marked.First() as Border;
             if (selected == null)
             {
@@ -2189,7 +2176,6 @@ namespace ModdingManager
                 return;
             }
 
-            // Ищем элемент конфигурации по Border.Name
             var item = CurrentTechTree.Items.FirstOrDefault(x => x.Id == selected.Name);
             if (item == null)
             {
@@ -2268,6 +2254,40 @@ namespace ModdingManager
             EnablesBox.Document.PageWidth = formattedText.Width + 20;
         }
 
- 
+        private void Grid_Drop(object sender, System.Windows.DragEventArgs e)
+        {
+
+        }
+
+        private void WrapperGridCanvas_Drop(object sender, System.Windows.DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
+                if (files.Length > 0)
+                {
+                    string filePath = files[0];
+
+                    string extension = System.IO.Path.GetExtension(filePath).ToLower();
+                    if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
+                    {
+                        try
+                        {
+                            BitmapImage bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.UriSource = new Uri(filePath);
+                            bitmap.EndInit();
+
+                            TechBGImage.ImageSource = bitmap;
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Windows.MessageBox.Show($"Ошибка загрузки изображения: {ex.Message}");
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

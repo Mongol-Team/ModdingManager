@@ -17,7 +17,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ModdingManager.managers;
-using ModdingManager.managers.gfx;
+using ModdingManager.classes.gfx;
 
 namespace ModdingManager
 {
@@ -115,7 +115,6 @@ namespace ModdingManager
                     return;
                 }
 
-                // Создаем директории
                 string leadersDir = Path.Combine(modPath, "gfx", "leaders", tag);
                 string advisorsDir = Path.Combine(modPath, "gfx", "advisors", tag);
                 Directory.CreateDirectory(leadersDir);

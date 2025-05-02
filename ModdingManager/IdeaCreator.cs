@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ModdingManager.managers;
-using ModdingManager.managers.gfx;
+using ModdingManager.classes.gfx;
 
 namespace ModdingManager
 {

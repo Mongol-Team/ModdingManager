@@ -10,22 +10,24 @@ using System.IO;
 using ModdingManager.configs;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
-namespace ModdingManager.managers.gfx
+using ModdingManager.managers;
+
+namespace ModdingManager.classes.gfx
 {
     public class DDSManager : ImageManager
     {
         public DDSManager() { }
 
-        public static void SaveIdeaGFXAsDDS(System.Drawing.Image image, string dir, string id, string tag)
+        public static void SaveIdeaGFXAsDDS(Image image, string dir, string id, string tag)
         {
             var path = Path.Combine(dir, "gfx", "interface", "ideas", tag);
-            System.IO.Directory.CreateDirectory(path);
+            Directory.CreateDirectory(path);
             SaveAsDDS(image, path, id, 64, 64);
         }
 
-        public static void SaveAsDDS(System.Drawing.Image image, string directory, string filename, int width, int height)
+        public static void SaveAsDDS(Image image, string directory, string filename, int width, int height)
         {
-            System.IO.Directory.CreateDirectory(directory);
+            Directory.CreateDirectory(directory);
 
             using (var imageSharp = ConvertToImageSharp(image))
             using (var resized = ResizeStretch(imageSharp, width, height))
@@ -39,8 +41,8 @@ namespace ModdingManager.managers.gfx
                 {
                     byte r = pixelData[i];
                     byte b = pixelData[i + 2];
-                    pixelData[i] = b;     // B
-                    pixelData[i + 2] = r; // R
+                    pixelData[i] = b;
+                    pixelData[i + 2] = r;
                 }
 
                 using (var surface = new Surface(resized.Width, resized.Height))
@@ -53,7 +55,7 @@ namespace ModdingManager.managers.gfx
 
         public static void SaveAllTechIconsAsDDS(TechTreeConfig techTree)
         {
-            System.Drawing.Bitmap ConvertImageSourceToBitmap(ImageSource imageSource)
+            Bitmap ConvertImageSourceToBitmap(ImageSource imageSource)
             {
                 if (imageSource is BitmapSource bitmapSource)
                 {
@@ -63,16 +65,16 @@ namespace ModdingManager.managers.gfx
                         encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
                         encoder.Save(memoryStream);
 
-                        using (var tempBitmap = new System.Drawing.Bitmap(memoryStream))
+                        using (var tempBitmap = new Bitmap(memoryStream))
                         {
-                            return new System.Drawing.Bitmap(tempBitmap);
+                            return new Bitmap(tempBitmap);
                         }
                     }
                 }
 
                 throw new ArgumentException("Невозможно преобразовать ImageSource в Bitmap — неподдерживаемый формат.");
             }
-            string techIconDir = System.IO.Path.Combine(ModManager.Directory, "gfx", "interface", "technologies");
+            string techIconDir = Path.Combine(ModManager.Directory, "gfx", "interface", "technologies");
             Directory.CreateDirectory(techIconDir);
 
             foreach (var item in techTree.Items)
@@ -84,7 +86,7 @@ namespace ModdingManager.managers.gfx
                 {
                     using (var bmp = ConvertImageSourceToBitmap(item.Image))
                     {
-                        DDSManager.SaveAsDDS(bmp, techIconDir, item.Id, 64, 64);
+                        SaveAsDDS(bmp, techIconDir, item.Id, 64, 64);
                     }
                 }
                 catch (Exception ex)
@@ -99,7 +101,7 @@ namespace ModdingManager.managers.gfx
         public static void SaveFolderTabIcon(TechTreeCreator window)
         {
 
-            System.Drawing.Bitmap ConvertImageSourceToBitmap(ImageSource imageSource)
+            Bitmap ConvertImageSourceToBitmap(ImageSource imageSource)
             {
                 if (imageSource is BitmapSource bitmapSource)
                 {
@@ -109,16 +111,16 @@ namespace ModdingManager.managers.gfx
                         encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
                         encoder.Save(memoryStream);
 
-                        using (var tempBitmap = new System.Drawing.Bitmap(memoryStream))
+                        using (var tempBitmap = new Bitmap(memoryStream))
                         {
-                            return new System.Drawing.Bitmap(tempBitmap);
+                            return new Bitmap(tempBitmap);
                         }
                     }
                 }
 
                 throw new ArgumentException("Невозможно преобразовать ImageSource в Bitmap — неподдерживаемый формат.");
             }
-            string techIconDir = System.IO.Path.Combine(ModManager.Directory, "gfx", "interface", "techtree");
+            string techIconDir = Path.Combine(ModManager.Directory, "gfx", "interface", "techtree");
             Directory.CreateDirectory(techIconDir);
             var firstCopy = window.TabFolderFirstImage.Source.Clone();
             var secondCopy = window.TabFolderFirstImage.Source.Clone();
@@ -131,7 +133,7 @@ namespace ModdingManager.managers.gfx
 
             using (var bmp = ConvertImageSourceToBitmap(temp2))
             {
-                DDSManager.SaveAsDDS(bmp, techIconDir, $"techtree_{window.CurrentTechTree.Name}_tab", 182, 55);
+                SaveAsDDS(bmp, techIconDir, $"techtree_{window.CurrentTechTree.Name}_tab", 182, 55);
             }
         }
     }

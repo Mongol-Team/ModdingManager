@@ -15,7 +15,7 @@ using TeximpNet;
 using TeximpNet.Compression;
 using TeximpNet.DDS;
 using System.Runtime.InteropServices;
-using ModdingManager.managers.gfx;
+using ModdingManager.classes.gfx;
 namespace ModdingManager.managers
 {
     public class ModManager

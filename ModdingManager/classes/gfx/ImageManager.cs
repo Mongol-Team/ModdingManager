@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
 using ModdingManager.classes;
-namespace ModdingManager.managers.gfx
+namespace ModdingManager.classes.gfx
 {
     public class ImageManager
     {
@@ -88,6 +88,25 @@ namespace ModdingManager.managers.gfx
             return null;
         }
 
+        public static Bitmap ConvertImageSourceToBitmap(ImageSource imageSource)
+        {
+            if (imageSource is BitmapSource bitmapSource)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                    encoder.Save(memoryStream);
+
+                    using (var tempBitmap = new Bitmap(memoryStream))
+                    {
+                        return new Bitmap(tempBitmap);
+                    }
+                }
+            }
+            throw new ArgumentException("Невозможно преобразовать ImageSource в Bitmap — неподдерживаемый формат.");
+        }
+
         public static ImageSource GetCombinedImages(List<ImageSourceArg> images, int width, int height)
         {
             if (images == null || images.Count == 0)
@@ -106,29 +125,23 @@ namespace ModdingManager.managers.gfx
                     double originalWidth = source.Width;
                     double originalHeight = source.Height;
 
-                    // Получаем абсолютные значения масштаба
                     double scaleX = imageArg.ScaleX == 0 ? 1 : Math.Abs(imageArg.ScaleX);
                     double scaleY = imageArg.ScaleY == 0 ? 1 : Math.Abs(imageArg.ScaleY);
 
-                    // Рассчитываем размеры после масштабирования
                     double scaledWidth = originalWidth * scaleX;
                     double scaledHeight = originalHeight * scaleY;
 
                     if (imageArg.IsCompresed)
                     {
-                        // Для сжатых изображений просто растягиваем на всю область
                         dc.DrawImage(source, new Rect(0, 0, width, height));
                     }
                     else
                     {
-                        // Начальная позиция (центр у левого/верхнего края)
                         double x = -scaledWidth / 2 + imageArg.OffsetX;
                         double y = -scaledHeight / 2 + imageArg.OffsetY;
 
-                        // Создаем группу преобразований
                         var transformGroup = new TransformGroup();
 
-                        // Масштабирование
                         transformGroup.Children.Add(new ScaleTransform(
                             imageArg.ScaleX == 0 ? 1 : imageArg.ScaleX,
                             imageArg.ScaleY == 0 ? 1 : imageArg.ScaleY,
@@ -136,7 +149,6 @@ namespace ModdingManager.managers.gfx
                             y + scaledHeight / 2
                         ));
 
-                        // Применяем преобразования
                         dc.PushTransform(transformGroup);
                         dc.DrawImage(source, new Rect(x, y, scaledWidth, scaledHeight));
                         dc.Pop();

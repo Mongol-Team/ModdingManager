@@ -42,7 +42,6 @@ namespace ModdingManager.managers.forms
 
         public static async Task LoadConfigAsync(TechTreeCreator window)
         {
-            // 1. Выбор файла в UI-потоке
             var openDialog = new OpenFileDialog
             {
                 Filter = "Tech Tree Files (*.tech)|*.tech",
@@ -56,17 +55,14 @@ namespace ModdingManager.managers.forms
                 window.IsEnabled = false;
                 window.Cursor = System.Windows.Input.Cursors.Wait;
 
-                // 2. Загрузка данных в фоновом потоке
                 var (config, imageData) = await Task.Run(() =>
                 {
                     using (var archive = ZipFile.OpenRead(openDialog.FileName))
                     {
-                        // 2.1. Чтение JSON
                         var jsonEntry = archive.GetEntry("config.json");
                         var config = JsonSerializer.Deserialize<TechTreeConfig>(
                             new StreamReader(jsonEntry.Open()).ReadToEnd());
 
-                        // 2.2. Чтение сырых данных изображений
                         var images = new Dictionary<string, byte[]>();
                         foreach (var entry in archive.Entries)
                         {
@@ -80,10 +76,6 @@ namespace ModdingManager.managers.forms
                             }
                         }
 
-                        // Проверяем наличие специальных иконок и загружаем с диска при необходимости
-
-
-
                         return (config, images);
                     }
                 });
@@ -96,7 +88,6 @@ namespace ModdingManager.managers.forms
 
                         foreach (var entry in archive.Entries)
                         {
-                            // Загружаем только те картинки, которые находятся в корне архива (без "images/" в пути)
                             if (!entry.FullName.StartsWith("images/") && entry.Name.EndsWith(".png"))
                             {
                                 using (var ms = new MemoryStream())
@@ -110,22 +101,24 @@ namespace ModdingManager.managers.forms
                         return images;
                     }
                 });
-
-                // 3. Создание изображений в UI-потоке
+                
                 await window.Dispatcher.InvokeAsync(() =>
                 {
                     window.CurrentTechTree = config;
 
-                    // Загружаем TabFolderFirstImage
                     if (rootImages.TryGetValue($"{config.Name}_first.png", out var firstImageBytes))
                     {
                         window.TabFolderFirstImage.Source = LoadImageFromBytes(firstImageBytes);
                     }
 
-                    // Загружаем TabFolderSecondImage
                     if (rootImages.TryGetValue($"{config.Name}_second.png", out var secondImageBytes))
                     {
                         window.TabFolderSecondImage.Source = LoadImageFromBytes(secondImageBytes);
+                    }
+
+                    if (rootImages.TryGetValue($"background.png", out var bgimageBytes))
+                    {
+                        window.TechBGImage.ImageSource = LoadImageFromBytes(bgimageBytes);
                     }
 
                     foreach (var item in window.CurrentTechTree.Items)
@@ -155,7 +148,6 @@ namespace ModdingManager.managers.forms
             }
         }
 
-        // Загрузка изображения из байтов в UI-потоке
         private static BitmapSource LoadImageFromBytes(byte[] imageData)
         {
             var bitmap = new BitmapImage();
@@ -247,6 +239,7 @@ namespace ModdingManager.managers.forms
                         ),
                     SecondTabImage = FreezeClone(window.TabFolderSecondImage.Source),
                     FirstTabImage = FreezeClone(window.TabFolderFirstImage.Source),
+                    BgImage = FreezeClone(window.TechBGImage.ImageSource),
                 };
             });
 
@@ -283,6 +276,12 @@ namespace ModdingManager.managers.forms
                         using (var stream = secondImageEntry.Open())
                         {
                             SaveBitmapSourceToStream(EnsureRenderable(second), stream);
+                        }
+                        var backgroundImageEntry = archive.CreateEntry($"background.png");
+                        var bg = saveData.BgImage;
+                        using (var stream = backgroundImageEntry.Open())
+                        {
+                            SaveBitmapSourceToStream(EnsureRenderable(bg), stream);
                         }
                     }
 
@@ -387,13 +386,11 @@ namespace ModdingManager.managers.forms
                     string json = await reader.ReadToEndAsync();
                     var config = JsonSerializer.Deserialize<TechTreeConfig>(json);
 
-                    // Загружаем или создаем изображения
                     foreach (var item in config.Items)
                     {
                         var imageEntry = archive.GetEntry($"images/{item.Id}.png");
                         if (imageEntry != null)
                         {
-                            // Загружаем из архива
                             using (var stream = imageEntry.Open())
                             {
                                 var bitmap = new BitmapImage();

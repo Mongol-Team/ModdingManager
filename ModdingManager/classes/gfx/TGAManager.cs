@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-namespace ModdingManager.managers.gfx
+namespace ModdingManager.classes.gfx
 {
     public class TGAManager : ImageManager
     {

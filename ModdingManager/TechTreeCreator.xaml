@@ -164,7 +164,7 @@
                 <Image x:Name="TabFolderSecondImage"
                    Width="25" Height="25"
                    Stretch="UniformToFill"
-                   IsHitTestVisible="False" Canvas.Left="123" Canvas.Top="15" />
+                   IsHitTestVisible="False" Canvas.Left="124" Canvas.Top="17" />
                 <Image x:Name="TabFolderShadowingImage"
                    Width="182" Height="61"
                    Source="pack://application:,,,/data/gfx/interface/techtree_tabs_shadowing.png"
@@ -180,20 +180,35 @@
                       x:Name="MainScrollViewer"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto" Margin="0,0,0,0">
-            <Canvas x:Name="GridCanvas"
+            <Grid x:Name="WrapperGridCanvas" Width="1240" Height="1240" Drop="WrapperGridCanvas_Drop" AllowDrop="True">
+                <!-- Новый задний фон -->
+
+                <Image 
+                   x:Name="TreeBGImage"
+                   Source="/data/gfx/interface/tiled_plain_bg.png"
+                   
+                   Stretch="UniformToFill"
+                   Panel.ZIndex="0" 
+                />
+
+                <!-- Слой с канвасом -->
+                <Canvas x:Name="GridCanvas"
                     Width="1240" Height="1240"
                     MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
                     MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
-                    MouseMove="Canvas_MouseMove">
-                <Canvas.Background>
-                    <ImageBrush
-                                ImageSource="/data/gfx/interface/tiled_plain_bg.png"
-                                TileMode="Tile"
-                                Viewport="0,0,64,64"
-                                ViewportUnits="Absolute"
-                                Stretch="None"/>
-                </Canvas.Background>
-            </Canvas>
+                    MouseMove="Canvas_MouseMove"
+                    Panel.ZIndex="1">
+                    <Canvas.Background>
+                        <ImageBrush x:Name="TechBGImage"
+                            Stretch="None"
+                            TileMode="None"
+                            AlignmentX="Left"
+                            AlignmentY="Top"/>
+                    </Canvas.Background>
+
+                </Canvas>
+            </Grid>
+
         </ScrollViewer>
 
     </Grid>
