@@ -47,6 +47,8 @@ namespace ModdingManager
             TestButton = new Button();
             GameDirBox = new TextBox();
             label2 = new Label();
+            button1 = new Button();
+            button2 = new Button();
             SuspendLayout();
             // 
             // LocConvertButton
@@ -147,7 +149,7 @@ namespace ModdingManager
             // 
             // DirBox
             // 
-            DirBox.Location = new Point(44, 408);
+            DirBox.Location = new Point(45, 590);
             DirBox.Name = "DirBox";
             DirBox.Size = new Size(554, 27);
             DirBox.TabIndex = 9;
@@ -156,7 +158,7 @@ namespace ModdingManager
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(638, 415);
+            label1.Location = new Point(639, 597);
             label1.Name = "label1";
             label1.Size = new Size(146, 20);
             label1.TabIndex = 10;
@@ -190,13 +192,13 @@ namespace ModdingManager
             TestButton.Name = "TestButton";
             TestButton.Size = new Size(237, 56);
             TestButton.TabIndex = 13;
-            TestButton.Text = "Создатель стартовых юнитов";
+            TestButton.Text = "Создатель шаблонов юнитов";
             TestButton.UseVisualStyleBackColor = true;
             TestButton.Click += TestButton_Click;
             // 
             // GameDirBox
             // 
-            GameDirBox.Location = new Point(44, 455);
+            GameDirBox.Location = new Point(45, 637);
             GameDirBox.Name = "GameDirBox";
             GameDirBox.Size = new Size(554, 27);
             GameDirBox.TabIndex = 14;
@@ -205,17 +207,37 @@ namespace ModdingManager
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(638, 455);
+            label2.Location = new Point(639, 637);
             label2.Name = "label2";
             label2.Size = new Size(145, 20);
             label2.TabIndex = 15;
             label2.Text = "Дирректория игры ";
             // 
+            // button1
+            // 
+            button1.Location = new Point(42, 388);
+            button1.Name = "button1";
+            button1.Size = new Size(237, 56);
+            button1.TabIndex = 16;
+            button1.Text = "Создатель суперивентов";
+            button1.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            button2.Location = new Point(684, 388);
+            button2.Name = "button2";
+            button2.Size = new Size(237, 56);
+            button2.TabIndex = 17;
+            button2.Text = "Создатель стартовых юнитов";
+            button2.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(963, 494);
+            ClientSize = new Size(963, 694);
+            Controls.Add(button2);
+            Controls.Add(button1);
             Controls.Add(label2);
             Controls.Add(GameDirBox);
             Controls.Add(TestButton);
@@ -232,9 +254,10 @@ namespace ModdingManager
             Controls.Add(LocTechButton);
             Controls.Add(Statebutton);
             Controls.Add(LocConvertButton);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
-            Text = "Form1";
+            Text = "Главное меню";
             Load += MainForm_Load;
             ResumeLayout(false);
             PerformLayout();
@@ -258,5 +281,7 @@ namespace ModdingManager
         private Button TestButton;
         private TextBox GameDirBox;
         private Label label2;
+        private Button button1;
+        private Button button2;
     }
 }

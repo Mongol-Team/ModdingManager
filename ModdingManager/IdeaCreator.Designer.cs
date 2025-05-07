@@ -305,9 +305,10 @@
             Controls.Add(ImagePanel);
             Controls.Add(label1);
             Controls.Add(ModifBox);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "IdeaCreator";
-            Text = "IdeaCreator";
+            Text = "Создатель идей";
             ResumeLayout(false);
             PerformLayout();
         }

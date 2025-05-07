@@ -22,15 +22,24 @@
     <Folder Include="data\configs\ideas\" />
     <Folder Include="data\configs\modifiers\" />
     <Folder Include="data\configs\techtrees\" />
+    <Folder Include="data\configs\templates\" />
   </ItemGroup>
 
   <ItemGroup>
 	<ApplicationDefinition Remove="App.xaml" />
+	<None Remove="data\gfx\interface\new_regiment_slot_support.png" />
+	<None Remove="data\gfx\interface\null_item_image.png" />
 	<None Remove="data\gfx\interface\technology_available_item_bg.png" />
 	<None Remove="data\gfx\interface\techtree_tabs.png" />
 	<None Remove="data\gfx\interface\techtree_tabs_shadowing.png" />
 	<None Remove="data\gfx\interface\tech_industry_available_item_bg.png" />
 	<None Remove="data\gfx\interface\tiled_plain_bg.png" />
+	<Resource Include="data\gfx\interface\new_regiment_slot_support.png">
+	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	</Resource>
+	<Resource Include="data\gfx\interface\null_item_image.png">
+	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	</Resource>
 	<Resource Include="data\gfx\interface\technology_available_item_bg.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>

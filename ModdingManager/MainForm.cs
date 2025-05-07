@@ -223,7 +223,8 @@ namespace ModdingManager
             {
                 ModManager.Directory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
-
+                TemplateCreator fc = new TemplateCreator();
+                fc.Show();
             }
             else
             {

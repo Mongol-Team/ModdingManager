@@ -649,9 +649,10 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(TagBox);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "CountryCreator";
-            Text = "CountryCreator";
+            Text = "Создатель стран";
             ResumeLayout(false);
             PerformLayout();
         }

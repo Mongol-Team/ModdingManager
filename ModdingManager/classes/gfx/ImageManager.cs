@@ -13,12 +13,33 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
-using ModdingManager.classes;
+using System.Drawing.Imaging;
+using ModdingManager.classes.args;
 namespace ModdingManager.classes.gfx
 {
     public class ImageManager
     {
         public ImageManager() { }
+
+        public static Bitmap LoadAndCropRightSideOfIcon(string filePath)
+        {
+            static Bitmap CropLeftHalf(Bitmap original)
+            {
+                int halfWidth = original.Width / 2;
+                var rect = new System.Drawing.Rectangle(0, 0, halfWidth, original.Height);
+                return original.Clone(rect, original.PixelFormat);
+            }
+
+            try
+            {
+                using var fullBitmap = DDSManager.LoadDDSAsBitmap(filePath);
+                return CropLeftHalf(fullBitmap);
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
 
         public static Image<Rgba32> ConvertToImageSharp(System.Drawing.Image systemDrawingImage)
@@ -106,6 +127,10 @@ namespace ModdingManager.classes.gfx
             }
             throw new ArgumentException("Невозможно преобразовать ImageSource в Bitmap — неподдерживаемый формат.");
         }
+
+       
+        
+
 
         public static ImageSource GetCombinedImages(List<ImageSourceArg> images, int width, int height)
         {

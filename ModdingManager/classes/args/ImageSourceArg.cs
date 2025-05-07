@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace ModdingManager.classes
+namespace ModdingManager.classes.args
 {
     public class ImageSourceArg
     {
@@ -15,7 +15,8 @@ namespace ModdingManager.classes
         public double ScaleY { get; set; } = 1.0;
         public double ScaleX { get; set; } = 1.0;
         public bool IsCompresed { get; set; } = false;
-        public ImageSourceArg() { 
+        public ImageSourceArg()
+        {
         }
     }
 }

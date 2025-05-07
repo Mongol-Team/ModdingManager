@@ -505,10 +505,11 @@
             Controls.Add(ApplyButton);
             Controls.Add(ModifBox);
             Controls.Add(label24);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximumSize = new Size(2000000, 2000000);
             Name = "ModifierCreator";
-            Text = "ModifierCreator";
+            Text = "Модифер креатор";
             ResumeLayout(false);
             PerformLayout();
         }

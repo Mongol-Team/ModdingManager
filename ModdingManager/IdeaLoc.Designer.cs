@@ -78,9 +78,10 @@
             Controls.Add(textBox2);
             Controls.Add(textBox1);
             Controls.Add(label1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "IdeaLoc";
-            Text = "IdeaLoc";
+            Text = "Локализатор идей";
             ResumeLayout(false);
             PerformLayout();
         }

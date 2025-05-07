@@ -448,9 +448,10 @@ namespace ModdingManager
             Controls.Add(NameBox);
             Controls.Add(label1);
             Controls.Add(BigIconPanel);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "CharacterCreator";
-            Text = "CharCreator";
+            Text = "Создатель персонажей";
             ResumeLayout(false);
             PerformLayout();
         }

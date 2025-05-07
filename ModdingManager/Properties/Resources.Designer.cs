@@ -63,6 +63,26 @@ namespace ModdingManager.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap new_regiment_slot_support {
+            get {
+                object obj = ResourceManager.GetObject("new_regiment_slot_support", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap null_item_image {
+            get {
+                object obj = ResourceManager.GetObject("null_item_image", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap tech_industry_available_item_bg {
             get {
                 object obj = ResourceManager.GetObject("tech_industry_available_item_bg", resourceCulture);

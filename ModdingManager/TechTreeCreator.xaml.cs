@@ -18,8 +18,8 @@ using System.IO;
 using ModdingManager.managers;
 using System.Text.RegularExpressions;
 using ModdingManager.managers.forms;
-using ModdingManager.classes;
 using ModdingManager.classes.gfx;
+using ModdingManager.classes.args;
 namespace ModdingManager
 {
     /// <summary>

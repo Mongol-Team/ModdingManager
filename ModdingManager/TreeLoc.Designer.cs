@@ -79,9 +79,10 @@
             Controls.Add(textBox2);
             Controls.Add(textBox1);
             Controls.Add(label1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "TreeLoc";
-            Text = "лока по фокусам";
+            Text = "Локализация древа форкусов";
             ResumeLayout(false);
             PerformLayout();
         }

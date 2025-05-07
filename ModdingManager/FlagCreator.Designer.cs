@@ -185,9 +185,10 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(panel1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "FlagCreator";
-            Text = "FlagCreator";
+            Text = "Создатель флагов";
             ResumeLayout(false);
             PerformLayout();
         }
