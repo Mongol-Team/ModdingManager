@@ -24,22 +24,6 @@ namespace ModdingManager.managers.forms
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
-        private static void ApplyTechTreeConfig(TechTreeCreator window, TechTreeConfig config)
-        {
-            window.CurrentTechTree = config;
-
-            window.Dispatcher.Invoke(() =>
-            {
-                window.RefreshTechTreeView();
-                System.Windows.MessageBox.Show(
-                    window,
-                    $"Tech tree '{config.Name}' loaded successfully",
-                    "Success",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-            });
-        }
-
         public static async Task LoadConfigAsync(TechTreeCreator window)
         {
             var openDialog = new OpenFileDialog
@@ -191,20 +175,7 @@ namespace ModdingManager.managers.forms
             return null;
         }
 
-        private static async Task<ImageSource> LoadImageFromPng(string filePath)
-        {
-            return await Task.Run(() =>
-            {
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = new Uri(filePath);
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                bitmap.Freeze(); // Для безопасного использования в других потоках
-                return bitmap;
-            });
-        }
-
+     
         private static BitmapSource FreezeClone(ImageSource source)
         {
             if (source == null)

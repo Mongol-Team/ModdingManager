@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ModdingManager.configs
@@ -10,7 +11,10 @@ namespace ModdingManager.configs
     {
         public RegimentConfig() { }
         public string Name { get; set; }
+
+        [JsonIgnore]
         public Image Icon { get; set; }
+
         public List<string> Categories {  get; set; }
         public int X {  get; set; }
         public int Y { get; set; }

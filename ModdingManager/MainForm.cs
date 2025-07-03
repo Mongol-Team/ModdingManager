@@ -1,12 +1,13 @@
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.IO;
-using ModdingManager.managers;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System;
 using ModdingManager.configs;
 using System.Drawing;
+using System.Windows.Forms.Integration;
+using ModdingManager.managers.utils;
 namespace ModdingManager
 {
     public partial class MainForm : Form
@@ -97,6 +98,7 @@ namespace ModdingManager
                 ModManager.Directory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
                 TechTreeCreator fc = new TechTreeCreator();
+                ElementHost.EnableModelessKeyboardInterop(fc);
                 fc.Show();
             }
             else
@@ -169,7 +171,7 @@ namespace ModdingManager
                 GameDirBox.Text = path.GamePath;
                 DirBox.Text = path.ModPath;
             }
-            catch{}
+            catch { }
         }
 
         private void CharCreator_Click(object sender, EventArgs e)
@@ -235,6 +237,68 @@ namespace ModdingManager
         private void GameDirBox_KeyDown(object sender, KeyEventArgs e)
         {
 
+        }
+
+        private void SuperEventCreatorButton_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(DirBox.Text) || !string.IsNullOrEmpty(GameDirBox.Text))
+            {
+                ModManager.Directory = DirBox.Text;
+                ModManager.GameDirectory = GameDirBox.Text;
+                SupereventCreator fc = new SupereventCreator();
+                ElementHost.EnableModelessKeyboardInterop(fc);
+                fc.Show();
+            }
+            else
+            {
+                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButtons.OK);
+            }
+        }
+
+        private void DebugButton_Click(object sender, EventArgs e)
+        {
+            ModManager.IsDebugRuning = true;
+            DebugWindow debugWindow = new DebugWindow();
+            // Инициализируем Debugger (если используется Singleton, то Instance уже создан)
+            Debugger.Instance.DebugOutputControl = debugWindow.DebugBox; // Подключаем RichTextBox для вывода логов
+
+            // Подключаем текущее окно к Debugger для перехвата исключений
+            Debugger.Instance.AttachToWindow(this);
+
+            // Пример записи отладочного сообщения
+            Debugger.Instance.LogMessage("Режим отладки активирован");
+
+            // Можно сразу проверить работу на тестовом исключении
+            try
+            {
+                throw new InvalidOperationException("Тестовое исключение для отладки");
+            }
+            catch (Exception ex)
+            {
+                Debugger.Instance.LogMessage($"Поймано исключение: {ex.Message}");
+            }
+            debugWindow.Show();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // 1. Простое тестовое исключение
+                throw new InvalidOperationException("Это тестовое исключение из button1_Click");
+
+                // 2. Альтернативные варианты тестовых исключений (раскомментируйте для проверки):
+                // throw new ArgumentNullException("testParameter", "Параметр не может быть null");
+                // throw new IndexOutOfRangeException("Выход за границы массива");
+                // throw new FileNotFoundException("Файл не найден", "example.txt");
+            }
+            catch (Exception ex)
+            {
+                // Записываем исключение в Debugger
+                Debugger.Instance.LogMessage($"Поймано исключение в button1_Click: {ex}");
+
+ 
+            }
         }
     }
 }

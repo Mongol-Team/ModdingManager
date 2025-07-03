@@ -1,4 +1,5 @@
-﻿
+﻿using System.Windows.Forms;
+
 namespace ModdingManager
 {
     public partial class CharacterCreator

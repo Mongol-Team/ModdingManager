@@ -9,12 +9,14 @@ using System.Windows;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Windows.Media.Media3D;
+using ModdingManager.classes.gfx;
 
 public static class WinFormConfigManager
 {
     private static readonly string ConfigsPath = Path.Combine("..", "..", "..", "data", "configs");
     private static readonly string CharactersPath = Path.Combine(ConfigsPath, "characters");
     private static readonly string IdeasPath = Path.Combine(ConfigsPath, "ideas");
+    private static readonly string TemplatesPath = Path.Combine(ConfigsPath, "templates");
     private static readonly string CountrysPath = Path.Combine(ConfigsPath, "countrys");
     private static readonly string TechTreesPath = Path.Combine(ConfigsPath, "techtrees");
 
@@ -24,7 +26,7 @@ public static class WinFormConfigManager
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public static async Task LoadConfigAsync<TForm>(TForm form) where TForm : Form
+    public static async Task LoadConfigWrapper<TForm>(TForm form) where TForm : Form
     {
         try
         {
@@ -74,7 +76,6 @@ public static class WinFormConfigManager
         }
         finally
         {
-            // Восстанавливаем UI
             if (form is System.Windows.FrameworkElement wpfForm)
             {
                 wpfForm.IsEnabled = true;
@@ -251,6 +252,7 @@ public static class WinFormConfigManager
                     CountryCreator countryForm => CreateCountryConfig(countryForm),
                     CharacterCreator characterForm => CreateCharacterConfig(characterForm),
                     IdeaCreator ideaForm => CreateIdeaConfig(ideaForm),
+                    TemplateCreator templateForm => CreateTemplateConfig(templateForm),
                     ModifierCreator modifierForm => CreateModifierConfig(modifierForm),
                     _ => throw new NotSupportedException($"Тип формы {typeof(TForm)} не поддерживается")
                 };
@@ -296,6 +298,7 @@ public static class WinFormConfigManager
             nameof(IdeaCreator) => (IdeasPath, "идеи"),
             nameof(TechTreeCreator) => (TechTreesPath, "дерева технологий"),
             nameof(ModifierCreator) => (Path.Combine(ConfigsPath, "modifiers"), "модификатора"),
+            nameof(TemplateCreator) => (TemplatesPath, "шаблона"),
             _ => throw new NotSupportedException($"Тип формы {typeof(TForm)} не поддерживается")
         };
     }
@@ -380,6 +383,74 @@ public static class WinFormConfigManager
         if (!string.IsNullOrEmpty(config.IconPath) && File.Exists(config.IconPath))
         {
             form.ImagePanel.BackgroundImage = Image.FromFile(config.IconPath);
+        }
+    }
+    #endregion
+    #region Template Config Methods
+    private static TemplateConfig CreateTemplateConfig(TemplateCreator form)
+    {
+        return form.CurrentConfig;
+    }
+
+    private static void ApplyTemplateConfig(TemplateCreator form, TemplateConfig config)
+    {
+        form.NameBox.Text = config.Name;
+        form.IsLocked.Checked = config.IsLocked ?? false;
+        form.GroupNameBox.Text = config.Namespace;
+        form.CanRecrutingLocked.Checked = config.AllowTraining ?? false;
+        form.ModelIDBox.Text = config.ModelName;
+        form.DivisionCapBox.Text = config.DivisionCap.ToString();
+        form.PriorityBox.Text = config.Priority.ToString();
+        form.CustomIconBox.Text = config.CustomIconId.ToString();
+        form.OOBTagBox.Text = config.OOBFileName;
+        form.OOBYearBox.Text = config.OOBFileYear.ToString();
+        form.CurrentConfig = config;
+    
+        foreach (var item in config.SupportItems)
+        {
+            var panel = FindPanel(form, "Support", item.X, item.Y);
+            if (panel != null)
+            {
+                AddImageToPanel(panel, item.Name);
+            }
+        }
+
+        foreach (var item in config.BrigadeItems)
+        {
+            var panel = FindPanel(form, "Brigade", item.X, item.Y);
+            if (panel != null)
+            {
+                AddImageToPanel(panel, item.Name);
+            }
+        }
+    }
+
+    
+
+    private static Panel FindPanel(TemplateCreator form, string prefix, int x, int y)
+    {
+        string panelName = $"{prefix}{x}{y}";
+        Panel panel = null;
+        if (prefix == "Support")
+        {
+            panel = form.Controls.OfType<Panel>()
+            .FirstOrDefault(p => p.Name == "SupportBG");
+        }else if (prefix == "Brigade")
+        {
+            panel = form.Controls.OfType<Panel>()
+            .FirstOrDefault(p => p.Name == "BrigadeBG");
+        }
+        var result = panel.Controls.OfType<Panel>()
+               .FirstOrDefault(p => p.Name == panelName);
+        return result;
+    }
+
+    private static void AddImageToPanel(Panel panel, string unitName)
+    {
+        var image = ImageManager.FindUnitIcon(unitName);
+        if (image != null)
+        {
+            panel.BackgroundImage = image;
         }
     }
     #endregion
@@ -482,7 +553,11 @@ public static class WinFormConfigManager
                             var modifierConfig = JsonSerializer.Deserialize<ModifierConfig>(json);
                             ApplyModifierConfig(modifierForm, modifierConfig);
                             break;
-                    
+                        case TemplateCreator templateForm:
+                            var templateConfig = JsonSerializer.Deserialize<TemplateConfig>(json);
+                            ApplyTemplateConfig(templateForm, templateConfig);
+                            break;
+
                     }
 
                     System.Windows.Forms.MessageBox.Show(form, $"Конфигурация '{configName}' успешно загружена",
@@ -705,20 +780,16 @@ public static class WinFormConfigManager
     {
         using (var memoryStream = new MemoryStream())
         {
-            // Сериализуем конфиг в JSON
             string json = JsonSerializer.Serialize(config, JsonOptions);
 
-            // Создаем архив в памяти
             using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
             {
-                // Добавляем JSON
                 var jsonEntry = archive.CreateEntry("config.json");
                 using (var writer = new StreamWriter(jsonEntry.Open()))
                 {
                     await writer.WriteAsync(json);
                 }
 
-                // Добавляем изображения
                 foreach (var item in config.Items.Where(i => i.Image != null))
                 {
                     var imageEntry = archive.CreateEntry($"images/{item.Id}.png");
@@ -731,7 +802,6 @@ public static class WinFormConfigManager
                 }
             }
 
-            // Сохраняем архив на диск
             await File.WriteAllBytesAsync(filePath, memoryStream.ToArray());
             return true;
         }
@@ -742,14 +812,12 @@ public static class WinFormConfigManager
         using (var fileStream = new FileStream(filePath, FileMode.Open))
         using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read))
         {
-            // Читаем JSON
             var jsonEntry = archive.GetEntry("config.json");
             using (var reader = new StreamReader(jsonEntry.Open()))
             {
                 string json = await reader.ReadToEndAsync();
                 var config = JsonSerializer.Deserialize<TechTreeConfig>(json);
 
-                // Загружаем изображения
                 foreach (var item in config.Items)
                 {
                     var imageEntry = archive.GetEntry($"images/{item.Id}.png");

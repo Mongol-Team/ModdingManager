@@ -16,8 +16,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ModdingManager.managers;
 using ModdingManager.classes.gfx;
+using ModdingManager.classes.extentions;
+using ModdingManager.managers.utils;
 
 namespace ModdingManager
 {
@@ -121,11 +122,11 @@ namespace ModdingManager
                 Directory.CreateDirectory(advisorsDir);
 
 
-                DDSManager.SaveAsDDS(bigIconPanel.BackgroundImage, leadersDir, $"{charId}_army.dds", 156, 210);
-                DDSManager.SaveAsDDS(bigIconPanel.BackgroundImage, leadersDir, $"{charId}_civilian.dds", 156, 210);
-              
-                DDSManager.SaveAsDDS(smallIconPanel.BackgroundImage, advisorsDir, $"{charId}_army.dds",65, 67);
-                DDSManager.SaveAsDDS(smallIconPanel.BackgroundImage, advisorsDir, $"{charId}_civilian.dds",65, 67);
+                bigIconPanel.BackgroundImage.SaveAsDDS(leadersDir, $"{charId}_army.dds", 156, 210);
+                bigIconPanel.BackgroundImage.SaveAsDDS(leadersDir, $"{charId}_civilian.dds", 156, 210);
+
+                smallIconPanel.BackgroundImage.SaveAsDDS(advisorsDir, $"{charId}_army.dds",65, 67);
+                smallIconPanel.BackgroundImage.SaveAsDDS(advisorsDir, $"{charId}_civilian.dds", 65, 67);
 
                 MessageBox.Show("Портреты сохранены успешно!", "Успех",
                               MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -394,7 +395,7 @@ namespace ModdingManager
         {
             Task.Run(() =>
             {
-                WinFormConfigManager.LoadConfigAsync(this);
+                WinFormConfigManager.LoadConfigWrapper(this);
             });
         }
         private void SaveButton_Click(object sender, EventArgs e)

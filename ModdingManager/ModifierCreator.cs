@@ -15,7 +15,7 @@ using System.IO;
 using TeximpNet.Compression;
 using TeximpNet.DDS;
 using TeximpNet;
-using ModdingManager.managers;
+using ModdingManager.managers.utils;
 
 namespace ModdingManager
 {
@@ -444,7 +444,7 @@ namespace ModdingManager
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            WinFormConfigManager.LoadConfigAsync(this);
+            WinFormConfigManager.LoadConfigWrapper(this);
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)

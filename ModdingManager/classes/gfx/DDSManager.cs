@@ -11,47 +11,22 @@ using System.IO;
 using ModdingManager.configs;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
-using ModdingManager.managers;
+using ModdingManager.classes.extentions;
+using ModdingManager.managers.utils;
 namespace ModdingManager.classes.gfx
 {
     public class DDSManager : ImageManager
     {
         public DDSManager() { }
 
-        public static void SaveIdeaGFXAsDDS(Image image, string dir, string id, string tag)
+        public static void SaveIdeaGFXAsDDS(System.Drawing.Image image, string dir, string id, string tag)
         {
             var path = Path.Combine(dir, "gfx", "interface", "ideas", tag);
             Directory.CreateDirectory(path);
-            SaveAsDDS(image, path, id, 64, 64);
+            image.SaveAsDDS(path, id, 64, 64);
         }
 
-        public static void SaveAsDDS(Image image, string directory, string filename, int width, int height)
-        {
-            Directory.CreateDirectory(directory);
-
-            using (var imageSharp = ConvertToImageSharp(image))
-            using (var resized = ResizeStretch(imageSharp, width, height))
-            {
-                string outputPath = Path.Combine(directory, $"{filename}.dds");
-
-                byte[] pixelData = new byte[resized.Width * resized.Height * 4];
-                resized.CopyPixelDataTo(pixelData);
-
-                for (int i = 0; i < pixelData.Length; i += 4)
-                {
-                    byte r = pixelData[i];
-                    byte b = pixelData[i + 2];
-                    pixelData[i] = b;
-                    pixelData[i + 2] = r;
-                }
-
-                using (var surface = new Surface(resized.Width, resized.Height))
-                {
-                    Marshal.Copy(pixelData, 0, surface.DataPtr, pixelData.Length);
-                    DDSFile.Write(outputPath, surface, TextureDimension.Two, DDSFlags.None);
-                }
-            }
-        }
+        
 
         public static void SaveAllTechIconsAsDDS(TechTreeConfig techTree)
         {
@@ -86,7 +61,7 @@ namespace ModdingManager.classes.gfx
                 {
                     using (var bmp = ConvertImageSourceToBitmap(item.Image))
                     {
-                        SaveAsDDS(bmp, techIconDir, item.Id, 64, 64);
+                        bmp.SaveAsDDS(techIconDir, item.Id, 64, 64);
                     }
                 }
                 catch (Exception ex)
@@ -133,7 +108,7 @@ namespace ModdingManager.classes.gfx
 
             using (var bmp = ConvertImageSourceToBitmap(temp2))
             {
-                SaveAsDDS(bmp, techIconDir, $"techtree_{window.CurrentTechTree.Name}_tab", 182, 55);
+                bmp.SaveAsDDS(techIconDir, $"techtree_{window.CurrentTechTree.Name}_tab", 182, 55);
             }
         }
 

@@ -83,6 +83,26 @@ namespace ModdingManager.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap superevent_bg_1 {
+            get {
+                object obj = ResourceManager.GetObject("superevent_bg_1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap superevent_button_1 {
+            get {
+                object obj = ResourceManager.GetObject("superevent_button_1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap tech_industry_available_item_bg {
             get {
                 object obj = ResourceManager.GetObject("tech_industry_available_item_bg", resourceCulture);

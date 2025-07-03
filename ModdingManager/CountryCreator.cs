@@ -12,8 +12,8 @@ using System.IO;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using ModdingManager.configs;
-using ModdingManager.managers;
 using System.Reflection.Metadata;
+using ModdingManager.managers.utils;
 
 namespace ModdingManager
 {
@@ -721,7 +721,7 @@ namespace ModdingManager
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            WinFormConfigManager.LoadConfigAsync(this);
+            WinFormConfigManager.LoadConfigWrapper(this);
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)

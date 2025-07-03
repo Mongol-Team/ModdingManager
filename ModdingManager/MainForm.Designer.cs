@@ -47,8 +47,9 @@ namespace ModdingManager
             TestButton = new Button();
             GameDirBox = new TextBox();
             label2 = new Label();
-            button1 = new Button();
-            button2 = new Button();
+            SuperEventCreatorButton = new Button();
+            фва = new Button();
+            DebugButton = new Button();
             SuspendLayout();
             // 
             // LocConvertButton
@@ -213,31 +214,46 @@ namespace ModdingManager
             label2.TabIndex = 15;
             label2.Text = "Дирректория игры ";
             // 
-            // button1
+            // SuperEventCreatorButton
             // 
-            button1.Location = new Point(42, 388);
-            button1.Name = "button1";
-            button1.Size = new Size(237, 56);
-            button1.TabIndex = 16;
-            button1.Text = "Создатель суперивентов";
-            button1.UseVisualStyleBackColor = true;
+            SuperEventCreatorButton.Location = new Point(42, 388);
+            SuperEventCreatorButton.Name = "SuperEventCreatorButton";
+            SuperEventCreatorButton.Size = new Size(237, 56);
+            SuperEventCreatorButton.TabIndex = 16;
+            SuperEventCreatorButton.Text = "Создатель суперивентов";
+            SuperEventCreatorButton.UseVisualStyleBackColor = true;
+            SuperEventCreatorButton.Click += SuperEventCreatorButton_Click;
             // 
-            // button2
+            // фва
             // 
-            button2.Location = new Point(684, 388);
-            button2.Name = "button2";
-            button2.Size = new Size(237, 56);
-            button2.TabIndex = 17;
-            button2.Text = "Создатель стартовых юнитов";
-            button2.UseVisualStyleBackColor = true;
+            фва.BackColor = Color.FromArgb(0, 192, 192);
+            фва.Location = new Point(684, 388);
+            фва.Name = "фва";
+            фва.Size = new Size(237, 56);
+            фва.TabIndex = 17;
+            фва.Text = "Создатель стартовых юнитов";
+            фва.UseVisualStyleBackColor = false;
+            // 
+            // DebugButton
+            // 
+            DebugButton.BackColor = Color.FromArgb(64, 64, 64);
+            DebugButton.ForeColor = SystemColors.Control;
+            DebugButton.Location = new Point(806, 607);
+            DebugButton.Name = "DebugButton";
+            DebugButton.Size = new Size(131, 37);
+            DebugButton.TabIndex = 18;
+            DebugButton.Text = "Debug";
+            DebugButton.UseVisualStyleBackColor = false;
+            DebugButton.Click += DebugButton_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(963, 694);
-            Controls.Add(button2);
-            Controls.Add(button1);
+            Controls.Add(DebugButton);
+            Controls.Add(фва);
+            Controls.Add(SuperEventCreatorButton);
             Controls.Add(label2);
             Controls.Add(GameDirBox);
             Controls.Add(TestButton);
@@ -281,7 +297,8 @@ namespace ModdingManager
         private Button TestButton;
         private TextBox GameDirBox;
         private Label label2;
-        private Button button1;
-        private Button button2;
+        private Button SuperEventCreatorButton;
+        private Button фва;
+        private Button DebugButton;
     }
 }

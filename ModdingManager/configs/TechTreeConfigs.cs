@@ -9,11 +9,11 @@ namespace ModdingManager.configs
 {
     public class TechTreeConfig
     {
-        public string Name { get; set; } // Имя древа технологий
-        public string Orientation { get; set; } // Ориентация древа: "vertical" или "horizontal"
+        public string Name { get; set; } 
+        public string Orientation { get; set; }
         public List<TechTreeItemConfig> Items { get; set; } = new List<TechTreeItemConfig>();
-        public List<List<string>> ChildOf { get; set; } = new List<List<string>>(); // Связи типа "родитель-ребенок"
-        public List<List<string>> Mutal { get; set; } = new List<List<string>>(); // Взаимные связи
+        public List<List<string>> ChildOf { get; set; } = new List<List<string>>(); 
+        public List<List<string>> Mutal { get; set; } = new List<List<string>>(); 
         public string Ledger { get; set; }
     }
 

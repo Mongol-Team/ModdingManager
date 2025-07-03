@@ -20,9 +20,9 @@
         <!-- Левая часть пока что пустая, но готова к использованию -->
         <Grid Grid.Column="0" Background="#F0F0F0" Grid.ColumnSpan="2" Margin="3,3,1085,1">
             <Label Content="Айди технологии" HorizontalAlignment="Left" Margin="58,44,0,0" VerticalAlignment="Top" Width="128"/>
-            <TextBox x:Name="TechIdBox" HorizontalAlignment="Left" Margin="39,67,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" TextInput="MyTextBox_TextInput" KeyDown="MyTextBox_KeyDown"/>
-            <TextBox x:Name="TechTreeNameBox" HorizontalAlignment="Left" Margin="219,88,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" TextInput="MyTextBox_TextInput" KeyDown="MyTextBox_KeyDown"/>
-            <TextBox x:Name="TechNameBox" HorizontalAlignment="Left" Margin="45,630,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" TextInput="MyTextBox_TextInput" KeyDown="MyTextBox_KeyDown"/>
+            <TextBox x:Name="TechIdBox" HorizontalAlignment="Left" Margin="39,67,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23"/>
+            <TextBox x:Name="TechTreeNameBox" HorizontalAlignment="Left" Margin="219,88,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23"/>
+            <TextBox x:Name="TechNameBox" HorizontalAlignment="Left" Margin="45,630,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" />
             <Label Content="Ориентация древа технологий" HorizontalAlignment="Left" Margin="30,100,0,0" VerticalAlignment="Top"/>
             <ComboBox x:Name="OrientationBox" HorizontalAlignment="Left" Margin="39,130,0,0" VerticalAlignment="Top" Width="159">
                 <ComboBoxItem Content="vertical"/>
@@ -63,14 +63,14 @@
 
             <Button x:Name="SetMutalButton" Content="- - -" HorizontalAlignment="Left" Margin="107,1,0,0" VerticalAlignment="Top" Click="MutalEvent"/>
             <Button x:Name="SetChildButton" Content="--&gt;" HorizontalAlignment="Left" Margin="60,1,0,0" VerticalAlignment="Top" Width="30" Click="ChildEvent"/>
-            <TextBox x:Name="TechDescBox" HorizontalAlignment="Left" Margin="38,295,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" TextInput="MyTextBox_TextInput" KeyDown="MyTextBox_KeyDown"/>
-            <TextBox x:Name="TechCostModifBox" HorizontalAlignment="Left" Margin="232,470,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="47" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" TextInput="MyTextBox_TextInput" KeyDown="MyTextBox_KeyDown"/>
+            <TextBox x:Name="TechDescBox" HorizontalAlignment="Left" Margin="38,295,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23"/>
+            <TextBox x:Name="TechCostModifBox" HorizontalAlignment="Left" Margin="232,470,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="47" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23"/>
             <Label Content="Еффект техи" HorizontalAlignment="Left" Margin="274,265,0,0" VerticalAlignment="Top"/>
             <Label Content="Описание технологии" HorizontalAlignment="Left" Margin="53,268,0,0" VerticalAlignment="Top"/>
             <Label Content="Разблокировка после исследования" HorizontalAlignment="Left" Margin="9,318,0,0" VerticalAlignment="Top"/>
             <Label Content="Имя технологии" HorizontalAlignment="Left" Margin="76,603,0,0" VerticalAlignment="Top" Width="104"/>
             <Label Content="Необходимые теч(помимо отеческого)" HorizontalAlignment="Left" Margin="3,414,0,0" VerticalAlignment="Top" Width="232"/>
-            <TextBox x:Name="StartYeatBox" HorizontalAlignment="Left" Margin="42,675,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="158" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" TextInput="MyTextBox_TextInput" KeyDown="MyTextBox_KeyDown"/>
+            <TextBox x:Name="StartYeatBox" HorizontalAlignment="Left" Margin="42,675,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="158" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23"/>
             <Label Content="Стартовый год" HorizontalAlignment="Left" Margin="76,649,0,0" VerticalAlignment="Top" Width="92"/>
             <Label Content="Модиф кост             Кост" HorizontalAlignment="Left" Margin="216,444,0,0" VerticalAlignment="Top" Width="151"/>
             <Label Content="Алловед" HorizontalAlignment="Left" Margin="283,359,0,0" VerticalAlignment="Top"/>
@@ -78,13 +78,12 @@
 
             <Label Content="Желание аи" HorizontalAlignment="Left" Margin="274,603,0,0" VerticalAlignment="Top"/>
             <Label Content="Имя древа" HorizontalAlignment="Left" Margin="269,64,0,0" VerticalAlignment="Top" Width="70"/>
-            <TextBox x:Name="TechCostBox" HorizontalAlignment="Left" Margin="321,471,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="47" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" TextInput="MyTextBox_TextInput" KeyDown="MyTextBox_KeyDown"/>
+            <TextBox x:Name="TechCostBox" HorizontalAlignment="Left" Margin="321,471,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="47" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23"/>
             <Button x:Name="DoneButton" Content="Готово" HorizontalAlignment="Left" Margin="181,712,0,0" VerticalAlignment="Top" Height="20" Width="81" Click="DoneButton_Click" Background="#FFA6846B"/>
             <RichTextBox x:Name="EnablesBox" 
                  Margin="36,342,209,366" 
                  VerticalScrollBarVisibility="Auto" 
-                 HorizontalScrollBarVisibility="Auto"
-                 PreviewKeyDown="MyRichBox_KeyDown">
+                 HorizontalScrollBarVisibility="Auto">
                 <FlowDocument PageWidth="200">
                     <Paragraph Name="MainParagraph" TextAlignment="Left" Margin="0">
                         <Run Text="enable_equipments:"/>
@@ -95,14 +94,14 @@
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
-            <RichTextBox x:Name="AllowedBox" Margin="229,384,22,344" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewKeyDown="MyRichBox_KeyDown" TextInput="MyRichBox_TextInput">
+            <RichTextBox x:Name="AllowedBox" Margin="229,384,22,344" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <FlowDocument>
                     <Paragraph>
                         <Run Text=""/>
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
-            <RichTextBox x:Name="EffectBox" Margin="235,288,20,412" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewKeyDown="MyRichBox_KeyDown" TextInput="MyRichBox_TextInput">
+            <RichTextBox x:Name="EffectBox" Margin="235,288,20,412" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <FlowDocument PageWidth="200">
                     <Paragraph>
                         <Run Text="on_research_complete:,show_effect_as_desc:"/>
@@ -110,21 +109,21 @@
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
-            <RichTextBox x:Name="DependenciesBox" Margin="39,435,212,277" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewKeyDown="MyRichBox_KeyDown" TextInput="MyRichBox_TextInput">
+            <RichTextBox x:Name="DependenciesBox" Margin="39,435,212,277" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <FlowDocument PageWidth="200">
                     <Paragraph>
                         <Run Text=""/>
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
-            <RichTextBox x:Name="AiWillDoBox" Margin="227,628,24,92" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewKeyDown="MyRichBox_KeyDown" TextInput="MyRichBox_TextInput">
+            <RichTextBox x:Name="AiWillDoBox" Margin="227,628,24,92" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" >
                 <FlowDocument>
                     <Paragraph>
                         <Run Text=""/>
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
-            <RichTextBox x:Name="ModdifierBox" Margin="227,526,24,196" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewKeyDown="MyRichBox_KeyDown" TextInput="MyRichBox_TextInput">
+            <RichTextBox x:Name="ModdifierBox" Margin="227,526,24,196" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <FlowDocument>
                     <Paragraph>
                         <Run Text=""/>
@@ -137,7 +136,7 @@
             <Button x:Name="LoadButton" Content="Загрузить дерво" HorizontalAlignment="Left" Margin="40,715,0,0" VerticalAlignment="Top" Click="LoadEvent" Background="#FFC02B2B" Width="100"/>
             <Button x:Name="SaveButton" Content="Сохранить дерво" HorizontalAlignment="Left" Margin="41,742,0,0" VerticalAlignment="Top" Click="SaveEvent" Background="#FF4F842A"/>
             <Label Content="Модифер(для категорий)" HorizontalAlignment="Left" Margin="45,503,0,0" VerticalAlignment="Top"/>
-            <RichTextBox x:Name="CathegoryModdifierBox" Margin="40,524,211,180" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewKeyDown="MyRichBox_KeyDown" TextInput="MyRichBox_TextInput" AcceptsReturn="False">
+            <RichTextBox x:Name="CathegoryModdifierBox" Margin="40,524,211,180" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  AcceptsReturn="False">
                 <FlowDocument PageWidth="200">
                     <Paragraph>
                         <Run Text=""/>
@@ -145,7 +144,7 @@
                 </FlowDocument>
             </RichTextBox>
             <Label Content="Леджер" HorizontalAlignment="Left" Margin="267,104,0,0" VerticalAlignment="Top"/>
-            <TextBox x:Name="TreeLedgerBox" HorizontalAlignment="Left" Margin="218,128,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" TextInput="MyTextBox_TextInput" KeyDown="MyTextBox_KeyDown"/>
+            <TextBox x:Name="TreeLedgerBox" HorizontalAlignment="Left" Margin="218,128,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" />
             <Button x:Name="TreeDoneButton" Content="Древо" HorizontalAlignment="Left" Margin="180,743,0,0" VerticalAlignment="Top" Height="20" Width="81" Click="DoneTreeButton_Click" Background="#FF6CB45F"/>
             <Canvas x:Name="TabFolderImageCanvas" Height="61" Width ="182" 
                 AllowDrop="True"

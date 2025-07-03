@@ -15,16 +15,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ModdingManager.configs;
 using System.IO;
-using ModdingManager.managers;
 using System.Text.RegularExpressions;
 using ModdingManager.managers.forms;
 using ModdingManager.classes.gfx;
 using ModdingManager.classes.args;
+using ModdingManager.classes.extentions;
+using ModdingManager.managers.utils;
 namespace ModdingManager
 {
-    /// <summary>
-    /// Логика взаимодействия для TestWPF.xaml
-    /// </summary>
     public partial class TechTreeCreator : Window
     {
         private Dictionary<UIElement, System.Windows.Point> originalPositions = new();
@@ -40,62 +38,7 @@ namespace ModdingManager
         {
             InitializeComponent();
             DrawGrid();
-            InputManager.Current.PreProcessInput += (sender, e) =>
-            {
-                var args = e.StagingItem.Input as System.Windows.Input.KeyEventArgs;
-
-                if (args == null) return;
-
-                var focused = Keyboard.FocusedElement as System.Windows.Controls.RichTextBox;
-                if (focused == null) return;
-
-                var caret = focused.CaretPosition;
-                if (!caret.IsAtInsertionPosition)
-                    caret = caret.GetInsertionPosition(LogicalDirection.Forward);
-
-                if (args.Key == Key.Enter)
-                {
-                    caret = caret.InsertLineBreak();
-                    focused.CaretPosition = caret;
-                    args.Handled = true;
-                }
-                else if (args.Key == Key.Left)
-                {
-                    var next = caret.GetNextInsertionPosition(LogicalDirection.Backward);
-                    if (next != null)
-                    {
-                        focused.CaretPosition = next;
-                        args.Handled = true;
-                    }
-                }
-                else if (args.Key == Key.Right)
-                {
-                    var next = caret.GetNextInsertionPosition(LogicalDirection.Forward);
-                    if (next != null)
-                    {
-                        focused.CaretPosition = next;
-                        args.Handled = true;
-                    }
-                }
-                else if (args.Key == Key.Up)
-                {
-                    var lineStart = caret.GetLineStartPosition(-1);
-                    if (lineStart != null)
-                    {
-                        focused.CaretPosition = lineStart;
-                        args.Handled = true;
-                    }
-                }
-                else if (args.Key == Key.Down)
-                {
-                    var lineStart = caret.GetLineStartPosition(1);
-                    if (lineStart != null)
-                    {
-                        focused.CaretPosition = lineStart;
-                        args.Handled = true;
-                    }
-                }
-            };
+            Debugger.AttachIfDebug(this);
         }
 
         private void DrawGrid()
@@ -262,18 +205,7 @@ namespace ModdingManager
             return border;
         }
 
-        private void AttachEventHandlers(Canvas canvas)
-        {
-            foreach (var child in canvas.Children) 
-            { 
-                if (child.GetType() == typeof(System.Windows.Controls.Panel))
-                {
-                    var panel = canvas.Children[0];
-                    panel.MouseLeftButtonDown += Element_MouseLeftButtonDown;
-                    panel.MouseRightButtonDown += Element_MouseRightButtonDown;
-                }
-            }
-        }
+      
 
         private System.Windows.Point GetCanvasPosition(int gridX, int gridY)
         {
@@ -342,7 +274,6 @@ namespace ModdingManager
             List<string> newLines = new List<string>();
             bool isVertical = techTree.Orientation?.ToLower() == "vertical";
 
-            // 1. Находим контейнер countrytechtreeview
             int containerStart = -1, containerEnd = -1;
             int braceLevel = 0;
             bool inTargetContainer = false;
@@ -380,7 +311,6 @@ namespace ModdingManager
                 return;
             }
 
-            // 2. Вставляем контент перед закрывающей скобкой
             string content = GenerateTechTreeContent(techTree, isVertical,
                 lines[containerStart].TakeWhile(c => c == '\t').Count() + 1);
 
@@ -399,7 +329,6 @@ namespace ModdingManager
 
             StringBuilder entries = new StringBuilder();
 
-            // Вставляем новый containerWindowType
             entries.AppendLine($"{GetTabs(innerTabCount)}containerWindowType = {{");
             entries.AppendLine($"{GetTabs(innerTabCount + 1)}name = \"{techTreeName}\"");
             entries.AppendLine($"{GetTabs(innerTabCount + 1)}position = {{ x=0 y=47 }}");
@@ -493,10 +422,8 @@ namespace ModdingManager
 
             foreach (var item in techTree.Items)
             {
-                // Проверяем, есть ли у элемента дети
                 bool hasChildren = techTree.ChildOf.Any(pair => pair[0] == item.Id);
 
-                // Проверяем, является ли элемент чьим-то ребенком
                 bool isChild = allChildren.Contains(item.Id);
 
                 if (hasChildren && !isChild)
@@ -1152,81 +1079,10 @@ namespace ModdingManager
 
         private List<ElementConnection> connections = new List<ElementConnection>();
 
-        [DllImport("user32.dll")]
-        static extern int ToUnicode(uint virtualKeyCode, uint scanCode,
-    byte[] keyboardState, [Out, MarshalAs(UnmanagedType.LPWStr)]
-    StringBuilder receivingBuffer, int bufferSize, uint flags);
-
-        [DllImport("user32.dll")]
-        static extern bool GetKeyboardState(byte[] lpKeyState);
-
-        [DllImport("user32.dll")]
-        static extern uint MapVirtualKey(uint uCode, uint uMapType);
-
-        private string GetCharFromKey(Key key)
-        {
-            string result = "";
-
-            int virtualKey = KeyInterop.VirtualKeyFromKey(key);
-            byte[] keyboardState = new byte[256];
-            if (!GetKeyboardState(keyboardState))
-                return result;
-
-            uint scanCode = MapVirtualKey((uint)virtualKey, 0);
-            StringBuilder stringBuilder = new StringBuilder(2);
-
-            int count = ToUnicode((uint)virtualKey, scanCode, keyboardState, stringBuilder, stringBuilder.Capacity, 0);
-            if (count > 0)
-                result = stringBuilder.ToString();
-
-            return result;
-        }
+        
 
 
-        private void MyTextBox_TextInput(object sender, TextCompositionEventArgs e)
-        {
-            TechNameBox.Text += e.Text;
-            TechNameBox.CaretIndex = TechNameBox.Text.Length;
-            e.Handled = true;
-        }
-
-        private void MyTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            string typedChar = GetCharFromKey(e.Key);
-            var thіs = sender as System.Windows.Controls.TextBox;
-            if (thіs == null) return;
-
-            if (e.Key == Key.Left)
-            {
-                if (thіs.CaretIndex > 0)
-                    thіs.CaretIndex--;
-                e.Handled = true;
-                return;
-            }
-
-            if (e.Key == Key.Right)
-            {
-                if (thіs.CaretIndex < thіs.Text.Length)
-                    thіs.CaretIndex++;
-                e.Handled = true;
-                return;
-            }
-
-            if (!string.IsNullOrEmpty(typedChar))
-            {
-                int caretPos = thіs.CaretIndex;
-                thіs.Text = thіs.Text.Insert(caretPos, typedChar);
-                thіs.CaretIndex = caretPos + typedChar.Length;
-                e.Handled = true;
-            }
-        }
-
-
-        private void MyRichBox_TextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = true; 
-        }
-
+       
         public void InsertGUITechTreeContainers(string modFolderPath, TechTreeConfig techTree, string gamePath)
         {
             string filePath = GetOrCopyGuiFile(modFolderPath, gamePath);
@@ -1454,7 +1310,7 @@ namespace ModdingManager
                     tabsStart = i;
                     inTabsContainer = true;
                     braceLevel = 1;
-                    i++; // Пропускаем строку с name
+                    i++; 
                     continue;
                 }
 
@@ -1496,7 +1352,6 @@ namespace ModdingManager
                 return;
             }
 
-            // 2. Создаем новую кнопку
             int tabCount = lines[tabsStart].TakeWhile(c => c == '\t').Count();
             string tabStr = new string('\t', tabCount);
             string innerTabStr = new string('\t', tabCount + 1);
@@ -1508,12 +1363,9 @@ namespace ModdingManager
             {innerTabStr}frame = 1
             {innerTabStr}clicksound = ui_research_tab_infantry
             {tabStr}}}";
-
-            // 3. Вставляем перед закрывающей скобкой
             List<string> result = new List<string>();
             result.AddRange(lines.Take(tabsEnd));
 
-            // Добавляем пустую строку перед кнопкой, если нужно
             if (tabsEnd > 0 && !string.IsNullOrWhiteSpace(lines[tabsEnd - 1]))
             {
                 result.Add("");
@@ -1525,106 +1377,7 @@ namespace ModdingManager
             File.WriteAllLines(filePath, result);
             Console.WriteLine($"Added {techTree.Name}_tab button at x={lastButtonX + 89}");
         }
-        private void MyRichBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            var richText = sender as System.Windows.Controls.RichTextBox;
-            if (richText == null) return;
-
-            var caret = richText.CaretPosition;
-
-            if (!caret.IsAtInsertionPosition)
-                caret = caret.GetInsertionPosition(LogicalDirection.Forward);
-
-            if (e.Key == Key.Left)
-            {
-                var next = caret.GetNextInsertionPosition(LogicalDirection.Backward);
-                if (next != null)
-                    richText.CaretPosition = next;
-                e.Handled = true;
-                return;
-            }
-            else if (e.Key == Key.Right)
-            {
-                var next = caret.GetNextInsertionPosition(LogicalDirection.Forward);
-                if (next != null)
-                    richText.CaretPosition = next;
-                e.Handled = true;
-                return;
-            }
-            else if (e.Key == Key.Up)
-            {
-                var lineStart = caret.GetLineStartPosition(-1);
-                if (lineStart != null)
-                    richText.CaretPosition = lineStart;
-                e.Handled = true;
-                return;
-            }
-            else if (e.Key == Key.Down)
-            {
-                var lineStart = caret.GetLineStartPosition(1);
-                if (lineStart != null)
-                    richText.CaretPosition = lineStart;
-                e.Handled = true;
-                return;
-            }
-
-            if (e.Key == Key.Enter)
-            {
-                caret = caret.InsertLineBreak();
-                richText.CaretPosition = caret;
-                e.Handled = true;
-                return;
-            }
-
-            if (e.Key == Key.Back)
-            {
-                var backPos = caret.GetPositionAtOffset(-1, LogicalDirection.Backward);
-                if (backPos != null)
-                {
-                    var range = new TextRange(backPos, caret);
-                    range.Text = "";
-                    richText.CaretPosition = backPos;
-                }
-
-                e.Handled = true;
-                return;
-            }
-
-            string typedChar = GetCharFromKey(e.Key);
-            if (!string.IsNullOrEmpty(typedChar))
-            {
-                // Создаём текстовую вставку вручную через TextRange
-                var range = new TextRange(caret, caret);
-                range.Text = typedChar;
-
-                // Двигаем каретку ВРУЧНУЮ на символ вперёд
-                var newCaret = range.End.GetInsertionPosition(LogicalDirection.Forward);
-                if (newCaret != null)
-                    richText.CaretPosition = newCaret;
-                else
-                    richText.CaretPosition = caret;
-
-                e.Handled = true;
-            }
-        }
-
-        private void InsertTextAtCaret(System.Windows.Controls.RichTextBox richText, string typedChar)
-        {
-            var caret = richText.CaretPosition;
-            var insertionPos = caret.GetPositionAtOffset(typedChar.Length, LogicalDirection.Forward);
-
-            if (insertionPos == null)
-            {
-                // Устанавливаем каретку в начало документа
-                richText.CaretPosition = richText.Document.ContentStart;
-                insertionPos = richText.CaretPosition;
-            }
-
-            // Вставляем текст
-            richText.CaretPosition = insertionPos;
-            richText.CaretPosition.InsertTextInRun(typedChar);
-        }
-
+        
         private void TechIconCanvas_Drop(object sender, System.Windows.DragEventArgs e)
         {
             if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
@@ -1749,7 +1502,7 @@ namespace ModdingManager
            
             using (var bmp = ImageManager.ConvertImageSourceToBitmap(img))
             {
-                DDSManager.SaveAsDDS(bmp, techIconDir, $"techtree_{window.CurrentTechTree.Name}_tab", 182, 61);
+                bmp.SaveAsDDS(techIconDir, $"techtree_{window.CurrentTechTree.Name}_tab", 182, 61);
             }
         }
         
@@ -1896,13 +1649,11 @@ namespace ModdingManager
                                      $"\t}}";
 
                         newLines.Insert(newLines.Count - 1, entry);
-                        if (braceLevel <= 0) newLines.Insert(newLines.Count - 2, ""); // Добавляем пустую строку перед закрытием
+                        if (braceLevel <= 0) newLines.Insert(newLines.Count - 2, ""); 
                         insertedEntry = true;
                     }
                 }
             }
-
-            // Если блок не найден, добавляем в конец файла
             if (!foundFoldersBlock)
             {
                 newLines.Add("");
@@ -1935,7 +1686,7 @@ namespace ModdingManager
             Directory.CreateDirectory(techIconDir);
             using (var bmp = ImageManager.ConvertImageSourceToBitmap(TechBGImage.ImageSource))
             {
-                DDSManager.SaveAsDDS(bmp, techIconDir, $"techtree_{CurrentTechTree.Name}_bg", bmp.Width, bmp.Height);
+                bmp.SaveAsDDS(techIconDir, $"techtree_{CurrentTechTree.Name}_bg", bmp.Width, bmp.Height);
             }
         }
 
@@ -2239,25 +1990,18 @@ namespace ModdingManager
            );
             string fullText = textRange.Text;
 
-            // Создаем FormattedText для измерения ширины текста
             var formattedText = new FormattedText(
                 fullText,
                 System.Globalization.CultureInfo.CurrentCulture,
                 System.Windows.FlowDirection.LeftToRight,
                 new Typeface(EnablesBox.FontFamily, EnablesBox.FontStyle, EnablesBox.FontWeight, EnablesBox.FontStretch),
                 EnablesBox.FontSize,
-                System.Windows.Media.Brushes.Black,  // Цвет не важен, нужен только для измерения
+                System.Windows.Media.Brushes.Black,
                 VisualTreeHelper.GetDpi(EnablesBox).PixelsPerDip
             );
-
-            // Устанавливаем новую ширину FlowDocument (+ небольшой отступ)
             EnablesBox.Document.PageWidth = formattedText.Width + 20;
         }
 
-        private void Grid_Drop(object sender, System.Windows.DragEventArgs e)
-        {
-
-        }
 
         private void WrapperGridCanvas_Drop(object sender, System.Windows.DragEventArgs e)
         {

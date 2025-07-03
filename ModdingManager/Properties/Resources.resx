@@ -124,6 +124,12 @@
   <data name="null_item_image" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\data\gfx\interface\null_item_image.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="superevent_bg_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\data\gfx\interface\superevent_bg_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="superevent_button_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\data\gfx\interface\superevent_button_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="technology_available_item_bg" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\data\gfx\interface\technology_available_item_bg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

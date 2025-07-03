@@ -10,8 +10,8 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ModdingManager.managers;
 using ModdingManager.classes.gfx;
+using ModdingManager.managers.utils;
 
 namespace ModdingManager
 {
@@ -313,7 +313,7 @@ namespace ModdingManager
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            WinFormConfigManager.LoadConfigAsync(this);
+            WinFormConfigManager.LoadConfigWrapper(this);
         }
 
         private void AddIdeaButtn_Click(object sender, EventArgs e)

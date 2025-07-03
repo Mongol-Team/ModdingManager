@@ -15,6 +15,8 @@ using System.Windows.Media;
 using System.Windows;
 using System.Drawing.Imaging;
 using ModdingManager.classes.args;
+using System.Text.RegularExpressions;
+using ModdingManager.managers.utils;
 namespace ModdingManager.classes.gfx
 {
     public class ImageManager
@@ -41,7 +43,53 @@ namespace ModdingManager.classes.gfx
             }
         }
 
+        public static System.Drawing.Image FindUnitIcon(string unitName)
+        {
+            var directoriesToSearch = new[]
+            {
+                ModManager.GameDirectory,
+                ModManager.Directory
+            };
 
+            foreach (var dir in directoriesToSearch)
+            {
+                if (!Directory.Exists(dir)) continue;
+
+                var gfxFiles = Directory.GetFiles(dir, "*.gfx", SearchOption.AllDirectories);
+                foreach (var file in gfxFiles)
+                {
+                    var content = File.ReadAllText(file);
+                    var spriteBlocks = Regex.Matches(content, @"spriteType\s*=\s*\{([^\}]+)\}", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+                    foreach (Match block in spriteBlocks)
+                    {
+                        var blockContent = block.Groups[1].Value;
+
+                        var nameMatch = Regex.Match(blockContent, $@"name\s*=\s*""GFX_unit_{Regex.Escape(unitName)}_icon_medium""", RegexOptions.IgnoreCase);
+                        if (!nameMatch.Success) continue;
+
+                        var textureMatch = Regex.Match(blockContent, @"textureFile\s*=\s*""([^""]+)""", RegexOptions.IgnoreCase);
+                        if (!textureMatch.Success) continue;
+
+                        var texturePath = textureMatch.Groups[1].Value.Replace('/', Path.DirectorySeparatorChar);
+                        var fullTexturePath = Path.Combine(dir, texturePath);
+
+                        if (File.Exists(fullTexturePath))
+                        {
+                            try
+                            {
+                                return ImageManager.LoadAndCropRightSideOfIcon(fullTexturePath);
+                            }
+                            catch
+                            {
+                            }
+                        }
+                    }
+                }
+            }
+
+            return Properties.Resources.null_item_image;
+        }
         public static Image<Rgba32> ConvertToImageSharp(System.Drawing.Image systemDrawingImage)
         {
             if (systemDrawingImage == null)
@@ -55,13 +103,8 @@ namespace ModdingManager.classes.gfx
             {
                 systemDrawingImage.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
                 ms.Seek(0, SeekOrigin.Begin);
-                return SixLabors.ImageSharp.Image.Load<Rgba32>(ms);
+                return SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgba32>(ms);
             }
-        }
-
-        public static Image<Rgba32> ResizeStretch(Image<Rgba32> image, int width, int height)
-        {
-            return image.Clone(x => x.Resize(width, height));
         }
 
         public static ImageSource GetCombinedTechImage(ImageSource overlayimg, ImageSource backgroundimg, int type)
@@ -128,9 +171,82 @@ namespace ModdingManager.classes.gfx
             throw new ArgumentException("Невозможно преобразовать ImageSource в Bitmap — неподдерживаемый формат.");
         }
 
-       
-        
 
+        public static BitmapSource CreateIndependentBitmapCopy(BitmapSource source)
+        {
+            if (source == null)
+                return null;
+            return new WriteableBitmap(source);
+        }
+
+
+        public static System.Drawing.Image ConvertToDrawingImage(BitmapSource bitmapSource)
+        {
+            if (bitmapSource == null)
+                return null;
+
+            using (var outStream = new MemoryStream())
+            {
+                var encoder = new PngBitmapEncoder(); // <-- используем PNG, не BMP
+                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                encoder.Save(outStream);
+                outStream.Position = 0;
+
+                return System.Drawing.Image.FromStream(outStream, true, true);
+            }
+        }
+        public static ImageSource ConvertBitmapToImageSource(Bitmap bitmap)
+        {
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memoryStream;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                return bitmapImage;
+            }
+        }
+        public static SixLabors.ImageSharp.Image<Rgba32> ResizeStretch(Image<SixLabors.ImageSharp.PixelFormats.Rgba32> image, int width, int height)
+        {
+            return image.Clone(x => x.Resize(width, height));
+        }
+        public static BitmapSource ConvertToBitmapSource(System.Drawing.Image image)
+        {
+            if (image == null)
+                return null;
+
+            using (MemoryStream memory = new MemoryStream())
+            {
+                image.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                memory.Position = 0;
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                return bitmapImage;
+            }
+        }
+
+        public static BitmapSource RenderUIElementToBitmap(UIElement element, int width, int height)
+        {
+            var renderBitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+
+            var dv = new DrawingVisual();
+            using (var ctx = dv.RenderOpen())
+            {
+                ctx.DrawRectangle(System.Windows.Media.Brushes.Transparent, null, new Rect(0, 0, width, height));
+
+                var vb = new VisualBrush(element);
+                ctx.DrawRectangle(vb, null, new Rect(0, 0, width, height));
+            }
+
+            renderBitmap.Render(dv);
+            return renderBitmap;
+        }
 
         public static ImageSource GetCombinedImages(List<ImageSourceArg> images, int width, int height)
         {
