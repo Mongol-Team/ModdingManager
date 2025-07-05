@@ -160,7 +160,6 @@
             // RullingPartyBox
             // 
             RullingPartyBox.FormattingEnabled = true;
-            RullingPartyBox.Items.AddRange(new object[] { "fascism", "communism", "neutrality", "democratic" });
             RullingPartyBox.Location = new Point(52, 303);
             RullingPartyBox.Name = "RullingPartyBox";
             RullingPartyBox.Size = new Size(125, 28);
@@ -653,6 +652,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "CountryCreator";
             Text = "Создатель стран";
+            Load += CountryCreator_Load;
             ResumeLayout(false);
             PerformLayout();
         }

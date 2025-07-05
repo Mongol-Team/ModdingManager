@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManager.classes.utils.fonts
+namespace ModdingManager.classes.utils.structs
 {
-    public class FontCharData
+    public struct Var
     {
-      
+        public string name;
+        public string value;
     }
 }

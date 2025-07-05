@@ -76,7 +76,7 @@ namespace ModdingManager
             double baseX = Canvas.GetLeft(border);
             double baseY = Canvas.GetTop(border);
 
-            var image = ImageManager.GetImageFromBorder(border);
+            var image = border.GetImage();
             if (image == null) return new System.Windows.Point(baseX + CellSize / 2, baseY + CellSize / 2);
 
             var transform = image.RenderTransform as TranslateTransform;
@@ -91,7 +91,7 @@ namespace ModdingManager
 
         private double GetVisualRadius(Border border, Vector direction)
         {
-            var image = ImageManager.GetImageFromBorder(border);
+            var image = border.GetImage();
             if (image == null) return CellSize / 2;
 
             double halfWidth = image.Width / 2;
@@ -168,7 +168,7 @@ namespace ModdingManager
 
             var image = new System.Windows.Controls.Image
             {
-                Source = ImageManager.GetCombinedTechImage(item.Image, item.IsBig ? BigBackgroundImage.Source : SmallBackgroundImage.Source , item.IsBig ? 1 : 2),
+                Source = item.Image.GetCombinedTechImage(item.IsBig ? BigBackgroundImage.Source : SmallBackgroundImage.Source , item.IsBig ? 1 : 2),
                 Width = imageWidth,
                 Height = imageHeight,
                 IsHitTestVisible = false
@@ -482,7 +482,7 @@ namespace ModdingManager
 
             var image = new System.Windows.Controls.Image
             {
-                Source = ImageManager.GetCombinedTechImage(overlayimg.Source, backgroundimg.Source, isBig ? 1 : 2),
+                Source = overlayimg.Source.GetCombinedTechImage(backgroundimg.Source, isBig ? 1 : 2),
                 Width = imageWidth,
                 Height = imageHeight,
                 IsHitTestVisible = false
@@ -1500,7 +1500,7 @@ namespace ModdingManager
             var img = ImageManager.GetCombinedImages(args, 182, 61);
 
            
-            using (var bmp = ImageManager.ConvertImageSourceToBitmap(img))
+            using (var bmp = img.ToBitmap())
             {
                 bmp.SaveAsDDS(techIconDir, $"techtree_{window.CurrentTechTree.Name}_tab", 182, 61);
             }
@@ -1670,7 +1670,7 @@ namespace ModdingManager
         private void DoneButton_Click(object sender, RoutedEventArgs e)
         {
             ExportTechTreeToFile();
-            DDSManager.SaveAllTechIconsAsDDS(CurrentTechTree);
+            CurrentTechTree.SaveAllTechIconsAsDDS();
             GenerateGfxFile(CurrentTechTree);
             InsertGUITechTreeEntries(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
             InsertGUIFolderTabButton(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
@@ -1684,7 +1684,7 @@ namespace ModdingManager
         {
             string techIconDir = System.IO.Path.Combine(ModManager.Directory, "gfx", "interface", "techtree");
             Directory.CreateDirectory(techIconDir);
-            using (var bmp = ImageManager.ConvertImageSourceToBitmap(TechBGImage.ImageSource))
+            using (var bmp = TechBGImage.ImageSource.ToBitmap())
             {
                 bmp.SaveAsDDS(techIconDir, $"techtree_{CurrentTechTree.Name}_bg", bmp.Width, bmp.Height);
             }
@@ -1956,7 +1956,7 @@ namespace ModdingManager
                 {
                     if (elem is System.Windows.Controls.Image img)
                     {
-                        img.Source = ImageManager.GetCombinedTechImage(overlayimg.Source, backgroundimg.Source, item.IsBig ? 1 : 2);
+                        img.Source = overlayimg.Source.GetCombinedTechImage(backgroundimg.Source, item.IsBig ? 1 : 2);
                     }
                 }
             }

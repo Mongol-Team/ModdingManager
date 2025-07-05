@@ -17,6 +17,7 @@ using System.Drawing.Imaging;
 using ModdingManager.classes.args;
 using System.Text.RegularExpressions;
 using ModdingManager.managers.utils;
+using ModdingManager.classes.extentions;
 namespace ModdingManager.classes.gfx
 {
     public class ImageManager
@@ -90,162 +91,32 @@ namespace ModdingManager.classes.gfx
 
             return Properties.Resources.null_item_image;
         }
-        public static Image<Rgba32> ConvertToImageSharp(System.Drawing.Image systemDrawingImage)
+
+        public static void SaveCountryFlags(System.Drawing.Image fascismImage,
+                                  System.Drawing.Image neutralityImage,
+                                  System.Drawing.Image communismImage,
+                                  System.Drawing.Image democraticImage,
+                                  string modPath,
+                                  string countryTag)
         {
-            if (systemDrawingImage == null)
+            try
             {
-                var emptyFlag = new Image<Rgba32>(82, 52);
-                emptyFlag.Mutate(x => x.BackgroundColor(new Rgba32(255, 0, 255, 255)));
-                return emptyFlag;
-            }
+                string flagsDir = modPath;
 
-            using (var ms = new MemoryStream())
+                System.IO.Directory.CreateDirectory(flagsDir);
+                System.IO.Directory.CreateDirectory(Path.Combine(flagsDir, "small"));
+                System.IO.Directory.CreateDirectory(Path.Combine(flagsDir, "medium"));
+
+                neutralityImage.SaveFlagSet(flagsDir, countryTag, "neutrality");
+                fascismImage.SaveFlagSet(flagsDir, countryTag, "fascism");
+                communismImage.SaveFlagSet(flagsDir, countryTag, "communism");
+                democraticImage.SaveFlagSet(flagsDir, countryTag, "democratic");
+            }
+            catch (Exception ex)
             {
-                systemDrawingImage.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                ms.Seek(0, SeekOrigin.Begin);
-                return SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgba32>(ms);
+                System.Windows.Forms.MessageBox.Show($"Ошибка создания флагов: {ex.Message}", "Ошибка",
+                              MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        public static ImageSource GetCombinedTechImage(ImageSource overlayimg, ImageSource backgroundimg, int type)
-        {
-            double renderWidth = 0;
-            double renderHeight = 0;
-            switch (type)
-            {
-                case 1:
-                    renderWidth = 183;
-                    renderHeight = 84;
-                    break;
-                case 2:
-                    renderWidth = 62;
-                    renderHeight = 62;
-                    break;
-            }
-
-            DrawingVisual dv = new DrawingVisual();
-            using (DrawingContext dc = dv.RenderOpen())
-            {
-                if (backgroundimg != null)
-                {
-                    dc.DrawImage(backgroundimg, new Rect(0, 0, renderWidth, renderHeight));
-                }
-
-                if (overlayimg != null)
-                {
-                    dc.DrawImage(overlayimg, new Rect(0, 0, renderWidth, renderHeight));
-                }
-            }
-
-            RenderTargetBitmap bmp = new RenderTargetBitmap((int)renderWidth, (int)renderHeight, 96, 96, PixelFormats.Pbgra32);
-            bmp.Render(dv);
-
-            return bmp;
-        }
-
-        public static System.Windows.Controls.Image GetImageFromBorder(Border border)
-        {
-            if (border.Child is Canvas canvas)
-            {
-                return canvas.Children.OfType<System.Windows.Controls.Image>().FirstOrDefault();
-            }
-            return null;
-        }
-
-        public static Bitmap ConvertImageSourceToBitmap(ImageSource imageSource)
-        {
-            if (imageSource is BitmapSource bitmapSource)
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    var encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-                    encoder.Save(memoryStream);
-
-                    using (var tempBitmap = new Bitmap(memoryStream))
-                    {
-                        return new Bitmap(tempBitmap);
-                    }
-                }
-            }
-            throw new ArgumentException("Невозможно преобразовать ImageSource в Bitmap — неподдерживаемый формат.");
-        }
-
-
-        public static BitmapSource CreateIndependentBitmapCopy(BitmapSource source)
-        {
-            if (source == null)
-                return null;
-            return new WriteableBitmap(source);
-        }
-
-
-        public static System.Drawing.Image ConvertToDrawingImage(BitmapSource bitmapSource)
-        {
-            if (bitmapSource == null)
-                return null;
-
-            using (var outStream = new MemoryStream())
-            {
-                var encoder = new PngBitmapEncoder(); // <-- используем PNG, не BMP
-                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-                encoder.Save(outStream);
-                outStream.Position = 0;
-
-                return System.Drawing.Image.FromStream(outStream, true, true);
-            }
-        }
-        public static ImageSource ConvertBitmapToImageSource(Bitmap bitmap)
-        {
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-                memoryStream.Seek(0, SeekOrigin.Begin);
-                BitmapImage bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memoryStream;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                return bitmapImage;
-            }
-        }
-        public static SixLabors.ImageSharp.Image<Rgba32> ResizeStretch(Image<SixLabors.ImageSharp.PixelFormats.Rgba32> image, int width, int height)
-        {
-            return image.Clone(x => x.Resize(width, height));
-        }
-        public static BitmapSource ConvertToBitmapSource(System.Drawing.Image image)
-        {
-            if (image == null)
-                return null;
-
-            using (MemoryStream memory = new MemoryStream())
-            {
-                image.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
-                memory.Position = 0;
-                BitmapImage bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                return bitmapImage;
-            }
-        }
-
-        public static BitmapSource RenderUIElementToBitmap(UIElement element, int width, int height)
-        {
-            var renderBitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-
-            var dv = new DrawingVisual();
-            using (var ctx = dv.RenderOpen())
-            {
-                ctx.DrawRectangle(System.Windows.Media.Brushes.Transparent, null, new Rect(0, 0, width, height));
-
-                var vb = new VisualBrush(element);
-                ctx.DrawRectangle(vb, null, new Rect(0, 0, width, height));
-            }
-
-            renderBitmap.Render(dv);
-            return renderBitmap;
         }
 
         public static ImageSource GetCombinedImages(List<ImageSourceArg> images, int width, int height)

@@ -1,17 +1,18 @@
-﻿using ModdingManager.configs;
+﻿using ModdingManager.classes.extentions;
+using ModdingManager.classes.gfx;
+using ModdingManager.configs;
+using ModdingManager.managers.utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ModdingManager.classes.gfx;
-using ModdingManager.managers.utils;
 
 namespace ModdingManager
 {
@@ -241,7 +242,13 @@ namespace ModdingManager
                 GenerateLocalizationFiles(TagBox.Text, IdBox.Text, NameBox.Text, DescBox.Text);
                 if (ImagePanel.BackgroundImage != null)
                 {
-                    DDSManager.SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManager.Directory, IdBox.Text, TagBox.Text);
+                    static void SaveIdeaGFXAsDDS(System.Drawing.Image image, string dir, string id, string tag)
+                    {
+                        var path = Path.Combine(dir, "gfx", "interface", "ideas", tag);
+                        Directory.CreateDirectory(path);
+                        image.SaveAsDDS(path, id, 64, 64);
+                    }
+                    SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManager.Directory, IdBox.Text, TagBox.Text);
                 }
                 else
                 {

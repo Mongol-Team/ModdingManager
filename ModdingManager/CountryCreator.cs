@@ -14,6 +14,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using ModdingManager.configs;
 using System.Reflection.Metadata;
 using ModdingManager.managers.utils;
+using ModdingManager.classes.gfx;
 
 namespace ModdingManager
 {
@@ -152,7 +153,7 @@ namespace ModdingManager
                 if (tagFiles.Length == 0)
                 {
                     string newTagFile = Path.Combine(tagsDir, "00_countries.txt");
-                    File.WriteAllText(newTagFile, newEntry,  new UTF8Encoding(false));
+                    File.WriteAllText(newTagFile, newEntry, new UTF8Encoding(false));
                 }
                 else
                 {
@@ -514,7 +515,7 @@ namespace ModdingManager
                 Image democraticFlag = GetImageFromPanel(CountryDecmocraticFlagPanel);
 
                 // Создаем флаги
-                ModManager.SaveCountryFlag(
+                ImageManager.SaveCountryFlags(
                     fascismFlag,
                     neutralityFlag,
                     communismFlag,
@@ -727,6 +728,15 @@ namespace ModdingManager
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
             WinFormConfigManager.SaveConfigWrapper(this);
+        }
+
+        private void CountryCreator_Load(object sender, EventArgs e)
+        {
+            foreach (var ideology in RegistryManager.Instance.Ideologies)
+            {
+                RullingPartyBox.Items.Add(ideology.Id);
+            }
+            
         }
     }
 }

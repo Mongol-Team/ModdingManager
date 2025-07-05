@@ -1,0 +1,60 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ModdingManager"
+    
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:controls="clr-namespace:ModdingManager.classes.controls" x:Class="ModdingManager.IdeologyCreator"
+        mc:Ignorable="d"
+        Title="IdeologyCreator" Height="450" Width="800">
+    <Grid>
+        <StackPanel Margin="20,20,579,20">
+            <Label Content="Имя локализированое"/>
+            <TextBox x:Name="NameTextBox" Width="120" TextWrapping="Wrap"/>
+
+            <Label Content="Описание локализированое"/>
+            <TextBox x:Name="DescTextBox" Width="120" TextWrapping="Wrap"/>
+
+            <Label Content="Прилагательное локализированое"/>
+            <TextBox x:Name="NounTextBox" Width="120" TextWrapping="Wrap"/>
+
+            <Label Content="Id внутриигровое"/>
+            <TextBox x:Name="IdTextBox" Width="120" TextWrapping="Wrap"/>
+            <Label Content="Цвет"/>
+            <xctk:ColorPicker x:Name="OptionTextColorPicker" Width="110" Height="25"/>
+            <CheckBox Height="35" Width="195">
+                <TextBlock Height="35" Width="177">
+                    Может ли формировать
+                    <LineBreak/>
+                    правитьельство в изгнании?
+                </TextBlock>
+            </CheckBox>
+            <CheckBox Height="50" Width="195">
+                <TextBlock Height="50" Width="177"><Run Text="Может быть подвержено"/><LineBreak/><Run Text="операции &quot;увеличить"/><LineBreak/><Run Text="популярность партии&quot;"/></TextBlock>
+            </CheckBox>
+            <CheckBox Height="55" Width="195">
+                <TextBlock Height="55" Width="177">
+                    Может ли формировать
+                    <LineBreak/>
+                    колаборационное 
+                    <LineBreak/>
+                    правительство?
+                </TextBlock>
+            </CheckBox>
+        </StackPanel>
+        <StackPanel Margin="266,20,335,20">
+            <Label Content="Модификаторы"/>
+            <RichTextBox x:Name="ModifierBox" Loaded="ModifierBox_Loaded" Height="360" >
+                <FlowDocument/>
+            </RichTextBox>
+        </StackPanel>
+        <StackPanel Margin="470,20,131,20">
+            <Label Content="Модификаторы фракций"/>
+            <RichTextBox x:Name="FactionModifierBox" Loaded="ModifierBox_Loaded" Height="360" >
+                <FlowDocument/>
+            </RichTextBox>
+        </StackPanel>
+    </Grid>
+</Window>

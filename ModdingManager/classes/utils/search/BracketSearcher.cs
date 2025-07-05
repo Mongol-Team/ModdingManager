@@ -20,11 +20,9 @@ public class BracketSearcher : Searcher
 
         while (pos < CurrentString.Length)
         {
-            // Ищем начало заголовка
             pos = FindExactHeaderPosition(header, pos);
             if (pos == -1) break;
 
-            // Проверяем, что это отдельное слово
             if (!IsStandaloneWord(pos, headerLength))
             {
                 pos += headerLength;

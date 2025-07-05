@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:ModdingManager"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:cntrls ="clr-namespace:ModdingManager.classes.controls"
-        xmlns:cf="clr-namespace:ColorFontPickerWPF;assembly=ColorFontPickerWPF"
         mc:Ignorable="d"
         Title="Создатель суперивентов" Height="650" Width="900">
     <Grid>

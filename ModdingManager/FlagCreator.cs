@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ModdingManager.managers.utils;
+using ModdingManager.classes.gfx;
 
 namespace ModdingManager
 {
@@ -26,7 +27,7 @@ namespace ModdingManager
             {
                 if (textBox2.Text.Length == 3)
                 {
-                    ModManager.SaveCountryFlag(panel2.BackgroundImage, panel1.BackgroundImage, panel3.BackgroundImage, panel4.BackgroundImage ,textBox1.Text, textBox2.Text);
+                    ImageManager.SaveCountryFlags(panel2.BackgroundImage, panel1.BackgroundImage, panel3.BackgroundImage, panel4.BackgroundImage ,textBox1.Text, textBox2.Text);
                 }
                 else
                 {
@@ -41,7 +42,7 @@ namespace ModdingManager
             {
                 if (textBox2.Text.Length == 3)
                 {
-                    ModManager.SaveCountryFlag(panel2.BackgroundImage, panel1.BackgroundImage, panel3.BackgroundImage, panel4.BackgroundImage, textBox1.Text, textBox2.Text);
+                    ImageManager.SaveCountryFlags(panel2.BackgroundImage, panel1.BackgroundImage, panel3.BackgroundImage, panel4.BackgroundImage, textBox1.Text, textBox2.Text);
                 }
                 else
                 {

@@ -11,6 +11,7 @@ using SixLabors.ImageSharp.Processing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Media.Imaging;
 using System.Xml.Linq;
 using TeximpNet;
 using TeximpNet.DDS;
@@ -24,7 +25,7 @@ namespace ModdingManager.classes.extentions
             Directory.CreateDirectory(directory);
 
             using (var imageSharp = ConvertToImageSharp(image))
-            using (var resized = ImageManager.ResizeStretch(imageSharp, width, height))
+            using (var resized = ResizeStretch(imageSharp, width, height))
             {
                 string outputPath = Path.Combine(directory, $"{filename}.dds");
 
@@ -109,11 +110,32 @@ namespace ModdingManager.classes.extentions
             }
         }
 
+        public static void SaveFlagSet(this System.Drawing.Image image, string flagsDir,
+                                      string countryTag, string ideology)
+        {
+            using (var imageSharp = image.ConvertToImageSharp())
+            {
+                using (var resized = ResizeStretch(imageSharp, 82, 52))
+                {
+                    resized.SaveAsTGA(Path.Combine(flagsDir, $"{countryTag}_{ideology}.tga"));
+                }
+
+                using (var resized = ResizeStretch(imageSharp, 41, 26))
+                {
+                    resized.SaveAsTGA(Path.Combine(flagsDir, "medium", $"{countryTag}_{ideology}.tga"));
+                }
+
+                using (var resized = ResizeStretch(imageSharp, 10, 7))
+                {
+                    resized.SaveAsTGA(Path.Combine(flagsDir, "small", $"{countryTag}_{ideology}.tga"));
+                }
+            }
+        }
 
         public static void SaveAsDDS(this Image<Rgba32> image, string directory, string filename, int width, int height)
         {
             Directory.CreateDirectory(directory);
-            using (var resized = ImageManager.ResizeStretch(image, width, height))
+            using (var resized = ResizeStretch(image, width, height))
             {
                 string outputPath = Path.Combine(directory, $"{filename}.dds");
 
@@ -159,6 +181,29 @@ namespace ModdingManager.classes.extentions
                 systemDrawingImage.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
                 ms.Seek(0, SeekOrigin.Begin);
                 return SixLabors.ImageSharp.Image.Load<Rgba32>(ms);
+            }
+        }
+
+        public static Image<Rgba32> ResizeStretch(this Image<Rgba32> image, int width, int height)
+        {
+            return image.Clone(x => x.Resize(width, height));
+        }
+
+        public static BitmapSource ToBitmapSource(this System.Drawing.Image image)
+        {
+            if (image == null)
+                return null;
+
+            using (MemoryStream memory = new MemoryStream())
+            {
+                image.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                memory.Position = 0;
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                return bitmapImage;
             }
         }
     }

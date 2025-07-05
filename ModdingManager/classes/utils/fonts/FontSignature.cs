@@ -1,8 +1,5 @@
 ﻿using HarfBuzzSharp;
-using Microsoft.Win32;
 using ModdingManager.classes.extentions;
-using RoyT.TrueType;
-using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
@@ -16,9 +13,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using TTCFileSplitter;
 using HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment;
-using PointF = SixLabors.ImageSharp.PointF;
 using SolidBrush = SixLabors.ImageSharp.Drawing.Processing.SolidBrush;
 using SystemFonts = SixLabors.Fonts.SystemFonts;
 using VerticalAlignment = SixLabors.Fonts.VerticalAlignment;
@@ -45,7 +40,6 @@ namespace ModdingManager.classes.utils.fonts
 
         public static CoverageResult ValidateCoverage(string fontPath)
         {
-            // 1. Загрузим файл шрифта в память
             byte[] fontData = File.ReadAllBytes(fontPath);
             var handle = GCHandle.Alloc(fontData, GCHandleType.Pinned);
             IntPtr ptr = handle.AddrOfPinnedObject();
@@ -74,12 +68,10 @@ namespace ModdingManager.classes.utils.fonts
             for (int cp = from; cp <= to; cp++)
             {
                 using var buf = new HarfBuzzSharp.Buffer();
-                // Добавляем символ в UTF-8; подходит для любых диапазонов BMP
                 buf.AddUtf8(char.ConvertFromUtf32(cp));
                 buf.GuessSegmentProperties();
                 hbFont.Shape(buf, null);
 
-                // GlyphInfos[i].Codepoint — это индекс глифа после шейпинга
                 var infos = buf.GlyphInfos;
                 if (infos.Length > 0 && infos[0].Codepoint != 0)
                     return true;
@@ -104,7 +96,7 @@ namespace ModdingManager.classes.utils.fonts
                     break;
             }
 
-            this.HandleFontFolder(outputPath, fontPath);
+            HandleFontFolder(outputPath, fontPath);
         }
 
         bool AskContinueOnMissingCyrillic()
@@ -194,7 +186,7 @@ namespace ModdingManager.classes.utils.fonts
             return Regex.Replace(cleaned, @"_+", "_").Trim('_');
         }
 
-        /*legacy method*/
+        /*legacy method, works only with ttf, ttc extension*/
 
         //public void HandleFontFolder(string outputPath, int textureWidth = 1024, int textureHeight = 1024, int padding = 3)
         //{

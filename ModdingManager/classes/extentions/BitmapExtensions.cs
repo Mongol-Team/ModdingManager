@@ -95,6 +95,22 @@ namespace ModdingManager.classes.extentions
             }
         }
 
+        public static System.Drawing.Image ToDrawingImage(this BitmapSource bitmapSource)
+        {
+            if (bitmapSource == null)
+                return null;
+
+            using (var outStream = new MemoryStream())
+            {
+                var encoder = new PngBitmapEncoder(); // <-- используем PNG, не BMP
+                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                encoder.Save(outStream);
+                outStream.Position = 0;
+
+                return System.Drawing.Image.FromStream(outStream, true, true);
+            }
+        }
+
         private static class NativeMethods
         {
             [System.Runtime.InteropServices.DllImport("gdi32.dll")]

@@ -170,8 +170,16 @@ namespace ModdingManager
                 var path = JsonSerializer.Deserialize<PathConfig>(json);
                 GameDirBox.Text = path.GamePath;
                 DirBox.Text = path.ModPath;
+                ModManager.Directory = DirBox.Text;
+                ModManager.GameDirectory = GameDirBox.Text;
+                RegistryManager.LoadInstance();
+                Debugger.Instance.LogMessage(RegistryManager.Instance.ToString());
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Debugger.Instance.LogMessage($"[MAIN Form] On load exeption :{ex.Message + ex.StackTrace}");
+            }
+
         }
 
         private void CharCreator_Click(object sender, EventArgs e)
@@ -297,7 +305,23 @@ namespace ModdingManager
                 // Записываем исключение в Debugger
                 Debugger.Instance.LogMessage($"Поймано исключение в button1_Click: {ex}");
 
- 
+
+            }
+        }
+
+        private void IdeologyCreatorBtn_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(DirBox.Text) || !string.IsNullOrEmpty(GameDirBox.Text))
+            {
+                ModManager.Directory = DirBox.Text;
+                ModManager.GameDirectory = GameDirBox.Text;
+                IdeologyCreator fc = new IdeologyCreator();
+                ElementHost.EnableModelessKeyboardInterop(fc);
+                fc.Show();
+            }
+            else
+            {
+                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButtons.OK);
             }
         }
     }

@@ -1,10 +1,13 @@
-﻿using System;
+﻿using ModdingManager.classes.extentions;
+using ModdingManager.managers.utils;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using System.Text.Json.Serialization;
 namespace ModdingManager.configs
 {
     public class TechTreeConfig
@@ -15,6 +18,33 @@ namespace ModdingManager.configs
         public List<List<string>> ChildOf { get; set; } = new List<List<string>>(); 
         public List<List<string>> Mutal { get; set; } = new List<List<string>>(); 
         public string Ledger { get; set; }
+
+        public void SaveAllTechIconsAsDDS()
+        {
+
+            string techIconDir = Path.Combine(ModManager.Directory, "gfx", "interface", "technologies");
+            Directory.CreateDirectory(techIconDir);
+
+            foreach (var item in this.Items)
+            {
+                if (item.Image == null || string.IsNullOrWhiteSpace(item.Id))
+                    continue;
+
+                try
+                {
+                    using (var bmp = item.Image.ToBitmap())
+                    {
+                        bmp.SaveAsDDS(techIconDir, item.Id, 64, 64);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Ошибка при сохранении иконки технологии {item.Id}: {ex.Message}", "Ошибка", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                }
+            }
+
+            System.Windows.MessageBox.Show("Сохранение иконок технологий завершено!", "Успех", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
     }
 
     public class TechTreeItemConfig

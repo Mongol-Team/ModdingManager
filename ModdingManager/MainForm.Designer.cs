@@ -32,7 +32,7 @@ namespace ModdingManager
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             LocConvertButton = new Button();
-            Statebutton = new Button();
+            StateManagerBtn = new Button();
             LocTechButton = new Button();
             ModButton = new Button();
             TechButton = new Button();
@@ -44,12 +44,13 @@ namespace ModdingManager
             label1 = new Label();
             CharCreator = new Button();
             IdeaCreatorButton = new Button();
-            TestButton = new Button();
+            TemplateCreatorBtn = new Button();
             GameDirBox = new TextBox();
             label2 = new Label();
             SuperEventCreatorButton = new Button();
-            фва = new Button();
+            OOBCreatorBtn = new Button();
             DebugButton = new Button();
+            IdeologyCreatorBtn = new Button();
             SuspendLayout();
             // 
             // LocConvertButton
@@ -63,15 +64,15 @@ namespace ModdingManager
             LocConvertButton.UseVisualStyleBackColor = false;
             LocConvertButton.Click += LocConvertButton_Click;
             // 
-            // Statebutton
+            // StateManagerBtn
             // 
-            Statebutton.Location = new Point(361, 56);
-            Statebutton.Name = "Statebutton";
-            Statebutton.Size = new Size(237, 56);
-            Statebutton.TabIndex = 1;
-            Statebutton.Text = "Работа со стейтами";
-            Statebutton.UseVisualStyleBackColor = true;
-            Statebutton.Click += Statebutton_Click;
+            StateManagerBtn.Location = new Point(361, 56);
+            StateManagerBtn.Name = "StateManagerBtn";
+            StateManagerBtn.Size = new Size(237, 56);
+            StateManagerBtn.TabIndex = 1;
+            StateManagerBtn.Text = "Работа со стейтами";
+            StateManagerBtn.UseVisualStyleBackColor = true;
+            StateManagerBtn.Click += Statebutton_Click;
             // 
             // LocTechButton
             // 
@@ -187,15 +188,15 @@ namespace ModdingManager
             IdeaCreatorButton.UseVisualStyleBackColor = false;
             IdeaCreatorButton.Click += IdeaCreatorButton_Click;
             // 
-            // TestButton
+            // TemplateCreatorBtn
             // 
-            TestButton.Location = new Point(684, 294);
-            TestButton.Name = "TestButton";
-            TestButton.Size = new Size(237, 56);
-            TestButton.TabIndex = 13;
-            TestButton.Text = "Создатель шаблонов юнитов";
-            TestButton.UseVisualStyleBackColor = true;
-            TestButton.Click += TestButton_Click;
+            TemplateCreatorBtn.Location = new Point(684, 294);
+            TemplateCreatorBtn.Name = "TemplateCreatorBtn";
+            TemplateCreatorBtn.Size = new Size(237, 56);
+            TemplateCreatorBtn.TabIndex = 13;
+            TemplateCreatorBtn.Text = "Создатель шаблонов юнитов";
+            TemplateCreatorBtn.UseVisualStyleBackColor = true;
+            TemplateCreatorBtn.Click += TestButton_Click;
             // 
             // GameDirBox
             // 
@@ -224,15 +225,15 @@ namespace ModdingManager
             SuperEventCreatorButton.UseVisualStyleBackColor = true;
             SuperEventCreatorButton.Click += SuperEventCreatorButton_Click;
             // 
-            // фва
+            // OOBCreatorBtn
             // 
-            фва.BackColor = Color.FromArgb(0, 192, 192);
-            фва.Location = new Point(684, 388);
-            фва.Name = "фва";
-            фва.Size = new Size(237, 56);
-            фва.TabIndex = 17;
-            фва.Text = "Создатель стартовых юнитов";
-            фва.UseVisualStyleBackColor = false;
+            OOBCreatorBtn.BackColor = Color.FromArgb(0, 192, 192);
+            OOBCreatorBtn.Location = new Point(684, 388);
+            OOBCreatorBtn.Name = "OOBCreatorBtn";
+            OOBCreatorBtn.Size = new Size(237, 56);
+            OOBCreatorBtn.TabIndex = 17;
+            OOBCreatorBtn.Text = "Создатель стартовых юнитов";
+            OOBCreatorBtn.UseVisualStyleBackColor = false;
             // 
             // DebugButton
             // 
@@ -246,17 +247,28 @@ namespace ModdingManager
             DebugButton.UseVisualStyleBackColor = false;
             DebugButton.Click += DebugButton_Click;
             // 
+            // IdeologyCreatorBtn
+            // 
+            IdeologyCreatorBtn.Location = new Point(361, 388);
+            IdeologyCreatorBtn.Name = "IdeologyCreatorBtn";
+            IdeologyCreatorBtn.Size = new Size(237, 56);
+            IdeologyCreatorBtn.TabIndex = 19;
+            IdeologyCreatorBtn.Text = "Создатель суперивентов";
+            IdeologyCreatorBtn.UseVisualStyleBackColor = true;
+            IdeologyCreatorBtn.Click += IdeologyCreatorBtn_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(963, 694);
+            Controls.Add(IdeologyCreatorBtn);
             Controls.Add(DebugButton);
-            Controls.Add(фва);
+            Controls.Add(OOBCreatorBtn);
             Controls.Add(SuperEventCreatorButton);
             Controls.Add(label2);
             Controls.Add(GameDirBox);
-            Controls.Add(TestButton);
+            Controls.Add(TemplateCreatorBtn);
             Controls.Add(IdeaCreatorButton);
             Controls.Add(CharCreator);
             Controls.Add(label1);
@@ -268,7 +280,7 @@ namespace ModdingManager
             Controls.Add(TechButton);
             Controls.Add(ModButton);
             Controls.Add(LocTechButton);
-            Controls.Add(Statebutton);
+            Controls.Add(StateManagerBtn);
             Controls.Add(LocConvertButton);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -282,7 +294,7 @@ namespace ModdingManager
         #endregion
 
         private Button LocConvertButton;
-        private Button Statebutton;
+        private Button StateManagerBtn;
         private Button LocTechButton;
         private Button ModButton;
         private Button TechButton;
@@ -294,11 +306,12 @@ namespace ModdingManager
         private Label label1;
         private Button CharCreator;
         private Button IdeaCreatorButton;
-        private Button TestButton;
+        private Button TemplateCreatorBtn;
         private TextBox GameDirBox;
         private Label label2;
         private Button SuperEventCreatorButton;
-        private Button фва;
+        private Button OOBCreatorBtn;
         private Button DebugButton;
+        private Button IdeologyCreatorBtn;
     }
 }

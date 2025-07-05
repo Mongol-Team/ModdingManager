@@ -230,7 +230,7 @@ namespace ModdingManager.classes.handlers
 
                 BitmapSource scaledSource = renderBitmap;
 
-                using (var originalImage = ImageManager.ConvertToDrawingImage(scaledSource))
+                using (var originalImage = scaledSource.ToDrawingImage())
                 {
                     if (originalImage != null)
                     {
@@ -249,7 +249,7 @@ namespace ModdingManager.classes.handlers
                 string frameDir = Path.Combine(basePath, "gfx", "interface", "superevent");
                 string frameFilename = $"superevent_frame_{CurrentConfig.Id}";
 
-                using (var drawingImage = ImageManager.ConvertToDrawingImage(frame.Source.ToBitmapSource()))
+                using (var drawingImage = frame.Source.ToBitmapSource().ToDrawingImage())
                 {
                     if (drawingImage != null)
                     {
