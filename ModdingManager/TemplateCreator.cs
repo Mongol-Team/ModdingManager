@@ -1,4 +1,5 @@
-﻿using ModdingManager.classes.gfx;
+﻿using Microsoft.Win32;
+using ModdingManager.classes.gfx;
 using ModdingManager.configs;
 using ModdingManager.managers.utils;
 using System;
@@ -13,164 +14,18 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Forms;
+using Registry = ModdingManager.managers.utils.Registry;
 
 namespace ModdingManager
 {
     public partial class TemplateCreator : Form
     {
-        public static List<RegimentConfig> AvaibleRegiments = new List<RegimentConfig>();
-        public static List<int> AvaibleTypes = new List<int>([0, 1]);
-        public TemplateConfig CurrentConfig = new TemplateConfig();
+        public TemplateConfig CurrentConfig = new ();
         public TemplateCreator()
         {
             InitializeComponent();
-            AvaibleRegiments = LoadAvailableRegiments();
-            //debug
-            var def = CollectUnitDefinitions();
-            var gavno = 1;
         }
-
-
-        public static List<(string Name, List<string> Categories)> CollectUnitDefinitions()
-        {
-            var result = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var rootPath in new[] { ModManager.GameDirectory, ModManager.Directory })
-            {
-                if (!Directory.Exists(rootPath)) continue;
-
-                var unitDirs = Directory.GetDirectories(rootPath, "units", SearchOption.AllDirectories)
-                                      .Where(path => Path.GetFullPath(path)
-                                          .Contains(Path.Combine("common", "units")));
-
-                foreach (var unitDir in unitDirs)
-                {
-                    foreach (var file in Directory.GetFiles(unitDir, "*.txt", SearchOption.TopDirectoryOnly))
-                    {
-                        var fileContent = File.ReadAllText(file);
-                        var fileSearcher = new BracketSearcher
-                        {
-                            OpenBracketChar = '{',
-                            CloseBracketChar = '}',
-                            CurrentString = fileContent.ToCharArray()
-                        };
-
-                        var subUnitsContents = fileSearcher.GetBracketContentByHeaderName("sub_units".ToCharArray());
-
-                        foreach (var subUnitsContent in subUnitsContents)
-                        {
-                            var subUnitsSearcher = new BracketSearcher
-                            {
-                                OpenBracketChar = '{',
-                                CloseBracketChar = '}',
-                                CurrentString = subUnitsContent.ToCharArray()
-                            };
-
-                            var unitDefinitions = subUnitsSearcher.GetAllBracketSubbracketsNames(1);
-
-                            foreach (var unitDef in unitDefinitions)
-                            {
-                                var unitContents = subUnitsSearcher.GetBracketContentByHeaderName(unitDef.ToCharArray());
-
-                                foreach (var unitContent in unitContents)
-                                {
-                                    var unitSearcher = new BracketSearcher
-                                    {
-                                        OpenBracketChar = '{',
-                                        CloseBracketChar = '}',
-                                        CurrentString = unitContent.ToCharArray()
-                                    };
-                                    var categories = unitSearcher.GetBracketContentByHeaderName("categories".ToCharArray());
-
-                                    if (categories.Count > 0)
-                                    {
-                                        var cleanCategories = categories.SelectMany(c => c.Split('\n'))
-                                            .Select(line => line.Trim())
-                                            .Where(line => !string.IsNullOrEmpty(line) &&
-                                                          !line.Contains("{") &&
-                                                          !line.Contains("}"))
-                                            .ToList();
-
-                                        if (cleanCategories.Count > 0)
-                                        {
-                                            var unitName = unitDef.Trim();
-                                            if (!result.ContainsKey(unitName))
-                                            {
-                                                result[unitName] = cleanCategories;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return result.Select(kvp => (kvp.Key, kvp.Value)).ToList();
-        }
-
-        public static List<RegimentConfig> LoadAvailableRegiments()
-        {
-            var result = new List<RegimentConfig>();
-            var unitDefs = CollectUnitDefinitions();
-
-            foreach (var (name, categories) in unitDefs)
-            {
-                var icon = ImageManager.FindUnitIcon(name);
-                result.Add(new RegimentConfig
-                {
-                    Name = name,
-                    Categories = categories,
-                    Icon = icon
-                });
-            }
-
-            return result;
-        }
-
-        private static Bitmap SearchIconWithParts(FileSearcher searcher, string[] nameParts)
-        {
-            searcher.PatternsList = new List<string> { string.Join("_", nameParts) };
-            var fullMatch = searcher.SearchFile();
-            if (fullMatch != null)
-            {
-                try
-                {
-                    return ImageManager.LoadAndCropRightSideOfIcon(fullMatch.Name);
-                }
-                finally
-                {
-                    fullMatch.Close();
-                }
-            }
-
-            for (int partsToTake = nameParts.Length - 1; partsToTake > 0; partsToTake--)
-            {
-                for (int startIdx = 0; startIdx <= nameParts.Length - partsToTake; startIdx++)
-                {
-                    var partialName = string.Join("_", nameParts.Skip(startIdx).Take(partsToTake));
-                    searcher.PatternsList = new List<string> { partialName };
-                    var partialMatch = searcher.SearchFile();
-
-                    if (partialMatch != null)
-                    {
-                        try
-                        {
-                            return ImageManager.LoadAndCropRightSideOfIcon(partialMatch.Name);
-                        }
-                        finally
-                        {
-                            partialMatch.Close();
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
-
+        
         private void AddElementEvent(object sender, MouseEventArgs e)
         {
             Panel panel = sender as Panel;
@@ -198,7 +53,7 @@ namespace ModdingManager
                     return;
                 }
 
-                var matchingRegiments = AvaibleRegiments
+                var matchingRegiments = Registry.Instance.Regiments
                     .Where(r => r.Categories != null &&
                         r.Categories.Contains(requiredCategory, StringComparer.OrdinalIgnoreCase) &&
                         (!type.Equals("Brigade", StringComparison.OrdinalIgnoreCase) ||
@@ -220,14 +75,12 @@ namespace ModdingManager
                     {
                         var selected = (RegimentConfig)((ToolStripMenuItem)s).Tag;
 
-                        // Установка иконки
                         if (panel.BackgroundImage != null && panel.BackgroundImage != selected.Icon)
                         {
                             panel.BackgroundImage.Dispose();
                         }
                         panel.BackgroundImage = new Bitmap(selected.Icon);
 
-                        // Создаем RegimentItem с координатами
                         var regimentItem = new RegimentConfig
                         {
                             Name = selected.Name,
@@ -237,7 +90,6 @@ namespace ModdingManager
                             Y = y
                         };
 
-                        // Добавляем в нужный список
                         if (type.Equals("Support", StringComparison.OrdinalIgnoreCase))
                         {
                             CurrentConfig.SupportItems.RemoveAll(r => r.X == x && r.Y == y); // Удаляем предыдущие на этих координатах
@@ -275,9 +127,9 @@ namespace ModdingManager
             CurrentConfig.OOBFileName = this.OOBTagBox.Text;
             CurrentConfig.OOBFileYear = int.TryParse(this.OOBYearBox.Text, out var year) ? year : 0;
         }
-        private void ConfigLoadButton_Click(object sender, EventArgs e)
+        private async void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            WinFormConfigManager.LoadConfigWrapper(this);
+            await WinFormConfigManager.LoadConfigWrapper(this);
             UpdtadeConfig();
         }
 
@@ -335,7 +187,6 @@ namespace ModdingManager
             if (!string.IsNullOrWhiteSpace(config.ModelName))
                 content.AppendLine($"    override_model = \"{config.ModelName}\"");
 
-            // Полки (обязательные)
             content.AppendLine("    regiments = {");
             foreach (var regiment in config.BrigadeItems)
             {
@@ -343,7 +194,6 @@ namespace ModdingManager
             }
             content.AppendLine("    }");
 
-            // Поддержка (только если есть)
             if (config.SupportItems != null && config.SupportItems.Any())
             {
                 content.AppendLine("    support = {");

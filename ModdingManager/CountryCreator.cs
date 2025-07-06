@@ -732,7 +732,7 @@ namespace ModdingManager
 
         private void CountryCreator_Load(object sender, EventArgs e)
         {
-            foreach (var ideology in RegistryManager.Instance.Ideologies)
+            foreach (var ideology in Registry.Instance.Ideologies)
             {
                 RullingPartyBox.Items.Add(ideology.Id);
             }

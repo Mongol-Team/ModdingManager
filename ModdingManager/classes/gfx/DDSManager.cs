@@ -15,9 +15,8 @@ using ModdingManager.classes.extentions;
 using ModdingManager.managers.utils;
 namespace ModdingManager.classes.gfx
 {
-    public class DDSManager : ImageManager
+    public static class DDSManager 
     {
-        public DDSManager() { }
         
         public static Bitmap LoadDDSAsBitmap(string path)
         {

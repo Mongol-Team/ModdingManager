@@ -172,8 +172,8 @@ namespace ModdingManager
                 DirBox.Text = path.ModPath;
                 ModManager.Directory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
-                RegistryManager.LoadInstance();
-                Debugger.Instance.LogMessage(RegistryManager.Instance.ToString());
+                Registry.LoadInstance();
+                Debugger.Instance.LogMessage(Registry.Instance.ToString());
             }
             catch (Exception ex)
             {

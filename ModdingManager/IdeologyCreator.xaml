@@ -8,9 +8,47 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:controls="clr-namespace:ModdingManager.classes.controls" x:Class="ModdingManager.IdeologyCreator"
         mc:Ignorable="d"
-        Title="IdeologyCreator" Height="450" Width="800">
-    <Grid>
-        <StackPanel Margin="20,20,579,20">
+        Title="IdeologyCreator" Height="450" Width="900">
+    <Grid Margin="0,0,0,0" >
+        <StackPanel Margin="226,20,524,20">
+
+            <TextBlock Height="40" Width="151">
+                 Влияние мировой напруги
+                 <LineBreak/>
+                 на War 
+                 <LineBreak/>
+            </TextBlock>
+            <TextBox x:Name="WarImpactOnTensionBox" Width="120" TextWrapping="Wrap"/>
+            <TextBlock Height="40" Width="149">
+                 Влияние мировой напруги
+                 <LineBreak/>
+                 на Faction 
+                 <LineBreak/>
+            </TextBlock>
+            <TextBox x:Name="FactionImpactOnTensionBox" Width="120" TextWrapping="Wrap"/>
+            <TextBlock Height="40" Width="147">
+                 Имя иделологии которое
+                 <LineBreak/>
+                 будет использовано ии
+                 <LineBreak/>
+            </TextBlock>
+            <TextBox x:Name="AiIdeologyNameBox" Width="120" TextWrapping="Wrap"/>
+            <TextBlock Height="40" Width="147">
+                 Имена динамических
+                 <LineBreak/>
+                 фракций
+                 <LineBreak/>
+            </TextBlock>
+            <RichTextBox Height="100" Name="DynamicFactionNamesBox">
+                <FlowDocument>
+                    <Paragraph>
+                        <Run Text=""/>
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
+
+        </StackPanel>
+        <StackPanel Margin="20,20,679,20">
             <Label Content="Имя локализированое"/>
             <TextBox x:Name="NameTextBox" Width="120" TextWrapping="Wrap"/>
 
@@ -24,17 +62,17 @@
             <TextBox x:Name="IdTextBox" Width="120" TextWrapping="Wrap"/>
             <Label Content="Цвет"/>
             <xctk:ColorPicker x:Name="OptionTextColorPicker" Width="110" Height="25"/>
-            <CheckBox Height="35" Width="195">
+            <CheckBox Height="35" Width="195" Name="CanFormExileGovermentBox">
                 <TextBlock Height="35" Width="177">
                     Может ли формировать
                     <LineBreak/>
                     правитьельство в изгнании?
                 </TextBlock>
             </CheckBox>
-            <CheckBox Height="50" Width="195">
+            <CheckBox Height="50" Width="195" Name="CanBeBoostedBox">
                 <TextBlock Height="50" Width="177"><Run Text="Может быть подвержено"/><LineBreak/><Run Text="операции &quot;увеличить"/><LineBreak/><Run Text="популярность партии&quot;"/></TextBlock>
             </CheckBox>
-            <CheckBox Height="55" Width="195">
+            <CheckBox Height="55" Width="195" Name="CanColaborateBox">
                 <TextBlock Height="55" Width="177">
                     Может ли формировать
                     <LineBreak/>
@@ -44,15 +82,21 @@
                 </TextBlock>
             </CheckBox>
         </StackPanel>
-        <StackPanel Margin="266,20,335,20">
+        <StackPanel Margin="381,20,353,20">
             <Label Content="Модификаторы"/>
-            <RichTextBox x:Name="ModifierBox" Loaded="ModifierBox_Loaded" Height="360" >
+            <RichTextBox x:Name="ModifiersBox" Loaded="ModifierBox_Loaded" Height="360" >
                 <FlowDocument/>
             </RichTextBox>
         </StackPanel>
-        <StackPanel Margin="470,20,131,20">
+        <StackPanel Margin="552,20,186,20">
             <Label Content="Модификаторы фракций"/>
-            <RichTextBox x:Name="FactionModifierBox" Loaded="ModifierBox_Loaded" Height="360" >
+            <RichTextBox x:Name="FactionModifiersBox" Loaded="ModifierBox_Loaded" Height="360" >
+                <FlowDocument/>
+            </RichTextBox>
+        </StackPanel>
+        <StackPanel Margin="719,20,19,20">
+            <Label Content="Правила"/>
+            <RichTextBox x:Name="RulesBox" Loaded="ModifierBox_Loaded" Height="360" >
                 <FlowDocument/>
             </RichTextBox>
         </StackPanel>
