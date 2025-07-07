@@ -68,8 +68,8 @@ namespace ModdingManager
             ApplyButton = new Button();
             SaveButton = new Button();
             LoadButton = new Button();
-            IdeologyBox = new TextBox();
             label18 = new Label();
+            IdeologyBox = new ComboBox();
             SuspendLayout();
             // 
             // BigIconPanel
@@ -202,7 +202,7 @@ namespace ModdingManager
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(219, 491);
+            label5.Location = new Point(223, 491);
             label5.Name = "label5";
             label5.Size = new Size(158, 20);
             label5.TabIndex = 26;
@@ -211,7 +211,7 @@ namespace ModdingManager
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(220, 544);
+            label6.Location = new Point(223, 544);
             label6.Name = "label6";
             label6.Size = new Size(116, 20);
             label6.TabIndex = 27;
@@ -221,7 +221,7 @@ namespace ModdingManager
             // 
             AdvisorSlot.FormattingEnabled = true;
             AdvisorSlot.Items.AddRange(new object[] { "political_advisor", "theorist", "army_chief", "navy_chief", "air_chief", "high_command" });
-            AdvisorSlot.Location = new Point(220, 569);
+            AdvisorSlot.Location = new Point(216, 569);
             AdvisorSlot.Name = "AdvisorSlot";
             AdvisorSlot.Size = new Size(165, 28);
             AdvisorSlot.TabIndex = 28;
@@ -326,7 +326,7 @@ namespace ModdingManager
             // 
             // AiDoBox
             // 
-            AiDoBox.Location = new Point(219, 631);
+            AiDoBox.Location = new Point(215, 640);
             AiDoBox.Name = "AiDoBox";
             AiDoBox.Size = new Size(166, 27);
             AiDoBox.TabIndex = 39;
@@ -334,7 +334,7 @@ namespace ModdingManager
             // label16
             // 
             label16.AutoSize = true;
-            label16.Location = new Point(221, 608);
+            label16.Location = new Point(221, 617);
             label16.Name = "label16";
             label16.Size = new Size(156, 20);
             label16.TabIndex = 40;
@@ -389,13 +389,6 @@ namespace ModdingManager
             LoadButton.UseVisualStyleBackColor = false;
             LoadButton.Click += LoadButton_Click;
             // 
-            // IdeologyBox
-            // 
-            IdeologyBox.Location = new Point(219, 441);
-            IdeologyBox.Name = "IdeologyBox";
-            IdeologyBox.Size = new Size(166, 27);
-            IdeologyBox.TabIndex = 50;
-            // 
             // label18
             // 
             label18.AutoSize = true;
@@ -405,13 +398,21 @@ namespace ModdingManager
             label18.TabIndex = 51;
             label18.Text = "Иделогия";
             // 
+            // IdeologyBox
+            // 
+            IdeologyBox.FormattingEnabled = true;
+            IdeologyBox.Location = new Point(221, 441);
+            IdeologyBox.Name = "IdeologyBox";
+            IdeologyBox.Size = new Size(165, 28);
+            IdeologyBox.TabIndex = 52;
+            // 
             // CharacterCreator
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(417, 714);
-            Controls.Add(label18);
             Controls.Add(IdeologyBox);
+            Controls.Add(label18);
             Controls.Add(LoadButton);
             Controls.Add(SaveButton);
             Controls.Add(ApplyButton);
@@ -453,6 +454,7 @@ namespace ModdingManager
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "CharacterCreator";
             Text = "Создатель персонажей";
+            Load += CharacterCreator_Load;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -498,7 +500,7 @@ namespace ModdingManager
         public Button ApplyButton;
         public Button SaveButton;
         public Button LoadButton;
-        public TextBox IdeologyBox;
         public Label label18;
+        public ComboBox IdeologyBox;
     }
 }

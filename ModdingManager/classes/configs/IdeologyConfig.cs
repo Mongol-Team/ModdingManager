@@ -1,5 +1,6 @@
 ﻿using ModdingManager.classes.extentions;
 using ModdingManager.classes.utils.search;
+using ModdingManager.classes.utils.structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,10 +87,18 @@ namespace ModdingManager.configs
 
                     var type = new IdeologyType { Name = typeName , Parrent = name };
                     var typeAssignments = VarSearcher.ParseAssignments(typeBlocks[0]);
-                    var canberandval = typeAssignments.FindByName("can_be_randomly_selected");
-                    var colorValue = typeAssignments.FindByName("color");
-                    type.CanBeRandomlySelected = VarSearcher.ParseBool(canberandval.value);
-                    type.Color = VarSearcher.ParseColor(colorValue.value);
+                    
+                    Var canberandval = typeAssignments.FindByName("can_be_randomly_selected");
+                    Var colorValue = typeAssignments.FindByName("color");
+                    if (!(canberandval.value == null))
+                    {
+                        type.CanBeRandomlySelected = VarSearcher.ParseBool(canberandval.value);
+                    }
+                    
+                    if (!(colorValue.value == null))
+                    {
+                        type.Color = VarSearcher.ParseColor(colorValue.value);
+                    }
 
                     config.SubTypes.Add(type);
                 }
@@ -135,6 +144,8 @@ namespace ModdingManager.configs
 
                 switch (kvp.name)
                 {
+                    case null:
+                        break;
                     case "can_host_government_in_exile":
                         config.CanFormExileGoverment = VarSearcher.ParseBool(kvp.value);
                         break;
@@ -172,6 +183,4 @@ namespace ModdingManager.configs
             return $"{Name} (Random: {CanBeRandomlySelected}, Color: {Color.ToString()}, Parrent: {Parrent})";
         }
     }
-
-
 }

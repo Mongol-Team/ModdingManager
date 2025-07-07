@@ -8,7 +8,8 @@ namespace ModdingManager.classes.utils.structs
 {
     public struct Var
     {
-        public string name;
-        public string value;
+        public string name { get; set; }
+        public string value { get; set; }
+        public static string GetValueSafe(Var? v) => v?.value;
     }
 }

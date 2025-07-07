@@ -23,11 +23,9 @@ namespace ModdingManager.configs
         public int Speed { get; set; } = 1;
         public string AdvisorSlot { get; set; } = "";
         public int AdvisorCost { get; set; } = 100;
-        public string AiWillDo { get; set; } = "";
+        public string AiWillDo { get; set; } = "20";
         public string Expire { get; set; } = "";
-        //[JsonIgnore]
-        public string BigIconPath { get; set; } = "";
-        //[JsonIgnore]
-        public string SmallIconPath { get; set; } = "";
+        public Image SmallImage { get; set; }
+        public Image BigImage { get; set; }
     }
 }

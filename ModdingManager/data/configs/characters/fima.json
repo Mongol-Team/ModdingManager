@@ -1,0 +1,24 @@
+{
+  "Id": "fimoznik",
+  "Name": "Фимозник",
+  "Description": "Пидрила",
+  "Ideology": "nazism",
+  "Types": [
+    "country_leader"
+  ],
+  "Tag": "GER",
+  "Traits": [
+    "dictator"
+  ],
+  "Skill": 0,
+  "Attack": 0,
+  "Defense": 0,
+  "Supply": 0,
+  "Speed": 0,
+  "AdvisorSlot": "",
+  "AdvisorCost": 0,
+  "AiWillDo": "",
+  "Expire": "",
+  "SmallImage": null,
+  "BigImage": null
+}

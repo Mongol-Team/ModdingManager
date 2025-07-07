@@ -32,6 +32,7 @@ namespace ModdingManager
         private Rect elementBounds;
         private Border highlightBorder;
         public SupereventConfig CurrentConfig = new();
+        private SuperEventHandler HandlerInstance;
         private enum ResizeDirection
         {
             None,
@@ -772,17 +773,17 @@ namespace ModdingManager
             if(!string.IsNullOrEmpty(CurrentConfig.Id))
             {
                 UpdateConfigButton_Click(sender, e);
-                SuperEventHandler handler = new() { CurrentConfig = CurrentConfig };
-                handler.HandleFontFiles();
-                handler.SaveSupereventAudioFile();
-                handler.CreateCustomAssetsFiles();
-                handler.SaveSupereventImages();
-                handler.HandleGUIFile();
-                handler.HandleGFXFile();
-                handler.HandleScriptedGuiFile();
-                handler.HandleLocalizationFiles();
-                handler.HandleButtonsImage();
-                handler.HandleFontDefineFiles();
+                HandlerInstance = new() { CurrentConfig = CurrentConfig };
+                HandlerInstance.HandleFontFiles();
+                HandlerInstance.SaveSupereventAudioFile();
+                HandlerInstance.CreateCustomAssetsFiles();
+                HandlerInstance.SaveSupereventImages();
+                HandlerInstance.HandleGUIFile();
+                HandlerInstance.HandleGFXFile();
+                HandlerInstance.HandleScriptedGuiFile();
+                HandlerInstance.HandleLocalizationFiles();
+                HandlerInstance.HandleButtonsImage();
+                HandlerInstance.HandleFontDefineFiles();
             }
             else
             {

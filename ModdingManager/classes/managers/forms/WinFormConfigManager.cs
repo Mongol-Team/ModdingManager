@@ -117,19 +117,6 @@ public static class WinFormConfigManager
         };
     }
 
-    private static async Task<string> ShowConfigSelectionDialog(object form, List<string> configs, string title)
-    {
-        if (form is System.Windows.FrameworkElement wpfForm)
-        {
-            return await ShowWpfSelectionDialog(wpfForm, configs, title);
-        }
-        else if (form is Form winFormsForm)
-        {
-            return await ShowWinFormsSelectionDialog(winFormsForm, configs, title);
-        }
-        throw new NotSupportedException("Unsupported form type");
-    }
-
     private static async Task<string> ShowWpfSelectionDialog(System.Windows.FrameworkElement owner, List<string> configs, string title)
     {
         var tcs = new TaskCompletionSource<string>();
@@ -259,7 +246,7 @@ public static class WinFormConfigManager
                 string filePath = Path.Combine(configPath, $"{configName}.json");
                 string json = JsonSerializer.Serialize(config, JsonOptions);
                 File.WriteAllText(filePath, json);
-                if (form is CharacterCreator charForm && charForm.currentCharacter != null)
+                if (form is CharacterCreator charForm && charForm.CurrentConfig != null)
                 {
                     SaveCharacterImages(charForm, configName);
                 }
@@ -661,8 +648,7 @@ public static class WinFormConfigManager
             Expire = form.ExpireBox.Text?.Trim() ?? "",
             Types = form.CharTypesBox.Text?.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
             Traits = form.PercBox.Text?.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
-            BigIconPath = form.currentCharacter?.BigIconPath ?? "",
-            SmallIconPath = form.currentCharacter?.SmallIconPath ?? ""
+       
         };
     }
 

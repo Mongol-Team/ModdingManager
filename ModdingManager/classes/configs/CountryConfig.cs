@@ -8,7 +8,6 @@ namespace ModdingManager.configs
 {
     public class CountryConfig
     {
-
         public string Tag { get; set; }
         public string Name { get; set; }
         public int Capital { get; set; }
