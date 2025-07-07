@@ -1,6 +1,7 @@
 ﻿using ModdingManager.classes.gfx;
 using ModdingManager.classes.utils.search;
 using ModdingManager.configs;
+using ModdingManager.managers.utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManager.managers.utils
+namespace ModdingManager.classes.utils
 {
     public class Registry
     {
@@ -75,17 +76,17 @@ namespace ModdingManager.managers.utils
         }
         private static void LoadIdeologies()
         {
-            Registry._instance.Ideologies = new List<IdeologyConfig>();
+            _instance.Ideologies = new List<IdeologyConfig>();
             var ideologyFiles = new List<string>();
 
             string modDir = Path.Combine(ModManager.Directory, "common", "ideologies");
             if (Directory.Exists(modDir))
                 ideologyFiles.AddRange(Directory.GetFiles(modDir, "*.*", SearchOption.AllDirectories));
             string gameDir = Path.Combine(ModManager.GameDirectory, "common", "ideologies");
-            if (Directory.Exists(gameDir) || ideologyFiles.Count < 1)
+            if (Directory.Exists(gameDir) && ideologyFiles.Count < 1)
                 ideologyFiles.AddRange(Directory.GetFiles(gameDir, "*.*", SearchOption.AllDirectories));
 
-          
+
 
             foreach (var file in ideologyFiles)
             {
@@ -119,6 +120,9 @@ namespace ModdingManager.managers.utils
                     if (config != null)
                         _instance.Ideologies.Add(config);
                 }
+                _instance.Ideologies.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+
+               
             }
         }
         #region Helper Methods

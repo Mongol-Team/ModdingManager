@@ -79,7 +79,6 @@ namespace ModdingManager.classes.handlers
                 string recruitLine = $"recruit_character = {CurrentConfig.Id}";
                 var lines = File.ReadAllLines(modFile).ToList();
 
-                // Найти последнюю строку, содержащую "recruit_character ="
                 int lastRecruitIndex = lines.FindLastIndex(line => line.TrimStart().StartsWith("recruit_character ="));
 
                 if (lastRecruitIndex >= 0)

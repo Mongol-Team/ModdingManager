@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Forms;
-using Registry = ModdingManager.managers.utils.Registry;
+using Registry = ModdingManager.classes.utils.Registry;
 
 namespace ModdingManager
 {

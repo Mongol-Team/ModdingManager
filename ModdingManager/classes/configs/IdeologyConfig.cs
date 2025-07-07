@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ModdingManager.configs
 {
-    public class IdeologyConfig
+    public class IdeologyConfig : IComparable<IdeologyConfig>
     {
         public IdeologyConfig()
         {
@@ -31,6 +31,10 @@ namespace ModdingManager.configs
         public Dictionary<string, double> FactionModifiers { get; set; }
         public string AiIdeologyName { get; set; }
         public List<string> DynamicFactionNames { get; set; }
+        public int CompareTo(IdeologyConfig other)
+        {
+            return string.Compare(this.Name, other.Name, StringComparison.Ordinal);
+        }
         public override string ToString()
         {
             return $"IdeologyConfig:\n" +

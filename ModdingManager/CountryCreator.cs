@@ -15,6 +15,7 @@ using ModdingManager.configs;
 using System.Reflection.Metadata;
 using ModdingManager.managers.utils;
 using ModdingManager.classes.gfx;
+using ModdingManager.classes.utils;
 
 namespace ModdingManager
 {

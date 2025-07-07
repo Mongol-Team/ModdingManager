@@ -18,9 +18,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ModdingManager.classes.gfx;
 using ModdingManager.classes.extentions;
-using ModdingManager.managers.utils;
 using System.Runtime.CompilerServices;
 using ModdingManager.classes.handlers;
+using ModdingManager.classes.utils;
 
 namespace ModdingManager
 {
@@ -192,13 +192,16 @@ namespace ModdingManager
         {
             CharacterCreator form = sender as CharacterCreator;
             ComboBox cmb = (ComboBox)form.Controls["IdeologyBox"];
+            List<string> list = new();
             foreach (IdeologyConfig ideo in Registry.Instance.Ideologies)
             {
                 foreach (IdeologyType type in ideo.SubTypes)
                 {
-                    cmb.Items.Add(type.Name);
+                    list.Add(type.Name);
                 }
             }
+            list.Sort();
+            cmb.Items.AddRange(list.ToArray());
         }
         #endregion
 

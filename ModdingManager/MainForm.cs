@@ -8,6 +8,7 @@ using ModdingManager.configs;
 using System.Drawing;
 using System.Windows.Forms.Integration;
 using ModdingManager.managers.utils;
+using ModdingManager.classes.utils;
 namespace ModdingManager
 {
     public partial class MainForm : Form
@@ -173,7 +174,6 @@ namespace ModdingManager
                 ModManager.Directory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
                 Registry.LoadInstance();
-                Debugger.Instance.LogMessage(Registry.Instance.ToString());
             }
             catch (Exception ex)
             {
