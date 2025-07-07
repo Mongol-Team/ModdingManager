@@ -248,7 +248,7 @@ public static class WinFormConfigManager
                 File.WriteAllText(filePath, json);
                 if (form is CharacterCreator charForm && charForm.CurrentConfig != null)
                 {
-                    SaveCharacterImages(charForm, configName);
+                    //SaveCharacterImages(charForm, configName);
                 }
                 else if (form is IdeaCreator ideaForm && ideaForm.ImagePanel.BackgroundImage != null)
                 {
@@ -668,7 +668,8 @@ public static class WinFormConfigManager
         form.AdvisorSlot.Text = config.AdvisorSlot;
         form.TagBox.Text = config.Tag;
         form.PercBox.Lines = config.Traits.ToArray();
-
+        form.CharTypesBox.Lines = config.Types.ToArray();
+        form.IdeologyBox.SelectedItem = config.Ideology;
         string bigIconPath = Path.Combine(CharactersPath, $"{config.Id}_big.png");
         string smallIconPath = Path.Combine(CharactersPath, $"{config.Id}_small.png");
 
