@@ -129,7 +129,8 @@ namespace ModdingManager
             {
                 ModManager.Directory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
-                CountryCreator fc = new CountryCreator();
+                WPFCountryCreator fc = new WPFCountryCreator();
+                ElementHost.EnableModelessKeyboardInterop(fc);
                 fc.Show();
             }
             else

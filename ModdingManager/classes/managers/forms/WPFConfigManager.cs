@@ -10,6 +10,7 @@ using Microsoft.VisualBasic;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using SixLabors.ImageSharp;
+using ModdingManager.classes.extentions;
 
 namespace ModdingManager.managers.forms
 {
@@ -232,7 +233,7 @@ namespace ModdingManager.managers.forms
                             var imageEntry = archive.CreateEntry($"images/{img.Key}");
                             using (var stream = imageEntry.Open())
                             {
-                                SaveBitmapSourceToStream(EnsureRenderable(img.Value), stream);
+                                EnsureRenderable(img.Value).SaveToStream(stream);
                             }
                         }
 
@@ -240,19 +241,19 @@ namespace ModdingManager.managers.forms
                         var first = saveData.FirstTabImage;
                         using (var stream = firstImageEntry.Open())
                         {
-                            SaveBitmapSourceToStream(EnsureRenderable(first), stream);
+                            EnsureRenderable(first).SaveToStream(stream);
                         }
                         var secondImageEntry = archive.CreateEntry($"{window.CurrentTechTree.Name}_second.png");
                         var second = saveData.SecondTabImage;
                         using (var stream = secondImageEntry.Open())
                         {
-                            SaveBitmapSourceToStream(EnsureRenderable(second), stream);
+                           EnsureRenderable(second).SaveToStream(stream);
                         }
                         var backgroundImageEntry = archive.CreateEntry($"background.png");
                         var bg = saveData.BgImage;
                         using (var stream = backgroundImageEntry.Open())
                         {
-                            SaveBitmapSourceToStream(EnsureRenderable(bg), stream);
+                            EnsureRenderable(bg).SaveToStream(stream);
                         }
                     }
 
@@ -285,20 +286,7 @@ namespace ModdingManager.managers.forms
             return source;
         }
 
-        private static void SaveBitmapSourceToStream(BitmapSource source, Stream stream)
-        {
-            var wb = new WriteableBitmap(source);
-            int width = wb.PixelWidth;
-            int height = wb.PixelHeight;
-            int stride = width * ((wb.Format.BitsPerPixel + 7) / 8);
-            byte[] pixels = new byte[height * stride];
-
-            wb.CopyPixels(pixels, stride, 0);
-
-            var image = SixLabors.ImageSharp.Image.LoadPixelData<SixLabors.ImageSharp.PixelFormats.Bgra32>(pixels, width, height);
-            image.SaveAsPng(stream);
-        }
-
+        
 
 
         private static async Task SaveBitmapSourceToFile(BitmapSource bitmapSource, string filePath)

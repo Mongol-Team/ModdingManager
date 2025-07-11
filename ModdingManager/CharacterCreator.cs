@@ -38,7 +38,7 @@ namespace ModdingManager
             CurrentConfig.Tag = TagBox.Text;
             CurrentConfig.Id = IdBox.Text;
             CurrentConfig.Name = NameBox.Text;
-            CurrentConfig.Expire = ExpireBox.Text;
+            CurrentConfig.Expire = ExpireTimePicker.Text;
 
             CurrentConfig.Attack = TryParseOrDefault(AtkBox.Text, 0);
             CurrentConfig.Defense = TryParseOrDefault(DefBox.Text, 0);
@@ -179,13 +179,13 @@ namespace ModdingManager
         {
             Task.Run(() =>
             {
-                WinFormConfigManager.LoadConfigWrapper(this);
+                WPFConfigManager.LoadConfigWrapper(this);
             });
         }
         private void SaveButton_Click(object sender, EventArgs e)
         {
 
-            WinFormConfigManager.SaveConfigWrapper(this);
+            WPFConfigManager.SaveConfigWrapper(this);
         }
 
         private void CharacterCreator_Load(object sender, EventArgs e)

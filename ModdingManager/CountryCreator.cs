@@ -496,42 +496,42 @@ namespace ModdingManager
                 MessageBox.Show($"Ошибка при создании файла: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void CreateCountryFlags()
-        {
-            if (TagBox.Text.Length != 3)
-            {
-                MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+        //private void CreateCountryFlags()
+        //{
+        //    if (TagBox.Text.Length != 3)
+        //    {
+        //        MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //        return;
+        //    }
 
-            string flagsDir = Path.Combine(ModManager.Directory, "gfx", "flags");
-            string countryTag = TagBox.Text;
+        //    string flagsDir = Path.Combine(ModManager.Directory, "gfx", "flags");
+        //    string countryTag = TagBox.Text;
 
-            try
-            {
-                // Получаем изображения из панелей
-                Image fascismFlag = GetImageFromPanel(CountryFascismFlagPanel);
-                Image neutralityFlag = GetImageFromPanel(CountryNeutralFlagPanel);
-                Image communismFlag = GetImageFromPanel(CountryCommunismFlagPanel);
-                Image democraticFlag = GetImageFromPanel(CountryDecmocraticFlagPanel);
+        //    try
+        //    {
+        //        // Получаем изображения из панелей
+        //        Image fascismFlag = GetImageFromPanel(CountryFascismFlagPanel);
+        //        Image neutralityFlag = GetImageFromPanel(CountryNeutralFlagPanel);
+        //        Image communismFlag = GetImageFromPanel(CountryCommunismFlagPanel);
+        //        Image democraticFlag = GetImageFromPanel(CountryDecmocraticFlagPanel);
 
-                // Создаем флаги
-                ImageManager.SaveCountryFlags(
-                    fascismFlag,
-                    neutralityFlag,
-                    communismFlag,
-                    democraticFlag,
-                    flagsDir,
-                    countryTag
-                );
+        //        // Создаем флаги
+        //        ImageManager.SaveCountryFlags(
+        //            fascismFlag,
+        //            neutralityFlag,
+        //            communismFlag,
+        //            democraticFlag,
+        //            flagsDir,
+        //            countryTag
+        //        );
 
-                MessageBox.Show($"Флаги страны {countryTag} успешно созданы в {flagsDir}", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при создании флагов: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+        //        MessageBox.Show($"Флаги страны {countryTag} успешно созданы в {flagsDir}", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Ошибка при создании флагов: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
 
         private Image GetImageFromPanel(Panel panel)
         {
@@ -553,7 +553,7 @@ namespace ModdingManager
             CreateCountryHistoryFile();
             UpdateStateOwnership();
             CreateCommonCountriesFile();
-            CreateCountryFlags();
+            //CreateCountryFlags();
             AddCountryTag();
             CreateLocalizationFiles(ModManager.Directory, TagBox.Text);
         }
@@ -723,12 +723,12 @@ namespace ModdingManager
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            WinFormConfigManager.LoadConfigWrapper(this);
+            WPFConfigManager.LoadConfigWrapper(this);
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            WinFormConfigManager.SaveConfigWrapper(this);
+            WPFConfigManager.SaveConfigWrapper(this);
         }
 
         private void CountryCreator_Load(object sender, EventArgs e)

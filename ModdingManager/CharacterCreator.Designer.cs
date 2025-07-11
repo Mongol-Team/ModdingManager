@@ -64,12 +64,12 @@ namespace ModdingManager
             AiDoBox = new TextBox();
             label16 = new Label();
             label17 = new Label();
-            ExpireBox = new TextBox();
             ApplyButton = new Button();
             SaveButton = new Button();
             LoadButton = new Button();
             label18 = new Label();
             IdeologyBox = new ComboBox();
+            ExpireTimePicker = new DateTimePicker();
             SuspendLayout();
             // 
             // BigIconPanel
@@ -349,13 +349,6 @@ namespace ModdingManager
             label17.TabIndex = 41;
             label17.Text = "Когда умрет";
             // 
-            // ExpireBox
-            // 
-            ExpireBox.Location = new Point(25, 618);
-            ExpireBox.Name = "ExpireBox";
-            ExpireBox.Size = new Size(166, 27);
-            ExpireBox.TabIndex = 42;
-            // 
             // ApplyButton
             // 
             ApplyButton.BackColor = Color.RosyBrown;
@@ -406,17 +399,24 @@ namespace ModdingManager
             IdeologyBox.Size = new Size(165, 28);
             IdeologyBox.TabIndex = 52;
             // 
+            // ExpireTimePicker
+            // 
+            ExpireTimePicker.Location = new Point(12, 638);
+            ExpireTimePicker.Name = "ExpireTimePicker";
+            ExpireTimePicker.Size = new Size(183, 27);
+            ExpireTimePicker.TabIndex = 53;
+            // 
             // CharacterCreator
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(417, 714);
+            Controls.Add(ExpireTimePicker);
             Controls.Add(IdeologyBox);
             Controls.Add(label18);
             Controls.Add(LoadButton);
             Controls.Add(SaveButton);
             Controls.Add(ApplyButton);
-            Controls.Add(ExpireBox);
             Controls.Add(label17);
             Controls.Add(label16);
             Controls.Add(AiDoBox);
@@ -496,11 +496,11 @@ namespace ModdingManager
         public TextBox AiDoBox;
         public Label label16;
         public Label label17;
-        public TextBox ExpireBox;
         public Button ApplyButton;
         public Button SaveButton;
         public Button LoadButton;
         public Label label18;
         public ComboBox IdeologyBox;
+        public DateTimePicker ExpireTimePicker;
     }
 }

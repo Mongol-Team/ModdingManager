@@ -59,6 +59,32 @@ public static class ImageSourceExtensions
 
         return bmp;
     }
+    public static DrawingImage ToDrawingImage(this ImageSource source)
+    {
+        if (source is DrawingImage drawingImage)
+        {
+            return drawingImage;
+        }
+
+        var imageDrawing = new ImageDrawing
+        {
+            ImageSource = source,
+            Rect = new Rect(0, 0, source.Width, source.Height)
+        };
+
+        var drawingGroup = new DrawingGroup();
+        drawingGroup.Children.Add(imageDrawing);
+
+        var result = new DrawingImage(drawingGroup);
+        result.Freeze(); // для повышения производительности
+
+        return result;
+    }
+    public static System.Drawing.Image ToDrawingDotImage(this ImageSource imageSource)
+    {
+        return imageSource.ToBitmap(); // если ToBitmap() возвращает System.Drawing.Bitmap
+    }
+
     public static Bitmap ToBitmap(this ImageSource imageSource)
     {
         if (imageSource is BitmapSource bitmapSource)

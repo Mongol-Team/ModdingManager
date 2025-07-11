@@ -14,10 +14,23 @@ namespace ModdingManager.classes.extentions
             var split = fullText.Split(new[] { "\r\n", "\n", "\r" }, System.StringSplitOptions.None);
             foreach (var line in split)
             {
-                lines.Add(line);
+                if (!string.IsNullOrEmpty(line))
+                {
+                    lines.Add(line);
+                }
             }
 
             return lines;
+        }
+        public static void SetLines(this System.Windows.Controls.RichTextBox rtb, IEnumerable<string> lines)
+        {
+            var document = new FlowDocument();
+            foreach (var line in lines)
+            {
+                var paragraph = new Paragraph(new Run(line));
+                document.Blocks.Add(paragraph);
+            }
+            rtb.Document = document;
         }
 
         public static List<string> GetLines(this RichTextBox rtb)

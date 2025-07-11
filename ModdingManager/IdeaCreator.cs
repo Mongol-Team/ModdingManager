@@ -315,12 +315,12 @@ namespace ModdingManager
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            WinFormConfigManager.SaveConfigWrapper(this);
+            WPFConfigManager.SaveConfigWrapper(this);
         }
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            WinFormConfigManager.LoadConfigWrapper(this);
+            WPFConfigManager.LoadConfigWrapper(this);
         }
 
         private void AddIdeaButtn_Click(object sender, EventArgs e)

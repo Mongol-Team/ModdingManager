@@ -11,7 +11,7 @@ using System.Text;
 using System.Windows.Media.Media3D;
 using ModdingManager.classes.gfx;
 
-public static class WinFormConfigManager
+public static class WPFConfigManager
 {
     private static readonly string ConfigsPath = Path.Combine("..", "..", "..", "data", "configs");
     private static readonly string CharactersPath = Path.Combine(ConfigsPath, "characters");
@@ -561,8 +561,8 @@ public static class WinFormConfigManager
             Tag = form.TagBox.Text,
             Capital = int.TryParse(form.CapitalBox.Text, out var capital) ? capital : 0,
             GraphicalCulture = form.GrapficalCultureBox.Text,
-            Color = $"{form.CountryColorDialog.Color.R} {form.CountryColorDialog.Color.G} {form.CountryColorDialog.Color.B}",
-            Technologies = form.TechBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
+            //Color = $"{form.CountryColorDialog.Color.R} {form.CountryColorDialog.Color.G} {form.CountryColorDialog.Color.B}",
+            //Technologies = form.TechBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
             Convoys = int.TryParse(form.ConvoyBox.Text, out var convoys) ? convoys : 0,
             OOB = form.StartOOBBox.Text,
             ResearchSlots = int.TryParse(form.ResearchSlotBox.Text, out var slots) ? slots : 0,
@@ -570,13 +570,9 @@ public static class WinFormConfigManager
             WarSup = int.Parse(form.WarSupportBox.Text),
             Name = form.CountryNameBox.Text,
             RulingParty = form.RullingPartyBox.SelectedItem?.ToString(),
-            LastElection = form.LastElectionBox.Text,
+            //LastElection = form.LastElectionBox.Text,
             ElectionFrequency = int.TryParse(form.ElectionFreqBox.Text, out var freq) ? freq : 0,
             ElectionsAllowed = form.IsElectionAllowedBox.Checked,
-            NeutralityPopularity = int.TryParse(form.NeutralPopularBox.Text, out var neutral) ? neutral : 0,
-            FascismPopularity = int.TryParse(form.FascismPopularBox.Text, out var fascism) ? fascism : 0,
-            CommunismPopularity = int.TryParse(form.CommunismPopularBox.Text, out var communism) ? communism : 0,
-            DemocraticPopularity = int.TryParse(form.DemocraticPopularBox.Text, out var democratic) ? democratic : 0,
             Ideas = form.StartIdeasBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
             Characters = form.RecruitBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
             States = ParseStates(form.CountryStatesBox.Text)
@@ -589,34 +585,34 @@ public static class WinFormConfigManager
         form.CapitalBox.Text = config.Capital.ToString();
         form.GrapficalCultureBox.Text = config.GraphicalCulture;
 
-        var colorParts = config.Color.Split(' ');
-        if (colorParts.Length == 3)
-        {
-            form.CountryColorDialog.Color = Color.FromArgb(
-                int.Parse(colorParts[0]),
-                int.Parse(colorParts[1]),
-                int.Parse(colorParts[2]));
-            form.ColorPickerButton.BackColor = form.CountryColorDialog.Color;
-        }
+        //var colorParts = config.Color.Split(' ');
+        //if (colorParts.Length == 3)
+        //{
+        //    form.CountryColorDialog.Color = Color.FromArgb(
+        //        int.Parse(colorParts[0]),
+        //        int.Parse(colorParts[1]),
+        //        int.Parse(colorParts[2]));
+        //    form.ColorPickerButton.BackColor = form.CountryColorDialog.Color;
+        //}
 
-        form.TechBox.Text = string.Join(Environment.NewLine, config.Technologies);
-        form.ConvoyBox.Text = config.Convoys.ToString();
-        form.StartOOBBox.Text = config.OOB;
-        form.ResearchSlotBox.Text = config.ResearchSlots.ToString();
-        form.WarSupportBox.Text = config.WarSup.ToString();
-        form.StabBox.Text = config.Stab.ToString();
-        form.CountryNameBox.Text = config.Name;
-        form.RullingPartyBox.SelectedItem = config.RulingParty;
-        form.LastElectionBox.Text = config.LastElection;
-        form.ElectionFreqBox.Text = config.ElectionFrequency.ToString();
-        form.IsElectionAllowedBox.Checked = config.ElectionsAllowed;
+        //form.TechBox.Text = string.Join(Environment.NewLine, config.Technologies);
+        //form.ConvoyBox.Text = config.Convoys.ToString();
+        //form.StartOOBBox.Text = config.OOB;
+        //form.ResearchSlotBox.Text = config.ResearchSlots.ToString();
+        //form.WarSupportBox.Text = config.WarSup.ToString();
+        //form.StabBox.Text = config.Stab.ToString();
+        //form.CountryNameBox.Text = config.Name;
+        //form.RullingPartyBox.SelectedItem = config.RulingParty;
+        //form.LastElectionBox.Text = config.LastElection;
+        //form.ElectionFreqBox.Text = config.ElectionFrequency.ToString();
+        //form.IsElectionAllowedBox.Checked = config.ElectionsAllowed;
 
-        form.NeutralPopularBox.Text = config.NeutralityPopularity.ToString();
-        form.FascismPopularBox.Text = config.FascismPopularity.ToString();
-        form.CommunismPopularBox.Text = config.CommunismPopularity.ToString();
-        form.DemocraticPopularBox.Text = config.DemocraticPopularity.ToString();
+        //form.NeutralPopularBox.Text = config.NeutralityPopularity.ToString();
+        //form.FascismPopularBox.Text = config.FascismPopularity.ToString();
+        //form.CommunismPopularBox.Text = config.CommunismPopularity.ToString();
+        //form.DemocraticPopularBox.Text = config.DemocraticPopularity.ToString();
 
-        form.StartIdeasBox.Text = string.Join(Environment.NewLine, config.Ideas);
+        //form.StartIdeasBox.Text = string.Join(Environment.NewLine, config.Ideas);
         form.RecruitBox.Text = string.Join(Environment.NewLine, config.Characters);
         form.CountryStatesBox.Text = string.Join(Environment.NewLine,
             config.States.Select(s => $"{s.Key}:{(s.Value ? "1" : "0")}"));
@@ -645,7 +641,7 @@ public static class WinFormConfigManager
             Ideology = form.IdeologyBox.Text?.Trim() ?? "",
             AdvisorCost = SafeParseInt(form.AdvisorCost.Text),
             AiWillDo = form.AiDoBox.Text?.Trim() ?? "",
-            Expire = form.ExpireBox.Text?.Trim() ?? "",
+            Expire = form.ExpireTimePicker.Text?.Trim() ?? "",
             Types = form.CharTypesBox.Text?.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
             Traits = form.PercBox.Text?.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
        
@@ -659,7 +655,7 @@ public static class WinFormConfigManager
         form.DescBox.Text = config.Description;
         form.AdvisorCost.Text = config.AdvisorCost.ToString();
         form.AiDoBox.Text = config.AiWillDo;
-        form.ExpireBox.Text = config.Expire;
+        form.ExpireTimePicker.Text = config.Expire;
         form.SpdBox.Text = config.Speed.ToString();
         form.SupplyBox.Text = config.Supply.ToString();
         form.DefBox.Text = config.Defense.ToString();

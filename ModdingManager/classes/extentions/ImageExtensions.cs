@@ -11,6 +11,7 @@ using SixLabors.ImageSharp.Processing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Linq;
 using TeximpNet;
@@ -78,7 +79,23 @@ namespace ModdingManager.classes.extentions
                 File.WriteAllBytes(fullPath, ms.ToArray());
             }
         }
+        public static ImageSource ConvertToImageSource(this System.Drawing.Image image)
+        {
+            // Конвертация System.Drawing.Image в ImageSource
+            using (var ms = new MemoryStream())
+            {
+                image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                ms.Seek(0, SeekOrigin.Begin);
 
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.StreamSource = ms;
+                bitmapImage.EndInit();
+
+                return bitmapImage;
+            }
+        }
         public static void SaveAsDDS(this Bitmap image, string fullPath)
         {
             string directory = Path.GetDirectoryName(fullPath);
@@ -111,26 +128,36 @@ namespace ModdingManager.classes.extentions
         }
 
         public static void SaveFlagSet(this System.Drawing.Image image, string flagsDir,
-                                      string countryTag, string ideology)
+                                string countryTag, string ideology)
         {
             using (var imageSharp = image.ConvertToImageSharp())
             {
+                // Основной флаг
+                string pathLarge = Path.Combine(flagsDir, $"{countryTag}_{ideology}.tga");
+                Directory.CreateDirectory(Path.GetDirectoryName(pathLarge)!);
                 using (var resized = ResizeStretch(imageSharp, 82, 52))
                 {
-                    resized.SaveAsTGA(Path.Combine(flagsDir, $"{countryTag}_{ideology}.tga"));
+                    resized.SaveAsTGA(pathLarge);
                 }
 
+                // Средний флаг
+                string mediumDir = Path.Combine(flagsDir, "medium");
+                Directory.CreateDirectory(mediumDir);
                 using (var resized = ResizeStretch(imageSharp, 41, 26))
                 {
-                    resized.SaveAsTGA(Path.Combine(flagsDir, "medium", $"{countryTag}_{ideology}.tga"));
+                    resized.SaveAsTGA(Path.Combine(mediumDir, $"{countryTag}_{ideology}.tga"));
                 }
 
+                // Маленький флаг
+                string smallDir = Path.Combine(flagsDir, "small");
+                Directory.CreateDirectory(smallDir);
                 using (var resized = ResizeStretch(imageSharp, 10, 7))
                 {
-                    resized.SaveAsTGA(Path.Combine(flagsDir, "small", $"{countryTag}_{ideology}.tga"));
+                    resized.SaveAsTGA(Path.Combine(smallDir, $"{countryTag}_{ideology}.tga"));
                 }
             }
         }
+
 
         public static void SaveAsDDS(this Image<Rgba32> image, string directory, string filename, int width, int height)
         {

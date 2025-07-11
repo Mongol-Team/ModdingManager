@@ -125,6 +125,12 @@ namespace ModdingManager.classes.utils
                
             }
         }
+
+        public IdeologyConfig? GetIdeology(string id)
+        {
+            return this.Ideologies.FirstOrDefault(i => i.Id == id);
+        }
+
         #region Helper Methods
         public static List<(string Name, List<string> Categories)> CollectUnitDefinitions()
         {

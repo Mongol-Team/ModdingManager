@@ -115,7 +115,7 @@ namespace ModdingManager.classes.handlers
                     CurrentConfig.Types.Contains("country_leader"), false);
 
                 string enEntries = GenerateLocalizationEntries(
-                    CurrentConfig.Id, "", "",
+                    CurrentConfig.Id, CurrentConfig.Name, CurrentConfig.Description,
                     CurrentConfig.Types.Contains("country_leader"), true);
 
                 ProcessLocalizationFile(ruFilePath, "l_russian", ruEntries);
@@ -276,8 +276,6 @@ namespace ModdingManager.classes.handlers
                     content.AppendLine($"\t\t\tlegacy_id = {CurrentConfig.Id}");
                     content.AppendLine("\t\t}");
                 }
-
-                // Блок лидера страны
                 if (CurrentConfig.Types.Contains("country_leader"))
                 {
                     content.AppendLine("\t\tcountry_leader = {");

@@ -129,14 +129,14 @@ namespace ModdingManager
         }
         private async void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            await WinFormConfigManager.LoadConfigWrapper(this);
+            await WPFConfigManager.LoadConfigWrapper(this);
             UpdtadeConfig();
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
             UpdtadeConfig();
-            WinFormConfigManager.SaveConfigWrapper(this);
+            WPFConfigManager.SaveConfigWrapper(this);
         }
 
         private void ApplyButton_Click(object sender, EventArgs e)

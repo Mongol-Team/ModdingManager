@@ -1395,7 +1395,7 @@ namespace ModdingManager
                         int targetWidth = current.Name.Contains("Small") ? 62 : 183;
                         int targetHeight = current.Name.Contains("Small") ? 62 : 84;
 
-                        var resized = ResizeToBitmap(original, targetWidth, targetHeight);
+                        var resized = original.ResizeToBitmap(targetWidth, targetHeight);
 
                         if (current.Name.Contains("Small"))
                             SmallOverlayImage.Source = resized;
@@ -1410,26 +1410,7 @@ namespace ModdingManager
             }
         }
 
-        private BitmapSource ResizeToBitmap(BitmapSource source, int targetWidth, int targetHeight)
-        {
-            var scale = new ScaleTransform(
-                (double)targetWidth / source.PixelWidth,
-                (double)targetHeight / source.PixelHeight);
-
-            var transformed = new TransformedBitmap(source, scale);
-
-            var drawingVisual = new DrawingVisual();
-            using (var context = drawingVisual.RenderOpen())
-            {
-                context.DrawImage(transformed, new Rect(0, 0, targetWidth, targetHeight));
-            }
-
-            var target = new RenderTargetBitmap(
-                targetWidth, targetHeight, 96, 96, PixelFormats.Pbgra32);
-            target.Render(drawingVisual);
-
-            return target;
-        }
+        
 
         private void TabFolderImageCanvas_Drop(object sender, System.Windows.DragEventArgs e)
         {
@@ -1444,10 +1425,10 @@ namespace ModdingManager
                     {
                         BitmapImage original = new BitmapImage(new Uri(imagePath));
 
-                        var resizedFirst = ResizeToBitmap(original, 25, 25);
+                        var resizedFirst = original.ResizeToBitmap(25, 25);
                         TabFolderFirstImage.Source = resizedFirst;
 
-                        var resizedSecond = ResizeToBitmap(original, 25, 25);
+                        var resizedSecond = original.ResizeToBitmap(25, 25);
                         TabFolderSecondImage.Source = resizedSecond;
                     }
                     catch (Exception ex)

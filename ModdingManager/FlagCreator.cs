@@ -23,32 +23,32 @@ namespace ModdingManager
 
         private void textBox2_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
-            {
-                if (textBox2.Text.Length == 3)
-                {
-                    ImageManager.SaveCountryFlags(panel2.BackgroundImage, panel1.BackgroundImage, panel3.BackgroundImage, panel4.BackgroundImage ,textBox1.Text, textBox2.Text);
-                }
-                else
-                {
-                    MessageBox.Show("Ты пьянь?", "Вопрос");
-                }
-            }
+            //if (e.KeyCode == Keys.Enter)
+            //{
+            //    if (textBox2.Text.Length == 3)
+            //    {
+            //        ImageManager.SaveCountryFlags(panel2.BackgroundImage, panel1.BackgroundImage, panel3.BackgroundImage, panel4.BackgroundImage ,textBox1.Text, textBox2.Text);
+            //    }
+            //    else
+            //    {
+            //        MessageBox.Show("Ты пьянь?", "Вопрос");
+            //    }
+            //}
         }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
-            {
-                if (textBox2.Text.Length == 3)
-                {
-                    ImageManager.SaveCountryFlags(panel2.BackgroundImage, panel1.BackgroundImage, panel3.BackgroundImage, panel4.BackgroundImage, textBox1.Text, textBox2.Text);
-                }
-                else
-                {
-                    MessageBox.Show("Ты пьянь?", "Вопрос");
-                }
-            }
+            //if (e.KeyCode == Keys.Enter)
+            //{
+            //    if (textBox2.Text.Length == 3)
+            //    {
+            //        ImageManager.SaveCountryFlags(panel2.BackgroundImage, panel1.BackgroundImage, panel3.BackgroundImage, panel4.BackgroundImage, textBox1.Text, textBox2.Text);
+            //    }
+            //    else
+            //    {
+            //        MessageBox.Show("Ты пьянь?", "Вопрос");
+            //    }
+            //}
         }
 
         private void panel1_DragDrop(object sender, DragEventArgs e)

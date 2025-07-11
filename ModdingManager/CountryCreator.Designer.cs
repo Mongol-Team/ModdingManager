@@ -78,6 +78,7 @@
             CountryFascismFlagPanel = new Panel();
             CountryCommunismFlagPanel = new Panel();
             CountryDecmocraticFlagPanel = new Panel();
+            label29 = new Label();
             label24 = new Label();
             label26 = new Label();
             label27 = new Label();
@@ -88,6 +89,7 @@
             ConfigLoadButton = new Button();
             SaveConfigButton = new Button();
             label4 = new Label();
+            CountryDecmocraticFlagPanel.SuspendLayout();
             SuspendLayout();
             // 
             // label4
@@ -486,7 +488,7 @@
             CountryFascismFlagPanel.Name = "CountryFascismFlagPanel";
             CountryFascismFlagPanel.Size = new Size(82, 52);
             CountryFascismFlagPanel.TabIndex = 39;
-            CountryFascismFlagPanel.DragDrop += CountryFascismFlagPanel_DragDrop;
+            CountryFascismFlagPanel.DragDrop += CountryFascismFlagPanel_DragEnter;
             CountryFascismFlagPanel.DragEnter += CountryFascismFlagPanel_DragEnter;
             // 
             // CountryCommunismFlagPanel
@@ -504,12 +506,22 @@
             // 
             CountryDecmocraticFlagPanel.AllowDrop = true;
             CountryDecmocraticFlagPanel.BackColor = SystemColors.ActiveCaption;
+            CountryDecmocraticFlagPanel.Controls.Add(label29);
             CountryDecmocraticFlagPanel.Location = new Point(480, 156);
             CountryDecmocraticFlagPanel.Name = "CountryDecmocraticFlagPanel";
             CountryDecmocraticFlagPanel.Size = new Size(82, 52);
             CountryDecmocraticFlagPanel.TabIndex = 41;
             CountryDecmocraticFlagPanel.DragDrop += CountryDecmocraticFlagPanel_DragDrop;
             CountryDecmocraticFlagPanel.DragEnter += CountryDecmocraticFlagPanel_DragEnter;
+            // 
+            // label29
+            // 
+            label29.AutoSize = true;
+            label29.Location = new Point(29, 20);
+            label29.Name = "label29";
+            label29.Size = new Size(58, 20);
+            label29.TabIndex = 0;
+            label29.Text = "label29";
             // 
             // label24
             // 
@@ -653,6 +665,8 @@
             Name = "CountryCreator";
             Text = "Создатель стран";
             Load += CountryCreator_Load;
+            CountryDecmocraticFlagPanel.ResumeLayout(false);
+            CountryDecmocraticFlagPanel.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -716,5 +730,6 @@
         public ColorDialog CountryColorDialog;
         public Button ConfigLoadButton;
         public Button SaveConfigButton;
+        private Label label29;
     }
 }

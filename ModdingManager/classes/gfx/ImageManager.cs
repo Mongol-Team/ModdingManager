@@ -90,32 +90,7 @@ namespace ModdingManager.classes.gfx
             return Properties.Resources.null_item_image;
         }
 
-        public static void SaveCountryFlags(System.Drawing.Image fascismImage,
-                                  System.Drawing.Image neutralityImage,
-                                  System.Drawing.Image communismImage,
-                                  System.Drawing.Image democraticImage,
-                                  string modPath,
-                                  string countryTag)
-        {
-            try
-            {
-                string flagsDir = modPath;
-
-                Directory.CreateDirectory(flagsDir);
-                Directory.CreateDirectory(Path.Combine(flagsDir, "small"));
-                Directory.CreateDirectory(Path.Combine(flagsDir, "medium"));
-
-                neutralityImage.SaveFlagSet(flagsDir, countryTag, "neutrality");
-                fascismImage.SaveFlagSet(flagsDir, countryTag, "fascism");
-                communismImage.SaveFlagSet(flagsDir, countryTag, "communism");
-                democraticImage.SaveFlagSet(flagsDir, countryTag, "democratic");
-            }
-            catch (Exception ex)
-            {
-                System.Windows.Forms.MessageBox.Show($"Ошибка создания флагов: {ex.Message}", "Ошибка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+        
         public static ImageSource GetCombinedImages(List<ImageSourceArg> images, int width, int height)
         {
             if (images == null || images.Count == 0)
