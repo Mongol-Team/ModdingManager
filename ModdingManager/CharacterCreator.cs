@@ -38,17 +38,16 @@ namespace ModdingManager
             CurrentConfig.Tag = TagBox.Text;
             CurrentConfig.Id = IdBox.Text;
             CurrentConfig.Name = NameBox.Text;
-            CurrentConfig.Expire = ExpireTimePicker.Text;
-
+            CurrentConfig.Expire = ExpireTimePicker.Value.ToString("yyyy.MM.dd");
             CurrentConfig.Attack = TryParseOrDefault(AtkBox.Text, 0);
             CurrentConfig.Defense = TryParseOrDefault(DefBox.Text, 0);
             CurrentConfig.Supply = TryParseOrDefault(SupplyBox.Text, 0);
             CurrentConfig.Speed = TryParseOrDefault(SpdBox.Text, 0);
             CurrentConfig.Skill = TryParseOrDefault(SkillBox.Text, 0);
             CurrentConfig.AdvisorCost = TryParseOrDefault(AdvisorCost.Text, 0);
-
             CurrentConfig.Types = CharTypesBox.GetLines();
             CurrentConfig.Traits = PercBox.GetLines();
+            CurrentConfig.Description = DescBox.Text;
             CurrentConfig.AiWillDo = AiDoBox.Text;
             CurrentConfig.Ideology = IdeologyBox.Text;
             CurrentConfig.BigImage = BigIconPanel.BackgroundImage;
@@ -63,15 +62,7 @@ namespace ModdingManager
 
 
         #endregion
-        private void ApplyButton_Click(object sender, EventArgs e)
-        {
-            UpdateCurrentConfig();
-            HandlerIncetance.CreateCharacterFile();
-            HandlerIncetance.SaveCharacterPortraits();
-            HandlerIncetance.CreateCharacterLocalizationFiles();
-            HandlerIncetance.HandleGFXFile();
-            HandlerIncetance.HandleRecruting();
-        }
+
         #region Events
         private void BigIconBox_DragEnter(object sender, DragEventArgs e)
         {
@@ -94,6 +85,15 @@ namespace ModdingManager
             }
         }
 
+        private void ApplyButton_Click(object sender, EventArgs e)
+        {
+            UpdateCurrentConfig();
+            HandlerIncetance.CreateCharacterFile();
+            HandlerIncetance.SaveCharacterPortraits();
+            HandlerIncetance.CreateCharacterLocalizationFiles();
+            HandlerIncetance.HandleGFXFile();
+            HandlerIncetance.HandleRecruting();
+        }
         private void BigIconBox_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);

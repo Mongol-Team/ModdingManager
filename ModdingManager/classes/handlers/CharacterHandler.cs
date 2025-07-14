@@ -115,7 +115,7 @@ namespace ModdingManager.classes.handlers
                     CurrentConfig.Types.Contains("country_leader"), false);
 
                 string enEntries = GenerateLocalizationEntries(
-                    CurrentConfig.Id, CurrentConfig.Name, CurrentConfig.Description,
+                    CurrentConfig.Id, "", "",
                     CurrentConfig.Types.Contains("country_leader"), true);
 
                 ProcessLocalizationFile(ruFilePath, "l_russian", ruEntries);

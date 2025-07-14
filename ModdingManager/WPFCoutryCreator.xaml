@@ -38,9 +38,6 @@
                     <TextBox x:Name="ElectionsDelayBox" Width="120"/>
 
                     <CheckBox x:Name="HaveElectionsBox" Content="Есть ли выборы"/>
-
-                    <Label Content="Описание"/>
-                    <TextBox x:Name="DescBox" Width="120"/>
                     <Button x:Name="ApplyButton" Content="Применить" Width="120" Background="#FFAB8338" Margin="0,10,0,0" Click="ApplyButton_Click"/>
                     <Button x:Name="LoadConfigButton" Content="Загрузить конфиг" Width="120" Background="#FF4AAB38"  Margin="0,10,0,0" Click="LoadConfigButton_Click"/>
                     <Button x:Name="SaveConfigButton" Content="Сохранить конфиг" Width="120" Background="#FFE82F2F" Margin="0,10,0,0" Click="SaveConfigButton_Click"/>

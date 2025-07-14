@@ -103,14 +103,14 @@ namespace ModdingManager
 
         public int? Stab
         {
-            get => int.TryParse(StabBox.Text, out int result) ? result : 0;
-            set => StabBox.Text = value.ToString();
+            get => int.TryParse(StabBox.Text, out int result) ? result / 10 : 0;
+            set => StabBox.Text = (value * 10).ToString();
         }
 
         public int? WarSup
         {
-            get => int.TryParse(WarSupBox.Text, out int result) ? result : 0;
-            set => WarSupBox.Text = value.ToString();
+            get => int.TryParse(WarSupBox.Text, out int result) ? result / 10: 0;
+            set => WarSupBox.Text = (value * 10).ToString();
         }
 
         public int? ResearchSlots
@@ -203,7 +203,6 @@ namespace ModdingManager
                     {
                         string boolPart = parts[1];
                         bool isCore = boolPart == "true" || boolPart == "1";
-                        System.Windows.MessageBox.Show($"{id} {isCore}");
                         result[id] = isCore;
                     }
                 }

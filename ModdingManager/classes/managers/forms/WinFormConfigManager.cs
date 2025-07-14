@@ -641,7 +641,7 @@ public static class WPFConfigManager
             Ideology = form.IdeologyBox.Text?.Trim() ?? "",
             AdvisorCost = SafeParseInt(form.AdvisorCost.Text),
             AiWillDo = form.AiDoBox.Text?.Trim() ?? "",
-            Expire = form.ExpireTimePicker.Text?.Trim() ?? "",
+            Expire = form.ExpireTimePicker.Value.ToString("yyyy.MM.dd"),
             Types = form.CharTypesBox.Text?.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
             Traits = form.PercBox.Text?.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>(),
        

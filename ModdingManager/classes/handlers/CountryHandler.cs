@@ -24,8 +24,8 @@ namespace ModdingManager.classes.handlers
                 Directory.CreateDirectory(ruLocPath);
                 Directory.CreateDirectory(enLocPath);
 
-                string ruContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_russian");
-                string enContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_english");
+                string ruContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_russian", this.CurrentConfig.Name);
+                string enContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_english", this.CurrentConfig.Name);
 
                 string ruFilePath = Path.Combine(ruLocPath, $"{this.CurrentConfig.Tag}_history_l_russian.yml");
                 string enFilePath = Path.Combine(enLocPath, $"{this.CurrentConfig.Tag}_history_l_english.yml");
@@ -43,7 +43,7 @@ namespace ModdingManager.classes.handlers
             }
         }
 
-        private static string GenerateLocalizationContent(string tag, string languageKey)
+        private static string GenerateLocalizationContent(string tag, string languageKey, string name)
         {
             var sb = new StringBuilder();
 
@@ -61,7 +61,7 @@ namespace ModdingManager.classes.handlers
             sb.AppendLine($" {tag}_democratic_ADJ: \"\"");
             sb.AppendLine($" {tag}_neutrality_ADJ: \"\"");
             sb.AppendLine($" {tag}_communism_ADJ: \"\"");
-            sb.AppendLine($" {tag}: \"\"");
+            sb.AppendLine($" {tag}: \"{name}\"");
             sb.AppendLine($" {tag}_DEF: \"\"");
             sb.AppendLine($" {tag}_ADJ: \"\"");
 
@@ -358,7 +358,6 @@ namespace ModdingManager.classes.handlers
                     }
                     writer.WriteLine();
 
-                    // Персонажи
                     if (this.CurrentConfig.Characters.Count > 0)
                     {
                         foreach (string character in this.CurrentConfig.Characters)
@@ -434,7 +433,6 @@ namespace ModdingManager.classes.handlers
 
             try
             {
-                // Создаём директорию, если её нет
                 Directory.CreateDirectory(flagsDir);
 
                 foreach (var pair in this.CurrentConfig.CountryFlags)
@@ -445,7 +443,6 @@ namespace ModdingManager.classes.handlers
                     if (!string.IsNullOrEmpty(ideologyDir))
                         Directory.CreateDirectory(ideologyDir);
 
-                    // Сохраняем флаг
                     pair.Value.ToDrawingDotImage().SaveFlagSet(flagsDir, countryTag, pair.Key);
                 }
 
