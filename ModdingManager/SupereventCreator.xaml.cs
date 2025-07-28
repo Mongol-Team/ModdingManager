@@ -17,6 +17,7 @@ using Brushes = System.Windows.Media.Brushes;
 using FontFamily = System.Windows.Media.FontFamily;
 using RichTextBox = System.Windows.Controls.RichTextBox;
 using TextBox = System.Windows.Controls.TextBox;
+
 namespace ModdingManager
 {
     public partial class SupereventCreator : Window
@@ -928,7 +929,7 @@ namespace ModdingManager
 
         private void SearchableCombo_Loaded(object sender, RoutedEventArgs e)
         {
-            if (sender is SearchableComboBoxControl combo)
+            if (sender is SearchableComboBox combo)
             {
                 var fonts = Fonts.SystemFontFamilies
                                  .Select(f => f.Source)

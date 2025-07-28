@@ -1,7 +1,9 @@
 ﻿using ModdingManager.classes.functional.search;
+using ModdingManager.classes.utils.types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 public class BracketSearcher : Searcher
 {
@@ -9,76 +11,194 @@ public class BracketSearcher : Searcher
     public char OpenBracketChar { get; set; } = '{';
     public char CloseBracketChar { get; set; } = '}';
     public char CommentSymbol { get; set; } = '#';
-    public List<string> GetBracketContentByHeaderName(char[] header)
-    {
-        var results = new List<string>();
-        if (CurrentString == null || header == null || header.Length == 0)
-            return results;
+    public char AssignSymbol { get; set; } = '=';
 
+    /// <summary>
+    /// Находит все скобки с указанным именем заголовка
+    /// </summary>
+    public List<Bracket> FindBracketsByName(string bracketName)
+    {
+        var brackets = new List<Bracket>();
+        if (string.IsNullOrWhiteSpace(bracketName))
+            return brackets;
+
+        SearchPattern = bracketName.ToCharArray();
         int pos = 0;
-        int headerLength = header.Length;
 
         while (pos < CurrentString.Length)
         {
-            pos = FindExactHeaderPosition(header, pos);
+            pos = FindExactHeaderPosition(SearchPattern, pos);
             if (pos == -1) break;
 
-            if (!IsStandaloneWord(pos, headerLength))
+            var bracket = GetBracketAtPosition(pos);
+            if (bracket != null)
             {
-                pos += headerLength;
-                continue;
+                brackets.Add(bracket);
+                pos = bracket.EndPosition + 1;
             }
-
-            // Пропускаем пробелы после заголовка
-            pos += headerLength;
-            while (pos < CurrentString.Length && char.IsWhiteSpace(CurrentString[pos]))
-                pos++;
-
-            // Проверяем, что после заголовка идет '=' или открывающая скобка
-            if (pos >= CurrentString.Length ||
-                (CurrentString[pos] != '=' && CurrentString[pos] != OpenBracketChar))
+            else
             {
-                pos++;
-                continue;
+                pos += SearchPattern.Length;
             }
-
-            // Ищем открывающую скобку
-            int bracketStart = FindNextBracketStart(pos);
-            if (bracketStart == -1) break;
-
-            // Находим соответствующую закрывающую скобку
-            int bracketEnd = FindMatchingBracketEnd(bracketStart);
-            if (bracketEnd == -1) break;
-
-            // Извлекаем содержимое
-            var content = new char[bracketEnd - bracketStart - 1];
-            Array.Copy(CurrentString, bracketStart + 1, content, 0, content.Length);
-            results.Add(new string(content).Trim());
-
-            pos = bracketEnd + 1;
         }
 
-        return results;
+        return brackets;
     }
 
-    private bool IsStandaloneWord(int pos, int length)
+    /// <summary>
+    /// Получает информацию о скобке по позиции заголовка
+    /// </summary>
+    private Bracket GetBracketAtPosition(int headerStart)
     {
-        // Проверяем символ перед заголовком
-        if (pos > 0 && IsWordCharacter(CurrentString[pos - 1]))
-            return false;
+        int headerEnd = headerStart + SearchPattern.Length;
 
-        // Проверяем символ после заголовка
-        if (pos + length < CurrentString.Length && IsWordCharacter(CurrentString[pos + length]))
-            return false;
+        // Пропускаем пробелы после заголовка
+        while (headerEnd < CurrentString.Length && char.IsWhiteSpace(CurrentString[headerEnd]))
+            headerEnd++;
 
-        return true;
+        // Проверяем наличие '=' после заголовка
+        if (headerEnd < CurrentString.Length && CurrentString[headerEnd] == AssignSymbol)
+        {
+            headerEnd++;
+            while (headerEnd < CurrentString.Length && char.IsWhiteSpace(CurrentString[headerEnd]))
+                headerEnd++;
+        }
+
+        // Проверяем наличие открывающей скобки
+        if (headerEnd >= CurrentString.Length || CurrentString[headerEnd] != OpenBracketChar)
+            return null;
+
+        int bracketStart = headerEnd;
+        int bracketEnd = FindMatchingBracketEnd(bracketStart);
+        if (bracketEnd == -1)
+            return null;
+
+        // Создаем объект Bracket
+        var bracket = new Bracket
+        {
+            OpenChar = OpenBracketChar,
+            CloseChar = CloseBracketChar,
+            CommentSymbol = CommentSymbol,
+            AssignSymbol = AssignSymbol,
+            StartPosition = bracketStart,
+            EndPosition = bracketEnd,
+            Header = new string(CurrentString, headerStart, headerEnd - headerStart - 1).Trim()
+        };
+
+        // Парсим содержимое скобки
+        ParseBracketContent(bracket, bracketStart + 1, bracketEnd - 1);
+
+        return bracket;
     }
 
-   
-
-    public List<string> GetAllBracketSubbracketsNames(int targetDepth = 1)
+    /// <summary>
+    /// Парсит содержимое скобки
+    /// </summary>
+    private void ParseBracketContent(Bracket bracket, int contentStart, int contentEnd)
     {
-        var results = new List<string>();
+        int lineStart = contentStart;
+        bool inSubBracket = false;
+        int subBracketDepth = 0;
+        int subBracketStart = 0;
+
+        for (int i = contentStart; i <= contentEnd; i++)
+        {
+            if (CurrentString[i] == CommentSymbol)
+            {
+                // Пропускаем комментарии
+                while (i <= contentEnd && CurrentString[i] != '\n' && CurrentString[i] != '\r')
+                    i++;
+                continue;
+            }
+
+            if (CurrentString[i] == OpenBracketChar && !inSubBracket)
+            {
+                inSubBracket = true;
+                subBracketDepth = 1;
+                subBracketStart = i;
+                continue;
+            }
+
+            if (inSubBracket)
+            {
+                if (CurrentString[i] == OpenBracketChar) subBracketDepth++;
+                if (CurrentString[i] == CloseBracketChar) subBracketDepth--;
+
+                if (subBracketDepth == 0)
+                {
+                    inSubBracket = false;
+                    var subBracket = GetBracketAtPosition(FindHeaderStart(subBracketStart));
+                    if (subBracket != null)
+                    {
+                        bracket.AddSubBracket(subBracket);
+                    }
+                    lineStart = i + 1;
+                }
+                continue;
+            }
+
+            if (CurrentString[i] == '\n' || CurrentString[i] == '\r' || i == contentEnd)
+            {
+                if (lineStart < i)
+                {
+                    string line = new string(CurrentString, lineStart, i - lineStart).Trim();
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        bracket.AddContent(line);
+
+                        // Пытаемся распарсить как переменную
+                        var var = TryParseVar(line);
+                        if (var != null)
+                        {
+                            bracket.ContentVars.Add(var);
+                        }
+                    }
+                }
+                lineStart = i + 1;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Пытается распарсить строку как переменную
+    /// </summary>
+    private Var TryParseVar(string line)
+    {
+        int eqPos = line.IndexOf(AssignSymbol);
+        if (eqPos <= 0) return null;
+
+        string name = line.Substring(0, eqPos).Trim();
+        string value = line.Substring(eqPos + 1).Trim();
+
+        return new Var { Name = name, Value = value };
+    }
+
+    /// <summary>
+    /// Находит начало заголовка для подскобки
+    /// </summary>
+    private int FindHeaderStart(int bracketPos)
+    {
+        int pos = bracketPos - 1;
+
+        // Пропускаем пробелы перед скобкой
+        while (pos >= 0 && char.IsWhiteSpace(CurrentString[pos]))
+            pos--;
+
+        // Ищем начало имени
+        int end = pos;
+        while (pos >= 0 && !char.IsWhiteSpace(CurrentString[pos]) &&
+               CurrentString[pos] != '\n' && CurrentString[pos] != '\r')
+            pos--;
+
+        return pos + 1;
+    }
+
+    /// <summary>
+    /// Находит все подскобки указанного уровня вложенности
+    /// </summary>
+    public List<Bracket> GetAllSubBrackets(int targetDepth = 1)
+    {
+        var results = new List<Bracket>();
         if (CurrentString == null || targetDepth < 1)
             return results;
 
@@ -114,18 +234,10 @@ public class BracketSearcher : Searcher
 
                     if (nameStart < i)
                     {
-                        int nameEnd = i - 1;
-                        while (nameEnd > nameStart && char.IsWhiteSpace(CurrentString[nameEnd]))
-                            nameEnd--;
-
-                        if (nameEnd >= nameStart && CurrentString[nameEnd] == '=')
-                            nameEnd--;
-
-                        if (nameEnd >= nameStart)
+                        var bracket = GetBracketAtPosition(nameStart);
+                        if (bracket != null)
                         {
-                            var name = new string(CurrentString, nameStart, nameEnd - nameStart + 1);
-                            if (!string.IsNullOrWhiteSpace(name))
-                                results.Add(name.Trim());
+                            results.Add(bracket);
                         }
                     }
                 }
@@ -141,57 +253,7 @@ public class BracketSearcher : Searcher
         return results;
     }
 
-    public List<string> GetAllSubbracetContent(char[] brackedHeader, char[] subbrackedHeader)
-    {
-        var results = new List<string>();
-        var mainContents = GetBracketContentByHeaderName(brackedHeader);
-
-        foreach (var content in mainContents)
-        {
-            var tempSearcher = new BracketSearcher
-            {
-                OpenBracketChar = this.OpenBracketChar,
-                CloseBracketChar = this.CloseBracketChar,
-                CurrentString = content.ToCharArray(),
-            };
-
-            results.AddRange(tempSearcher.GetBracketContentByHeaderName(subbrackedHeader));
-        }
-
-        return results;
-    }
-
-    #region Improved Helper Methods
-    private int SearchFullPatternFromPosition(int startPos)
-    {
-        if (startPos >= CurrentString.Length) return -1;
-
-        for (int i = startPos; i <= CurrentString.Length - SearchPattern.Length; i++)
-        {
-            bool match = true;
-            for (int j = 0; j < SearchPattern.Length; j++)
-            {
-                if (CurrentString[i + j] != SearchPattern[j])
-                {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) return i;
-        }
-        return -1;
-    }
-
-    private int FindNextBracketStart(int startPos)
-    {
-        for (int i = startPos; i < CurrentString.Length; i++)
-        {
-            if (CurrentString[i] == OpenBracketChar)
-                return i;
-        }
-        return -1;
-    }
-
+    #region Helper Methods
     private int FindMatchingBracketEnd(int startPos)
     {
         int depth = 1;
@@ -209,62 +271,6 @@ public class BracketSearcher : Searcher
         return -1;
     }
 
-    private int FindNearestHeaderBeforeBracket(int bracketPos, int depthLevel)
-    {
-        int currentDepth = 0;
-        int position = bracketPos - 1;
-
-        // Ищем начало строки перед скобкой
-        while (position >= 0)
-        {
-            if (CurrentString[position] == '\n' || CurrentString[position] == '\r')
-            {
-                currentDepth++;
-                if (currentDepth > depthLevel)
-                    return -1;
-            }
-
-            if (!char.IsWhiteSpace(CurrentString[position]) &&
-                CurrentString[position] != '\n' &&
-                CurrentString[position] != '\r')
-            {
-                break;
-            }
-
-            position--;
-        }
-
-        if (position < 0) return -1;
-
-        // Ищем начало строки
-        int headerStart = position;
-        while (headerStart > 0 && !IsNewLine(CurrentString[headerStart - 1]))
-            headerStart--;
-
-        return headerStart;
-    }
-
-    private int FindHeaderEnd(int startPos)
-    {
-        int endPos = startPos;
-        while (endPos < CurrentString.Length && !IsNewLine(CurrentString[endPos]))
-            endPos++;
-        return endPos;
-    }
-    private int FindHeaderEnd(int startPos, int maxPos)
-    {
-        int endPos = startPos;
-        while (endPos < maxPos &&
-               !IsNewLine(CurrentString[endPos]) &&
-               CurrentString[endPos] != '=' &&
-               CurrentString[endPos] != OpenBracketChar)
-        {
-            endPos++;
-        }
-        return endPos;
-    }
-    private bool IsNewLine(char c) => c == '\n' || c == '\r';
-
     private int FindExactHeaderPosition(char[] header, int startPos)
     {
         for (int i = startPos; i <= CurrentString.Length - header.Length; i++)
@@ -279,10 +285,21 @@ public class BracketSearcher : Searcher
                 }
             }
 
-            if (match)
+            if (match && IsStandaloneWord(i, header.Length))
                 return i;
         }
         return -1;
+    }
+
+    private bool IsStandaloneWord(int pos, int length)
+    {
+        if (pos > 0 && IsWordCharacter(CurrentString[pos - 1]))
+            return false;
+
+        if (pos + length < CurrentString.Length && IsWordCharacter(CurrentString[pos + length]))
+            return false;
+
+        return true;
     }
 
     private bool IsWordCharacter(char c)

@@ -1,24 +1,12 @@
-﻿using Microsoft.Win32;
-using ModdingManager.classes.extentions;
+﻿using ModdingManager.classes.extentions;
 using ModdingManager.classes.views;
-using ModdingManager.configs;
-using ModdingManager.classes.utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ModdingManager.managers.utils;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using Registry = ModdingManager.classes.utils.Registry;
 using Label = System.Windows.Controls.Label;
+using Registry = ModdingManager.classes.utils.Registry;
 
 namespace ModdingManager
 {
@@ -47,7 +35,10 @@ namespace ModdingManager
             get => CountryDescNameBox.Text;
             set => CountryDescNameBox.Text = value;
         }
-
+        public string? CountryFileName { 
+            get => CountryFileNameBox.SelectedItem.ToString(); 
+            set => CountryFileNameBox.SelectedItem = value;
+        }
         public int? Capital
         {
             get => int.TryParse(CapitalIdBox.Text, out int result) ? result : 0;
@@ -101,16 +92,16 @@ namespace ModdingManager
             set => StartOOBox.Text = value.ToString();
         }
 
-        public int? Stab
+        public double? Stab
         {
-            get => int.TryParse(StabBox.Text, out int result) ? result / 10 : 0;
-            set => StabBox.Text = (value * 10).ToString();
+            get => double.TryParse(StabBox.Text, out double result) ? result / 100 : 0;
+            set => StabBox.Text = (value * 100).ToString();
         }
 
-        public int? WarSup
+        public double? WarSup
         {
-            get => int.TryParse(WarSupBox.Text, out int result) ? result / 10: 0;
-            set => WarSupBox.Text = (value * 10).ToString();
+            get => double.TryParse(WarSupBox.Text, out double result) ? result / 100: 0;
+            set => WarSupBox.Text = (value * 100).ToString();
         }
 
         public int? ResearchSlots
@@ -355,7 +346,10 @@ namespace ModdingManager
                 lines.Add(i.Id + ":");
             }
             PartyPopularitiesBox.SetLines(lines);
+
+            CountryFileNameBox.ItemsSource = ModManager.LoadCountryFileNames();
         }
+      
 
         private void TechIconCanvas_Drop(object sender, System.Windows.DragEventArgs e)
         {

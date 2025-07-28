@@ -1,0 +1,376 @@
+﻿using ModdingManager.classes.args;
+using ModdingManager.classes.configs;
+using ModdingManager.classes.controls;
+using ModdingManager.classes.utils;
+using ModdingManager.classes.views;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using Xceed.Wpf.Toolkit.Zoombox;
+using Control = System.Windows.Controls.Control;
+using Cursors = System.Windows.Input.Cursors;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+
+
+namespace ModdingManager
+{
+    public partial class StateWorkerWindow : Window, IStateWorkerView
+    {
+        private System.Windows.Point _mousePosition;
+        public event Action<string> MapLayerChanged;
+        public event Action<ProvinceTransferArg> ProvinceTransferRequested;
+        public event Action<StateTransferArg> StateTransferRequested;
+        public event Action<string, int> SearchElement;
+        public event Action<MarkEventArg> MarkEvent;
+        private StateWorkerPresenter _presenter;
+        public event Action<string> MapChanged;
+        public MarkEventArg _markedElement;
+        public string CurrentMapLayer { get; set; } = "PROVINCE"; // Начальный слой по умолчанию
+        public MapConfig Map
+        {
+            get;
+            set;
+        }
+        public event Action<bool, string> ShowIdsChanged;
+        public bool IsShowIdsChecked => DisplayIdsBox.IsChecked ?? false;
+        public StateWorkerWindow()
+        {
+            InitializeComponent();
+            _presenter = new StateWorkerPresenter(this);
+            DisplayIdsBox.Checked += (s, e) => ShowIdsChanged?.Invoke(true, CurrentMapState);
+            DisplayIdsBox.Unchecked += (s, e) => ShowIdsChanged?.Invoke(false, CurrentMapState);
+        }
+        public event RoutedEventHandler Loaded
+        {
+            add => base.Loaded += value;
+            remove => base.Loaded -= value;
+        }
+        public Canvas Display
+        {
+            get => DisplayView;
+            set => DisplayView = value;
+        }
+
+        public Canvas ProvinceIDLayer
+        {
+            get => IdProvCanv;
+            set => IdProvCanv = value;
+        }
+        public Canvas ProvinceRenderLayer
+        {
+            get => ProvRenderCanv;
+            set => ProvRenderCanv = value;
+        }
+        public Canvas StateIDLayer
+        {
+            get => IdStateCanv;
+            set => IdStateCanv = value;
+        }
+        public Canvas StateRenderLayer
+        {
+            get => StateRenderCanv;
+            set => StateRenderCanv = value;
+        }
+        public StackPanel Menu
+        {
+            get => MenuPanel;
+            set => MenuPanel = value;
+        }
+        public Canvas StrategicIDLayer
+        {
+            get => IdStrategicCanv;
+            set => IdStrategicCanv = value;
+        }
+        public Canvas StrategicRenderLayer
+        {
+            get => StrategicRenderCanv;
+            set => StrategicRenderCanv = value;
+        }
+        public Canvas CountryIDLayer
+        {
+            get => IdCountryCanv;
+            set => IdCountryCanv = value;
+        }
+        public Canvas CountryRenderLayer
+        {
+            get => CountryRenderCanv;
+            set => CountryRenderCanv = value;
+        }
+        public Canvas StateLayer
+        {
+            get => StateLayerCanvas;
+            set => StateLayerCanvas = value;
+        }
+        public Canvas CountryLayer
+        {
+            get => CountryLayerCanvas;
+            set => CountryLayerCanvas = value;
+        }
+        public Canvas StrategicLayer
+        {
+            get => StrategicLayerCanvas;
+            set => StrategicLayerCanvas = value;
+        }
+        public Canvas ProvinceLayer
+        {
+            get => ProvinceLayerCanvas;
+            set => ProvinceLayerCanvas = value;
+        }
+        public SceneViewer Scene
+        {
+            get => DisplayScrollViewer;
+            set => DisplayScrollViewer = value;
+        }
+        public string CurrentMapState { get; set; }
+
+        #region Drag & Drop Implementation
+
+        private ProvinceConfig _draggedProvince;
+        private System.Windows.Point _dragStartPoint;
+
+        
+
+        private void Display_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.RightButton != MouseButtonState.Pressed || e.ClickCount > 2) return;
+
+            var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
+            if (hit?.VisualHit is Polygon polygon && polygon.Tag is int provinceId)
+            {
+                _draggedProvince = Registry.Instance.Map.Provinces.FirstOrDefault(p => p.Id == provinceId);
+                _dragStartPoint = e.GetPosition(Display);
+            }
+        }
+
+        private void Display_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_draggedProvince == null || e.RightButton != MouseButtonState.Pressed) return;
+
+            var currentPos = e.GetPosition(Display);
+            if ((currentPos - _dragStartPoint).Length < 10) return;
+
+            Cursor = Cursors.Hand;
+        }
+
+        private void Display_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_draggedProvince == null) return;
+
+            var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
+            if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is int targetProvinceId)
+            {
+                var targetProvince = Registry.Instance.Map.Provinces.FirstOrDefault(p => p.Id == targetProvinceId);
+
+                switch (CurrentMapLayer)
+                {
+                    case "STATE":
+                        HandleStateTransfer(_draggedProvince, targetProvince);
+                        break;
+                    case "STRATEGIC":
+                        HandleRegionTransfer(_draggedProvince, targetProvince);
+                        break;
+                    case "COUNTRY":
+                        HandleCountryTransfer(_draggedProvince, targetProvince);
+                        break;
+                }
+            }
+
+            _draggedProvince = null;
+            Cursor = Cursors.Arrow;
+        }
+
+        #endregion
+
+        #region Transfer Handlers
+
+        private void HandleStateTransfer(ProvinceConfig sourceProvince, ProvinceConfig targetProvince)
+        {
+            var sourceState = GetStateForProvince(sourceProvince.Id);
+            var targetState = GetStateForProvince(targetProvince.Id);
+
+            if (targetState != null)
+            {
+
+                if (sourceState != null && sourceState.Id == targetState.Id)
+                {
+                    return;
+                }
+                ProvinceTransferRequested?.Invoke(new ProvinceTransferArg
+                {
+                    ProvinceId = sourceProvince.Id,
+                    SourceState = sourceState,
+                    TargetState = targetState
+                });
+            }
+        }
+        private void HandleRegionTransfer(ProvinceConfig sourceProvince, ProvinceConfig targetProvince)
+        {
+            var sourceState = GetRegionForProvince(sourceProvince.Id);
+            var targetState = GetRegionForProvince(targetProvince.Id);
+
+            if (targetState != null)
+            {
+                if (sourceState != null && sourceState.Id == targetState.Id)
+                {
+                    return;
+                }
+                ProvinceTransferRequested?.Invoke(new ProvinceTransferArg
+                {
+                    ProvinceId = sourceProvince.Id,
+                    SourceRegion = sourceState,
+                    TargetRegion = targetState
+                });
+            }
+        }
+        private void HandleCountryTransfer(ProvinceConfig sourceProvince, ProvinceConfig targetProvince)
+        {
+            var sourceState = GetStateForProvince(sourceProvince.Id);
+            var targetState = GetStateForProvince(targetProvince.Id);
+
+            if (targetState == null) return;
+
+            var sourceCountry = GetCountryForState(sourceState.Id);
+            var targetCountry = GetCountryForState(targetState.Id);
+
+            if (targetCountry != null && sourceCountry.Tag != targetCountry.Tag)
+            {
+                if (sourceState != null && sourceCountry.Tag != targetCountry.Tag)
+                {
+                    return;
+                }
+                StateTransferRequested?.Invoke(new StateTransferArg
+                {
+                    StateId = sourceState.Id ?? -1,
+                    SourceCountryTag = sourceCountry.Tag ?? "None",
+                    TargetCountryTag = targetCountry.Tag
+                });
+            }
+        }
+
+        #endregion
+        #region Marking Implementation
+        private void OnDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount < 2)
+            {
+                return;
+            }
+            var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
+            if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is int targetProvinceId)
+            {
+                
+
+                switch (CurrentMapLayer)
+                {
+                    case "STATE":
+                        _markedElement = new MarkEventArg
+                        {
+                            MarkedState = Registry.Instance.Map.States.Where(s => s.Provinces.Any(p => p.Id == targetProvinceId)).First()
+                        };
+                        HandleMarking(_markedElement);
+                        break;
+                    case "PROVINCE":
+                        _markedElement = new MarkEventArg
+                        {
+                            MarkedProvince = Registry.Instance.Map.Provinces.Where(p => p.Id == targetProvinceId).First()
+                        };
+                        HandleMarking(_markedElement);
+                        break;
+                    case "STRATEGIC":
+                        _markedElement = new MarkEventArg
+                        {
+                            MarkedRegion = Registry.Instance.Map.StrategicRegions.Where(s => s.Provinces.Any(p => p.Id == targetProvinceId)).First()
+                        };
+                        HandleMarking(_markedElement);
+                        break;
+                    case "COUNTRY":
+                        _markedElement = new MarkEventArg
+                        {
+                            MarkedCountry = Registry.Instance.Map.Countries.Where(c => c.States.Any(s => s.Provinces.Any(p => p.Id == targetProvinceId))).First()
+                        };
+                        HandleMarking(_markedElement);
+                        break;
+                }
+            }
+
+            _draggedProvince = null;
+            Cursor = Cursors.Arrow;
+            
+        }
+        #region Marking Handler
+        private void HandleMarking(MarkEventArg arg)
+        {
+            if (arg != null)
+            {
+                MarkEvent?.Invoke(arg);
+            }
+        }
+        #endregion
+        #endregion
+        #region Helper Methods
+
+        private StateConfig GetStateForProvince(int? provinceId)
+        {
+            return Registry.Instance.Map.States?.FirstOrDefault(s =>
+                s.Provinces?.Any(p => p.Id == provinceId) == true);
+        }
+        private StrategicRegionConfig GetRegionForProvince(int? provinceId)
+        {
+            return Registry.Instance.Map.StrategicRegions?.FirstOrDefault(s =>
+                s.Provinces?.Any(p => p.Id == provinceId) == true);
+        }
+        private CountryOnMapConfig GetCountryForState(int? stateId)
+        {
+            return Registry.Instance.Map.Countries?.FirstOrDefault(c =>
+                c.States?.Any(s => s.Id == stateId) == true);
+        }
+
+        #endregion
+        #region Events
+        
+        private void DraggingProvinceEvent(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            MapChanged?.Invoke(CurrentMapLayer);
+        }
+        
+        private void ProvinceLayerButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentMapLayer = "PROVINCE";
+            MapLayerChanged?.Invoke(CurrentMapLayer);
+        }
+        private void CountryLayerButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentMapLayer = "COUNTRY";
+            MapLayerChanged?.Invoke(CurrentMapLayer);
+        }
+        private void StateLayerButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentMapLayer = "STATE";
+            MapLayerChanged?.Invoke(CurrentMapLayer);
+        }
+        private void StrategicLayerButton_Click(object sender, RoutedEventArgs e)
+        {
+            CurrentMapLayer = "STRATEGIC";
+            MapLayerChanged?.Invoke(CurrentMapLayer);
+        }
+
+        private void SearchByIdBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (int.TryParse(SearchByIdBox.Text, out int res))
+            {
+                SearchElement?.Invoke(CurrentMapState, res);
+            }
+        }
+        #endregion
+    }
+}

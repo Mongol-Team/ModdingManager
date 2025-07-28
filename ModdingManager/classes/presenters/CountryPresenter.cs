@@ -1,5 +1,5 @@
 ﻿using ModdingManager.classes.handlers;
-using ModdingManager.classes.managers.utils.ModdingManager.managers.forms;
+using ModdingManager.classes.managers.utils;
 using ModdingManager.classes.views;
 using ModdingManager.configs;
 using System.Drawing.Imaging;
@@ -19,7 +19,6 @@ public class CountryPresenter
         _view = view;
         _handler = new CountryHandler();
 
-        // Подписка на события View
         _view.ApplyClicked += OnApplyClicked;
         _view.LoadConfigClicked += ConfigManager.OnLoadConfigClickedEvent;
         _view.SaveConfigClicked += ConfigManager.OnSaveConfigClickedEvent;
@@ -27,7 +26,6 @@ public class CountryPresenter
 
     private void OnApplyClicked(object sender, RoutedEventArgs e)
     {
-        // Сбор данных с View
         _currentConfig = new CountryConfig
         {
             Tag = _view.Tag,
@@ -38,6 +36,7 @@ public class CountryPresenter
             Technologies = _view.Technologies,
             Convoys = _view.Convoys,
             OOB = _view.OOB,
+            CountryFileName = _view.CountryFileName,
             Stab = _view.Stab,
             WarSup = _view.WarSup,
             ResearchSlots = _view.ResearchSlots,
@@ -47,14 +46,13 @@ public class CountryPresenter
             ElectionsAllowed = _view.ElectionsAllowed,
             Ideas = _view.Ideas,
             Characters = _view.Characters,
-            States = _view.States,
+            StateCores = _view.States,
             PartyPopularities = _view.PartyPopularities,
             CountryFlags = _view.CountryFlags,
         };
         _handler.CurrentConfig = _currentConfig;
         try
         {
-            // Вызов бизнес-логики
             _handler.CreateCountryHistoryFile();
             _handler.UpdateStateOwnership();
             _handler.CreateCommonCountriesFile();

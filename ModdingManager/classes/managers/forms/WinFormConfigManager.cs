@@ -575,7 +575,7 @@ public static class WPFConfigManager
             ElectionsAllowed = form.IsElectionAllowedBox.Checked,
             Ideas = form.StartIdeasBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
             Characters = form.RecruitBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
-            States = ParseStates(form.CountryStatesBox.Text)
+            StateCores = ParseStates(form.CountryStatesBox.Text)
         };
         return conf;
     }
@@ -615,7 +615,7 @@ public static class WPFConfigManager
         //form.StartIdeasBox.Text = string.Join(Environment.NewLine, config.Ideas);
         form.RecruitBox.Text = string.Join(Environment.NewLine, config.Characters);
         form.CountryStatesBox.Text = string.Join(Environment.NewLine,
-            config.States.Select(s => $"{s.Key}:{(s.Value ? "1" : "0")}"));
+            config.StateCores.Select(s => $"{s.Key}:{(s.Value ? "1" : "0")}"));
     }
     #endregion
     #region Character Config Methods

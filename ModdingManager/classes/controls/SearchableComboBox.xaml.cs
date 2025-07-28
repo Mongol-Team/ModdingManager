@@ -9,19 +9,20 @@ using UserControl = System.Windows.Controls.UserControl;
 
 namespace ModdingManager.classes.controls
 {
-    public partial class SearchableComboBoxControl : UserControl
+
+    public partial class SearchableComboBox : UserControl
     {
         // Expose ItemsSource & SelectedItem so you can bind them in VM
         public static readonly DependencyProperty ItemsSourceProperty =
-            DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(SearchableComboBoxControl),
+            DependencyProperty.Register(nameof(ItemsSource), typeof(IEnumerable), typeof(SearchableComboBox),
                 new PropertyMetadata(null));
 
         public static readonly DependencyProperty SelectedItemProperty =
-            DependencyProperty.Register(nameof(SelectedItem), typeof(object), typeof(SearchableComboBoxControl),
+            DependencyProperty.Register(nameof(SelectedItem), typeof(object), typeof(SearchableComboBox),
                 new PropertyMetadata(null));
 
         public static readonly DependencyProperty ComboWidthProperty =
-            DependencyProperty.Register(nameof(ComboWidth), typeof(double), typeof(SearchableComboBoxControl),
+            DependencyProperty.Register(nameof(ComboWidth), typeof(double), typeof(SearchableComboBox),
                 new PropertyMetadata(200d));
 
         public IEnumerable ItemsSource
@@ -44,7 +45,7 @@ namespace ModdingManager.classes.controls
 
         private object[] _allItems = Array.Empty<object>();
 
-        public SearchableComboBoxControl()
+        public SearchableComboBox()
         {
             InitializeComponent();
             this.PART_ComboBox.Name = this.Name + "ComboBox";
@@ -84,8 +85,8 @@ namespace ModdingManager.classes.controls
             else
                 PART_ListBox.ItemsSource =
                     _allItems
-                      .Where(x => x?.ToString()?.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
-                      .ToArray();
+                        .Where(x => x?.ToString()?.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                        .ToArray();
         }
 
         private void CommitSelection(object item)
@@ -123,4 +124,5 @@ namespace ModdingManager.classes.controls
             remove => PART_ComboBox.Loaded -= value;
         }
     }
+
 }

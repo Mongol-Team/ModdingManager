@@ -20,8 +20,9 @@ namespace ModdingManager.classes.views
         public Dictionary<string, int>? Technologies { get; set; }
         public int? Convoys { get; set; }
         public string? OOB { get; set; }
-        public int? Stab { get; set; }
-        public int? WarSup { get; set; }
+        public double? Stab { get; set; }
+        public double? WarSup { get; set; }
+        public string? CountryFileName { get; set; }
         public int? ResearchSlots { get; set; }
         public string? RulingParty { get; set; }
         public DateOnly? LastElection { get; set; }

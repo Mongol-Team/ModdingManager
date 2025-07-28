@@ -1,6 +1,6 @@
 ﻿using ModdingManager.classes.extentions;
 using ModdingManager.classes.utils.search;
-using ModdingManager.classes.utils.structs;
+using ModdingManager.classes.utils.types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -94,14 +94,14 @@ namespace ModdingManager.configs
                     
                     Var canberandval = typeAssignments.FindByName("can_be_randomly_selected");
                     Var colorValue = typeAssignments.FindByName("color");
-                    if (!(canberandval.value == null))
+                    if (!(canberandval == null))
                     {
-                        type.CanBeRandomlySelected = VarSearcher.ParseBool(canberandval.value);
+                        type.CanBeRandomlySelected = VarSearcher.ParseBool(canberandval.Value.ToString());
                     }
                     
-                    if (!(colorValue.value == null))
+                    if (!(colorValue == null))
                     {
-                        type.Color = VarSearcher.ParseColor(colorValue.value);
+                        type.Color = VarSearcher.ParseColor(colorValue.Value.ToString());
                     }
 
                     config.SubTypes.Add(type);
@@ -121,7 +121,7 @@ namespace ModdingManager.configs
             {
                 var rules = VarSearcher.ParseAssignments(rulesContent[0]);
                 foreach (var kvp in rules)
-                    config.Rules[kvp.name] = VarSearcher.ParseBool(kvp.value);
+                    config.Rules[kvp.Name] = VarSearcher.ParseBool(kvp.Value.ToString());
             }
 
             var modsContent = searcher.GetBracketContentByHeaderName("modifiers".ToCharArray());
@@ -129,8 +129,8 @@ namespace ModdingManager.configs
             {
                 var modifiers = VarSearcher.ParseAssignments(modsContent[0]);
                 foreach (var kvp in modifiers)
-                    if (double.TryParse(kvp.value, out double dVal))
-                        config.Modifiers[kvp.name] = dVal;
+                    if (double.TryParse(kvp.Value.ToString(), out double dVal))
+                        config.Modifiers[kvp.Name] = dVal;
             }
 
             var factionModsContent = searcher.GetBracketContentByHeaderName("faction_modifiers".ToCharArray());
@@ -138,34 +138,34 @@ namespace ModdingManager.configs
             {
                 var factionMods = VarSearcher.ParseAssignments(factionModsContent[0]);
                 foreach (var kvp in factionMods)
-                    if (double.TryParse(kvp.value, out double dVal))
-                        config.FactionModifiers[kvp.name] = dVal;
+                    if (double.TryParse(kvp.Value.ToString(), out double dVal))
+                        config.FactionModifiers[kvp.Name] = dVal;
             }
 
             var assignments = VarSearcher.ParseAssignments(content);
             foreach (var kvp in assignments)
             {
 
-                switch (kvp.name)
+                switch (kvp.Name)
                 {
                     case null:
                         break;
                     case "can_host_government_in_exile":
-                        config.CanFormExileGoverment = VarSearcher.ParseBool(kvp.value);
+                        config.CanFormExileGoverment = VarSearcher.ParseBool(kvp.Value.ToString());
                         break;
                     case "war_impact_on_world_tension":
-                        if (double.TryParse(kvp.value.Replace(".", ","), out double warTension))
+                        if (double.TryParse(kvp.Value.ToString().Replace(".", ","), out double warTension))
                             config.WarImpactOnTension = warTension;
                         break;
                     case "faction_impact_on_world_tension":
-                        if (double.TryParse(kvp.value.Replace(".", ","), out double factionTension))
+                        if (double.TryParse(kvp.Value.ToString().Replace(".", ","), out double factionTension))
                             config.FactionImpactOnTension = factionTension;
                         break;
                     case "can_be_boosted":
-                        config.CanBeBoosted = VarSearcher.ParseBool(kvp.value);
+                        config.CanBeBoosted = VarSearcher.ParseBool(kvp.Value.ToString());
                         break;
                     case "can_collaborate":
-                        config.CanColaborate = VarSearcher.ParseBool(kvp.value);
+                        config.CanColaborate = VarSearcher.ParseBool(kvp.Value.ToString());
                         break;
                     case string s when s.StartsWith("ai_"):
                         config.AiIdeologyName = s.Substring(3);

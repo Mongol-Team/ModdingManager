@@ -27,8 +27,6 @@ namespace ModdingManager.classes.managers.utils
     using System.Windows.Media.Imaging;
     using System.Xml.Linq;
 
-    namespace ModdingManager.managers.forms
-    {
         public class ConfigManager
         {
             private static readonly string BaseConfigsPath = GetApplicationConfigPath();
@@ -155,6 +153,7 @@ namespace ModdingManager.classes.managers.utils
                         Technologies = view.Technologies,
                         Convoys = view.Convoys,
                         OOB = view.OOB,
+                        CountryFileName = view.CountryFileName,
                         Stab = view.Stab,
                         WarSup = view.WarSup,
                         ResearchSlots = view.ResearchSlots,
@@ -165,9 +164,9 @@ namespace ModdingManager.classes.managers.utils
                         PartyPopularities = view.PartyPopularities,
                         Ideas = view.Ideas,
                         Characters = view.Characters,
-                        States = view.States
+                        StateCores = view.States
                     };
-                    config.States = view.States;
+                    config.StateCores = view.States;
                     await SaveCountryConfigInternalAsync(config, window, saveDialog.FileName);
                     view.ShowMessage("Конфигурация страны успешно сохранена!");
                 }
@@ -233,6 +232,7 @@ namespace ModdingManager.classes.managers.utils
                         view.Technologies = config.Technologies;
                         view.Convoys = config.Convoys;
                         view.OOB = config.OOB;
+                        view.CountryFileName = config.CountryFileName;
                         view.Stab = config.Stab;
                         view.WarSup = config.WarSup;
                         view.ResearchSlots = config.ResearchSlots;
@@ -243,7 +243,7 @@ namespace ModdingManager.classes.managers.utils
                         view.PartyPopularities = config.PartyPopularities;
                         view.Ideas = config.Ideas;
                         view.Characters = config.Characters;
-                        view.States = config.States;
+                        view.States = config.StateCores;
                         view.CountryFlags = config.CountryFlags;
                         
                     });
@@ -394,4 +394,4 @@ namespace ModdingManager.classes.managers.utils
             #endregion
         }
     }
-}
+

@@ -12,8 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MessageBox = System.Windows.MessageBox;
-namespace ModdingManager.classes.handlers
-{
+
     public class SuperEventHandler
     {
         public SupereventConfig CurrentConfig {  get; set; }
@@ -76,7 +75,7 @@ namespace ModdingManager.classes.handlers
                 // Get the image source
                 if (buttonImage.Source is BitmapSource bitmapSource)
                 {
-                    if(buttonImage.Source != Properties.Resources.null_item_image.ToBitmapSource())
+                    if(buttonImage.Source != ModdingManager.Properties.Resources.null_item_image.ToBitmapSource())
                     {
                         // Convert to DDS (BC3 RGBA format)
                         byte[] ddsBytes = bitmapSource.ConvertToDdsBC3();
@@ -291,7 +290,7 @@ namespace ModdingManager.classes.handlers
                     {
                         if (child is Canvas optionCanvas && optionCanvas.Name?.StartsWith("OptionButton") == true)
                         {
-                            if (optionCanvas.FindWrappedImage().Source.ToBitmapSource() != Properties.Resources.null_item_image.ToBitmapSource())
+                            if (optionCanvas.FindWrappedImage().Source.ToBitmapSource() != ModdingManager.Properties.Resources.null_item_image.ToBitmapSource())
                             {
                                 char optionChar = (char)('A' + optionIndex);
                                 string optionName = optionCanvas.Name ?? "unnamed_button";
@@ -461,7 +460,7 @@ namespace ModdingManager.classes.handlers
                         }
 
                         writer.WriteLine($"\t\t\tposition = {{ x = {btnX:0} y = {btnY:0} }}");
-                        if (optionCanvas.FindWrappedImage().Source.ToBitmapSource() != Properties.Resources.null_item_image.ToBitmapSource())
+                        if (optionCanvas.FindWrappedImage().Source.ToBitmapSource() != ModdingManager.Properties.Resources.null_item_image.ToBitmapSource())
                         {
                             writer.WriteLine($"\t\t\tquadTextureSprite =\"GFX_{CurrentConfig.Id}_option_{optionChar}_bg\"");
                         }
@@ -687,4 +686,3 @@ namespace ModdingManager.classes.handlers
             }
         }
     }
-}

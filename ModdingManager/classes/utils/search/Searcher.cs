@@ -36,6 +36,7 @@ namespace ModdingManager.classes.functional.search
             return count;
         }
 
+
         public bool SearchFullPattern()
         {
             if (SearchPattern == null || CurrentString == null || SearchPattern.Length == 0)

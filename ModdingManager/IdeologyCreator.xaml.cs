@@ -23,9 +23,6 @@ namespace ModdingManager
         {
             InitializeComponent();
         }
-
-       
-
         private void ModifierBox_Loaded(object sender, RoutedEventArgs e)
         {
            

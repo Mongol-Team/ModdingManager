@@ -13,7 +13,10 @@
             <StackPanel Orientation="Horizontal" Margin="10">
                 <!-- Колонка 1 -->
                 <StackPanel Margin="10">
+                    <Label Content="файл coutrytags"/>
+                    <controls:SearchableComboBox x:Name="CountryFileNameBox"  Width="150"/>
                     <Label Content="тег страны"/>
+                    
                     <TextBox x:Name="TagBox" Width="120"/>
 
                     <Label Content="технологии на старте"/>
@@ -32,9 +35,9 @@
                     <DatePicker x:Name="LastElectionsDatePicker"/>
 
                     <Label Content="правящая партия"/>
-                    <controls:SearchableComboBoxControl x:Name="RullingPartyBox" Width="150" Loaded="RullingPartyBox_Loaded"/>
+                    <controls:SearchableComboBox x:Name="RullingPartyBox" Width="150" Loaded="RullingPartyBox_Loaded"/>
 
-                    <Label Content="интервал выборов"/>
+                    <Label Content="интервал выборов(в месяцах)"/>
                     <TextBox x:Name="ElectionsDelayBox" Width="120"/>
 
                     <CheckBox x:Name="HaveElectionsBox" Content="Есть ли выборы"/>

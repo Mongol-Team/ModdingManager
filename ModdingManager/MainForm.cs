@@ -42,6 +42,9 @@ namespace ModdingManager
             {
                 ModManager.Directory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
+                StateWorkerWindow stateWorkerWindow = new StateWorkerWindow();
+                ElementHost.EnableModelessKeyboardInterop(stateWorkerWindow);
+                stateWorkerWindow.Show();
             }
             else
             {
@@ -166,6 +169,7 @@ namespace ModdingManager
         {
             string relativePath = Path.Combine("..", "..", "..", "data", "dir.json");
             string fullPath = Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
+           
             try
             {
                 string json = File.ReadAllText(fullPath);
@@ -175,6 +179,10 @@ namespace ModdingManager
                 ModManager.Directory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
                 Registry.LoadInstance();
+                Debugger.Instance.LogMessage(Path.Combine(ModManager.Directory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.Directory, "localisation", ModManager.CurrentLanguage, "replace")));
+                Debugger.Instance.LogMessage(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
+                Debugger.Instance.LogMessage(Path.Combine(ModManager.Directory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.Directory, "localisation", ModManager.CurrentLanguage)));
+                Debugger.Instance.LogMessage(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
             }
             catch (Exception ex)
             {

@@ -1,0 +1,68 @@
+﻿<Window x:Class="ModdingManager.StateWorkerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:ModdingManager.classes.controls"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:ModdingManager"
+        mc:Ignorable="d"
+        Title="StateWorkerWindow" Height="650" Width="1200">
+    <Grid>
+        <controls:SceneViewer x:Name="DisplayScrollViewer"
+              VerticalScrollBarVisibility="Auto"
+              HorizontalScrollBarVisibility="Auto" Margin="0,61,263,0" >
+            <Canvas x:Name="DisplayView" Background="White" Height="598" MouseDown="Display_MouseDown" MouseMove="Display_MouseMove" MouseUp="Display_MouseUp" MouseLeftButtonDown="OnDoubleClick" >
+                <Canvas Name="ProvinceLayerCanvas" MouseMove="DraggingProvinceEvent">
+                    <Canvas Name="ProvRenderCanv" Background="Transparent">
+                    </Canvas>
+                    <Canvas Name="IdProvCanv" Background="Transparent">
+                    </Canvas>
+                </Canvas>
+                <Canvas Name="StateLayerCanvas" MouseMove="DraggingProvinceEvent">
+                    <Canvas Name="StateRenderCanv" Background="Transparent">
+                    </Canvas>
+                    <Canvas Name="IdStateCanv" Background="Transparent">
+                    </Canvas>
+                </Canvas>
+                <Canvas Name="CountryLayerCanvas" MouseMove="DraggingProvinceEvent">
+                    <Canvas Name="CountryRenderCanv" Background="Transparent">
+                    </Canvas>
+                    <Canvas Name="IdCountryCanv" Background="Transparent">
+                    </Canvas>
+                </Canvas>
+                <Canvas Name="StrategicLayerCanvas" MouseMove="DraggingProvinceEvent" >
+                    <Canvas Name="StrategicRenderCanv" Background="Transparent">
+                    </Canvas>
+                    <Canvas Name="IdStrategicCanv" Background="Transparent">
+                    </Canvas>
+                </Canvas>
+            </Canvas>
+
+        </controls:SceneViewer>
+        <Button Content="Провиции" x:Name="ProviceMapButton" Margin="10,10,1070,578" Background="#FF4EC95A" FontSize="18" Click="ProvinceLayerButton_Click" />
+        <Button Content="Стейты" x:Name="StateMapButton" Margin="135,10,945,578" Background="#FFD77777" FontSize="18" Click="StateLayerButton_Click" />
+        <Button Content="Страны" x:Name="CountryMapButton" Margin="260,10,820,578" Background="#FFC7E549" FontSize="18" Click="CountryLayerButton_Click"/>
+        <CheckBox x:Name="DisplayIdsBox" Content="Отображение айди" HorizontalAlignment="Left" Margin="580,18,0,0" VerticalAlignment="Top" FontSize="22" Width="250" Height="38"/>
+        <Button Content="Регионы" x:Name="StrategicMapButton" Margin="385,10,695,578" Background="#FFE59E49" FontSize="18" Click="StrategicLayerButton_Click"/>
+        <StackPanel Margin="942,0,10,7">
+            
+            <TextBlock Width="200" FontSize="22" Margin="0,20,0,0">
+                <Run>
+                    Поиск по ID
+                </Run>
+            </TextBlock>
+            <TextBox HorizontalAlignment="Left" Name="SearchByIdBox" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="207" Height="32" FontSize="22" 
+            Margin="15,20,0,0"
+            TextChanged="SearchByIdBox_TextChanged"/>
+            <TextBlock Width="200" FontSize="22" Margin="0,20,0,0">
+                <Run>
+                    Информация
+                </Run>  
+            </TextBlock>
+            <StackPanel x:Name="MenuPanel" Height="430">
+            </StackPanel>
+        </StackPanel>
+        
+    </Grid>
+</Window>

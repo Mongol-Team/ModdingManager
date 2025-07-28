@@ -66,12 +66,14 @@ namespace ModdingManager
             // 
             // StateManagerBtn
             // 
+            StateManagerBtn.BackColor = Color.FromArgb(0, 192, 192);
+            StateManagerBtn.ForeColor = Color.Black;
             StateManagerBtn.Location = new Point(361, 56);
             StateManagerBtn.Name = "StateManagerBtn";
             StateManagerBtn.Size = new Size(237, 56);
             StateManagerBtn.TabIndex = 1;
-            StateManagerBtn.Text = "Работа со стейтами";
-            StateManagerBtn.UseVisualStyleBackColor = true;
+            StateManagerBtn.Text = "Работа со картой";
+            StateManagerBtn.UseVisualStyleBackColor = false;
             StateManagerBtn.Click += Statebutton_Click;
             // 
             // LocTechButton
@@ -217,12 +219,14 @@ namespace ModdingManager
             // 
             // SuperEventCreatorButton
             // 
+            SuperEventCreatorButton.BackColor = Color.FromArgb(0, 192, 192);
+            SuperEventCreatorButton.ForeColor = Color.Black;
             SuperEventCreatorButton.Location = new Point(42, 388);
             SuperEventCreatorButton.Name = "SuperEventCreatorButton";
             SuperEventCreatorButton.Size = new Size(237, 56);
             SuperEventCreatorButton.TabIndex = 16;
             SuperEventCreatorButton.Text = "Создатель суперивентов";
-            SuperEventCreatorButton.UseVisualStyleBackColor = true;
+            SuperEventCreatorButton.UseVisualStyleBackColor = false;
             SuperEventCreatorButton.Click += SuperEventCreatorButton_Click;
             // 
             // OOBCreatorBtn
@@ -253,7 +257,7 @@ namespace ModdingManager
             IdeologyCreatorBtn.Name = "IdeologyCreatorBtn";
             IdeologyCreatorBtn.Size = new Size(237, 56);
             IdeologyCreatorBtn.TabIndex = 19;
-            IdeologyCreatorBtn.Text = "Создатель суперивентов";
+            IdeologyCreatorBtn.Text = "Создатель идеологий";
             IdeologyCreatorBtn.UseVisualStyleBackColor = true;
             IdeologyCreatorBtn.Click += IdeologyCreatorBtn_Click;
             // 

@@ -1,5 +1,7 @@
 ﻿using BCnEncoder.Encoder; // Install BCnEncoder nuget package
 using BCnEncoder.Shared;
+using OpenCvSharp;
+using OpenCvSharp.Extensions;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
@@ -94,7 +96,10 @@ namespace ModdingManager.classes.extentions
                 NativeMethods.DeleteObject(hBitmap);
             }
         }
-
+        public static Mat ToMat(this Bitmap bitmap)
+        {
+            return BitmapConverter.ToMat(bitmap);
+        }
         public static System.Drawing.Image ToDrawingImage(this BitmapSource bitmapSource)
         {
             if (bitmapSource == null)
