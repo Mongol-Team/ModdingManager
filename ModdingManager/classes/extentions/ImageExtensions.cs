@@ -1,7 +1,7 @@
 ﻿
 using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
-using ModdingManager.classes.gfx;
+using ModdingManager.classes.managers.gfx;
 using ModdingManager.classes.utils.fonts;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;

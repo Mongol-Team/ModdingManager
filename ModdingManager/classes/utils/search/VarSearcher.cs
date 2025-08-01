@@ -39,6 +39,7 @@ namespace ModdingManager.classes.utils.search
             }
             return null;
         }
+        
         /// <summary>
         /// Обновляет значение переменной по ключу в строках с указанным символом присваивания.
         /// </summary>
@@ -51,7 +52,7 @@ namespace ModdingManager.classes.utils.search
         /// Обновляет значение переменной по ключу в строках с указанным символом разделения.
         /// Возвращает обновлённый массив строк, либо null, если ключ не найден.
         /// </summary>
-        public static string[]? SetSourceValue(string[] lines, Var var, string delimiter = ":")
+        public static string[]? SetSourceValue(string[] lines, Var var, string delimiter = ":", string tabstr = "")
         {
             for (int i = 0; i < lines.Length; i++)
             {
@@ -66,12 +67,12 @@ namespace ModdingManager.classes.utils.search
 
                 // Сохраняем отступ в начале строки и возможный комментарий
                 int indentIndex = rawLine.IndexOf(line);
-                string indentation = indentIndex >= 0 ? rawLine.Substring(0, indentIndex) : "";
-                string comment = rawLine.Contains("#") ? rawLine.Substring(rawLine.IndexOf("#")) : "";
+                string indentation = indentIndex >= 0 ? rawLine.Substring(0, indentIndex): "";
+                string comment = rawLine.Contains("#") ? rawLine.Substring(rawLine.IndexOf("#")): "";
 
                 // Формируем новую строку
                 string formattedValue = $"\"{var.Value}\"";
-                lines[i] = $"{indentation}{var.Name} {delimiter} {formattedValue} {comment}".Trim();
+                lines[i] = $"{tabstr}{indentation}{var.Name}{delimiter} {formattedValue} {comment}".Trim();
                 return lines;
             }
 

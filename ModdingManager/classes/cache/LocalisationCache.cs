@@ -1,6 +1,6 @@
 ﻿using ModdingManager.classes.utils.search;
 using ModdingManager.classes.utils.types;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
@@ -14,6 +14,10 @@ namespace ModdingManager.classes.cache
         public List<Var> CountryLocalisation { get; private set; } = new();
         public List<Var> StateLocalisation { get; private set; } = new();
 
+        public LocalisationCache()
+        {
+            LoadLocalisation();
+        }
         /// <summary>
         /// Параллельно загружает все переменные из .yml файлов в AllCache (с учётом приоритетов)
         /// </summary>

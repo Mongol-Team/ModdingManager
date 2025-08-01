@@ -7,7 +7,7 @@ using System;
 using ModdingManager.configs;
 using System.Drawing;
 using System.Windows.Forms.Integration;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using ModdingManager.classes.utils;
 namespace ModdingManager
 {

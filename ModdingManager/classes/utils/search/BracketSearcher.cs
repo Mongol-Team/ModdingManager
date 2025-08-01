@@ -12,12 +12,15 @@ public class BracketSearcher : Searcher
     public char CloseBracketChar { get; set; } = '}';
     public char CommentSymbol { get; set; } = '#';
     public char AssignSymbol { get; set; } = '=';
+    private int maxRecursionDepth = 50;
+    private int currentRecursionDepth = 0;
 
     /// <summary>
     /// Находит все скобки с указанным именем заголовка
     /// </summary>
     public List<Bracket> FindBracketsByName(string bracketName)
     {
+        currentRecursionDepth = 0;
         var brackets = new List<Bracket>();
         if (string.IsNullOrWhiteSpace(bracketName))
             return brackets;
@@ -50,107 +53,182 @@ public class BracketSearcher : Searcher
     /// </summary>
     private Bracket GetBracketAtPosition(int headerStart)
     {
-        int headerEnd = headerStart + SearchPattern.Length;
+        if (currentRecursionDepth > maxRecursionDepth)
+            return null;
 
-        // Пропускаем пробелы после заголовка
-        while (headerEnd < CurrentString.Length && char.IsWhiteSpace(CurrentString[headerEnd]))
-            headerEnd++;
+        currentRecursionDepth++;
 
-        // Проверяем наличие '=' после заголовка
-        if (headerEnd < CurrentString.Length && CurrentString[headerEnd] == AssignSymbol)
+        try
         {
-            headerEnd++;
-            while (headerEnd < CurrentString.Length && char.IsWhiteSpace(CurrentString[headerEnd]))
+            if (headerStart < 0 || headerStart >= CurrentString.Length)
+                return null;
+
+            int headerEnd = headerStart;
+            bool hasAssign = false;
+
+            // Собираем заголовок до пробела, '=' или '{'
+            while (headerEnd < CurrentString.Length)
+            {
+                char c = CurrentString[headerEnd];
+                if (char.IsWhiteSpace(c) || c == AssignSymbol || c == OpenBracketChar)
+                    break;
+
                 headerEnd++;
+            }
+
+            // Пропускаем пробелы после заголовка
+            int posAfterHeader = headerEnd;
+            while (posAfterHeader < CurrentString.Length && char.IsWhiteSpace(CurrentString[posAfterHeader]))
+                posAfterHeader++;
+
+            // Обработка присваивания
+            if (posAfterHeader < CurrentString.Length && CurrentString[posAfterHeader] == AssignSymbol)
+            {
+                hasAssign = true;
+                posAfterHeader++;
+                while (posAfterHeader < CurrentString.Length && char.IsWhiteSpace(CurrentString[posAfterHeader]))
+                    posAfterHeader++;
+            }
+
+            // Проверка открывающей скобки
+            if (posAfterHeader >= CurrentString.Length || CurrentString[posAfterHeader] != OpenBracketChar)
+                return null;
+
+            int bracketStart = posAfterHeader;
+            int bracketEnd = FindMatchingBracketEnd(bracketStart);
+            if (bracketEnd == -1)
+                return null;
+
+            // Извлекаем заголовок
+            string headerName = new string(CurrentString, headerStart, headerEnd - headerStart).Trim();
+
+            // Если был символ присваивания, удаляем его из конца заголовка
+            if (hasAssign && headerName.EndsWith("="))
+                headerName = headerName.Substring(0, headerName.Length - 1).Trim();
+
+            var bracket = new Bracket
+            {
+                OpenChar = OpenBracketChar,
+                CloseChar = CloseBracketChar,
+                CommentSymbol = CommentSymbol,
+                AssignSymbol = AssignSymbol,
+                StartPosition = bracketStart,
+                EndPosition = bracketEnd,
+                Header = headerName
+            };
+
+            // Рекурсивный парсинг содержимого
+            ParseBracketContent(bracket, bracketStart + 1, bracketEnd - 1);
+            return bracket;
         }
-
-        // Проверяем наличие открывающей скобки
-        if (headerEnd >= CurrentString.Length || CurrentString[headerEnd] != OpenBracketChar)
-            return null;
-
-        int bracketStart = headerEnd;
-        int bracketEnd = FindMatchingBracketEnd(bracketStart);
-        if (bracketEnd == -1)
-            return null;
-
-        // Создаем объект Bracket
-        var bracket = new Bracket
+        finally
         {
-            OpenChar = OpenBracketChar,
-            CloseChar = CloseBracketChar,
-            CommentSymbol = CommentSymbol,
-            AssignSymbol = AssignSymbol,
-            StartPosition = bracketStart,
-            EndPosition = bracketEnd,
-            Header = new string(CurrentString, headerStart, headerEnd - headerStart - 1).Trim()
-        };
-
-        // Парсим содержимое скобки
-        ParseBracketContent(bracket, bracketStart + 1, bracketEnd - 1);
-
-        return bracket;
+            currentRecursionDepth--;
+        }
     }
 
     /// <summary>
-    /// Парсит содержимое скобки
+    /// Парсит содержимое скобки без рекурсивных вызовов GetBracketAtPosition
     /// </summary>
-    private void ParseBracketContent(Bracket bracket, int contentStart, int contentEnd)
+    private void ParseBracketContentNonRecursive(Bracket bracket, int contentStart, int contentEnd)
     {
         int lineStart = contentStart;
-        bool inSubBracket = false;
-        int subBracketDepth = 0;
-        int subBracketStart = 0;
+        int depth = 0;
+        var bracketStack = new Stack<Bracket>();
 
         for (int i = contentStart; i <= contentEnd; i++)
         {
-            if (CurrentString[i] == CommentSymbol)
+            char c = CurrentString[i];
+
+            // Обработка комментариев только на нулевом уровне
+            if (c == CommentSymbol && depth == 0)
             {
-                // Пропускаем комментарии
+                // Добавляем содержимое до комментария
+                if (i > lineStart)
+                {
+                    string cleanLine = new string(CurrentString, lineStart, i - lineStart).Trim();
+                    if (!string.IsNullOrWhiteSpace(cleanLine))
+                    {
+                        AddContentWithVar(bracket, cleanLine);
+                    }
+                }
+
+                // Пропускаем комментарий
                 while (i <= contentEnd && CurrentString[i] != '\n' && CurrentString[i] != '\r')
                     i++;
+
+                lineStart = i + 1;
                 continue;
             }
 
-            if (CurrentString[i] == OpenBracketChar && !inSubBracket)
+            // Обработка вложенных скобок
+            if (c == OpenBracketChar)
             {
-                inSubBracket = true;
-                subBracketDepth = 1;
-                subBracketStart = i;
-                continue;
-            }
-
-            if (inSubBracket)
-            {
-                if (CurrentString[i] == OpenBracketChar) subBracketDepth++;
-                if (CurrentString[i] == CloseBracketChar) subBracketDepth--;
-
-                if (subBracketDepth == 0)
+                if (depth == 0)
                 {
-                    inSubBracket = false;
-                    var subBracket = GetBracketAtPosition(FindHeaderStart(subBracketStart));
-                    if (subBracket != null)
+                    // Нашли начало новой подскобки
+                    int subHeaderStart = FindHeaderStart(i);
+                    if (subHeaderStart >= 0 && subHeaderStart < i)
                     {
-                        bracket.AddSubBracket(subBracket);
+                        // Создаем новую подскобку
+                        var subBracket = new Bracket
+                        {
+                            OpenChar = OpenBracketChar,
+                            CloseChar = CloseBracketChar,
+                            StartPosition = i
+                        };
+
+                        // Определяем заголовок
+                        int subHeaderEnd = i - 1;
+                        while (subHeaderEnd >= subHeaderStart && char.IsWhiteSpace(CurrentString[subHeaderEnd]))
+                            subHeaderEnd--;
+
+                        subBracket.Header = new string(CurrentString, subHeaderStart, subHeaderEnd - subHeaderStart + 1)
+                            .Trim().TrimEnd(AssignSymbol).Trim();
+
+                        bracketStack.Push(subBracket);
                     }
+                }
+                depth++;
+            }
+            else if (c == CloseBracketChar)
+            {
+                depth--;
+
+                if (depth == 0 && bracketStack.Count > 0)
+                {
+                    // Завершаем подскобку
+                    var subBracket = bracketStack.Pop();
+                    subBracket.EndPosition = i;
+
+                    // Парсим содержимое подскобки (без рекурсии)
+                    ParseSubBracketContent(subBracket, subBracket.StartPosition + 1, i - 1);
+
+                    // Добавляем подскобку в родительскую
+                    bracket.AddSubBracket(subBracket);
+
+                    // Добавляем всю подскобку как единый элемент контента
+                    string fullBracketContent = new string(CurrentString,
+                        subBracket.StartPosition - subBracket.Header.Length - (subBracket.Header.Length > 0 ? 1 : 0),
+                        i - (subBracket.StartPosition - subBracket.Header.Length - (subBracket.Header.Length > 0 ? 1 : 0)) + 1);
+
+                    bracket.AddContent(fullBracketContent);
                     lineStart = i + 1;
                 }
-                continue;
             }
 
-            if (CurrentString[i] == '\n' || CurrentString[i] == '\r' || i == contentEnd)
+            // Обработка конца строки или контента
+            if (depth == 0 && (c == '\n' || c == '\r' || i == contentEnd))
             {
-                if (lineStart < i)
+                if (i >= lineStart)
                 {
-                    string line = new string(CurrentString, lineStart, i - lineStart).Trim();
-                    if (!string.IsNullOrWhiteSpace(line))
+                    int len = (i == contentEnd) ? (i - lineStart + 1) : (i - lineStart);
+                    if (len > 0)
                     {
-                        bracket.AddContent(line);
-
-                        // Пытаемся распарсить как переменную
-                        var var = TryParseVar(line);
-                        if (var != null)
+                        string line = new string(CurrentString, lineStart, len).Trim();
+                        if (!string.IsNullOrWhiteSpace(line))
                         {
-                            bracket.ContentVars.Add(var);
+                            AddContentWithVar(bracket, line);
                         }
                     }
                 }
@@ -159,6 +237,169 @@ public class BracketSearcher : Searcher
         }
     }
 
+    /// <summary>
+    /// Добавляет строку контента и пытается распарсить ее как переменную
+    /// </summary>
+    private void AddContentWithVar(Bracket bracket, string line)
+    {
+        // Пробуем распарсить как переменную
+        var variable = TryParseVar(line);
+        if (variable != null)
+        {
+            bracket.AddVar(variable);
+
+            // Удаляем оригинальное представление переменной
+            bracket.Content.RemoveAll(l => l == variable.ToString());
+        }
+        else
+        {
+            bracket.AddContent(line);
+        }
+    }
+
+    /// <summary>
+    /// Парсит содержимое подскобки (упрощенная версия без вложенных скобок)
+    /// </summary>
+    private void ParseSubBracketContent(Bracket bracket, int contentStart, int contentEnd)
+    {
+        int lineStart = contentStart;
+        int depth = 0;
+
+        for (int i = contentStart; i <= contentEnd; i++)
+        {
+            char c = CurrentString[i];
+
+            if (c == OpenBracketChar)
+            {
+                depth++;
+            }
+            else if (c == CloseBracketChar)
+            {
+                depth--;
+            }
+
+            // Обработка конца строки
+            if (c == '\n' || c == '\r' || i == contentEnd || depth > 0)
+            {
+                if (depth == 0 && i >= lineStart)
+                {
+                    int len = (i == contentEnd) ? (i - lineStart + 1) : (i - lineStart);
+                    if (len > 0)
+                    {
+                        string line = new string(CurrentString, lineStart, len).Trim();
+                        if (!string.IsNullOrWhiteSpace(line))
+                        {
+                            AddContentWithVar(bracket, line);
+                        }
+                    }
+                    lineStart = i + 1;
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// Парсит содержимое скобки
+    /// </summary>
+    private void ParseBracketContent(Bracket bracket, int contentStart, int contentEnd)
+    {
+        int lineStart = contentStart;
+        int depth = 0;  // Глубина для обработки "голых" скобок без заголовков
+
+        for (int i = contentStart; i <= contentEnd; i++)
+        {
+            char c = CurrentString[i];
+
+            // Обработка комментариев только на нулевом уровне
+            if (c == CommentSymbol && depth == 0)
+            {
+                // Добавляем содержимое до комментария
+                if (i > lineStart)
+                {
+                    string cleanLine = new string(CurrentString, lineStart, i - lineStart).Trim();
+                    if (!string.IsNullOrWhiteSpace(cleanLine))
+                    {
+                        AddContentWithVar(bracket, cleanLine);
+                    }
+                }
+
+                // Пропускаем комментарий
+                while (i <= contentEnd && CurrentString[i] != '\n' && CurrentString[i] != '\r')
+                    i++;
+
+                lineStart = i + 1;
+                continue;
+            }
+
+            // Обработка вложенных скобок
+            if (c == OpenBracketChar)
+            {
+                // Если на нулевой глубине - пытаемся распарсить как подскобку
+                if (depth == 0)
+                {
+                    int subHeaderStart = FindHeaderStart(i);
+                    if (subHeaderStart >= 0 && subHeaderStart < i)
+                    {
+                        var subBracket = GetBracketAtPosition(subHeaderStart);
+                        if (subBracket != null)
+                        {
+                            // Добавляем подскобку и переходим к её концу
+                            bracket.AddSubBracket(subBracket);
+                            i = subBracket.EndPosition;
+                            lineStart = i + 1;
+                            continue;
+                        }
+                    }
+                }
+
+                // Увеличиваем глубину если не нашли валидную подскобку
+                depth++;
+            }
+            if (c == OpenBracketChar && depth == 0)
+            {
+                int subHeaderStart = FindHeaderStart(i);
+                if (subHeaderStart >= 0 && subHeaderStart < i)
+                {
+                    var subBracket = GetBracketAtPosition(subHeaderStart);
+                    if (subBracket != null)
+                    {
+                        bracket.AddSubBracket(subBracket);
+                        i = subBracket.EndPosition;
+                        lineStart = i + 1;
+
+                        // Удаляем оригинальное представление из Content
+                        string bracketRepresentation = subBracket.ToString();
+                        bracket.Content.RemoveAll(line => line == bracketRepresentation);
+                        continue;
+                    }
+                }
+                depth++;
+            }
+            else if (c == CloseBracketChar && depth > 0)
+            {
+                depth--;
+            }
+
+            // Обработка конца строки или контента
+            if (depth == 0 && (c == '\n' || c == '\r' || i == contentEnd))
+            {
+                if (i >= lineStart)
+                {
+                    int len = (i == contentEnd) ? (i - lineStart + 1) : (i - lineStart);
+                    if (len > 0)
+                    {
+                        string line = new string(CurrentString, lineStart, len).Trim();
+                        if (!string.IsNullOrWhiteSpace(line))
+                        {
+                            AddContentWithVar(bracket, line);
+                        }
+                    }
+                }
+
+                if (i < contentEnd)
+                    lineStart = i + 1;
+            }
+        }
+    }
     /// <summary>
     /// Пытается распарсить строку как переменную
     /// </summary>
@@ -184,11 +425,22 @@ public class BracketSearcher : Searcher
         while (pos >= 0 && char.IsWhiteSpace(CurrentString[pos]))
             pos--;
 
-        // Ищем начало имени
+        // Если встретили '=', пропускаем его и пробелы перед ним
+        if (pos >= 0 && CurrentString[pos] == AssignSymbol)
+        {
+            pos--; // Переходим перед '='
+            while (pos >= 0 && char.IsWhiteSpace(CurrentString[pos]))
+                pos--;
+        }
+
+        // Теперь ищем начало токена (числа/даты/слова)
         int end = pos;
         while (pos >= 0 && !char.IsWhiteSpace(CurrentString[pos]) &&
-               CurrentString[pos] != '\n' && CurrentString[pos] != '\r')
+               CurrentString[pos] != '\n' && CurrentString[pos] != '\r' &&
+               CurrentString[pos] != AssignSymbol)
+        {
             pos--;
+        }
 
         return pos + 1;
     }
@@ -285,21 +537,24 @@ public class BracketSearcher : Searcher
                 }
             }
 
-            if (match && IsStandaloneWord(i, header.Length))
-                return i;
+            if (match)
+            {
+                // Проверка границ слова
+                bool validStart = (i == 0) ||
+                    !IsWordCharacter(CurrentString[i - 1]) ||
+                    (CurrentString[i - 1] == CloseBracketChar);
+
+                bool validEnd = (i + header.Length == CurrentString.Length) ||
+                    !IsWordCharacter(CurrentString[i + header.Length]) ||
+                    (CurrentString[i + header.Length] == OpenBracketChar);
+
+                if (validStart && validEnd)
+                {
+                    return i;
+                }
+            }
         }
         return -1;
-    }
-
-    private bool IsStandaloneWord(int pos, int length)
-    {
-        if (pos > 0 && IsWordCharacter(CurrentString[pos - 1]))
-            return false;
-
-        if (pos + length < CurrentString.Length && IsWordCharacter(CurrentString[pos + length]))
-            return false;
-
-        return true;
     }
 
     private bool IsWordCharacter(char c)

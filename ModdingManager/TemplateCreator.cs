@@ -1,7 +1,7 @@
 ﻿using Microsoft.Win32;
-using ModdingManager.classes.gfx;
+using ModdingManager.classes.managers.gfx;
 using ModdingManager.configs;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

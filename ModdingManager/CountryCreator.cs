@@ -13,8 +13,8 @@ using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using ModdingManager.configs;
 using System.Reflection.Metadata;
-using ModdingManager.managers.utils;
-using ModdingManager.classes.gfx;
+using ModdingManager.managers.@base;
+using ModdingManager.classes.managers.gfx;
 using ModdingManager.classes.utils;
 
 namespace ModdingManager

@@ -15,7 +15,7 @@ using System.IO;
 using TeximpNet.Compression;
 using TeximpNet.DDS;
 using TeximpNet;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 
 namespace ModdingManager
 {

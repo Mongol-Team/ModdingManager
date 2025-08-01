@@ -9,7 +9,7 @@ using System.Windows;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Windows.Media.Media3D;
-using ModdingManager.classes.gfx;
+using ModdingManager.classes.managers.gfx;
 
 public static class WPFConfigManager
 {

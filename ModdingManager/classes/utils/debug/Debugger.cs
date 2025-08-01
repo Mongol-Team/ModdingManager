@@ -1,4 +1,4 @@
-﻿using ModdingManager.managers.utils;
+﻿using ModdingManager.managers.@base;
 using System;
 using System.Windows;
 using System.Windows.Forms;

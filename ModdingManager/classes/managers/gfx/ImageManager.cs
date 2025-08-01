@@ -16,9 +16,9 @@ using System.Windows;
 using System.Drawing.Imaging;
 using ModdingManager.classes.args;
 using System.Text.RegularExpressions;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using ModdingManager.classes.extentions;
-namespace ModdingManager.classes.gfx
+namespace ModdingManager.classes.managers.gfx
 {
     public static class ImageManager
     {
@@ -77,7 +77,7 @@ namespace ModdingManager.classes.gfx
                         {
                             try
                             {
-                                return ImageManager.LoadAndCropRightSideOfIcon(fullTexturePath);
+                                return LoadAndCropRightSideOfIcon(fullTexturePath);
                             }
                             catch
                             {

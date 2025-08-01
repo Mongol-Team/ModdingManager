@@ -16,7 +16,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ModdingManager.classes.gfx;
 using ModdingManager.classes.extentions;
 using System.Runtime.CompilerServices;
 using ModdingManager.classes.handlers;

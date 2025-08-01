@@ -8,8 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ModdingManager.managers.utils;
-using ModdingManager.classes.gfx;
+using ModdingManager.managers.@base;
+using ModdingManager.classes.managers.gfx;
 
 namespace ModdingManager
 {

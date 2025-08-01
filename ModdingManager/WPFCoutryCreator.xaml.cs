@@ -1,6 +1,6 @@
 ﻿using ModdingManager.classes.extentions;
 using ModdingManager.classes.views;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;

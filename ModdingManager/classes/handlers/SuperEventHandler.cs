@@ -1,8 +1,8 @@
 ﻿using ModdingManager.classes.extentions;
-using ModdingManager.classes.gfx;
+using ModdingManager.classes.managers.gfx;
 using ModdingManager.classes.utils.fonts;
 using ModdingManager.configs;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using System;
 using System.Diagnostics;
 using System.IO;

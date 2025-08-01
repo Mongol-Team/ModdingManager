@@ -17,10 +17,10 @@ using ModdingManager.configs;
 using System.IO;
 using System.Text.RegularExpressions;
 using ModdingManager.managers.forms;
-using ModdingManager.classes.gfx;
 using ModdingManager.classes.args;
 using ModdingManager.classes.extentions;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
+using ModdingManager.classes.managers.gfx;
 namespace ModdingManager
 {
     public partial class TechTreeCreator : Window

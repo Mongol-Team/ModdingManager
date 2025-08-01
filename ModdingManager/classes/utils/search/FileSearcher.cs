@@ -1,14 +1,14 @@
 ﻿using ModdingManager.classes.functional.search;
+using ModdingManager.classes.utils.types;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 public class FileSearcher : Searcher
 {
     public List<FileStream> Files { get; set; } = new List<FileStream>();
     public List<string> PatternsList { get; set; } = new List<string>();
     public List<string> AllowedExtensions { get; set; } = new List<string>();
-
-    
     private static readonly Dictionary<HashSet<string>, HashSet<string>> PatternEquivalents =
        new Dictionary<HashSet<string>, HashSet<string>>(HashSet<string>.CreateSetComparer())
        {
@@ -19,7 +19,6 @@ public class FileSearcher : Searcher
            [new HashSet<string> { "mot" }] = new HashSet<string> { "motorized" },
            [new HashSet<string> { "anti", "tank" }] = new HashSet<string> { "at", "anti_tank" }
        };
-
     public FileStream SearchFile()
     {
         if (Files == null || !Files.Any() || PatternsList == null || !PatternsList.Any())
@@ -52,7 +51,6 @@ public class FileSearcher : Searcher
         var remainingPatterns = new HashSet<string>(patterns, StringComparer.OrdinalIgnoreCase);
         var matchedPatterns = new HashSet<string>();
 
-        // Проверяем прямые совпадения
         foreach (var pattern in patterns)
         {
             if (fileParts.Contains(pattern))
@@ -63,7 +61,6 @@ public class FileSearcher : Searcher
             }
         }
 
-        // Проверяем эквиваленты для оставшихся паттернов
         foreach (var equiv in PatternEquivalents)
         {
             // Если все паттерны из ключа еще не найдены
@@ -164,43 +161,289 @@ public class FileSearcher : Searcher
 
         return best.Path;
     }
-
-    private List<HashSet<string>> GetAllPatternVariants(List<string> originalPatterns)
+    #region Var Methods
+    public void SetVar(Var variable, int fileIndex)
     {
-        var variants = new List<HashSet<string>> { originalPatterns.ToHashSet() };
+        if (fileIndex < 0 || fileIndex >= Files.Count || variable == null) return;
 
-        // Генерируем варианты замены через эквиваленты
-        foreach (var equiv in PatternEquivalents)
+        string path = Files[fileIndex].Name;
+        var lines = File.ReadAllLines(path).ToList();
+
+        string pattern = $@"^\s*{Regex.Escape(variable.Name)}\s*=";
+        bool replaced = false;
+
+        for (int i = 0; i < lines.Count; i++)
         {
-            if (equiv.Key.IsSubsetOf(originalPatterns.ToHashSet()))
+            if (Regex.IsMatch(lines[i], pattern, RegexOptions.IgnoreCase))
             {
-                foreach (var replacement in equiv.Value)
+                lines[i] = variable.ToString();
+                replaced = true;
+                break;
+            }
+        }
+
+        if (!replaced)
+        {
+            // если переменной не было, добавляем в конец
+            lines.Add(variable.ToString());
+        }
+
+        File.WriteAllLines(path, lines);
+    }
+
+    public Var? GetVar(string name, int fileIndex)
+    {
+        if (fileIndex < 0 || fileIndex >= Files.Count || string.IsNullOrWhiteSpace(name)) return null;
+
+        string path = Files[fileIndex].Name;
+        var lines = File.ReadAllLines(path);
+
+        string pattern = $@"^\s*{Regex.Escape(name)}\s*=\s*(.+)$";
+
+        foreach (var line in lines)
+        {
+            var match = Regex.Match(line, pattern, RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                string value = match.Groups[1].Value.Trim();
+                return new Var { Name = name, Value = value };
+            }
+        }
+        return null;
+    }
+
+    public void AddVar(Var variable, int fileIndex, int? lineIndex = null)
+    {
+        if (fileIndex < 0 || fileIndex >= Files.Count || variable == null) return;
+
+        string path = Files[fileIndex].Name;
+        var lines = new List<string>(File.ReadAllLines(path));
+
+        if (lineIndex.HasValue && lineIndex.Value >= 0 && lineIndex.Value < lines.Count)
+        {
+            lines.Insert(lineIndex.Value, variable.ToString());
+        }
+        else
+        {
+            lines.Add(variable.ToString());
+        }
+
+        File.WriteAllLines(path, lines);
+    }
+
+    public void RemoveVar(Var variable, int fileIndex)
+    {
+        if (fileIndex < 0 || fileIndex >= Files.Count || variable == null) return;
+
+        string path = Files[fileIndex].Name;
+        var lines = new List<string>(File.ReadAllLines(path));
+
+        string pattern = $@"^\s*{Regex.Escape(variable.Name)}\s*=";
+        lines.RemoveAll(line => Regex.IsMatch(line, pattern, RegexOptions.IgnoreCase));
+
+        File.WriteAllLines(path, lines);
+    }
+    #endregion
+
+    #region Bracket Methods
+
+    public Bracket? GetBracket(string header, int fileIndex,
+    char openChar = '{', char closeChar = '}', char assignSymbol = '=', char commentSymbol = '#')
+    {
+        if (fileIndex < 0 || fileIndex >= Files.Count || string.IsNullOrWhiteSpace(header)) return null;
+
+        string path = Files[fileIndex].Name;
+        var lines = File.ReadAllLines(path).ToList();
+
+        string pattern = $@"^\s*{Regex.Escape(header)}\s*{Regex.Escape(assignSymbol.ToString())}";
+        int start = -1, end = -1, openCount = 0;
+
+        for (int i = 0; i < lines.Count; i++)
+        {
+            if (start == -1 && Regex.IsMatch(lines[i], pattern, RegexOptions.IgnoreCase))
+            {
+                start = i;
+                openCount = lines[i].Count(c => c == openChar) - lines[i].Count(c => c == closeChar);
+                if (openCount <= 0) openCount = 1;
+            }
+            else if (start != -1)
+            {
+                openCount += lines[i].Count(c => c == openChar);
+                openCount -= lines[i].Count(c => c == closeChar);
+
+                if (openCount <= 0)
                 {
-                    var newVariant = originalPatterns
-                        .Where(p => !equiv.Key.Contains(p))
-                        .Concat(new[] { replacement })
-                        .ToHashSet();
-                    variants.Add(newVariant);
+                    end = i;
+                    break;
                 }
             }
         }
 
-        return variants;
+        if (start == -1 || end == -1) return null;
+
+        var blockLines = lines.GetRange(start, end - start + 1);
+        return ParseBracketBlock(blockLines, start, header, openChar, closeChar, assignSymbol, commentSymbol);
     }
 
-    private int CountMatchedPatterns(HashSet<string> patterns, HashSet<string> fileParts)
+    /// <summary>
+    /// Рекурсивный парсер для построения дерева Bracket.
+    /// </summary>
+    private Bracket ParseBracketBlock(List<string> blockLines, int startPosition, string header,
+        char openChar, char closeChar, char assignSymbol, char commentSymbol)
     {
-        int count = 0;
-        foreach (var pattern in patterns)
+        var bracket = new Bracket
         {
-            if (fileParts.Contains(pattern)
-                || PatternEquivalents.Any(e =>
-                    e.Key.Contains(pattern) &&
-                    e.Value.Any(v => fileParts.Contains(v))))
+            Header = header,
+            OpenChar = openChar,
+            CloseChar = closeChar,
+            AssignSymbol = assignSymbol,
+            CommentSymbol = commentSymbol,
+            StartPosition = startPosition,
+            EndPosition = startPosition + blockLines.Count - 1
+        };
+
+        // Убираем первую и последнюю строку (заголовок и закрывающую скобку)
+        var innerLines = blockLines.Skip(1).Take(blockLines.Count - 2).ToList();
+        bracket.Content = innerLines;
+
+        for (int i = 0; i < innerLines.Count; i++)
+        {
+            string line = innerLines[i];
+            string trimmed = line.Split(commentSymbol)[0].Trim();
+
+            if (string.IsNullOrWhiteSpace(trimmed)) continue;
+
+            // Проверяем: это начало подскобки?
+            if (trimmed.Contains(openChar))
             {
-                count++;
+                // Получаем имя подскобки до AssignSymbol
+                string subHeader = trimmed.Split(assignSymbol)[0].Trim();
+
+                // Собираем блок подскобки
+                int start = i;
+                int openCount = line.Count(c => c == openChar) - line.Count(c => c == closeChar);
+                if (openCount <= 0) openCount = 1;
+
+                for (int j = i + 1; j < innerLines.Count; j++)
+                {
+                    openCount += innerLines[j].Count(c => c == openChar);
+                    openCount -= innerLines[j].Count(c => c == closeChar);
+
+                    if (openCount <= 0)
+                    {
+                        var subBlock = innerLines.GetRange(start, j - start + 1);
+                        var subBracket = ParseBracketBlock(subBlock, start + 1, subHeader,
+                            openChar, closeChar, assignSymbol, commentSymbol);
+
+                        bracket.SubBrackets.Add(subBracket);
+                        i = j;
+                        break;
+                    }
+                }
+            }
+            else if (trimmed.Contains(assignSymbol))
+            {
+                // Это Var
+                var parts = trimmed.Split(assignSymbol);
+                if (parts.Length == 2)
+                {
+                    bracket.SubVars.Add(new Var
+                    {
+                        Name = parts[0].Trim(),
+                        Value = parts[1].Trim()
+                    });
+                }
             }
         }
-        return count;
+
+        return bracket;
     }
+
+    public void SetBracket(Bracket bracket, int fileIndex)
+    {
+        if (fileIndex < 0 || fileIndex >= Files.Count || bracket == null) return;
+
+        string path = Files[fileIndex].Name;
+        var lines = File.ReadAllLines(path).ToList();
+
+        // Если известны позиции блока, заменяем его
+        if (bracket.StartPosition >= 0 && bracket.EndPosition < lines.Count)
+        {
+            lines.RemoveRange(bracket.StartPosition, bracket.EndPosition - bracket.StartPosition + 1);
+            lines.InsertRange(bracket.StartPosition, bracket.ToString().Split('\n'));
+        }
+        else
+        {
+            // Иначе ищем по Header
+            string pattern = $@"^\s*{Regex.Escape(bracket.Header)}\s*{Regex.Escape(bracket.AssignSymbol.ToString())}";
+            int start = lines.FindIndex(l => Regex.IsMatch(l, pattern, RegexOptions.IgnoreCase));
+
+            if (start != -1)
+            {
+                // Заменяем старый блок
+                var existing = GetBracket(bracket.Header, fileIndex, bracket.OpenChar,
+                    bracket.CloseChar, bracket.AssignSymbol, bracket.CommentSymbol);
+
+                if (existing != null)
+                {
+                    lines.RemoveRange(existing.StartPosition, existing.EndPosition - existing.StartPosition + 1);
+                    lines.InsertRange(existing.StartPosition, bracket.ToString().Split('\n'));
+                }
+            }
+            else
+            {
+                // Добавляем в конец
+                lines.AddRange(bracket.ToString().Split('\n'));
+            }
+        }
+
+        File.WriteAllLines(path, lines);
+    }
+
+    public void AddBracket(Bracket bracket, int fileIndex, int? lineIndex = null)
+    {
+        if (fileIndex < 0 || fileIndex >= Files.Count || bracket == null) return;
+
+        string path = Files[fileIndex].Name;
+        var lines = File.ReadAllLines(path).ToList();
+        var blockLines = bracket.ToString().Split('\n');
+
+        if (lineIndex.HasValue && lineIndex.Value >= 0 && lineIndex.Value < lines.Count)
+        {
+            lines.InsertRange(lineIndex.Value, blockLines);
+        }
+        else
+        {
+            lines.AddRange(blockLines);
+        }
+
+        File.WriteAllLines(path, lines);
+    }
+
+    public void RemoveBracket(Bracket bracket, int fileIndex)
+    {
+        if (fileIndex < 0 || fileIndex >= Files.Count || bracket == null) return;
+
+        string path = Files[fileIndex].Name;
+        var lines = File.ReadAllLines(path).ToList();
+
+        if (bracket.StartPosition >= 0 && bracket.EndPosition < lines.Count)
+        {
+            lines.RemoveRange(bracket.StartPosition, bracket.EndPosition - bracket.StartPosition + 1);
+            File.WriteAllLines(path, lines);
+        }
+        else
+        {
+            // Если позиции неизвестны – ищем по Header
+            var existing = GetBracket(bracket.Header, fileIndex, bracket.OpenChar,
+                bracket.CloseChar, bracket.AssignSymbol, bracket.CommentSymbol);
+
+            if (existing != null)
+            {
+                lines.RemoveRange(existing.StartPosition, existing.EndPosition - existing.StartPosition + 1);
+                File.WriteAllLines(path, lines);
+            }
+        }
+    }
+    #endregion
 }

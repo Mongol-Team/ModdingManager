@@ -1,5 +1,5 @@
 ﻿using ModdingManager.classes.extentions;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -1,6 +1,6 @@
 ﻿using ModdingManager.classes.extentions;
 using ModdingManager.configs;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using System;
 using System.Collections.Generic;
 using System.IO;

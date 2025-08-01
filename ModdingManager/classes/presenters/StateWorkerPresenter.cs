@@ -5,7 +5,7 @@ using ModdingManager.classes.extentions;
 using ModdingManager.classes.metadata;
 using ModdingManager.classes.utils;
 using ModdingManager.classes.views;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using OpenCvSharp;
 using OpenCvSharp.Internal.Vectors;
 using SixLabors.ImageSharp.Drawing;

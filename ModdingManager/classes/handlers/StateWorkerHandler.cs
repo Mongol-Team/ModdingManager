@@ -3,7 +3,8 @@ using ModdingManager.classes.configs;
 using ModdingManager.classes.utils;
 using ModdingManager.classes.utils.search;
 using ModdingManager.classes.utils.types;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
+using ModdingManager.managers.@base;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System.Collections.Concurrent;
@@ -96,10 +97,7 @@ public class StateWorkerHandler
                 Debugger.Instance.LogMessage($"🔥 Ошибка при обработке провинции {province.Id}: {ex.Message}");
             }
         });
-
-        // ==============================
-        // Итог
-        // ==============================
+        
         timer.Stop();
         Debugger.Instance.LogMessage("\n====================================");
         Debugger.Instance.LogMessage($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
@@ -115,12 +113,10 @@ public class StateWorkerHandler
     }
     public void ChangeProvince(ProvinceConfig province)
     {
-        // Пути
         string modMapDir = Path.Combine(ModManager.Directory, "map");
         string modDefinitions = Path.Combine(modMapDir, "definition.csv");
         string gameDefinitions = Path.Combine(ModManager.GameDirectory, "map", "definition.csv");
 
-        // 1. Проверяем наличие definitions.csv в моде, если нет - копируем из игры
         if (!File.Exists(modDefinitions))
         {
             if (!Directory.Exists(modMapDir))
@@ -130,21 +126,21 @@ public class StateWorkerHandler
                 throw new FileNotFoundException($"Не найден definition.csv ни в моде, ни в игре: {gameDefinitions}");
 
             File.Copy(gameDefinitions, modDefinitions, true);
+            Registry.Instance.MapCache.AddDefinitionFile(modDefinitions);
         }
 
-        // 2. Читаем все строки definitions.csv
-        var lines = File.ReadAllLines(modDefinitions, Encoding.UTF8).ToList();
+        // Работаем через кеш
+        var definitionsContent = Registry.Instance.MapCache.GetDefinitionFileContent(modDefinitions);
+        var lines = definitionsContent.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).ToList();
 
-        // 3. Ищем строку с Id провинции
         int lineIndex = lines.FindIndex(line =>
         {
             var parts = line.Split(';');
             return parts.Length > 0 && int.TryParse(parts[0], out int id) && id == province.Id;
         });
 
-        // 4. Формируем новую строку
         string newLine = $"{province.Id};{province.Color.R};{province.Color.G};{province.Color.B};" +
-                         $"{province.Type};{(province.IsCoastal ? 1 : 0)};{province.Terrain};{province.ContinentId}";
+                        $"{province.Type};{(province.IsCoastal ? 1 : 0)};{province.Terrain};{province.ContinentId}";
 
         if (lineIndex >= 0)
         {
@@ -152,59 +148,108 @@ public class StateWorkerHandler
         }
         else
         {
-            // Если нет такой строки - добавляем
             lines.Add(newLine);
         }
 
-        // 5. Сохраняем обновленный definitions.csv
-        File.WriteAllLines(modDefinitions, lines, Encoding.UTF8);
+        Registry.Instance.MapCache.UpdateDefinitionFile(modDefinitions, string.Join(Environment.NewLine, lines));
 
-        // 6. Работа с локализацией VictoryPoints
+        // 2. Работа с локализацией VictoryPoints (оставляем без изменений, так как это отдельная система)
         string vpKey = $"VICTORY_POINTS_{province.Id}";
-        var victoryPoints = Registry.Instance.Cache.VictoryPointsLocalisation;
-        var vpVar = victoryPoints.FirstOrDefault(v => v.Name.Equals(vpKey, StringComparison.OrdinalIgnoreCase));
+        string newLineLoc = $" {vpKey}: \"{province.Name}\"";
+        string locFolder = Path.Combine(ModManager.Directory, "localisation", ModManager.CurrentLanguage);
+        string replaceFolder = Path.Combine(locFolder, "replace");
 
-        if (vpVar != null)
+        Directory.CreateDirectory(locFolder);
+        Directory.CreateDirectory(replaceFolder);
+
+        string filePath = Path.Combine(locFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
+        string replacePath = Path.Combine(replaceFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
+        string header = $"﻿l_{ModManager.CurrentLanguage}:\n";
+
+        void EnsureFileHasHeader(string path, string header)
         {
-            // Есть существующая локализация - обновляем её через VarSearcher
-            string sourcePath = vpVar.GetProperty("sourcePath") as string;
-
-            if (sourcePath != null && File.Exists(sourcePath))
-            {
-                var vpLines = File.ReadAllLines(sourcePath, Encoding.UTF8);
-                vpVar.Value = province.Name; // обновляем имя
-                var updated = VarSearcher.SetSourceValue(vpLines, vpVar, ":");
-                if (updated != null)
-                    File.WriteAllLines(sourcePath, updated, new UTF8Encoding(true));
-            }
+            if (!File.Exists(path))
+                File.WriteAllText(path, header, new UTF8Encoding(true));
         }
-        else
+
+        void UpdateLineInFile(string path, string key, string line)
         {
-            // Нет локализации - создаем новый файл victory_points_l_{lang}.yml
-            string locFolder = Path.Combine(ModManager.Directory, "localisation", ModManager.CurrentLanguage);
-            string replaceFolder = Path.Combine(locFolder, "replace");
+            var lines = File.ReadAllLines(path, new UTF8Encoding(true)).ToList();
+            bool found = false;
 
-            if (!Directory.Exists(locFolder))
-                Directory.CreateDirectory(locFolder);
-            if (!Directory.Exists(replaceFolder))
-                Directory.CreateDirectory(replaceFolder);
-
-            string filePath = Path.Combine(locFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
-
-            // Если файла нет - создаем с заголовком
-            if (!File.Exists(filePath))
+            for (int i = 0; i < lines.Count; i++)
             {
-                File.WriteAllText(filePath, $"﻿l_{ModManager.CurrentLanguage}:\n", new UTF8Encoding(true));
+                if (lines[i].StartsWith($" {key}:"))
+                {
+                    lines[i] = line;
+                    found = true;
+                    break;
+                }
             }
 
-            // Добавляем новую запись
-            string newLineLoc = $" {vpKey}: \"{province.Name}\"";
-            File.AppendAllText(filePath, newLineLoc + Environment.NewLine, new UTF8Encoding(true));
+            if (!found)
+                lines.Add(line);
 
-            // Добавляем в кеш VictoryPointsLocalisation
-            var newVar = new Var { Name = vpKey, Value = province.Name };
-            newVar.AddProperty("sourcePath", filePath);
-            victoryPoints.Add(newVar);
+            File.WriteAllLines(path, lines, new UTF8Encoding(true));
+        }
+
+        EnsureFileHasHeader(filePath, header);
+        EnsureFileHasHeader(replacePath, header);
+
+        UpdateLineInFile(filePath, vpKey, newLineLoc);
+        UpdateLineInFile(replacePath, vpKey, newLineLoc);
+
+
+
+
+        // 3. Обновление Victory Points в файлах состояний через кеш
+        if (Registry.Instance.MapCache.ProvinceIndex == null)
+        {
+            Registry.Instance.MapCache.BuildProvinceIndex();
+        }
+
+        if (Registry.Instance.MapCache.ProvinceIndex.TryGetValue(province.Id, out var stateInfo))
+        {
+            var (fileKey, stateBracket) = stateInfo;
+
+            // Находим или создаем history
+            var historyBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "history");
+            if (historyBracket == null)
+            {
+                historyBracket = new Bracket { Header = "history" };
+                stateBracket.AddSubBracket(historyBracket);
+            }
+
+            string vpLine = $"{province.Id} {province.VictoryPoints}";
+            var victoryPointsBrackets = historyBracket.SubBrackets.Where(b => b.Header == "victory_points");
+            if (victoryPointsBrackets == null )
+            {
+                var victoryPointsBracket = new Bracket { Header = "victory_points" };
+                victoryPointsBracket.AddContent(vpLine);
+                historyBracket.AddSubBracket(victoryPointsBracket);
+            }
+            else
+            {
+                Bracket currentBracket = historyBracket.SubBrackets
+      .FirstOrDefault(b => b.Content.Any(line => line.Contains(province.Id.ToString())));
+                if (currentBracket != null)
+                {
+                    currentBracket.Content.Clear();
+                    currentBracket.Content.Add(vpLine);
+                    
+                }
+                else
+                {
+                    var victoryPointsBracket = new Bracket { Header = "victory_points" };
+                    victoryPointsBracket.AddContent(vpLine);
+                    historyBracket.AddSubBracket(victoryPointsBracket);
+                }
+            }
+
+            // Помечаем файл как измененный
+            Registry.Instance.MapCache.MarkStateFileDirty(fileKey);
+
+            Registry.Instance.MapCache.SaveDirtyStateFiles();
         }
     }
     public void ChangeStrategicRegion(StrategicRegionConfig region)
@@ -217,66 +262,119 @@ public class StateWorkerHandler
     }
     public void MoveProvinceToState(int? provinceId, StateConfig? currentState, StateConfig targetState)
     {
-        var searcher = new BracketSearcher();
+        if (provinceId == null) return;
+
+        var provinceStr = provinceId.ToString();
 
         if (currentState != null)
         {
-            string currentText = File.ReadAllText(currentState.FilePath);
-            searcher.CurrentString = currentText.ToCharArray();
-            searcher.RemoveBracketContentFromBlock("provinces", provinceId.ToString(), " ");
+            // Обработка текущего штата (удаление провинции)
+            var currentContent = File.ReadAllText(currentState.FilePath);
+            var currentSearcher = new BracketSearcher { CurrentString = currentContent.ToCharArray() };
+            var currentBrackets = currentSearcher.FindBracketsByName("state");
 
-            string updatedCurrent = new string(searcher.CurrentString);
-            File.WriteAllText(currentState.FilePath, updatedCurrent);
+            if (currentBrackets.Count > 0)
+            {
+                var stateBracket = currentBrackets[0];
+                var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+
+                if (provincesBracket != null)
+                {
+                    provincesBracket.RemoveSubstringFromContentAll(provinceStr);
+                    File.WriteAllText(currentState.FilePath, stateBracket.ToString());
+                }
+            }
         }
 
-        string targetText = File.ReadAllText(targetState.FilePath);
-        searcher.CurrentString = targetText.ToCharArray();
-        searcher.AddBracketContentToBlock("provinces", provinceId.ToString(), " ");
+        // Обработка целевого штата (добавление провинции)
+        var targetContent = File.ReadAllText(targetState.FilePath);
+        var targetSearcher = new BracketSearcher { CurrentString = targetContent.ToCharArray() };
+        var targetBrackets = targetSearcher.FindBracketsByName("state");
 
-        string updatedTarget = new string(searcher.CurrentString);
-        File.WriteAllText(targetState.FilePath, updatedTarget);
+        if (targetBrackets.Count > 0)
+        {
+            var stateBracket = targetBrackets[0];
+            var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+
+            if (provincesBracket == null)
+            {
+                provincesBracket = new Bracket { Header = "provinces" };
+                stateBracket.AddSubBracket(provincesBracket);
+            }
+
+            provincesBracket.AddContent(provinceStr);
+            File.WriteAllText(targetState.FilePath, stateBracket.ToString());
+        }
     }
 
     public void MoveStateToCountry(StateConfig state, string countryTag)
     {
-        string fileContent = File.ReadAllText(state.FilePath);
-        var lines = fileContent.Split('\n');
-        for (int i = 0; i < lines.Length; i++)
+        var content = File.ReadAllText(state.FilePath);
+        var searcher = new BracketSearcher { CurrentString = content.ToCharArray() };
+        var stateBrackets = searcher.FindBracketsByName("state");
+
+        if (stateBrackets.Count > 0)
         {
-            string line = lines[i].Trim();
-            if (line.StartsWith("owner"))
+            var stateBracket = stateBrackets[0];
+            var ownerVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "owner");
+
+            if (ownerVar != null)
             {
-                int equalIndex = line.IndexOf('=');
-                if (equalIndex != -1)
-                {
-                    lines[i] = $"owner = {countryTag}";
-                    break;
-                }
+                ownerVar.Value = countryTag;
             }
+            else
+            {
+                stateBracket.AddVar(new Var { Name = "owner", Value = countryTag });
+            }
+
+            File.WriteAllText(state.FilePath, stateBracket.ToString());
         }
-        File.WriteAllText(state.FilePath, string.Join("\n", lines));
     }
+
     public void MoveProvinceToStrategicRegion(int? provinceId, StrategicRegionConfig? currentRegion, StrategicRegionConfig targetRegion)
     {
-        var searcher = new BracketSearcher();
+        if (provinceId == null) return;
+
+        var provinceStr = provinceId.ToString();
 
         if (currentRegion != null)
         {
-            string currentText = File.ReadAllText(currentRegion.FilePath);
-            searcher.CurrentString = currentText.ToCharArray();
-            searcher.RemoveBracketContentFromBlock("provinces", provinceId.ToString(), " ");
+            // Обработка текущего региона (удаление провинции)
+            var currentContent = File.ReadAllText(currentRegion.FilePath);
+            var currentSearcher = new BracketSearcher { CurrentString = currentContent.ToCharArray() };
+            var currentBrackets = currentSearcher.FindBracketsByName("strategic_region");
 
-            string updatedCurrent = new string(searcher.CurrentString);
-            File.WriteAllText(currentRegion.FilePath, updatedCurrent);
+            if (currentBrackets.Count > 0)
+            {
+                var regionBracket = currentBrackets[0];
+                var provincesBracket = regionBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+
+                if (provincesBracket != null)
+                {
+                    provincesBracket.RemoveAllContentContaining(provinceStr);
+                    File.WriteAllText(currentRegion.FilePath, regionBracket.ToString());
+                }
+            }
         }
 
-        string targetText = File.ReadAllText(targetRegion.FilePath);
-        searcher.CurrentString = targetText.ToCharArray();
-        searcher.AddBracketContentToBlock("provinces", provinceId.ToString(), " ");
+        // Обработка целевого региона (добавление провинции)
+        var targetContent = File.ReadAllText(targetRegion.FilePath);
+        var targetSearcher = new BracketSearcher { CurrentString = targetContent.ToCharArray() };
+        var targetBrackets = targetSearcher.FindBracketsByName("strategic_region");
 
-        string updatedTarget = new string(searcher.CurrentString);
-        File.WriteAllText(targetRegion.FilePath, updatedTarget);
+        if (targetBrackets.Count > 0)
+        {
+            var regionBracket = targetBrackets[0];
+            var provincesBracket = regionBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+
+            if (provincesBracket == null)
+            {
+                provincesBracket = new Bracket { Header = "provinces" };
+                regionBracket.AddSubBracket(provincesBracket);
+            }
+
+            provincesBracket.AddContent(provinceStr);
+            File.WriteAllText(targetRegion.FilePath, regionBracket.ToString());
+        }
     }
-
-
 }

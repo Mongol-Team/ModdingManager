@@ -12,8 +12,8 @@ using ModdingManager.configs;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using ModdingManager.classes.extentions;
-using ModdingManager.managers.utils;
-namespace ModdingManager.classes.gfx
+using ModdingManager.managers.@base;
+namespace ModdingManager.classes.managers.gfx
 {
     public static class DDSManager 
     {
@@ -35,7 +35,7 @@ namespace ModdingManager.classes.gfx
                 var handle = GCHandle.Alloc(image.Data, GCHandleType.Pinned);
                 try
                 {
-                    IntPtr ptr = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
+                    nint ptr = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
                     return new Bitmap(image.Width, image.Height, image.Stride, format, ptr);
                 }
                 finally

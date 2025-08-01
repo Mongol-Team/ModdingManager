@@ -1,10 +1,10 @@
 ﻿using ModdingManager.classes.cache;
 using ModdingManager.classes.configs;
-using ModdingManager.classes.gfx;
+using ModdingManager.classes.managers.gfx;
 using ModdingManager.classes.utils.search;
 using ModdingManager.classes.utils.types;
 using ModdingManager.configs;
-using ModdingManager.managers.utils;
+using ModdingManager.managers.@base;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -21,7 +21,8 @@ namespace ModdingManager.classes.utils
         private Registry() { }
         private static Registry _instance = new();
         public static Registry Instance => _instance ??= new Registry();
-        public LocalisationCache Cache { get; set; } = new LocalisationCache();
+        public LocalisationCache LocCache { get; set; } = new LocalisationCache();
+        public MapCache MapCache { get; set; } = new MapCache();
         public  List<RegimentConfig> Regiments { get; set; }
         public  List<CountryConfig> Countries { get; set; }
         public  List<IdeaConfig> Ideas { get; set; }
@@ -47,14 +48,57 @@ namespace ModdingManager.classes.utils
             LoadModifiers();
             LoadCharacters();
             LoadIdeologies();
-            LoadBaseProvinceMap();
+            LoadMap();
         }
+        #region Load Methods
         private static void LoadCache()
         {
-            _instance.Cache = new LocalisationCache();
-            _instance.Cache.LoadLocalisation();
+            _instance.LocCache = new();
+            _instance.MapCache = new();
         }
-      
+        private static void LoadCharacters()
+        {
+
+        }
+        private static void LoadIdeologies()
+        {
+            _instance.Ideologies = new List<IdeologyConfig>();
+            var ideologyFiles = new List<string>();
+
+            string modDir = Path.Combine(ModManager.Directory, "common", "ideologies");
+            if (Directory.Exists(modDir))
+                ideologyFiles.AddRange(Directory.GetFiles(modDir, "*.*", SearchOption.AllDirectories));
+
+            string gameDir = Path.Combine(ModManager.GameDirectory, "common", "ideologies");
+            if (Directory.Exists(gameDir) && ideologyFiles.Count < 1)
+                ideologyFiles.AddRange(Directory.GetFiles(gameDir, "*.*", SearchOption.AllDirectories));
+
+            foreach (var file in ideologyFiles)
+            {
+                string fileContent = File.ReadAllText(file);
+                var searcher = new BracketSearcher
+                {
+                    CurrentString = fileContent.ToCharArray(),
+                    OpenBracketChar = '{',
+                    CloseBracketChar = '}'
+                };
+
+                // Ищем основной блок ideologies
+                var ideologyBrackets = searcher.FindBracketsByName("ideologies");
+                if (ideologyBrackets.Count == 0) continue;
+
+                // Обрабатываем каждую найденную идеологию
+                var ideologyMainBracket = ideologyBrackets[0];
+                foreach (var subBracket in ideologyMainBracket.SubBrackets)
+                {
+                    var config = ParseIdeologyConfig(subBracket.Header, subBracket);
+                    if (config != null)
+                        _instance.Ideologies.Add(config);
+                }
+
+                _instance.Ideologies.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
+            }
+        }
         private static void LoadRegiemts()
         {
             var result = new List<RegimentConfig>();
@@ -85,7 +129,7 @@ namespace ModdingManager.classes.utils
         {
 
         }
-        public static void LoadBaseProvinceMap()
+        public static void LoadMap()
         {
             string definitionPath = System.IO.Path.Combine(ModManager.Directory, "map", "definition.csv");
             string provinceImagePath = System.IO.Path.Combine(ModManager.Directory, "map", "provinces.bmp");
@@ -102,7 +146,8 @@ namespace ModdingManager.classes.utils
             Instance.Map.Countries = ParseCountryMap(Instance.Map);
             Instance.Map.Bitmap = new Bitmap(provinceImagePath);
         }
-
+        #endregion 
+        #region Parse Methods
         public static MapConfig ParseProvinceMap(string[] lines)
         {
             MapConfig res = new MapConfig();
@@ -144,14 +189,380 @@ namespace ModdingManager.classes.utils
                 }
             }
             GetProvinceNames(otherProvinces);
+            GetProvinceVictoryPoints(otherProvinces);
             res.Provinces = seaProvinces.Concat(otherProvinces).ToList();
             return res;
         }
+        public static List<StrategicRegionConfig> ParseStrategicMap(MapConfig map)
+        {
+            var strategicMap = new Dictionary<int, StrategicRegionConfig>();
 
+            string[] priorityFolders = {
+                Path.Combine(ModManager.Directory, "map", "strategicregions"),
+                Path.Combine(ModManager.GameDirectory, "map", "strategicregions")
+            };
+
+            foreach (string folder in priorityFolders)
+            {
+                if (!Directory.Exists(folder)) continue;
+                string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    string content = File.ReadAllText(file);
+                    var searcher = new BracketSearcher { CurrentString = content.ToCharArray() };
+                    var regionBrackets = searcher.FindBracketsByName("strategic_region");
+
+                    foreach (var regionBracket in regionBrackets)
+                    {
+                        var idVar = regionBracket.SubVars.FirstOrDefault(v => v.Name == "id");
+                        if (idVar == null || !int.TryParse(idVar.Value as string, out int id) || strategicMap.ContainsKey(id))
+                            continue;
+
+                        var provincesBracket = regionBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+                        if (provincesBracket == null) continue;
+
+                        var provinceIds = provincesBracket.Content
+                            .SelectMany(line => line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
+                            .Select(s => int.TryParse(s, out int value) ? value : (int?)null)
+                            .Where(x => x.HasValue)
+                            .Select(x => x.Value)
+                            .ToHashSet();
+
+                        var matchedProvinces = map.Provinces
+                            .Where(p => provinceIds.Contains(p.Id))
+                            .ToList();
+
+                        strategicMap[id] = new StrategicRegionConfig
+                        {
+                            Id = id,
+                            Provinces = matchedProvinces,
+                            FilePath = file,
+                            Color = ModManager.GenerateColorFromId(id)
+                        };
+                    }
+                }
+            }
+
+            return strategicMap.Values.ToList();
+        }
+
+        public static List<StateConfig> ParseStateMap(MapConfig map)
+        {
+            var stateMap = new Dictionary<int, StateConfig>();
+
+            string[] priorityFolders = {
+                Path.Combine(ModManager.Directory, "history", "states"),
+                Path.Combine(ModManager.GameDirectory, "history", "states")
+            };
+
+            foreach (string folder in priorityFolders)
+            {
+                if (!Directory.Exists(folder)) continue;
+                string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    string content = File.ReadAllText(file);
+                    var searcher = new BracketSearcher { CurrentString = content.ToCharArray() };
+                    var stateBrackets = searcher.FindBracketsByName("state");
+
+                    foreach (var stateBracket in stateBrackets)
+                    {
+                        var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
+                        if (idVar == null || !int.TryParse(idVar.Value as string, out int id) || stateMap.ContainsKey(id))
+                            continue;
+                        if (idVar.Value.ToString() == "2")
+                        {
+                            var brp = 1;
+                        }
+                        var nameVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "name");
+                        string internalName = nameVar?.Value?.ToString().Trim('"');
+                        if (string.IsNullOrEmpty(internalName)) continue;
+
+                        var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+                        if (provincesBracket == null) continue;
+
+                        var provinceIds = provincesBracket.Content
+                            .SelectMany(line => line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
+                            .Select(s => int.TryParse(s, out int value) ? value : (int?)null)
+                            .Where(x => x.HasValue)
+                            .Select(x => x.Value)
+                            .ToHashSet();
+
+                        var matchedProvinces = map.Provinces
+                            .Where(p => provinceIds.Contains(p.Id))
+                            .ToList();
+
+                        stateMap[id] = new StateConfig
+                        {
+                            Id = id,
+                            Color = ModManager.GenerateColorFromId(id),
+                            FilePath = file,
+                            Provinces = matchedProvinces,
+                            LocalizationKey = nameVar?.Value as string
+                        };
+                    }
+                }
+            }
+
+            var result = stateMap.Values.ToList();
+            GetStateNames(result);
+            return result;
+        }
+
+        public static List<CountryOnMapConfig> ParseCountryMap(MapConfig map)
+        {
+            var tagVars = new List<Var>();
+            string[] tagFolders = {
+        Path.Combine(ModManager.Directory, "common", "country_tags"),
+        Path.Combine(ModManager.GameDirectory, "common", "country_tags")
+    };
+
+            foreach (var folder in tagFolders)
+            {
+                if (Directory.Exists(folder))
+                {
+                    tagVars.AddRange(VarSearcher.TryGetCountryTags(folder));
+                }
+            }
+
+            var tagLookup = tagVars.ToDictionary(v => v.Name, v => v.Value);
+            var countries = new List<CountryOnMapConfig>();
+            var visitedIds = new HashSet<int>();
+
+            string[] stateFolders = {
+        Path.Combine(ModManager.Directory, "history", "states"),
+        Path.Combine(ModManager.GameDirectory, "history", "states")
+    };
+
+            foreach (var folder in stateFolders)
+            {
+                if (!Directory.Exists(folder)) continue;
+
+                foreach (var file in Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories))
+                {
+                    string content = File.ReadAllText(file);
+                    var searcher = new BracketSearcher { CurrentString = content.ToCharArray() };
+                    var stateBrackets = searcher.FindBracketsByName("state");
+
+                    foreach (var stateBracket in stateBrackets)
+                    {
+                        var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
+                        var ownerVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "owner");
+
+                        if (idVar == null || !int.TryParse(idVar.Value as string, out int id) ||
+                            ownerVar == null || visitedIds.Contains(id))
+                            continue;
+
+                        var state = map.States?.FirstOrDefault(s => s.Id == id);
+                        if (state == null) continue;
+
+                        string ownerTag = ownerVar.Value as string;
+                        if (!tagLookup.TryGetValue(ownerTag, out var countryPath))
+                            continue;
+
+                        var country = countries.FirstOrDefault(c => c.Tag == ownerTag);
+                        if (country == null)
+                        {
+                            var color = GetCountryColor(ownerTag, countryPath.ToString());
+                            country = new CountryOnMapConfig
+                            {
+                                Tag = ownerTag,
+                                Color = color,
+                                States = new List<StateConfig>()
+                            };
+                            countries.Add(country);
+                        }
+
+                        country.States.Add(state);
+                        visitedIds.Add(id);
+                    }
+                }
+            }
+
+            map.Countries = countries;
+            return countries;
+        }
+        public static IdeologyConfig ParseIdeologyConfig(string name, Bracket bracket)
+        {
+            var config = new IdeologyConfig
+            {
+                Id = name,
+                SubTypes = new List<IdeologyType>(),
+                Rules = new Dictionary<string, bool>(),
+                Modifiers = new Dictionary<string, double>(),
+                FactionModifiers = new Dictionary<string, double>(),
+                DynamicFactionNames = new List<string>()
+            };
+
+            // Обработка types
+            var typesBracket = bracket.SubBrackets.FirstOrDefault(b => b.Header == "types");
+            if (typesBracket != null)
+            {
+                foreach (var typeBracket in typesBracket.SubBrackets)
+                {
+                    var type = new IdeologyType
+                    {
+                        Name = typeBracket.Header,
+                        Parrent = name
+                    };
+
+                    var canBeRandom = typeBracket.SubVars.FirstOrDefault(v => v.Name == "can_be_randomly_selected");
+                    if (canBeRandom != null)
+                    {
+                        type.CanBeRandomlySelected = VarSearcher.ParseBool(canBeRandom.Value as string);
+                    }
+
+                    var colorValue = typeBracket.SubVars.FirstOrDefault(v => v.Name == "color");
+                    if (colorValue != null)
+                    {
+                        type.Color = VarSearcher.ParseColor(colorValue.Value as string);
+                    }
+
+                    config.SubTypes.Add(type);
+                }
+            }
+
+            // Обработка dynamic_faction_names
+            var namesBracket = bracket.SubBrackets.FirstOrDefault(b => b.Header == "dynamic_faction_names");
+            if (namesBracket != null)
+            {
+                config.DynamicFactionNames = namesBracket.Content
+                    .SelectMany(line => VarSearcher.ParseQuotedStrings(line))
+                    .ToList();
+            }
+
+            // Обработка color
+            var colorBracket = bracket.SubBrackets.FirstOrDefault(b => b.Header == "color");
+            if (colorBracket != null && colorBracket.Content.Count > 0)
+            {
+                config.Color = VarSearcher.ParseColor(colorBracket.Content[0]);
+            }
+
+            // Обработка rules
+            var rulesBracket = bracket.SubBrackets.FirstOrDefault(b => b.Header == "rules");
+            if (rulesBracket != null)
+            {
+                foreach (var var in rulesBracket.SubVars)
+                {
+                    config.Rules[var.Name] = VarSearcher.ParseBool(var.Value as string);
+                }
+            }
+
+            // Обработка modifiers
+            var modsBracket = bracket.SubBrackets.FirstOrDefault(b => b.Header == "modifiers");
+            if (modsBracket != null)
+            {
+                foreach (var var in modsBracket.SubVars)
+                {
+                    if (double.TryParse((var.Value as string), out double dVal))
+                        config.Modifiers[var.Name] = dVal;
+                }
+            }
+
+            // Обработка faction_modifiers
+            var factionModsBracket = bracket.SubBrackets.FirstOrDefault(b => b.Header == "faction_modifiers");
+            if (factionModsBracket != null)
+            {
+                foreach (var var in factionModsBracket.SubVars)
+                {
+                    if (double.TryParse(var.Value as string, out double dVal))
+                        config.FactionModifiers[var.Name] = dVal;
+                }
+            }
+
+            // Обработка остальных переменных
+            foreach (var var in bracket.SubVars)
+            {
+                switch (var.Name)
+                {
+                    case "can_host_government_in_exile":
+                        config.CanFormExileGoverment = VarSearcher.ParseBool(var.Value as string);
+                        break;
+                    case "war_impact_on_world_tension":
+                        if (double.TryParse((var.Value as string).Replace(".", ","), out double warTension))
+                            config.WarImpactOnTension = warTension;
+                        break;
+                    case "faction_impact_on_world_tension":
+                        if (double.TryParse((var.Value as string).Replace(".", ","), out double factionTension))
+                            config.FactionImpactOnTension = factionTension;
+                        break;
+                    case "can_be_boosted":
+                        config.CanBeBoosted = VarSearcher.ParseBool(var.Value as string);
+                        break;
+                    case "can_collaborate":
+                        config.CanColaborate = VarSearcher.ParseBool(var.Value as string);
+                        break;
+                    case string s when s.StartsWith("ai_"):
+                        config.AiIdeologyName = s.Substring(3);
+                        break;
+                }
+            }
+
+            return config;
+        }
+        #endregion
+        #region Helper Methods
+        public static void GetProvinceVictoryPoints(List<ProvinceConfig> provinces)
+        {
+            if (provinces == null || !provinces.Any() || Registry.Instance.MapCache.GetStateFiles().Count == 0)
+                return;
+
+            var provinceDict = provinces.ToDictionary(p => p.Id, p => p);
+            bool hasChanges = false;
+
+            foreach (var stateFile in Registry.Instance.MapCache.GetStateFiles())
+            {
+                string content = Registry.Instance.MapCache.GetStateFileContent(stateFile.Key);
+                var searcher = new BracketSearcher
+                {
+                    CurrentString = content.ToCharArray(),
+                };
+
+                var victoryPointsBrackets = searcher.FindBracketsByName("victory_points");
+
+                foreach (var bracket in victoryPointsBrackets)
+                {
+                    foreach (var line in bracket.Content)
+                    {
+                        var parts = line.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        if (parts.Length == 2 &&
+                            int.TryParse(parts[0], out int provinceId) &&
+                            int.TryParse(parts[1], out int victoryPoints))
+                        {
+                            if (provinceDict.TryGetValue(provinceId, out var province))
+                            {
+                                if (province.VictoryPoints != victoryPoints)
+                                {
+                                    province.VictoryPoints = victoryPoints;
+                                    hasChanges = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Обновляем кеш, если были изменения
+            if (hasChanges)
+            {
+                Registry.Instance.MapCache.MarkStateFilesDirty();
+            }
+
+            // Инициализация нулевых значений (избыточно, можно удалить)
+            foreach (var province in provinces.Where(p => p.VictoryPoints == 0))
+            {
+                province.VictoryPoints = 0;
+            }
+        }
+        public IdeologyConfig? GetIdeology(string id)
+        {
+            return this.Ideologies.FirstOrDefault(i => i.Id == id);
+        }
         private static void GetProvinceNames(List<ProvinceConfig> list)
         {
-            var victoryPoints = _instance.Cache.VictoryPointsLocalisation;
-            var allCache = _instance.Cache.AllCache;
+            var victoryPoints = _instance.LocCache.VictoryPointsLocalisation;
+            var allCache = _instance.LocCache.AllCache;
 
             var vpLookup = victoryPoints.ToDictionary(v => v.Name, v => v.Value.ToString(), StringComparer.OrdinalIgnoreCase);
             var allLookup = allCache.ToDictionary(v => v.Name, v => v.Value.ToString(), StringComparer.OrdinalIgnoreCase);
@@ -174,75 +585,35 @@ namespace ModdingManager.classes.utils
                 }
             }
         }
-
-        public static List<StateConfig> ParseStateMap(MapConfig map)
+        private static System.Windows.Media.Color GetCountryColor(string tag, string countryPath)
         {
-            var stateMap = new Dictionary<int, StateConfig>();
-
-            string[] priorityFolders = {
-                Path.Combine(ModManager.Directory, "history", "states"),
-                Path.Combine(ModManager.GameDirectory, "history", "states")
+            string pathClean = countryPath.Trim('"').Replace('/', Path.DirectorySeparatorChar);
+            string[] possiblePaths = {
+                Path.Combine(ModManager.Directory, "common", pathClean),
+                Path.Combine(ModManager.GameDirectory, "common", pathClean)
             };
 
-            foreach (string folder in priorityFolders)
+            foreach (var path in possiblePaths)
             {
-                if (!System.IO.Directory.Exists(folder)) continue;
-
-                var files = System.IO.Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
-
-                foreach (string file in files)
+                if (File.Exists(path))
                 {
-                    string content = File.ReadAllText(file);
-                    var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                    var content = File.ReadAllText(path);
+                    var searcher = new BracketSearcher { CurrentString = content.ToCharArray() };
+                    var colorBrackets = searcher.FindBracketsByName("color");
 
-                    int? id = VarSearcher.SearchInt(lines, "id");
-                    if (id == null || stateMap.ContainsKey(id.Value)) continue;
-
-                    string internalName = VarSearcher.SearchString(lines, "name")?.Trim('"');
-                    if (string.IsNullOrEmpty(internalName)) continue;
-
-                    var bracketSearcher = new BracketSearcher
+                    if (colorBrackets.Count > 0)
                     {
-                        CurrentString = content.ToCharArray()
-                    };
-                    string key = VarSearcher.SearchString(lines, "name");
-                    var provinceBlock = bracketSearcher.GetBracketContentByHeaderName("provinces".ToCharArray())
-                        .FirstOrDefault();
-
-                    if (provinceBlock == null) continue;
-
-                    var provinceIds = provinceBlock
-                        .Split(new[] { '\n', '\r', ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => int.TryParse(s, out int value) ? value : (int?)null)
-                        .Where(x => x.HasValue)
-                        .Select(x => x.Value)
-                        .ToHashSet();
-
-                    var matchedProvinces = map.Provinces
-                        .Where(p => provinceIds.Contains(p.Id))
-                        .ToList();
-
-                    var color = ModManager.GenerateColorFromId(id.Value);
-
-                    stateMap[id.Value] = new StateConfig
-                    {
-                        Id = id.Value,
-                        Color = color,
-                        FilePath = file,
-                        Provinces = matchedProvinces,
-                        LocalizationKey = key,
-                    };
+                        return VarSearcher.ParseColor(colorBrackets[0].Content.FirstOrDefault()).ToMediaColor();
+                    }
                 }
             }
-            var result = stateMap.Values.ToList();
-            GetStateNames(result);
-            return result;
-        }
 
+            return Colors.Gray;
+        }
         private static void GetStateNames(List<StateConfig> states)
         {
-            var stateLocals = _instance.Cache.StateLocalisation;
-            var allCache = _instance.Cache.AllCache;
+            var stateLocals = _instance.LocCache.StateLocalisation;
+            var allCache = _instance.LocCache.AllCache;
 
             var stateLookup = stateLocals.ToDictionary(v => v.Name, v => v.Value.ToString(), StringComparer.OrdinalIgnoreCase);
             var allLookup = allCache.ToDictionary(v => v.Name, v => v.Value.ToString(), StringComparer.OrdinalIgnoreCase);
@@ -266,205 +637,6 @@ namespace ModdingManager.classes.utils
             }
         }
 
-
-        public static List<StrategicRegionConfig> ParseStrategicMap(MapConfig map)
-        {
-            var strategicMap = new Dictionary<int, StrategicRegionConfig>();
-
-            string[] priorityFolders = {
-        Path.Combine(ModManager.Directory, "map", "strategicregions"),
-        Path.Combine(ModManager.GameDirectory, "map", "strategicregions")
-    };
-
-            foreach (string folder in priorityFolders)
-            {
-                if (!System.IO.Directory.Exists(folder)) continue;
-
-                var files = System.IO.Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
-
-                foreach (string file in files)
-                {
-                    string content = File.ReadAllText(file);
-                    var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    int? id = VarSearcher.SearchInt(lines, "id");
-                    if (id == null || strategicMap.ContainsKey(id.Value)) continue;
-
-                    var bracketSearcher = new BracketSearcher
-                    {
-                        CurrentString = content.ToCharArray()
-                    };
-
-                    var provinceBlock = bracketSearcher.GetBracketContentByHeaderName("provinces".ToCharArray())
-                        .FirstOrDefault();
-
-                    if (provinceBlock == null) continue;
-
-                    var provinceIds = provinceBlock
-                        .Split(new[] { '\n', '\r', ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => int.TryParse(s, out int value) ? value : (int?)null)
-                        .Where(x => x.HasValue)
-                        .Select(x => x.Value)
-                        .ToHashSet();
-
-                    var matchedProvinces = map.Provinces
-                        .Where(p => provinceIds.Contains(p.Id))
-                        .ToList();
-
-                    var region = new StrategicRegionConfig
-                    {
-                        Id = id.Value,
-                        Provinces = matchedProvinces,
-                        FilePath = file,
-                        Color = ModManager.GenerateColorFromId(id.Value)
-                    };
-
-                    strategicMap[id.Value] = region;
-                }
-            }
-
-            return strategicMap.Values.ToList();
-        }
-        public static List<CountryOnMapConfig> ParseCountryMap(MapConfig map)
-        {
-            List<Var> tagVars = VarSearcher.TryGetCountryTags(Path.Combine(ModManager.Directory, "common", "country_tags"));
-            if (tagVars.Count == 0)
-                tagVars = VarSearcher.TryGetCountryTags(Path.Combine(ModManager.GameDirectory, "common", "country_tags"));
-
-            var tagLookup = tagVars.ToDictionary(v => v.Name, v => v.Value);
-
-            var countries = new List<CountryOnMapConfig>();
-            var visitedIds = new HashSet<int>();
-
-            string[] stateFolders = {
-        Path.Combine(ModManager.Directory, "history", "states"),
-        Path.Combine(ModManager.GameDirectory, "history", "states")
-    };
-
-            foreach (var folder in stateFolders)
-            {
-                if (!Directory.Exists(folder)) continue;
-
-                foreach (var file in Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories))
-                {
-                    string content = File.ReadAllText(file);
-                    var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    int? id = VarSearcher.SearchInt(lines, "id");
-                    string ownerTag = VarSearcher.SearchString(lines, "owner");
-
-                    if (id == null || string.IsNullOrWhiteSpace(ownerTag)) continue;
-                    if (visitedIds.Contains(id.Value)) continue;
-
-                    var state = map.States?.FirstOrDefault(s => s.Id == id.Value);
-                    if (state == null) continue;
-
-                    string countryKey = tagLookup.ContainsKey(ownerTag) ? ownerTag : null;
-                    string countryPath = tagLookup.TryGetValue(ownerTag, out var pathVal) ? pathVal as string : null;
-
-                    var country = countries.FirstOrDefault(c => c.Tag == countryKey);
-                    if (country == null)
-                    {
-                        System.Windows.Media.Color color = Colors.Gray;
-
-                        if (countryPath != null)
-                        {
-                            string pathClean = countryPath.Trim('"').Replace('/', Path.DirectorySeparatorChar);
-                            string fullPathDir = Path.Combine(ModManager.Directory, "common", pathClean);
-                            string fullPathGame = Path.Combine(ModManager.GameDirectory, "common", pathClean);
-
-                            string pathToUse = File.Exists(fullPathDir) ? fullPathDir :
-                                               File.Exists(fullPathGame) ? fullPathGame : null;
-
-                            if (pathToUse != null)
-                            {
-                                var cContent = File.ReadAllText(pathToUse);
-                                var bSearcher = new BracketSearcher { CurrentString = cContent.ToCharArray() };
-                                string colorBlock = bSearcher.GetBracketContentByHeaderName("color".ToCharArray()).FirstOrDefault();
-                                if (!string.IsNullOrWhiteSpace(colorBlock))
-                                    color = VarSearcher.ParseColor(colorBlock).ToMediaColor();
-                            }
-                        }
-
-                        country = new CountryOnMapConfig
-                        {
-                            Tag = countryKey,
-                            Color = color,
-                            States = new List<StateConfig>()
-                        };
-                        countries.Add(country);
-                    }
-
-                    country.States.Add(state);
-                    visitedIds.Add(id.Value);
-                }
-            }
-
-            map.Countries = countries;
-            return countries;
-        }
-        private static void LoadCharacters()
-        {
-
-        }
-        private static void LoadIdeologies()
-        {
-            _instance.Ideologies = new List<IdeologyConfig>();
-            var ideologyFiles = new List<string>();
-
-            string modDir = Path.Combine(ModManager.Directory, "common", "ideologies");
-            if (Directory.Exists(modDir))
-                ideologyFiles.AddRange(Directory.GetFiles(modDir, "*.*", SearchOption.AllDirectories));
-            string gameDir = Path.Combine(ModManager.GameDirectory, "common", "ideologies");
-            if (Directory.Exists(gameDir) && ideologyFiles.Count < 1)
-                ideologyFiles.AddRange(Directory.GetFiles(gameDir, "*.*", SearchOption.AllDirectories));
-
-
-
-            foreach (var file in ideologyFiles)
-            {
-                string fileContent = File.ReadAllText(file);
-                BracketSearcher searcher = new BracketSearcher
-                {
-                    CurrentString = fileContent.ToCharArray(),
-                    OpenBracketChar = '{',
-                    CloseBracketChar = '}'
-                };
-
-                // Ищем основной блок ideologies
-                var ideologiesContent = searcher.GetBracketContentByHeaderName("ideologies".ToCharArray());
-                if (ideologiesContent.Count == 0) continue;
-
-                // Обрабатываем каждую найденную идеологию
-                var ideologySearcher = new BracketSearcher
-                {
-                    CurrentString = ideologiesContent[0].ToCharArray(),
-                    OpenBracketChar = '{',
-                    CloseBracketChar = '}'
-                };
-
-                var ideologyNames = ideologySearcher.GetAllBracketSubbracketsNames(1);
-                foreach (var name in ideologyNames)
-                {
-                    var ideologyBlocks = ideologySearcher.GetBracketContentByHeaderName(name.ToCharArray());
-                    if (ideologyBlocks.Count == 0) continue;
-
-                    IdeologyConfig config = IdeologyConfig.ParseIdeologyConfig(name, ideologyBlocks[0]);
-                    if (config != null)
-                        _instance.Ideologies.Add(config);
-                }
-                _instance.Ideologies.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.Ordinal));
-
-               
-            }
-        }
-        
-        public IdeologyConfig? GetIdeology(string id)
-        {
-            return this.Ideologies.FirstOrDefault(i => i.Id == id);
-        }
-
-        #region Helper Methods
         public static List<(string Name, List<string> Categories)> CollectUnitDefinitions()
         {
             var result = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
@@ -484,54 +656,36 @@ namespace ModdingManager.classes.utils
                         var fileContent = File.ReadAllText(file);
                         var fileSearcher = new BracketSearcher
                         {
-                            OpenBracketChar = '{',
-                            CloseBracketChar = '}',
                             CurrentString = fileContent.ToCharArray()
                         };
 
-                        var subUnitsContents = fileSearcher.GetBracketContentByHeaderName("sub_units".ToCharArray());
+                        // Находим все блоки sub_units
+                        var subUnitsBrackets = fileSearcher.FindBracketsByName("sub_units");
 
-                        foreach (var subUnitsContent in subUnitsContents)
+                        foreach (var subUnitsBracket in subUnitsBrackets)
                         {
-                            var subUnitsSearcher = new BracketSearcher
+                            // Обрабатываем все определения юнитов внутри sub_units
+                            foreach (var unitBracket in subUnitsBracket.SubBrackets)
                             {
-                                OpenBracketChar = '{',
-                                CloseBracketChar = '}',
-                                CurrentString = subUnitsContent.ToCharArray()
-                            };
+                                // Ищем блок categories внутри каждого юнита
+                                var categoriesBracket = unitBracket.SubBrackets
+                                    .FirstOrDefault(b => b.Header.Equals("categories", StringComparison.OrdinalIgnoreCase));
 
-                            var unitDefinitions = subUnitsSearcher.GetAllBracketSubbracketsNames(1);
-
-                            foreach (var unitDef in unitDefinitions)
-                            {
-                                var unitContents = subUnitsSearcher.GetBracketContentByHeaderName(unitDef.ToCharArray());
-
-                                foreach (var unitContent in unitContents)
+                                if (categoriesBracket != null)
                                 {
-                                    var unitSearcher = new BracketSearcher
-                                    {
-                                        OpenBracketChar = '{',
-                                        CloseBracketChar = '}',
-                                        CurrentString = unitContent.ToCharArray()
-                                    };
-                                    var categories = unitSearcher.GetBracketContentByHeaderName("categories".ToCharArray());
+                                    var cleanCategories = categoriesBracket.Content
+                                        .SelectMany(line => line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
+                                        .Where(category => !string.IsNullOrWhiteSpace(category) &&
+                                                          !category.Contains("{") &&
+                                                          !category.Contains("}"))
+                                        .ToList();
 
-                                    if (categories.Count > 0)
+                                    if (cleanCategories.Count > 0)
                                     {
-                                        var cleanCategories = categories.SelectMany(c => c.Split('\n'))
-                                            .Select(line => line.Trim())
-                                            .Where(line => !string.IsNullOrEmpty(line) &&
-                                                          !line.Contains("{") &&
-                                                          !line.Contains("}"))
-                                            .ToList();
-
-                                        if (cleanCategories.Count > 0)
+                                        var unitName = unitBracket.Header.Trim();
+                                        if (!result.ContainsKey(unitName))
                                         {
-                                            var unitName = unitDef.Trim();
-                                            if (!result.ContainsKey(unitName))
-                                            {
-                                                result[unitName] = cleanCategories;
-                                            }
+                                            result[unitName] = cleanCategories;
                                         }
                                     }
                                 }

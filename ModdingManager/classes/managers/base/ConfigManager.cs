@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManager.classes.managers.utils
+namespace ModdingManager.classes.managers.@base
 {
     using global::ModdingManager.classes.extentions;
     using global::ModdingManager.classes.utils;

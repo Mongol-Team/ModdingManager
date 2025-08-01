@@ -1,6 +1,5 @@
 ﻿using ModdingManager.classes.configs;
 using ModdingManager.classes.extentions;
-using ModdingManager.classes.gfx;
 using ModdingManager.classes.utils.search;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Tga;
@@ -23,7 +22,7 @@ using System.Windows.Media;
 using TeximpNet;
 using TeximpNet.Compression;
 using TeximpNet.DDS;
-namespace ModdingManager.managers.utils
+namespace ModdingManager.managers.@base
 {
     public class ModManager
     {
