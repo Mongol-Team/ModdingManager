@@ -313,9 +313,9 @@ namespace ModdingManager.classes.utils
         {
             var tagVars = new List<Var>();
             string[] tagFolders = {
-        Path.Combine(ModManager.Directory, "common", "country_tags"),
-        Path.Combine(ModManager.GameDirectory, "common", "country_tags")
-    };
+                Path.Combine(ModManager.Directory, "common", "country_tags"),
+                Path.Combine(ModManager.GameDirectory, "common", "country_tags")
+            };
 
             foreach (var folder in tagFolders)
             {
@@ -325,7 +325,11 @@ namespace ModdingManager.classes.utils
                 }
             }
 
-            var tagLookup = tagVars.ToDictionary(v => v.Name, v => v.Value);
+            var tagLookup = tagVars
+    .GroupBy(v => v.Name)
+    .Select(g => g.First())
+    .ToDictionary(v => v.Name, v => v.Value);
+
             var countries = new List<CountryOnMapConfig>();
             var visitedIds = new HashSet<int>();
 

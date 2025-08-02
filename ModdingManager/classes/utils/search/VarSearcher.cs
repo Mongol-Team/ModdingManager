@@ -137,8 +137,8 @@ namespace ModdingManager.classes.utils.search
         public static List<Var> ParseAssignments(string content, char assignSymbol = '=')
         {
             List<Var> varList = new();
-            var assignments = new Dictionary<string, string>();
-            string[] lines = content.Split('\n', '\r');
+            HashSet<string> seenNames = new();
+            string[] lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string line in lines)
             {
@@ -150,14 +150,16 @@ namespace ModdingManager.classes.utils.search
                 {
                     string key = trimmed.Substring(0, eqIndex).Trim();
                     string value = trimmed.Substring(eqIndex + 1).Trim();
-                    Var var = new Var();
-                    var.Name = key;
-                    var.Value = value;
-                    varList.Add(var);
+
+                    if (seenNames.Contains(key)) continue;
+
+                    seenNames.Add(key);
+                    varList.Add(new Var { Name = key, Value = value });
                 }
             }
             return varList;
         }
+
 
         /// <summary>
         /// Извлекает все строки в кавычках из текста.
