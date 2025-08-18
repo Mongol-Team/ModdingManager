@@ -1,21 +1,7 @@
-﻿using SixLabors.ImageSharp.Formats.Tga;
-using SixLabors.ImageSharp.Processing;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using ModdingManager.configs;
-using System.Reflection.Metadata;
+﻿using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
-using ModdingManager.classes.managers.gfx;
-using ModdingManager.classes.utils;
+using System.IO;
+using System.Text;
 
 namespace ModdingManager
 {
@@ -737,7 +723,7 @@ namespace ModdingManager
             {
                 RullingPartyBox.Items.Add(ideology.Id);
             }
-            
+
         }
     }
 }

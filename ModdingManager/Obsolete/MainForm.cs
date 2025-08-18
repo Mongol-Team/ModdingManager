@@ -1,18 +1,15 @@
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System;
-using ModdingManager.configs;
-using System.Drawing;
-using System.Windows.Forms.Integration;
-using ModdingManager.managers.@base;
 using ModdingManager.classes.utils;
+using ModdingManager.configs;
+using ModdingManager.managers.@base;
+using System.IO;
+using System.Text.Json;
+using System.Windows.Forms.Integration;
 namespace ModdingManager
 {
+    [Obsolete("Please use ModdingManager.WPF.View.Main instead.")]
     public partial class MainForm : Form
     {
+        [Obsolete("Please use ModdingManager.WPF.View.Main instead.")]
         public MainForm()
         {
             InitializeComponent();
@@ -169,7 +166,7 @@ namespace ModdingManager
         {
             string relativePath = Path.Combine("..", "..", "..", "data", "dir.json");
             string fullPath = Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
-           
+
             try
             {
                 string json = File.ReadAllText(fullPath);
