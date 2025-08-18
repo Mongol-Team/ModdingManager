@@ -61,7 +61,7 @@
             <Label Content="Id внутриигровое"/>
             <TextBox x:Name="IdTextBox" Width="120" TextWrapping="Wrap"/>
             <Label Content="Цвет"/>
-            <xctk:ColorPicker x:Name="OptionTextColorPicker" Width="110" Height="25"/>
+            <controls:ColorPicker x:Name="OptionTextColorPicker" Width="110" Height="25"/>
             <CheckBox Height="35" Width="195" Name="CanFormExileGovermentBox">
                 <TextBlock Height="35" Width="177">
                     Может ли формировать

@@ -17,7 +17,7 @@ namespace ModdingManager.classes.handlers
 
         public void HandleGFXFile()
         {
-            string guiDirectory = Path.Combine(ModManager.Directory, "interface");
+            string guiDirectory = Path.Combine(ModManager.ModDirectory, "interface");
             Directory.CreateDirectory(guiDirectory);
             string filePath = Path.Combine(guiDirectory, $"{CurrentConfig.Tag}.gfx");
 
@@ -43,7 +43,7 @@ namespace ModdingManager.classes.handlers
                     .FirstOrDefault(path => Path.GetFileName(path).Contains(tag, StringComparison.Ordinal));
             }
             string tag = CurrentConfig.Tag;
-            string modPath = Path.Combine(ModManager.Directory, "history", "countries");
+            string modPath = Path.Combine(ModManager.ModDirectory, "history", "countries");
             string gamePath = Path.Combine(ModManager.GameDirectory, "history", "countries");
 
             try
@@ -102,8 +102,8 @@ namespace ModdingManager.classes.handlers
         {
             try
             {
-                string ruLocPath = Path.Combine(ModManager.Directory, "localisation", "russian");
-                string enLocPath = Path.Combine(ModManager.Directory, "localisation", "english");
+                string ruLocPath = Path.Combine(ModManager.ModDirectory, "localisation", "russian");
+                string enLocPath = Path.Combine(ModManager.ModDirectory, "localisation", "english");
                 Directory.CreateDirectory(ruLocPath);
                 Directory.CreateDirectory(enLocPath);
 
@@ -179,8 +179,8 @@ namespace ModdingManager.classes.handlers
                     return;
                 }
 
-                string leadersDir = Path.Combine(ModManager.Directory, "gfx", "leaders", CurrentConfig.Tag);
-                string advisorsDir = Path.Combine(ModManager.Directory, "gfx", "advisors", CurrentConfig.Tag);
+                string leadersDir = Path.Combine(ModManager.ModDirectory, "gfx", "leaders", CurrentConfig.Tag);
+                string advisorsDir = Path.Combine(ModManager.ModDirectory, "gfx", "advisors", CurrentConfig.Tag);
                 Directory.CreateDirectory(leadersDir);
                 Directory.CreateDirectory(advisorsDir);
 
@@ -200,7 +200,7 @@ namespace ModdingManager.classes.handlers
         {
             try
             {
-                string charactersDir = Path.Combine(ModManager.Directory, "common", "characters");
+                string charactersDir = Path.Combine(ModManager.ModDirectory, "common", "characters");
                 Directory.CreateDirectory(charactersDir);
 
                 string filePath = Path.Combine(charactersDir, $"{CurrentConfig.Tag}.txt");

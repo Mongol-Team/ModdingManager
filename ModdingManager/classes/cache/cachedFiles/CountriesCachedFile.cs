@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManager.classes.utils.fonts
+namespace ModdingManager.classes.cache.cachedFiles
 {
-    public class FontCharData
+    public class CountriesCachedFile
     {
-      
     }
 }

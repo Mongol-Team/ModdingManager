@@ -19,8 +19,8 @@ public class CountryHandler
     {
         try
         {
-            string ruLocPath = Path.Combine(ModManager.Directory, "localisation", "russian");
-            string enLocPath = Path.Combine(ModManager.Directory, "localisation", "english");
+            string ruLocPath = Path.Combine(ModManager.ModDirectory, "localisation", "russian");
+            string enLocPath = Path.Combine(ModManager.ModDirectory, "localisation", "english");
             Directory.CreateDirectory(ruLocPath);
             Directory.CreateDirectory(enLocPath);
 
@@ -68,7 +68,7 @@ public class CountryHandler
             return;
         }
 
-        string tagsDir = Path.Combine(ModManager.Directory, "common", "country_tags");
+        string tagsDir = Path.Combine(ModManager.ModDirectory, "common", "country_tags");
         string countryTag = this.CurrentConfig.Tag;
 
         string countryFileName = this.CurrentConfig.CountryFileName;
@@ -147,7 +147,7 @@ public class CountryHandler
             return;
         }
 
-        string modStatesDir = Path.Combine(ModManager.Directory, "history", "states");
+        string modStatesDir = Path.Combine(ModManager.ModDirectory, "history", "states");
         string gameStatesDir = Path.Combine(ModManager.GameDirectory, "history", "states");
 
         if (!Directory.Exists(modStatesDir))
@@ -276,7 +276,7 @@ public class CountryHandler
         }
 
         string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
-        string filePath = Path.Combine(ModManager.Directory, "history", "countries", fileName);
+        string filePath = Path.Combine(ModManager.ModDirectory, "history", "countries", fileName);
 
         try
         {
@@ -405,7 +405,7 @@ public class CountryHandler
             return;
         }
         string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
-        string filePath = Path.Combine(ModManager.Directory, "common", "countries", fileName);
+        string filePath = Path.Combine(ModManager.ModDirectory, "common", "countries", fileName);
 
         try
         {
@@ -442,7 +442,7 @@ public class CountryHandler
             return;
         }
 
-        string flagsDir = Path.Combine(ModManager.Directory, "gfx", "flags");
+        string flagsDir = Path.Combine(ModManager.ModDirectory, "gfx", "flags");
         string countryTag = this.CurrentConfig.Tag;
 
         try

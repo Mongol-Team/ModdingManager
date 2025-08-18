@@ -44,11 +44,13 @@ namespace ModdingManager
             get => int.TryParse(CapitalIdBox.Text, out int result) ? result : 0;
             set => CapitalIdBox.Text = value.ToString();
         }
-        public System.Windows.Media.Color? Color 
+        public System.Windows.Media.Color? Color
         {
-            get => CountryColorPicker.SelectedColor ?? System.Windows.Media.Color.FromRgb(0, 0, 2);
-            set => CountryColorPicker.SelectedColor = value;
+            get => CountryColorPicker.SelectedColor;
+            set => CountryColorPicker.SelectedColor = value ?? System.Windows.Media.Color.FromRgb(0, 0, 2);
         }
+
+
         public string? GraphicalCulture
         {
             get => GraficalCultureBox.Text;

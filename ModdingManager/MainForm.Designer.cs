@@ -51,6 +51,7 @@ namespace ModdingManager
             OOBCreatorBtn = new Button();
             DebugButton = new Button();
             IdeologyCreatorBtn = new Button();
+            button1 = new Button();
             SuspendLayout();
             // 
             // LocConvertButton
@@ -157,7 +158,7 @@ namespace ModdingManager
             DirBox.Name = "DirBox";
             DirBox.Size = new Size(554, 27);
             DirBox.TabIndex = 9;
-            DirBox.KeyDown += DirBox_KeyDown;
+            DirBox.TextChanged += DirBox_TextChanged;
             // 
             // label1
             // 
@@ -206,7 +207,7 @@ namespace ModdingManager
             GameDirBox.Name = "GameDirBox";
             GameDirBox.Size = new Size(554, 27);
             GameDirBox.TabIndex = 14;
-            GameDirBox.KeyDown += DirBox_KeyDown;
+            GameDirBox.TextChanged += DirBox_TextChanged;
             // 
             // label2
             // 
@@ -261,11 +262,22 @@ namespace ModdingManager
             IdeologyCreatorBtn.UseVisualStyleBackColor = true;
             IdeologyCreatorBtn.Click += IdeologyCreatorBtn_Click;
             // 
+            // button1
+            // 
+            button1.Location = new Point(806, 568);
+            button1.Name = "button1";
+            button1.Size = new Size(131, 33);
+            button1.TabIndex = 20;
+            button1.Text = "писюн ф6";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click_1;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(963, 694);
+            Controls.Add(button1);
             Controls.Add(IdeologyCreatorBtn);
             Controls.Add(DebugButton);
             Controls.Add(OOBCreatorBtn);
@@ -317,5 +329,6 @@ namespace ModdingManager
         private Button OOBCreatorBtn;
         private Button DebugButton;
         private Button IdeologyCreatorBtn;
+        private Button button1;
     }
 }

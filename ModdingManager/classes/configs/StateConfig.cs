@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModdingManager.classes.utils.types;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,8 +18,11 @@ namespace ModdingManager.classes.configs
         public System.Windows.Media.Color Color { get; set; }
         [JsonIgnore]
         public string FilePath { get; set; }
-        [JsonIgnore]
         public string LocalizationKey { get; set; } = string.Empty;
+        public string Cathegory { get; set; }
+        public int? Manpower { get; set; }
+        public double? LocalSupply { get; set; }
+        public List<Var> Buildings { get; set; } = new List<Var>();
 
     }
 }

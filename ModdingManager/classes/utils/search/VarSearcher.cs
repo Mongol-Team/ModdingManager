@@ -154,7 +154,7 @@ namespace ModdingManager.classes.utils.search
                     if (seenNames.Contains(key)) continue;
 
                     seenNames.Add(key);
-                    varList.Add(new Var { Name = key, Value = value });
+                    varList.Add(new Var { Name = key, Value = value, AssignSymbol = assignSymbol });
                 }
             }
             return varList;

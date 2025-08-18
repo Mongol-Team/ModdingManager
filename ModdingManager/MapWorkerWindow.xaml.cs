@@ -16,7 +16,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Xceed.Wpf.Toolkit.Zoombox;
 using Control = System.Windows.Controls.Control;
 using Cursors = System.Windows.Input.Cursors;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
@@ -24,7 +23,7 @@ using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
 namespace ModdingManager
 {
-    public partial class StateWorkerWindow : Window, IStateWorkerView
+    public partial class MapWorkerWindow : Window, IStateWorkerView
     {
         private System.Windows.Point _mousePosition;
         public event Action<string> MapLayerChanged;
@@ -43,7 +42,7 @@ namespace ModdingManager
         }
         public event Action<bool, string> ShowIdsChanged;
         public bool IsShowIdsChecked => DisplayIdsBox.IsChecked ?? false;
-        public StateWorkerWindow()
+        public MapWorkerWindow()
         {
             InitializeComponent();
             _presenter = new StateWorkerPresenter(this);
@@ -262,51 +261,62 @@ namespace ModdingManager
         private void OnDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.ClickCount < 2)
-            {
                 return;
-            }
-            var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
-            if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is int targetProvinceId)
-            {
-                
 
-                switch (CurrentMapLayer)
-                {
-                    case "STATE":
-                        _markedElement = new MarkEventArg
-                        {
-                            MarkedState = Registry.Instance.Map.States.Where(s => s.Provinces.Any(p => p.Id == targetProvinceId)).First()
-                        };
-                        HandleMarking(_markedElement);
-                        break;
-                    case "PROVINCE":
-                        _markedElement = new MarkEventArg
-                        {
-                            MarkedProvince = Registry.Instance.Map.Provinces.Where(p => p.Id == targetProvinceId).First()
-                        };
-                        HandleMarking(_markedElement);
-                        break;
-                    case "STRATEGIC":
-                        _markedElement = new MarkEventArg
-                        {
-                            MarkedRegion = Registry.Instance.Map.StrategicRegions.Where(s => s.Provinces.Any(p => p.Id == targetProvinceId)).First()
-                        };
-                        HandleMarking(_markedElement);
-                        break;
-                    case "COUNTRY":
-                        _markedElement = new MarkEventArg
-                        {
-                            MarkedCountry = Registry.Instance.Map.Countries.Where(c => c.States.Any(s => s.Provinces.Any(p => p.Id == targetProvinceId))).First()
-                        };
-                        HandleMarking(_markedElement);
-                        break;
-                }
+            var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
+            if (hit?.VisualHit is not Polygon targetPolygon || targetPolygon.Tag is not int targetProvinceId)
+                return;
+
+            _markedElement = null;
+
+            switch (CurrentMapLayer)
+            {
+                case "STATE":
+                    var state = Registry.Instance.Map.States
+                        .FirstOrDefault(s => s.Provinces.Any(p => p.Id == targetProvinceId));
+                    if (state != null)
+                    {
+                        _markedElement = new MarkEventArg { MarkedState = state };
+                    }
+                    break;
+
+                case "PROVINCE":
+                    var province = Registry.Instance.Map.Provinces
+                        .FirstOrDefault(p => p.Id == targetProvinceId);
+                    if (province != null)
+                    {
+                        _markedElement = new MarkEventArg { MarkedProvince = province };
+                    }
+                    break;
+
+                case "STRATEGIC":
+                    var region = Registry.Instance.Map.StrategicRegions
+                        .FirstOrDefault(r => r.Provinces.Any(p => p.Id == targetProvinceId));
+                    if (region != null)
+                    {
+                        _markedElement = new MarkEventArg { MarkedRegion = region };
+                    }
+                    break;
+
+                case "COUNTRY":
+                    var country = Registry.Instance.Map.Countries
+                        .FirstOrDefault(c => c.States.Any(s => s.Provinces.Any(p => p.Id == targetProvinceId)));
+                    if (country != null)
+                    {
+                        _markedElement = new MarkEventArg { MarkedCountry = country };
+                    }
+                    break;
+            }
+
+            if (_markedElement != null)
+            {
+                HandleMarking(_markedElement);
             }
 
             _draggedProvince = null;
             Cursor = Cursors.Arrow;
-            
         }
+
         #region Marking Handler
         private void HandleMarking(MarkEventArg arg)
         {
@@ -337,7 +347,11 @@ namespace ModdingManager
 
         #endregion
         #region Events
-        
+        private void HealerButton_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            MapHealerWindow healerWindow = new MapHealerWindow();
+            healerWindow.Show();
+        }
         private void DraggingProvinceEvent(object sender, System.Windows.Input.MouseEventArgs e)
         {
             MapChanged?.Invoke(CurrentMapLayer);
@@ -371,6 +385,9 @@ namespace ModdingManager
                 SearchElement?.Invoke(CurrentMapState, res);
             }
         }
+
         #endregion
+
+        
     }
 }

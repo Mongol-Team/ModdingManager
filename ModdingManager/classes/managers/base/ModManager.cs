@@ -22,17 +22,18 @@ using System.Windows.Media;
 using TeximpNet;
 using TeximpNet.Compression;
 using TeximpNet.DDS;
+
 namespace ModdingManager.managers.@base
 {
     public class ModManager
     {
-        public static string Directory;
+        public static string ModDirectory;
         public static bool IsDebugRuning;
         public static string GameDirectory;
         public static string CurrentLanguage = "russian";
         public static List<string> LoadCountryFileNames()
         {
-            string countriesDir = Path.Combine(ModManager.Directory, "common", "country_tags");
+            string countriesDir = Path.Combine(ModManager.ModDirectory, "common", "country_tags");
 
             if (!System.IO.Directory.Exists(countriesDir))
             {
@@ -62,8 +63,5 @@ namespace ModdingManager.managers.@base
                 byte.Parse(parts[2])
             );
         }
-
-
     }
-
 }

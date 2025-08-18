@@ -1,4 +1,4 @@
-﻿using ModdingManager.classes.cache;
+﻿using ModdingManager.classes.cache.data;
 using ModdingManager.classes.configs;
 using ModdingManager.classes.managers.gfx;
 using ModdingManager.classes.utils.search;
@@ -8,6 +8,7 @@ using ModdingManager.managers.@base;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,8 +22,8 @@ namespace ModdingManager.classes.utils
         private Registry() { }
         private static Registry _instance = new();
         public static Registry Instance => _instance ??= new Registry();
-        public LocalisationCache LocCache { get; set; } = new LocalisationCache();
-        public MapCache MapCache { get; set; } = new MapCache();
+        public LocalisationCache LocCache { get; set; }
+        public MapCache MapCache { get; set; }
         public  List<RegimentConfig> Regiments { get; set; }
         public  List<CountryConfig> Countries { get; set; }
         public  List<IdeaConfig> Ideas { get; set; }
@@ -65,7 +66,7 @@ namespace ModdingManager.classes.utils
             _instance.Ideologies = new List<IdeologyConfig>();
             var ideologyFiles = new List<string>();
 
-            string modDir = Path.Combine(ModManager.Directory, "common", "ideologies");
+            string modDir = Path.Combine(ModManager.ModDirectory, "common", "ideologies");
             if (Directory.Exists(modDir))
                 ideologyFiles.AddRange(Directory.GetFiles(modDir, "*.*", SearchOption.AllDirectories));
 
@@ -83,11 +84,9 @@ namespace ModdingManager.classes.utils
                     CloseBracketChar = '}'
                 };
 
-                // Ищем основной блок ideologies
                 var ideologyBrackets = searcher.FindBracketsByName("ideologies");
                 if (ideologyBrackets.Count == 0) continue;
 
-                // Обрабатываем каждую найденную идеологию
                 var ideologyMainBracket = ideologyBrackets[0];
                 foreach (var subBracket in ideologyMainBracket.SubBrackets)
                 {
@@ -131,8 +130,8 @@ namespace ModdingManager.classes.utils
         }
         public static void LoadMap()
         {
-            string definitionPath = System.IO.Path.Combine(ModManager.Directory, "map", "definition.csv");
-            string provinceImagePath = System.IO.Path.Combine(ModManager.Directory, "map", "provinces.bmp");
+            string definitionPath = System.IO.Path.Combine(ModManager.ModDirectory, "map", "definition.csv");
+            string provinceImagePath = System.IO.Path.Combine(ModManager.ModDirectory, "map", "provinces.bmp");
 
             if (!File.Exists(definitionPath))
                 throw new FileNotFoundException("Не найден файл definition.csv", definitionPath);
@@ -198,14 +197,17 @@ namespace ModdingManager.classes.utils
             var strategicMap = new Dictionary<int, StrategicRegionConfig>();
 
             string[] priorityFolders = {
-                Path.Combine(ModManager.Directory, "map", "strategicregions"),
+                Path.Combine(ModManager.ModDirectory, "map", "strategicregions"),
                 Path.Combine(ModManager.GameDirectory, "map", "strategicregions")
             };
 
             foreach (string folder in priorityFolders)
             {
-                if (!Directory.Exists(folder)) continue;
+                if (!Directory.Exists(folder)) 
+                    continue;
+
                 string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
+
                 foreach (string file in files)
                 {
                     string content = File.ReadAllText(file);
@@ -251,7 +253,7 @@ namespace ModdingManager.classes.utils
             var stateMap = new Dictionary<int, StateConfig>();
 
             string[] priorityFolders = {
-                Path.Combine(ModManager.Directory, "history", "states"),
+                Path.Combine(ModManager.ModDirectory, "history", "states"),
                 Path.Combine(ModManager.GameDirectory, "history", "states")
             };
 
@@ -267,39 +269,53 @@ namespace ModdingManager.classes.utils
 
                     foreach (var stateBracket in stateBrackets)
                     {
-                        var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
-                        if (idVar == null || !int.TryParse(idVar.Value as string, out int id) || stateMap.ContainsKey(id))
-                            continue;
-                        if (idVar.Value.ToString() == "2")
+                        try
                         {
-                            var brp = 1;
+                            var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
+                            if (idVar == null || !int.TryParse(idVar.Value as string, out int id) || stateMap.ContainsKey(id))
+                                continue;
+                            if (idVar.Value.ToString() == "2")
+                            {
+                                var brp = 1;
+                            }
+                            var nameVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "name");
+                            string internalName = nameVar?.Value?.ToString().Trim('"');
+                            if (string.IsNullOrEmpty(internalName)) continue;
+
+                            var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+                            if (provincesBracket == null) continue;
+                            var historyBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "history");
+                            var provinceIds = provincesBracket.Content
+                                .SelectMany(line => line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
+                                .Select(s => int.TryParse(s, out int value) ? value : (int?)null)
+                                .Where(x => x.HasValue)
+                                .Select(x => x.Value)
+                                .ToHashSet();
+
+                            var matchedProvinces = map.Provinces
+                                .Where(p => provinceIds.Contains(p.Id))
+                                .ToList();
+                            int.TryParse(stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower").Value as string, out int manpower);
+                            var buildings = historyBracket.SubBrackets.FirstOrDefault(b => b.Header == "buildings")?.SubVars;
+                            double.TryParse(stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supplies")?.Value as string, NumberStyles.Float, CultureInfo.InvariantCulture, out double localSupply);
+                            var cathegory = stateBracket.SubVars.FirstOrDefault(v => v.Name == "state_category")?.Value.ToString();
+                            stateMap[id] = new StateConfig
+                            {
+                                Id = id,
+                                Color = ModManager.GenerateColorFromId(id),
+                                FilePath = file,
+                                Provinces = matchedProvinces,
+                                LocalizationKey = nameVar?.Value as string,
+                                Manpower = manpower,
+                                Buildings = buildings,
+                                LocalSupply = localSupply,
+                                Cathegory = cathegory,
+                            };
                         }
-                        var nameVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "name");
-                        string internalName = nameVar?.Value?.ToString().Trim('"');
-                        if (string.IsNullOrEmpty(internalName)) continue;
-
-                        var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
-                        if (provincesBracket == null) continue;
-
-                        var provinceIds = provincesBracket.Content
-                            .SelectMany(line => line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
-                            .Select(s => int.TryParse(s, out int value) ? value : (int?)null)
-                            .Where(x => x.HasValue)
-                            .Select(x => x.Value)
-                            .ToHashSet();
-
-                        var matchedProvinces = map.Provinces
-                            .Where(p => provinceIds.Contains(p.Id))
-                            .ToList();
-
-                        stateMap[id] = new StateConfig
+                        catch(Exception ex)
                         {
-                            Id = id,
-                            Color = ModManager.GenerateColorFromId(id),
-                            FilePath = file,
-                            Provinces = matchedProvinces,
-                            LocalizationKey = nameVar?.Value as string
-                        };
+                            Debugger.Instance.LogMessage(ex.Message + $"\n {stateBracket.ToString()}");
+                        }
                     }
                 }
             }
@@ -313,7 +329,7 @@ namespace ModdingManager.classes.utils
         {
             var tagVars = new List<Var>();
             string[] tagFolders = {
-                Path.Combine(ModManager.Directory, "common", "country_tags"),
+                Path.Combine(ModManager.ModDirectory, "common", "country_tags"),
                 Path.Combine(ModManager.GameDirectory, "common", "country_tags")
             };
 
@@ -334,7 +350,7 @@ namespace ModdingManager.classes.utils
             var visitedIds = new HashSet<int>();
 
             string[] stateFolders = {
-        Path.Combine(ModManager.Directory, "history", "states"),
+        Path.Combine(ModManager.ModDirectory, "history", "states"),
         Path.Combine(ModManager.GameDirectory, "history", "states")
     };
 
@@ -510,19 +526,20 @@ namespace ModdingManager.classes.utils
         {
             if (provinces == null || !provinces.Any() || Registry.Instance.MapCache.GetStateFiles().Count == 0)
                 return;
+            provinces = provinces
+            .GroupBy(p => p.Id)
+            .Select(g => g.First())
+            .ToList();
 
             var provinceDict = provinces.ToDictionary(p => p.Id, p => p);
-            bool hasChanges = false;
-
             foreach (var stateFile in Registry.Instance.MapCache.GetStateFiles())
             {
-                string content = Registry.Instance.MapCache.GetStateFileContent(stateFile.Key);
-                var searcher = new BracketSearcher
+                var stateBracket = stateFile.Value.StateBracket;
+                if (stateBracket == null)
                 {
-                    CurrentString = content.ToCharArray(),
-                };
-
-                var victoryPointsBrackets = searcher.FindBracketsByName("victory_points");
+                    continue;
+                }
+                var victoryPointsBrackets = stateBracket.SubBrackets.Where(b => b.Header == "victory_points");
 
                 foreach (var bracket in victoryPointsBrackets)
                 {
@@ -539,18 +556,12 @@ namespace ModdingManager.classes.utils
                                 if (province.VictoryPoints != victoryPoints)
                                 {
                                     province.VictoryPoints = victoryPoints;
-                                    hasChanges = true;
+                                    
                                 }
                             }
                         }
                     }
                 }
-            }
-
-            // Обновляем кеш, если были изменения
-            if (hasChanges)
-            {
-                Registry.Instance.MapCache.MarkStateFilesDirty();
             }
 
             // Инициализация нулевых значений (избыточно, можно удалить)
@@ -593,7 +604,7 @@ namespace ModdingManager.classes.utils
         {
             string pathClean = countryPath.Trim('"').Replace('/', Path.DirectorySeparatorChar);
             string[] possiblePaths = {
-                Path.Combine(ModManager.Directory, "common", pathClean),
+                Path.Combine(ModManager.ModDirectory, "common", pathClean),
                 Path.Combine(ModManager.GameDirectory, "common", pathClean)
             };
 
@@ -616,8 +627,8 @@ namespace ModdingManager.classes.utils
         }
         private static void GetStateNames(List<StateConfig> states)
         {
-            var stateLocals = _instance.LocCache.StateLocalisation;
-            var allCache = _instance.LocCache.AllCache;
+            List<Var> stateLocals = new (_instance.LocCache.StateLocalisation);
+            List<Var> allCache = new (_instance.LocCache.AllCache);
 
             var stateLookup = stateLocals.ToDictionary(v => v.Name, v => v.Value.ToString(), StringComparer.OrdinalIgnoreCase);
             var allLookup = allCache.ToDictionary(v => v.Name, v => v.Value.ToString(), StringComparer.OrdinalIgnoreCase);
@@ -645,7 +656,7 @@ namespace ModdingManager.classes.utils
         {
             var result = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var rootPath in new[] { ModManager.GameDirectory, ModManager.Directory })
+            foreach (var rootPath in new[] { ModManager.GameDirectory, ModManager.ModDirectory })
             {
                 if (!Directory.Exists(rootPath)) continue;
 

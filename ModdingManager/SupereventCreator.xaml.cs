@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Brushes = System.Windows.Media.Brushes;
+using Color = System.Windows.Media.Color;
 using FontFamily = System.Windows.Media.FontFamily;
 using RichTextBox = System.Windows.Controls.RichTextBox;
 using TextBox = System.Windows.Controls.TextBox;
@@ -54,6 +55,9 @@ namespace ModdingManager
             InitializeDragAndResize();
             SupereventFrame.IsHitTestVisible = false;
             Debugger.AttachIfDebug(this);
+            this.DescFontColorPicker.SelectedColorChanged += FontColorPicker_SelectedColorChanged;
+            this.HeaderFontColorPicker.SelectedColorChanged += FontColorPicker_SelectedColorChanged;
+            this.OptionTextColorPicker.SelectedColorChanged += FontColorPicker_SelectedColorChanged;
         }
         #region Helper Methods
         private bool IsInEditableRichTextBox(System.Windows.Input.MouseEventArgs e)
@@ -998,7 +1002,7 @@ namespace ModdingManager
 
         private void FontColorPicker_Loaded(object sender, RoutedEventArgs e)
         {
-            if (sender is Xceed.Wpf.Toolkit.ColorPicker picker)
+            if (sender is ColorPicker picker)
             {
                 string pickerName = picker.Name;
 
@@ -1084,9 +1088,9 @@ namespace ModdingManager
                 }
             }
         }
-        private void FontColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
+        private void FontColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color> e)
         {
-            if (sender is Xceed.Wpf.Toolkit.ColorPicker picker)
+            if (sender is ColorPickerDropdown picker)
             {
                 string pickerName = picker.Name;
 
@@ -1104,9 +1108,7 @@ namespace ModdingManager
                         var target = MainCanvas.FindChildByName<RichTextBox>(targetTextBoxName);
                         if (target != null)
                         {
-                            target.Foreground = picker.SelectedColor.HasValue
-                                ? new SolidColorBrush(picker.SelectedColor.Value)
-                                : Brushes.Transparent;
+                            target.Foreground = new SolidColorBrush(picker.SelectedColor);
                         }
                     }
                 }
@@ -1118,9 +1120,7 @@ namespace ModdingManager
                         var rtb = button.FindElementsOfType<RichTextBox>().FirstOrDefault();
                         if (rtb != null)
                         {
-                            rtb.Foreground = picker.SelectedColor.HasValue
-                                ? new SolidColorBrush(picker.SelectedColor.Value)
-                                : Brushes.Transparent;
+                            rtb.Foreground = new SolidColorBrush(picker.SelectedColor);
                         }
                     }
                 }

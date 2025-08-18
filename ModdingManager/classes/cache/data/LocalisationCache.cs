@@ -1,10 +1,11 @@
 ﻿using ModdingManager.classes.utils.search;
 using ModdingManager.classes.utils.types;
 using ModdingManager.managers.@base;
+using NAudio.Dmo.Effect;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
-namespace ModdingManager.classes.cache
+namespace ModdingManager.classes.cache.data
 {
     public class LocalisationCache
     {
@@ -27,8 +28,8 @@ namespace ModdingManager.classes.cache
             {
                 Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage),                // самый низкий приоритет
                 Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace"),
-                Path.Combine(ModManager.Directory, "localisation", ModManager.CurrentLanguage),
-                Path.Combine(ModManager.Directory, "localisation", ModManager.CurrentLanguage, "replace")          // самый высокий приоритет
+                Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage),
+                Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")          // самый высокий приоритет
             };
 
             var cache = new ConcurrentDictionary<string, Var>(StringComparer.OrdinalIgnoreCase);
@@ -41,13 +42,22 @@ namespace ModdingManager.classes.cache
 
                 Parallel.ForEach(files, file =>
                 {
-                    string content = File.ReadAllText(file, new UTF8Encoding(true));
-                    var vars = VarSearcher.ParseAssignments(content, ':');
-
-                    foreach (var variable in vars)
+                    try
                     {
-                        cache[variable.Name] = variable;
-                        variable.AddProperty("sourcePath", file);
+                        string content = File.ReadAllText(file, new UTF8Encoding(true));
+                        var vars = VarSearcher.ParseAssignments(content, ':');
+
+                        foreach (var variable in vars)
+                        {
+                            cache[variable.Name] = variable;
+                            variable.AddProperty("sourcePath", file);
+                            variable.Format = Var.VarFormat.Localisation;
+                            variable.IsValueQuoted = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debugger.Instance.LogMessage("Ошибка при загрузке файлов локализации: " + ex.Message);
                     }
                 });
             }
@@ -63,6 +73,7 @@ namespace ModdingManager.classes.cache
             LoadCountries();
             LoadStates();
         }
+
         public void LoadVictoryPoints() =>
             VictoryPointsLocalisation = AllCache
                 .Where(v => v.Name.StartsWith("VICTORY_POINTS_", StringComparison.OrdinalIgnoreCase))

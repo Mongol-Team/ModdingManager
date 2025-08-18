@@ -84,6 +84,59 @@ public static class ImageSourceExtensions
     {
         return imageSource.ToBitmap(); // если ToBitmap() возвращает System.Drawing.Bitmap
     }
+    public static ImageSource ToImageSource(this byte[] imageData, int dpi = 96)
+    {
+        if (imageData == null || imageData.Length == 0)
+            return null;
+
+        BitmapImage bitmap;
+        using (var stream = new MemoryStream(imageData))
+        {
+            bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.StreamSource = stream;
+            bitmap.EndInit();
+            bitmap.Freeze();
+        }
+
+        // Если уже 96 — возвращаем без рескейла
+        if (Math.Abs(bitmap.DpiX - dpi) < 0.1 && Math.Abs(bitmap.DpiY - dpi) < 0.1)
+            return bitmap;
+
+        // Вычисляем коэффициент масштабирования
+        double scaleX = dpi / bitmap.DpiX;
+        double scaleY = dpi / bitmap.DpiY;
+
+        // Применяем трансформацию
+        var transformed = new TransformedBitmap(bitmap, new ScaleTransform(scaleX, scaleY));
+        transformed.Freeze();
+
+        // Конвертируем в RenderTargetBitmap с новым DPI
+        int newWidth = (int)(bitmap.PixelWidth * scaleX);
+        int newHeight = (int)(bitmap.PixelHeight * scaleY);
+
+        var target = new RenderTargetBitmap(newWidth, newHeight, dpi, dpi, PixelFormats.Pbgra32);
+        var visual = new DrawingVisual();
+        using (var dc = visual.RenderOpen())
+        {
+            dc.DrawImage(transformed, new Rect(0, 0, newWidth, newHeight));
+        }
+        target.Render(visual);
+        target.Freeze();
+
+        return target;
+    }
+
+
+    // Вспомогательный метод для извлечения пикселей
+    private static byte[] GetPixels(this BitmapSource source)
+    {
+        int stride = (source.PixelWidth * source.Format.BitsPerPixel + 7) / 8;
+        var pixels = new byte[stride * source.PixelHeight];
+        source.CopyPixels(pixels, stride, 0);
+        return pixels;
+    }
 
     public static Bitmap ToBitmap(this ImageSource imageSource)
     {

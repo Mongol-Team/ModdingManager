@@ -9,6 +9,7 @@ using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -107,13 +108,148 @@ public class StateWorkerHandler
         return Registry.Instance.Map.Provinces;
     }
 
-    public void ChangeState(StateConfig state)
+    public void ChangeState(StateConfig state, string oldName, string newName)
     {
-        
+        // Проверяем, что состояние имеет ID и путь к файлу
+        if (state.Id == null || string.IsNullOrEmpty(state.FilePath))
+            return;
+
+        // Получаем кеш состояний
+        var stateCache = Registry.Instance.MapCache.GetStateFiles();
+
+        // Если файл отсутствует в кеше, загружаем его
+        if (!stateCache.TryGetValue(state.FilePath, out var cachedFile))
+        {
+            Registry.Instance.MapCache.AddStateFile(state.FilePath);
+            if (!stateCache.TryGetValue(state.FilePath, out cachedFile))
+                return; // Файл не удалось загрузить
+        }
+
+        // Ищем брекет состояния по ID
+        var stateBracket = cachedFile.StateBracket;
+
+        if (stateBracket == null)
+            return; // Состояние не найдено в файле
+        UpdateStateVariable(stateBracket, "name", state.LocalizationKey, true);
+        UpdateStateVariable(stateBracket, "manpower", state.Manpower?.ToString());
+        UpdateStateVariable(stateBracket, "state_category", state.Cathegory, true);
+        UpdateStateVariable(stateBracket, "local_supplies",
+        state.LocalSupply?.ToString(CultureInfo.InvariantCulture));
+        UpdateStateName(oldName, state.LocalizationKey, state.Name);
+
+        UpdateBuildings(stateBracket, state.Buildings);
+        cachedFile.IsDirty = true;
+        Registry.Instance.MapCache.MarkStateFileDirty(state.FilePath);
+        Registry.Instance.MapCache.SaveDirtyStateFiles();
+    }
+
+    private void UpdateStateName(string oldName, string newName, string newValue)
+    {
+        string basePath = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage);
+        string replacePath = Path.Combine(basePath, "replace");
+        string fileName = $"state_names_l_{ModManager.CurrentLanguage}.yml";
+        string filePath1 = Path.Combine(basePath, fileName);
+        string filePath2 = Path.Combine(replacePath, fileName);
+
+        Directory.CreateDirectory(basePath);
+        Directory.CreateDirectory(replacePath);
+
+        if (!File.Exists(filePath1))
+            File.WriteAllText(filePath1, $"l_{ModManager.CurrentLanguage}:\n");
+        if (!File.Exists(filePath2))
+            File.WriteAllText(filePath2, $"l_{ModManager.CurrentLanguage}:\n");
+
+        try
+        {
+            using var fileStream1 = new FileStream(filePath1, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            using var fileStream2 = new FileStream(filePath2, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+
+            var searcher = new FileSearcher
+            {
+                Files = new List<FileStream> { fileStream1, fileStream2 }
+            };
+
+            Var newVar = new Var
+            {
+                Name = newName,
+                Value = newValue,
+                AssignSymbol = ':',
+                Format = Var.VarFormat.Localisation,
+                IsValueQuoted = true
+            };
+
+            // Обновляем или добавляем переменную в оба файла
+            searcher.SetVar(newVar, 0);
+            searcher.SetVar(newVar, 1);
+
+            // Обновляем кэш
+            newVar.AddProperty("sourcePath", filePath1);
+            Registry.Instance.LocCache.StateLocalisation.RemoveAll(v =>
+                v.Value.ToString().Trim('"').Equals(oldName, StringComparison.OrdinalIgnoreCase));
+            Registry.Instance.LocCache.StateLocalisation.Add(newVar);
+        }
+        catch (Exception ex)
+        {
+            Debugger.Instance.LogMessage($"Error updating state name: {ex.Message}");
+        }
+    }
+
+    private void UpdateStateVariable(Bracket bracket, string varName, string value, bool isString = false)
+    {
+        if (value == null) return;
+
+        // Обработка строковых значений (добавляем кавычки)
+        if (isString && !value.StartsWith("\"") && !value.EndsWith("\""))
+            value = $"\"{value}\"";
+
+        // Ищем существующую переменную
+        var existingVarIndex = bracket.SubVars.FindIndex(v => v.Name.Equals(varName, StringComparison.OrdinalIgnoreCase));
+
+        if (existingVarIndex >= 0)
+        {
+            // Обновляем существующую переменную
+            bracket.SubVars[existingVarIndex] = new Var { Name = varName, Value = value };
+        }
+        else
+        {
+            // Добавляем новую переменную
+            bracket.AddVar(new Var { Name = varName, Value = value });
+        }
+    }
+
+    private void UpdateBuildings(Bracket stateBracket, List<Var> buildings)
+    {
+        // Ищем брекет истории
+        var historyBracket = stateBracket.SubBrackets
+            .FirstOrDefault(b => b.Header.Equals("history", StringComparison.OrdinalIgnoreCase));
+
+        if (historyBracket == null)
+        {
+            historyBracket = new Bracket { Header = "history" };
+            stateBracket.AddSubBracket(historyBracket);
+        }
+
+        // Ищем брекет зданий
+        var buildingsBracket = historyBracket.SubBrackets
+            .FirstOrDefault(b => b.Header.Equals("buildings", StringComparison.OrdinalIgnoreCase));
+
+        // Создаем новый брекет зданий если не найден
+        if (buildingsBracket == null)
+        {
+            buildingsBracket = new Bracket { Header = "buildings" };
+            historyBracket.AddSubBracket(buildingsBracket);
+        }
+
+        // Полностью заменяем все здания
+        buildingsBracket.SubVars.Clear();
+        foreach (var building in buildings)
+        {
+            buildingsBracket.AddVar(building);
+        }
     }
     public void ChangeProvince(ProvinceConfig province)
     {
-        string modMapDir = Path.Combine(ModManager.Directory, "map");
+        string modMapDir = Path.Combine(ModManager.ModDirectory, "map");
         string modDefinitions = Path.Combine(modMapDir, "definition.csv");
         string gameDefinitions = Path.Combine(ModManager.GameDirectory, "map", "definition.csv");
 
@@ -126,12 +262,12 @@ public class StateWorkerHandler
                 throw new FileNotFoundException($"Не найден definition.csv ни в моде, ни в игре: {gameDefinitions}");
 
             File.Copy(gameDefinitions, modDefinitions, true);
-            Registry.Instance.MapCache.AddDefinitionFile(modDefinitions);
+            Registry.Instance.MapCache.MapDefinitionCache = new(modDefinitions);
         }
 
         // Работаем через кеш
-        var definitionsContent = Registry.Instance.MapCache.GetDefinitionFileContent(modDefinitions);
-        var lines = definitionsContent.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).ToList();
+        var definitionsContent = Registry.Instance.MapCache.MapDefinitionCache;
+        var lines = definitionsContent.DefinitionLines;
 
         int lineIndex = lines.FindIndex(line =>
         {
@@ -140,7 +276,7 @@ public class StateWorkerHandler
         });
 
         string newLine = $"{province.Id};{province.Color.R};{province.Color.G};{province.Color.B};" +
-                        $"{province.Type};{(province.IsCoastal ? 1 : 0)};{province.Terrain};{province.ContinentId}";
+                        $"{province.Type};{(province.IsCoastal ? "true" : "false")};{province.Terrain};{province.ContinentId}";
 
         if (lineIndex >= 0)
         {
@@ -150,13 +286,15 @@ public class StateWorkerHandler
         {
             lines.Add(newLine);
         }
+        definitionsContent.Content = string.Join(Environment.NewLine, lines);
+        definitionsContent.IsDirty = true;
+        definitionsContent.SaveToFile();
 
-        Registry.Instance.MapCache.UpdateDefinitionFile(modDefinitions, string.Join(Environment.NewLine, lines));
 
         // 2. Работа с локализацией VictoryPoints (оставляем без изменений, так как это отдельная система)
         string vpKey = $"VICTORY_POINTS_{province.Id}";
         string newLineLoc = $" {vpKey}: \"{province.Name}\"";
-        string locFolder = Path.Combine(ModManager.Directory, "localisation", ModManager.CurrentLanguage);
+        string locFolder = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage);
         string replaceFolder = Path.Combine(locFolder, "replace");
 
         Directory.CreateDirectory(locFolder);
@@ -351,7 +489,7 @@ public class StateWorkerHandler
 
                 if (provincesBracket != null)
                 {
-                    provincesBracket.RemoveAllContentContaining(provinceStr);
+                    provincesBracket.RemoveSubstringFromContentAll(provinceStr);
                     File.WriteAllText(currentRegion.FilePath, regionBracket.ToString());
                 }
             }

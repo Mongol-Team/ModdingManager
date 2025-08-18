@@ -32,7 +32,7 @@ using MessageBox = System.Windows.MessageBox;
                 }
 
                 string sourcePath = sourceUri.LocalPath;
-                string destinationDirectory = Path.Combine(ModManager.Directory, "sound", "customsound");
+                string destinationDirectory = Path.Combine(ModManager.ModDirectory, "sound", "customsound");
 
                 Directory.CreateDirectory(destinationDirectory);
 
@@ -66,7 +66,7 @@ using MessageBox = System.Windows.MessageBox;
                 optionName = optionName.Replace(" ", "_").ToLower();
 
                 // Create the path for the DDS file
-                string directoryPath = Path.Combine(ModManager.Directory, "gfx", "superevent", "button");
+                string directoryPath = Path.Combine(ModManager.ModDirectory, "gfx", "superevent", "button");
                 string filePath = Path.Combine(directoryPath, $"{CurrentConfig.Id}_{optionName}_bg.dds");
 
                 // Ensure directory exists
@@ -95,7 +95,7 @@ using MessageBox = System.Windows.MessageBox;
                 return; 
             }
 
-            string soundDirectory = Path.Combine(ModManager.Directory, "sound");
+            string soundDirectory = Path.Combine(ModManager.ModDirectory, "sound");
             string customSoundDirectory = Path.Combine(soundDirectory, "customsound");
 
             Directory.CreateDirectory(soundDirectory);
@@ -208,7 +208,7 @@ using MessageBox = System.Windows.MessageBox;
             if (CurrentConfig == null)
                 return;
 
-            string basePath = ModManager.Directory;
+            string basePath = ModManager.ModDirectory;
             if (image != null)
             {
                 string imageDir = Path.Combine(basePath, "gfx", "superevent_pictures");
@@ -264,7 +264,7 @@ using MessageBox = System.Windows.MessageBox;
         }
         public void HandleGFXFile()
         {
-            string guiDirectory = Path.Combine(ModManager.Directory, "interface");
+            string guiDirectory = Path.Combine(ModManager.ModDirectory, "interface");
             Directory.CreateDirectory(guiDirectory);
             string filePath = Path.Combine(guiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_window.gfx");
 
@@ -324,7 +324,7 @@ using MessageBox = System.Windows.MessageBox;
             double centerX = canvasWidth / 2;
             double centerY = canvasHeight / 2;
 
-            string guiDirectory = Path.Combine(ModManager.Directory, "interface");
+            string guiDirectory = Path.Combine(ModManager.ModDirectory, "interface");
             Directory.CreateDirectory(guiDirectory);
             string filePath = Path.Combine(guiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_window.gui");
 
@@ -503,7 +503,7 @@ using MessageBox = System.Windows.MessageBox;
         }
         public void HandleFontFiles()
         {
-            string fontsDirectory = Path.Combine(ModManager.Directory, "gfx", "fonts");
+            string fontsDirectory = Path.Combine(ModManager.ModDirectory, "gfx", "fonts");
             Directory.CreateDirectory(fontsDirectory);
 
             var uniqueFonts = new HashSet<FontSignature>();
@@ -553,7 +553,7 @@ using MessageBox = System.Windows.MessageBox;
         private void HandleLocalizationFile(string language, string header, string titleValue, string descValue)
         {
             var mainCanvas = CurrentConfig.EventConstructor;
-            string locDirectory = Path.Combine(ModManager.Directory, "localisation", language);
+            string locDirectory = Path.Combine(ModManager.ModDirectory, "localisation", language);
             Directory.CreateDirectory(locDirectory);
 
             string filePath = Path.Combine(locDirectory, $"superevents_l_{language}.yml");
@@ -606,7 +606,7 @@ using MessageBox = System.Windows.MessageBox;
             {
                 return;
             }
-            string scriptedGuiDirectory = Path.Combine(ModManager.Directory, "common", "scripted_guis");
+            string scriptedGuiDirectory = Path.Combine(ModManager.ModDirectory, "common", "scripted_guis");
             Directory.CreateDirectory(scriptedGuiDirectory);
 
             string filePath = Path.Combine(scriptedGuiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_scripted_gui.txt");
@@ -648,7 +648,7 @@ using MessageBox = System.Windows.MessageBox;
 
         public void HandleFontDefineFiles()
         {
-            string interfaceDirectory = Path.Combine(ModManager.Directory, "interface");
+            string interfaceDirectory = Path.Combine(ModManager.ModDirectory, "interface");
             Directory.CreateDirectory(interfaceDirectory);
             string filePath = Path.Combine(interfaceDirectory, "font_definitions.gfx");
 

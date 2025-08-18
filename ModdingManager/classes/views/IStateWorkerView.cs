@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Xceed.Wpf.Toolkit;
-using Xceed.Wpf.Toolkit.Zoombox;
 using Control = System.Windows.Controls.Control;
 
 namespace ModdingManager.classes.views

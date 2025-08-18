@@ -64,7 +64,6 @@ namespace ModdingManager.classes.utils.types
         {
             if (variable == null || string.IsNullOrWhiteSpace(variable.Name)) return;
             SubVars.Add(variable);
-            Content.Add(variable.ToString());
         }
         // Возвращает индекс первой скобки по точному совпадению с Header
         public int GetSubBracketIndex(string header)
@@ -160,7 +159,6 @@ namespace ModdingManager.classes.utils.types
             Content.RemoveAll(line => line.Contains(keyword, StringComparison.OrdinalIgnoreCase));
         }
 
-        // Заменяет все строки в Content, содержащие указанный подстроку
         public void ReplaceAllContentContaining(string keyword, string newValue)
         {
             if (string.IsNullOrWhiteSpace(keyword) || string.IsNullOrWhiteSpace(newValue)) return;

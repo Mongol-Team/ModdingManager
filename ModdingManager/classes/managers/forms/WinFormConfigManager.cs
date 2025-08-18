@@ -236,7 +236,6 @@ public static class WPFConfigManager
                 Directory.CreateDirectory(configPath);
                 object config = form switch
                 {
-                    CountryCreator countryForm => CreateCountryConfig(countryForm),
                     CharacterCreator characterForm => CreateCharacterConfig(characterForm),
                     IdeaCreator ideaForm => CreateIdeaConfig(ideaForm),
                     TemplateCreator templateForm => CreateTemplateConfig(templateForm),
@@ -280,7 +279,6 @@ public static class WPFConfigManager
     {
         return typeof(TForm).Name switch
         {
-            nameof(CountryCreator) => (CountrysPath, "страны"),
             nameof(CharacterCreator) => (CharactersPath, "персонажа"),
             nameof(IdeaCreator) => (IdeasPath, "идеи"),
             nameof(TechTreeCreator) => (TechTreesPath, "дерева технологий"),
@@ -522,10 +520,6 @@ public static class WPFConfigManager
                 {
                     switch (form)
                     {
-                        case CountryCreator countryForm:
-                            var countryConfig = JsonSerializer.Deserialize<CountryConfig>(json);
-                            ApplyCountryConfig(countryForm, countryConfig);
-                            break;
 
                         case CharacterCreator characterForm:
                             var characterConfig = JsonSerializer.Deserialize<CountryCharacterConfig>(json);
@@ -554,69 +548,8 @@ public static class WPFConfigManager
         });
     }
     #region Country Config Methods
-    private static CountryConfig CreateCountryConfig(CountryCreator form)
-    {
-        var conf = new CountryConfig
-        {
-            Tag = form.TagBox.Text,
-            Capital = int.TryParse(form.CapitalBox.Text, out var capital) ? capital : 0,
-            GraphicalCulture = form.GrapficalCultureBox.Text,
-            //Color = $"{form.CountryColorDialog.Color.R} {form.CountryColorDialog.Color.G} {form.CountryColorDialog.Color.B}",
-            //Technologies = form.TechBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
-            Convoys = int.TryParse(form.ConvoyBox.Text, out var convoys) ? convoys : 0,
-            OOB = form.StartOOBBox.Text,
-            ResearchSlots = int.TryParse(form.ResearchSlotBox.Text, out var slots) ? slots : 0,
-            Stab = int.Parse(form.StabBox.Text),
-            WarSup = int.Parse(form.WarSupportBox.Text),
-            Name = form.CountryNameBox.Text,
-            RulingParty = form.RullingPartyBox.SelectedItem?.ToString(),
-            //LastElection = form.LastElectionBox.Text,
-            ElectionFrequency = int.TryParse(form.ElectionFreqBox.Text, out var freq) ? freq : 0,
-            ElectionsAllowed = form.IsElectionAllowedBox.Checked,
-            Ideas = form.StartIdeasBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
-            Characters = form.RecruitBox.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList(),
-            StateCores = ParseStates(form.CountryStatesBox.Text)
-        };
-        return conf;
-    }
-    private static void ApplyCountryConfig(CountryCreator form, CountryConfig config)
-    {
-        form.TagBox.Text = config.Tag;
-        form.CapitalBox.Text = config.Capital.ToString();
-        form.GrapficalCultureBox.Text = config.GraphicalCulture;
-
-        //var colorParts = config.Color.Split(' ');
-        //if (colorParts.Length == 3)
-        //{
-        //    form.CountryColorDialog.Color = Color.FromArgb(
-        //        int.Parse(colorParts[0]),
-        //        int.Parse(colorParts[1]),
-        //        int.Parse(colorParts[2]));
-        //    form.ColorPickerButton.BackColor = form.CountryColorDialog.Color;
-        //}
-
-        //form.TechBox.Text = string.Join(Environment.NewLine, config.Technologies);
-        //form.ConvoyBox.Text = config.Convoys.ToString();
-        //form.StartOOBBox.Text = config.OOB;
-        //form.ResearchSlotBox.Text = config.ResearchSlots.ToString();
-        //form.WarSupportBox.Text = config.WarSup.ToString();
-        //form.StabBox.Text = config.Stab.ToString();
-        //form.CountryNameBox.Text = config.Name;
-        //form.RullingPartyBox.SelectedItem = config.RulingParty;
-        //form.LastElectionBox.Text = config.LastElection;
-        //form.ElectionFreqBox.Text = config.ElectionFrequency.ToString();
-        //form.IsElectionAllowedBox.Checked = config.ElectionsAllowed;
-
-        //form.NeutralPopularBox.Text = config.NeutralityPopularity.ToString();
-        //form.FascismPopularBox.Text = config.FascismPopularity.ToString();
-        //form.CommunismPopularBox.Text = config.CommunismPopularity.ToString();
-        //form.DemocraticPopularBox.Text = config.DemocraticPopularity.ToString();
-
-        //form.StartIdeasBox.Text = string.Join(Environment.NewLine, config.Ideas);
-        form.RecruitBox.Text = string.Join(Environment.NewLine, config.Characters);
-        form.CountryStatesBox.Text = string.Join(Environment.NewLine,
-            config.StateCores.Select(s => $"{s.Key}:{(s.Value ? "1" : "0")}"));
-    }
+   
+    
     #endregion
     #region Character Config Methods
     private static CountryCharacterConfig CreateCharacterConfig(CharacterCreator form)

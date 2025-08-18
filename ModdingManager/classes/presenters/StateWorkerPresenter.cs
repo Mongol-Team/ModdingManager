@@ -26,6 +26,8 @@ using Brushes = System.Windows.Media.Brushes;
 using MessageBox = System.Windows.MessageBox;
 using Point = System.Windows.Point;
 using Polygon = System.Windows.Shapes.Polygon;
+using Rect = System.Windows.Rect;
+using Size = System.Windows.Size;
 using Window = System.Windows.Window;
 
 public class StateWorkerPresenter
@@ -62,7 +64,7 @@ public class StateWorkerPresenter
         loadingWindow.SetProgressBounds(0, 4); 
         loadingWindow.Show();
 
-        string modDirectory = ModManager.Directory;
+        string modDirectory = ModManager.ModDirectory;
         _view.Display.Width = Registry.Instance.Map.Bitmap.Width;
         _view.Display.Height = Registry.Instance.Map.Bitmap.Height;
 
@@ -102,11 +104,29 @@ public class StateWorkerPresenter
         {
             var viewer = new ClassViewer
             {
-                BuildingContent = targetObject
+                Width = 195,
+                BuildingContent = targetObject,
+                ElementOrientation = ClassViewer.ContentOrientation.Left,
             };
             viewer.OnPropertyChange += OnPropertyChanging;
+
             _view.Menu.Children.Clear();
             _view.Menu.Children.Add(viewer);
+
+            viewer.Loaded += (s, e) =>
+            {
+                if (!double.IsNaN(viewer.ActualHeight))
+                {
+                    _view.Menu.Height = viewer.ActualHeight;
+                }
+                else
+                {
+                    // Альтернативный вариант, если ActualHeight тоже NaN
+                    viewer.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    viewer.Arrange(new Rect(viewer.DesiredSize));
+                    _view.Menu.Height = viewer.DesiredSize.Height;
+                }
+            };
         }
     }
     private void OnPropertyChanging(object sender, PropertyChangedEventArg e)
@@ -118,6 +138,11 @@ public class StateWorkerPresenter
             {
                 var prov = viewer.BuildingContent as ProvinceConfig;
                 _handler.ChangeProvince(prov);
+            }
+            if (viewer.BuildingContent is StateConfig)
+            {
+                var state = viewer.BuildingContent as StateConfig;
+                _handler.ChangeState(state, e.OldValue.ToString(), e.NewValue.ToString());
             }
         }
     }
@@ -200,21 +225,42 @@ public class StateWorkerPresenter
     public void SearchProvince(int id)
     {
         SearchAndCenterView(_view.ProvinceIDLayer, id.ToString());
+        ProvinceConfig prov = Registry.Instance.Map.Provinces.FirstOrDefault(p => p.Id == id);
+        MarkEventArg markEventArg = new MarkEventArg
+        {
+            MarkedProvince = prov
+        };
+        OnMarkEvent(markEventArg);
     }
 
     public void SearchState(int id)
     {
         SearchAndCenterView(_view.StateIDLayer, id.ToString());
+        StateConfig state = Registry.Instance.Map.States.FirstOrDefault(s => s.Id == id);
+        MarkEventArg markEventArg = new MarkEventArg
+        {
+            MarkedState = state
+        };
     }
 
     public void SearchCountry(int id)
     {
         SearchAndCenterView(_view.CountryIDLayer, id.ToString());
+        CountryOnMapConfig country = Registry.Instance.Map.Countries.FirstOrDefault(c => c.Tag == id.ToString());
+        MarkEventArg markEventArg = new MarkEventArg
+        {
+            MarkedCountry = country
+        };
     }
 
     public void SearchStrategicRegion(int id)
     {
         SearchAndCenterView(_view.StrategicIDLayer, id.ToString());
+        StrategicRegionConfig region = Registry.Instance.Map.StrategicRegions.FirstOrDefault(r => r.Id == id);
+        MarkEventArg markEventArg = new MarkEventArg
+        {
+            MarkedRegion = region
+        };
     }
 
     private void SearchAndCenterView(Canvas canvas, string searchText)
@@ -541,7 +587,6 @@ public class StateWorkerPresenter
 
             DrawProvince(_view.ProvinceRenderLayer, province, province.Shape.FillColor, $"Province: {province.Id}");
 
-            // Теперь позиция текста корректная внутри TextBlock
             var textBlock = CreateTextBlocksUniversal(new List<ProvinceConfig> { province }).First();
             _view.ProvinceIDLayer.Children.Add(textBlock);
         }

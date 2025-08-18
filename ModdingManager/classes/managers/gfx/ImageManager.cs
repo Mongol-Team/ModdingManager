@@ -47,7 +47,7 @@ namespace ModdingManager.classes.managers.gfx
             var directoriesToSearch = new[]
             {
                 ModManager.GameDirectory,
-                ModManager.Directory
+                ModManager.ModDirectory
             };
 
             foreach (var dir in directoriesToSearch)

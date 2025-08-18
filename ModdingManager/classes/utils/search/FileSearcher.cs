@@ -2,7 +2,9 @@
 using ModdingManager.classes.utils.types;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
+using static System.Windows.Forms.DataFormats;
 
 public class FileSearcher : Searcher
 {
@@ -164,51 +166,92 @@ public class FileSearcher : Searcher
     #region Var Methods
     public void SetVar(Var variable, int fileIndex)
     {
-        if (fileIndex < 0 || fileIndex >= Files.Count || variable == null) return;
+        if (fileIndex < 0 || fileIndex >= Files.Count || variable == null || variable.IsEmpty()) return;
 
-        string path = Files[fileIndex].Name;
-        var lines = File.ReadAllLines(path).ToList();
+        var stream = Files[fileIndex];
+        stream.Seek(0, SeekOrigin.Begin);
 
-        string pattern = $@"^\s*{Regex.Escape(variable.Name)}\s*=";
+        var encoding = variable.Format == Var.VarFormat.Localisation ? new UTF8Encoding(true) : new UTF8Encoding(false);
+        var lines = new List<string>();
+
+        using (var reader = new StreamReader(stream, encoding, true, 1024, true))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                lines.Add(line);
+            }
+        }
+
         bool replaced = false;
+        string formatted = variable.ToString().TrimEnd();
+        string name = variable.Name.Trim('"');
+        string pattern = $@"^\s*{name}\s*{variable.AssignSymbol}\s*""[^""]*""\s*$";
+
 
         for (int i = 0; i < lines.Count; i++)
         {
-            if (Regex.IsMatch(lines[i], pattern, RegexOptions.IgnoreCase))
+            var match = Regex.Match(lines[i], pattern);
+            if (match.Success)
             {
-                lines[i] = variable.ToString();
+                if (variable.IsStringAreVar(lines[i]))
+                {
+                    string prefix = lines[i].Substring(0, lines[i].IndexOf(variable.AssignSymbol) + 1);
+                    lines[i] = $"{prefix} {variable.Value}";
+                }
+                else
+                {
+                    lines[i] = formatted;
+                }
+
                 replaced = true;
                 break;
             }
         }
 
+
         if (!replaced)
         {
-            // если переменной не было, добавляем в конец
-            lines.Add(variable.ToString());
+            AddVar(variable, fileIndex, null);
+            return;
         }
 
-        File.WriteAllLines(path, lines);
+        stream.Seek(0, SeekOrigin.Begin);
+        stream.SetLength(0);
+
+        using (var writer = new StreamWriter(stream, encoding, 1024, true))
+        {
+            foreach (var line in lines)
+            {
+                writer.WriteLine(line);
+            }
+        }
     }
 
     public Var? GetVar(string name, int fileIndex)
     {
         if (fileIndex < 0 || fileIndex >= Files.Count || string.IsNullOrWhiteSpace(name)) return null;
 
-        string path = Files[fileIndex].Name;
-        var lines = File.ReadAllLines(path);
+        var stream = Files[fileIndex];
+        stream.Seek(0, SeekOrigin.Begin);
 
-        string pattern = $@"^\s*{Regex.Escape(name)}\s*=\s*(.+)$";
-
-        foreach (var line in lines)
+        using (var reader = new StreamReader(stream, Encoding.UTF8, true, 1024, true))
         {
-            var match = Regex.Match(line, pattern, RegexOptions.IgnoreCase);
-            if (match.Success)
+            string pattern = $@"^\s*{Regex.Escape(name)}\s*(.)\s*(.+)$";
+
+            string line;
+            while ((line = reader.ReadLine()) != null)
             {
-                string value = match.Groups[1].Value.Trim();
-                return new Var { Name = name, Value = value };
+                var match = Regex.Match(line, pattern, RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    char assignSymbol = match.Groups[1].Value[0];
+                    string value = match.Groups[2].Value.Trim();
+                    return new Var { Name = name, Value = value, AssignSymbol = assignSymbol };
+                }
             }
         }
+
         return null;
     }
 
@@ -216,32 +259,74 @@ public class FileSearcher : Searcher
     {
         if (fileIndex < 0 || fileIndex >= Files.Count || variable == null) return;
 
-        string path = Files[fileIndex].Name;
-        var lines = new List<string>(File.ReadAllLines(path));
+        var stream = Files[fileIndex];
+        stream.Seek(0, SeekOrigin.Begin);
 
+        var encoding = variable.Format == Var.VarFormat.Localisation ? new UTF8Encoding(true) : new UTF8Encoding(false);
+        var lines = new List<string>();
+
+        using (var reader = new StreamReader(stream, encoding, true, 1024, true))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                lines.Add(line);
+            }
+        }
+
+        string formatted = FormatVar(variable);
         if (lineIndex.HasValue && lineIndex.Value >= 0 && lineIndex.Value < lines.Count)
         {
-            lines.Insert(lineIndex.Value, variable.ToString());
+            lines.Insert(lineIndex.Value, formatted);
         }
         else
         {
-            lines.Add(variable.ToString());
+            lines.Add(formatted);
         }
 
-        File.WriteAllLines(path, lines);
+        stream.Seek(0, SeekOrigin.Begin);
+        stream.SetLength(0);
+
+        using (var writer = new StreamWriter(stream, encoding, 1024, true))
+        {
+            foreach (var line in lines)
+            {
+                writer.WriteLine(line);
+            }
+        }
     }
 
     public void RemoveVar(Var variable, int fileIndex)
     {
         if (fileIndex < 0 || fileIndex >= Files.Count || variable == null) return;
 
-        string path = Files[fileIndex].Name;
-        var lines = new List<string>(File.ReadAllLines(path));
+        var stream = Files[fileIndex];
+        stream.Seek(0, SeekOrigin.Begin);
 
-        string pattern = $@"^\s*{Regex.Escape(variable.Name)}\s*=";
-        lines.RemoveAll(line => Regex.IsMatch(line, pattern, RegexOptions.IgnoreCase));
+        var encoding = variable.Format == Var.VarFormat.Localisation ? new UTF8Encoding(true) : new UTF8Encoding(false);
+        var lines = new List<string>();
 
-        File.WriteAllLines(path, lines);
+        using (var reader = new StreamReader(stream, encoding, true, 1024, true))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                lines.Add(line);
+            }
+        }
+
+        lines.RemoveAll(line => Regex.IsMatch(line, $@"^\s*{Regex.Escape(variable.Name)}\s*{Regex.Escape(variable.AssignSymbol.ToString())}", RegexOptions.IgnoreCase));
+
+        stream.Seek(0, SeekOrigin.Begin);
+        stream.SetLength(0);
+
+        using (var writer = new StreamWriter(stream, encoding, 1024, true))
+        {
+            foreach (var line in lines)
+            {
+                writer.WriteLine(line);
+            }
+        }
     }
     #endregion
 
@@ -445,5 +530,13 @@ public class FileSearcher : Searcher
             }
         }
     }
+    #endregion
+    #region Helper methods
+    private Encoding GetEncoding(string format)
+    {
+        return format == "localisation" ? new UTF8Encoding(true) : Encoding.UTF8;
+    }
+    private string FormatVar(Var variable) => variable.ToString();
+
     #endregion
 }

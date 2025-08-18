@@ -1464,7 +1464,7 @@ namespace ModdingManager
         {
             
           
-            string techIconDir = System.IO.Path.Combine(ModManager.Directory, "gfx", "interface", "techtree");
+            string techIconDir = System.IO.Path.Combine(ModManager.ModDirectory, "gfx", "interface", "techtree");
             Directory.CreateDirectory(techIconDir);
             var firstCopy = window.TabFolderFirstImage.Source.Clone();
             var secondCopy = window.TabFolderFirstImage.Source.Clone();
@@ -1490,7 +1490,7 @@ namespace ModdingManager
 
         public static void GenerateGfxFile(TechTreeConfig techTree)
         {
-            string interfaceDir = System.IO.Path.Combine(ModManager.Directory, "interface");
+            string interfaceDir = System.IO.Path.Combine(ModManager.ModDirectory, "interface");
             Directory.CreateDirectory(interfaceDir);
 
             string gfxFilePath = System.IO.Path.Combine(interfaceDir, $"{techTree.Name}.gfx");
@@ -1653,17 +1653,17 @@ namespace ModdingManager
             ExportTechTreeToFile();
             CurrentTechTree.SaveAllTechIconsAsDDS();
             GenerateGfxFile(CurrentTechTree);
-            InsertGUITechTreeEntries(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
-            InsertGUIFolderTabButton(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
-            InsertGUITechTreeContainers(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
-            CreateTAGTreeFolderName(ModManager.Directory, CurrentTechTree, ModManager.GameDirectory);
+            InsertGUITechTreeEntries(ModManager.ModDirectory, CurrentTechTree, ModManager.GameDirectory);
+            InsertGUIFolderTabButton(ModManager.ModDirectory, CurrentTechTree, ModManager.GameDirectory);
+            InsertGUITechTreeContainers(ModManager.ModDirectory, CurrentTechTree, ModManager.GameDirectory);
+            CreateTAGTreeFolderName(ModManager.ModDirectory, CurrentTechTree, ModManager.GameDirectory);
             SaveFolderTabIcon(this);
             SaveFolderBG();
         }
 
         private void SaveFolderBG()
         {
-            string techIconDir = System.IO.Path.Combine(ModManager.Directory, "gfx", "interface", "techtree");
+            string techIconDir = System.IO.Path.Combine(ModManager.ModDirectory, "gfx", "interface", "techtree");
             Directory.CreateDirectory(techIconDir);
             using (var bmp = TechBGImage.ImageSource.ToBitmap())
             {
@@ -1674,7 +1674,7 @@ namespace ModdingManager
         private void ExportTechTreeToFile()
         {
             string fileName = $"{CurrentTechTree.Name}.txt";
-            string fullPath = System.IO.Path.Combine(ModManager.Directory, "common", "technologies", fileName);
+            string fullPath = System.IO.Path.Combine(ModManager.ModDirectory, "common", "technologies", fileName);
 
             var sb = new StringBuilder();
             sb.AppendLine("technologies = {");

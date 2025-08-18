@@ -22,7 +22,7 @@ namespace ModdingManager.configs
         public void SaveAllTechIconsAsDDS()
         {
 
-            string techIconDir = Path.Combine(ModManager.Directory, "gfx", "interface", "technologies");
+            string techIconDir = Path.Combine(ModManager.ModDirectory, "gfx", "interface", "technologies");
             Directory.CreateDirectory(techIconDir);
 
             foreach (var item in this.Items)
