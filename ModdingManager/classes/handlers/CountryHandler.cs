@@ -2,15 +2,20 @@
 using ModdingManager.classes.utils;
 using ModdingManager.configs;
 using ModdingManager.managers.@base;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Controls;
 
 
 public class CountryHandler
 {
-    public CountryConfig CurrentConfig { get; set; }
-    public void CreateLocalizationFiles()
+    public CountryConfig CurrentConfig { get;  set; }
+    public  void CreateLocalizationFiles()
     {
         try
         {
@@ -19,7 +24,7 @@ public class CountryHandler
             Directory.CreateDirectory(ruLocPath);
             Directory.CreateDirectory(enLocPath);
 
-            string ruContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_russian", this.CurrentConfig.Name, this.CurrentConfig.RulingParty);
+            string ruContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_russian", this.CurrentConfig.Name , this.CurrentConfig.RulingParty);
             string enContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_english", this.CurrentConfig.Name, this.CurrentConfig.RulingParty);
 
             string ruFilePath = Path.Combine(ruLocPath, $"{this.CurrentConfig.Tag}_history_l_russian.yml");
@@ -48,7 +53,7 @@ public class CountryHandler
             sb.AppendLine($" {tag}_{i.Id}: \"\"");
             sb.AppendLine($" {tag}_{i.Id}_DEF: \"\"");
         }
-
+            
         sb.AppendLine($" {tag}: \"{name}\"");
         sb.AppendLine($" {tag}_DEF: \"\"");
         sb.AppendLine($" {tag}_ADJ: \"\"");
@@ -297,8 +302,8 @@ public class CountryHandler
 
                     foreach (var techLine in this.CurrentConfig.Technologies)
                     {
-
-                        writer.WriteLine($"\t{techLine.Key} = {techLine.Value}");
+                           
+                            writer.WriteLine($"\t{techLine.Key} = {techLine.Value}");
 
                     }
 

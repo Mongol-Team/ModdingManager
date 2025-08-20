@@ -1,11 +1,16 @@
-﻿using ModdingManager.classes.extentions;
-using ModdingManager.configs;
+﻿
+using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using System.Text.Json;
 using System.Windows;
-using System.Windows.Media;
+using System.Threading.Tasks;
+using System.Text.Json;
+using System.IO.Compression;
+using ModdingManager.configs;
+using Microsoft.VisualBasic;
 using System.Windows.Media.Imaging;
+using System.Windows.Media;
+using SixLabors.ImageSharp;
+using ModdingManager.classes.extentions;
 
 namespace ModdingManager.managers.forms
 {
@@ -81,7 +86,7 @@ namespace ModdingManager.managers.forms
                         return images;
                     }
                 });
-
+                
                 await window.Dispatcher.InvokeAsync(() =>
                 {
                     window.CurrentTechTree = config;
@@ -142,6 +147,20 @@ namespace ModdingManager.managers.forms
             return bitmap;
         }
 
+        private static async Task<BitmapSource> LoadImageFromFile(string filePath)
+        {
+            return await Task.Run(() =>
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(filePath);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
+            });
+        }
+
         private static ImageSource LoadDefaultBackground(bool isBig)
         {
             string path = isBig
@@ -157,7 +176,7 @@ namespace ModdingManager.managers.forms
             return null;
         }
 
-
+     
         private static BitmapSource FreezeClone(ImageSource source)
         {
             if (source == null)
@@ -186,7 +205,7 @@ namespace ModdingManager.managers.forms
                             item =>
                             {
                                 var imgCopy = item.Image.Clone();
-                                imgCopy.Freeze();
+                                imgCopy.Freeze();               
                                 return (BitmapSource)imgCopy;
                             }
                         ),
@@ -228,7 +247,7 @@ namespace ModdingManager.managers.forms
                         var second = saveData.SecondTabImage;
                         using (var stream = secondImageEntry.Open())
                         {
-                            EnsureRenderable(second).SaveToStream(stream);
+                           EnsureRenderable(second).SaveToStream(stream);
                         }
                         var backgroundImageEntry = archive.CreateEntry($"background.png");
                         var bg = saveData.BgImage;
@@ -245,7 +264,7 @@ namespace ModdingManager.managers.forms
             await window.Dispatcher.InvokeAsync(() =>
                 System.Windows.MessageBox.Show("Сохранение завершено!", "Успех"));
         }
-        private static BitmapSource EnsureRenderable(BitmapSource source)
+        static BitmapSource EnsureRenderable(BitmapSource source)
         {
             if (source is TransformedBitmap || source is CroppedBitmap || source is FormatConvertedBitmap)
             {
@@ -267,7 +286,251 @@ namespace ModdingManager.managers.forms
             return source;
         }
 
+        
 
 
+        private static async Task SaveBitmapSourceToFile(BitmapSource bitmapSource, string filePath)
+        {
+            await Task.Run(() =>
+            {
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                    encoder.Save(fileStream);
+                }
+            });
+        }
+
+        private static async Task SaveImageToPng(ImageSource image, string filePath)
+        {
+            if (image is BitmapSource bitmapSource)
+            {
+                await Task.Run(() =>
+                {
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        var encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                        encoder.Save(fileStream);
+                    }
+                });
+            }
+        }
+
+        private static async Task<List<string>> GetAvailableTechTreeConfigsAsync()
+        {
+            return await Task.Run(() =>
+            {
+                if (!Directory.Exists(TechTreesPath))
+                {
+                    Directory.CreateDirectory(TechTreesPath);
+                    return new List<string>();
+                }
+
+                return Directory.GetFiles(TechTreesPath, "*.tech")
+                    .Select(Path.GetFileNameWithoutExtension)
+                    .ToList();
+            });
+        }
+
+        private static async Task<TechTreeConfig> LoadTechTreeFromArchive(string filePath)
+        {
+            using (var fileStream = new FileStream(filePath, FileMode.Open))
+            using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read))
+            {
+                var jsonEntry = archive.GetEntry("config.json");
+                using (var reader = new StreamReader(jsonEntry.Open()))
+                {
+                    string json = await reader.ReadToEndAsync();
+                    var config = JsonSerializer.Deserialize<TechTreeConfig>(json);
+
+                    foreach (var item in config.Items)
+                    {
+                        var imageEntry = archive.GetEntry($"images/{item.Id}.png");
+                        if (imageEntry != null)
+                        {
+                            using (var stream = imageEntry.Open())
+                            {
+                                var bitmap = new BitmapImage();
+                                bitmap.BeginInit();
+                                bitmap.StreamSource = stream;
+                                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                                bitmap.EndInit();
+                                item.Image = bitmap;
+                            }
+                        }
+                        else
+                        {
+                            // Используем стандартный фон
+                            string defaultImagePath = item.IsBig
+                                ? @"ModdingManager\ModdingManager\data\gfx\interface\technology_available_item_bg.png"
+                                : @"ModdingManager\ModdingManager\data\gfx\interface\tech_industry_available_item_bg.png";
+
+                            if (File.Exists(defaultImagePath))
+                            {
+                                var uri = new Uri(defaultImagePath, UriKind.RelativeOrAbsolute);
+                                item.Image = new BitmapImage(uri);
+                            }
+                        }
+                    }
+
+                    return config;
+                }
+            }
+        }
+
+        private static async Task SaveTechTreeToArchive(TechTreeConfig config, string filePath)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                {
+                    var jsonEntry = archive.CreateEntry("config.json");
+                    using (var writer = new StreamWriter(jsonEntry.Open()))
+                    {
+                        string json = JsonSerializer.Serialize(config, JsonOptions);
+                        await writer.WriteAsync(json);
+                    }
+
+                    foreach (var item in config.Items.Where(i => i.Image != null))
+                    {
+                        var imageEntry = archive.CreateEntry($"images/{item.Id}.png");
+                        using (var stream = imageEntry.Open())
+                        {
+                            if (item.Image is BitmapSource bitmapSource)
+                            {
+                                var encoder = new PngBitmapEncoder();
+                                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+                                encoder.Save(stream);
+                            }
+                        }
+                    }
+                }
+
+                await File.WriteAllBytesAsync(filePath, memoryStream.ToArray());
+            }
+        }
+
+        public static async Task SaveConfigWrapper(TechTreeCreator window)
+        {
+            string fileName = await ShowWpfInputDialog(
+                window,
+                "Save Configuration",
+                "Enter file name (without .tech extension):");
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                System.Windows.MessageBox.Show(
+                    window,
+                    "Save operation canceled!",
+                    "Information",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            await SaveConfigAsync(window, fileName);
+        }
+
+        private static async Task<string> ShowWpfInputDialog(Window owner, string title, string prompt)
+        {
+            var tcs = new TaskCompletionSource<string>();
+
+            await owner.Dispatcher.InvokeAsync(() =>
+            {
+                var dialog = new Window
+                {
+                    Title = title,
+                    Width = 350,
+                    Height = 180,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    ResizeMode = ResizeMode.NoResize,
+                    SizeToContent = SizeToContent.Manual
+                };
+
+                var textBox = new System.Windows.Controls.TextBox
+                {
+                    Margin = new Thickness(10),
+                    VerticalAlignment = VerticalAlignment.Top
+                };
+
+                var button = new System.Windows.Controls.Button
+                {
+                    Content = "OK",
+                    Width = 80,
+                    Margin = new Thickness(10),
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
+                    IsDefault = true
+                };
+
+                button.Click += (s, e) =>
+                {
+                    tcs.SetResult(textBox.Text);
+                    dialog.Close();
+                };
+
+                var stackPanel = new System.Windows.Controls.StackPanel();
+                stackPanel.Children.Add(new System.Windows.Controls.TextBlock
+                {
+                    Text = prompt,
+                    Margin = new Thickness(10, 10, 10, 5)
+                });
+                stackPanel.Children.Add(textBox);
+                stackPanel.Children.Add(button);
+
+                dialog.Content = stackPanel;
+                dialog.Owner = owner;
+                dialog.ShowDialog();
+            });
+
+            return await tcs.Task;
+        }
+        private static async Task<string> ShowWpfSelectionDialog(Window owner, List<string> items, string title)
+        {
+            var tcs = new TaskCompletionSource<string>();
+
+            await owner.Dispatcher.InvokeAsync(() =>
+            {
+                var dialog = new Window
+                {
+                    Title = title,
+                    Width = 400,
+                    Height = 500,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    ResizeMode = ResizeMode.NoResize
+                };
+
+                var listBox = new System.Windows.Controls.ListBox
+                {
+                    ItemsSource = items,
+                    FontSize = 14,
+                    SelectionMode = System.Windows.Controls.SelectionMode.Single
+                };
+
+                var button = new System.Windows.Controls.Button
+                {
+                    Content = "Load",
+                    Height = 40,
+                    IsDefault = true
+                };
+
+                button.Click += (s, e) =>
+                {
+                    tcs.SetResult(listBox.SelectedItem?.ToString());
+                    dialog.Close();
+                };
+
+                var stackPanel = new System.Windows.Controls.StackPanel();
+                stackPanel.Children.Add(listBox);
+                stackPanel.Children.Add(button);
+
+                dialog.Content = stackPanel;
+                dialog.Owner = owner;
+                dialog.ShowDialog();
+            });
+
+            return await tcs.Task;
+        }
     }
 }
