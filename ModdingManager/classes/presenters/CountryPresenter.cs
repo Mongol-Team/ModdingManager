@@ -1,12 +1,7 @@
-﻿using ModdingManager.classes.handlers;
-using ModdingManager.classes.managers.@base;
+﻿using ModdingManager.classes.managers.@base;
 using ModdingManager.classes.views;
 using ModdingManager.configs;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 public class CountryPresenter
 {
