@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Media;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using System.IO;
-namespace ModdingManager.configs
+﻿namespace ModdingManagerModels
 {
-    public class SupereventConfig
+    public class SupereventConfig : IModel
     {
         public SupereventConfig() { }
         public string Id { get; set; }

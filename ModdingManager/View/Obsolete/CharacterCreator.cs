@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualBasic;
-using ModdingManager.configs;
+using ModdingManager.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;

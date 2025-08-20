@@ -1,15 +1,9 @@
 ﻿using ModdingManager.classes.configs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.Windows.Media;
 
-namespace ModdingManager.configs
+namespace ModdingManagerModels
 {
-    public class CountryConfig
+    public class CountryConfig : IModel
     {
         public string? Tag { get; set; }
         public string? Name { get; set; }

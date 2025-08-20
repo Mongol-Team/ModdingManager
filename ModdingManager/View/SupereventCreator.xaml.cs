@@ -1,7 +1,7 @@
 ﻿using ModdingManager.classes.controls;
 using ModdingManager.classes.extentions;
 using ModdingManager.classes.handlers;
-using ModdingManager.configs;
+using ModdingManager.Models;
 using ModdingManager.managers;
 using NAudio.Wave;
 using System.IO;

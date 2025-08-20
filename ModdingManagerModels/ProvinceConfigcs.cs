@@ -1,15 +1,9 @@
-﻿using ModdingManager.classes.args;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Drawing;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.Windows.Shapes;
 
-namespace ModdingManager.classes.configs
+namespace ModdingManagerModels
 {
-    public class ProvinceConfig
+    public class ProvinceConfig : IModel
     {
         [JsonIgnore]
         public int Id { get; set; }

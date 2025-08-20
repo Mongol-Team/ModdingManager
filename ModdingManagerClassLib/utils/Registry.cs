@@ -3,7 +3,7 @@ using ModdingManager.classes.configs;
 using ModdingManager.classes.managers.gfx;
 using ModdingManager.classes.utils.search;
 using ModdingManager.classes.utils.types;
-using ModdingManager.configs;
+using ModdingManager.Models;
 using ModdingManager.managers.@base;
 using OpenCvSharp;
 using System;

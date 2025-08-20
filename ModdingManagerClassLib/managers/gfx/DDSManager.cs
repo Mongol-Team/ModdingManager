@@ -1,23 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Pfim;
+using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using TeximpNet.DDS;
-using TeximpNet;
-using Pfim;
-using System.IO;
-using ModdingManager.configs;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using ModdingManager.classes.extentions;
-using ModdingManager.managers.@base;
 namespace ModdingManager.classes.managers.gfx
 {
-    public static class DDSManager 
+    public static class DDSManager
     {
-        
+
         public static Bitmap LoadDDSAsBitmap(string path)
         {
             using (var image = Pfimage.FromFile(path))

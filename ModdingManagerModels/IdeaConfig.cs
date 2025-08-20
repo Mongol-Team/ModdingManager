@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ModdingManager.configs
+﻿namespace ModdingManagerModels
 {
-    public class IdeaConfig
+    public class IdeaConfig : IModel
     {
         public string Id { get; set; }
         public string Name { get; set; }

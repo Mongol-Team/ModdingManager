@@ -1,0 +1,12 @@
+﻿using ModdingManager.classes.configs;
+
+namespace ModdingManagerModels.Args
+{
+    public class MarkEventArg
+    {
+        public ProvinceConfig MarkedProvince;
+        public StateConfig MarkedState;
+        public StrategicRegionConfig MarkedRegion;
+        public CountryOnMapConfig MarkedCountry;
+    }
+}

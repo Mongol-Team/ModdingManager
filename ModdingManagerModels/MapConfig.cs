@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 
-namespace ModdingManager.classes.configs
+namespace ModdingManagerModels
 {
-    public class MapConfig
+    public class MapConfig : IModel
     {
-        public MapConfig() { }
         public List<StateConfig> States { get; set; }
         public List<ProvinceConfig> Provinces { get; set; }
         public List<StrategicRegionConfig> StrategicRegions { get; set; }
         public List<CountryOnMapConfig> Countries { get; set; }
         public Bitmap Bitmap { get; set; }
-        public System.Windows.Point? GetProvincePos(int provinceId)
+        public Point? GetProvincePos(int provinceId)
         {
             var province = Provinces?.FirstOrDefault(p => p.Id == provinceId);
             if (province?.Shape == null)

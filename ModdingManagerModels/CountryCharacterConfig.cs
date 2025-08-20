@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 
-namespace ModdingManager.configs
+namespace ModdingManagerModels
 {
-    public class CountryCharacterConfig
+    public class CountryCharacterConfig : IModel
     {
-        public CountryCharacterConfig() { }
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";

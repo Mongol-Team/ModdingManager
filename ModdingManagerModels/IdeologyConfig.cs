@@ -1,20 +1,9 @@
-﻿using ModdingManager.classes.extentions;
-using ModdingManager.classes.utils.search;
-using ModdingManager.classes.utils.types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 
-namespace ModdingManager.configs
+namespace ModdingManagerModels
 {
-    public class IdeologyConfig : IComparable<IdeologyConfig>
+    public class IdeologyConfig : IComparable<IdeologyConfig>, IModel
     {
-        public IdeologyConfig()
-        {
-
-        }
         public string Id { get; set; }
         public string Description { get; set; }
         public string Noun { get; set; }
@@ -57,7 +46,7 @@ namespace ModdingManager.configs
     }
     public class IdeologyType
     {
-        public string Parrent {  get; set; }
+        public string Parrent { get; set; }
         public bool CanBeRandomlySelected { get; set; }
         public string Name { get; set; }
         public Color Color { get; set; }

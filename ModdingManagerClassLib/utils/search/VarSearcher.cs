@@ -1,11 +1,6 @@
 ﻿using ModdingManager.classes.utils.types;
-using System;
-using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ModdingManager.classes.utils.search
 {
@@ -39,7 +34,7 @@ namespace ModdingManager.classes.utils.search
             }
             return null;
         }
-        
+
         /// <summary>
         /// Обновляет значение переменной по ключу в строках с указанным символом присваивания.
         /// </summary>
@@ -67,8 +62,8 @@ namespace ModdingManager.classes.utils.search
 
                 // Сохраняем отступ в начале строки и возможный комментарий
                 int indentIndex = rawLine.IndexOf(line);
-                string indentation = indentIndex >= 0 ? rawLine.Substring(0, indentIndex): "";
-                string comment = rawLine.Contains("#") ? rawLine.Substring(rawLine.IndexOf("#")): "";
+                string indentation = indentIndex >= 0 ? rawLine.Substring(0, indentIndex) : "";
+                string comment = rawLine.Contains("#") ? rawLine.Substring(rawLine.IndexOf("#")) : "";
 
                 // Формируем новую строку
                 string formattedValue = $"\"{var.Value}\"";

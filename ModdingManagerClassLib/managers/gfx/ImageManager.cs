@@ -1,23 +1,10 @@
-﻿using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TeximpNet;
-using SixLabors.ImageSharp.Processing;
-using System.IO;
-using System.Windows.Controls;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Windows;
-using System.Drawing.Imaging;
-using ModdingManager.classes.args;
-using System.Text.RegularExpressions;
+﻿using ModdingManager.classes.args;
 using ModdingManager.managers.@base;
-using ModdingManager.classes.extentions;
+using System.Drawing;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 namespace ModdingManager.classes.managers.gfx
 {
     public static class ImageManager
@@ -90,7 +77,7 @@ namespace ModdingManager.classes.managers.gfx
             return Properties.Resources.null_item_image;
         }
 
-        
+
         public static ImageSource GetCombinedImages(List<ImageSourceArg> images, int width, int height)
         {
             if (images == null || images.Count == 0)

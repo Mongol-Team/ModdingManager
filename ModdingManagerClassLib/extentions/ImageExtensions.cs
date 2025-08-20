@@ -1,19 +1,14 @@
 ﻿
 using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
-using ModdingManager.classes.managers.gfx;
-using ModdingManager.classes.utils.fonts;
-using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using System.Drawing.Imaging;
-using System.IO;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Xml.Linq;
 using TeximpNet;
 using TeximpNet.DDS;
 
@@ -49,7 +44,7 @@ namespace ModdingManager.classes.extentions
             }
         }
 
-        
+
 
         public static void SaveAsDDS(this Image<Rgba32> image, string fullPath)
         {
@@ -202,7 +197,7 @@ namespace ModdingManager.classes.extentions
                 emptyFlag.Mutate(x => x.BackgroundColor(new Rgba32(255, 0, 255, 255)));
                 return emptyFlag;
             }
-            
+
             using (var ms = new MemoryStream())
             {
                 systemDrawingImage.Save(ms, System.Drawing.Imaging.ImageFormat.Png);

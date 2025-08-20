@@ -1,14 +1,8 @@
-﻿using ModdingManager.classes.utils.types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
-namespace ModdingManager.classes.configs
+namespace ModdingManagerModels
 {
-    public class StateConfig
+    public class StateConfig : IModel
     {
         [JsonIgnore]
         public List<ProvinceConfig> Provinces { get; set; }

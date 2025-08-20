@@ -1,4 +1,4 @@
-﻿using ModdingManager.configs;
+﻿using ModdingManager.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
