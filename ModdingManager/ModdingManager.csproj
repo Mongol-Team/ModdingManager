@@ -36,6 +36,7 @@
     <Folder Include="data\configs\techtrees\" />
     <Folder Include="data\configs\templates\" />
     <Folder Include="data\temp\" />
+    <Folder Include="Model\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,6 +55,7 @@
 	<None Remove="graphics\controls\color_spectrum.jpg" />
 	<None Remove="graphics\controls\err.png" />
 	<None Remove="graphics\controls\warn.png" />
+	<ProjectReference Include="..\ModdingManagerClassLib\ModdingManagerClassLib.csproj" />
 	<Resource Include="data\gfx\interface\healer.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
@@ -98,7 +100,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Update="TechTreeCreator.xaml.cs">
+    <Compile Update="View\TechTreeCreator.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
