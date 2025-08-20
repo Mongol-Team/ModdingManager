@@ -23,7 +23,6 @@ namespace ModdingManager
             _presenter = new CountryPresenter(this);
         }
 
-        // Реализация ICountryView
         public string Tag
         {
             get => TagBox.Text;

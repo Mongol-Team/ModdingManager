@@ -423,7 +423,7 @@ public class CountryHandler
                 if (this.CurrentConfig.Color != System.Windows.Media.Color.FromRgb(0, 0, 2))
                 {
                     System.Windows.Media.Color color = this.CurrentConfig.Color ?? System.Windows.Media.Color.FromRgb(0, 0, 2);
-                    writer.WriteLine($"color = {{ {color.R} {color.G} {color.B} }}");
+                    writer.WriteLine($"color = rgb {{ {color.R} {color.G} {color.B} }}");
                 }
 
                 MessageBox.Show($"Файл страны успешно создан: {filePath}", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -451,7 +451,6 @@ public class CountryHandler
 
             foreach (var pair in this.CurrentConfig.CountryFlags)
             {
-                // Создаём поддиректорию для флагов конкретной идеологии, если нужно
                 string ideologySubdir = Path.Combine(flagsDir, $"{countryTag}_{pair.Key}.png");
                 string ideologyDir = Path.GetDirectoryName(ideologySubdir);
                 if (!string.IsNullOrEmpty(ideologyDir))
