@@ -1,5 +1,5 @@
 ﻿using ModdingManager.classes.args;
-using ModdingManager.classes.configs;
+using ModdingManagerModels;
 using OpenCvSharp;
 
 namespace ModdingManager.classes.extentions

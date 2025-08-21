@@ -1,9 +1,7 @@
 ﻿using ModdingManager.classes.utils.search;
-using ModdingManager.classes.utils.types;
 using ModdingManager.managers.@base;
-using NAudio.Dmo.Effect;
+using ModdingManagerModels.Types;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Text;
 namespace ModdingManager.classes.cache.data
 {

@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Drawing;
+using System.Text.Json.Serialization;
 
 namespace ModdingManagerModels
 {
@@ -8,6 +9,6 @@ namespace ModdingManagerModels
         public string Name { get; set; }
         [JsonIgnore]
         public string Tag { get; set; }
-        public System.Windows.Media.Color Color { get; set; }
+        public Color Color { get; set; }
     }
 }

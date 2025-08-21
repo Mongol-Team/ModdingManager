@@ -1,4 +1,4 @@
-﻿using ModdingManager.classes.configs;
+﻿using System.Drawing;
 using System.Text.Json.Serialization;
 
 namespace ModdingManagerModels
@@ -10,7 +10,7 @@ namespace ModdingManagerModels
         public int? Capital { get; set; }
         public string? CountryFileName { get; set; }
         public string? GraphicalCulture { get; set; }
-        public System.Windows.Media.Color? Color { get; set; }
+        public Color? Color { get; set; }
         public Dictionary<string, int>? Technologies { get; set; }
         public int? Convoys { get; set; }
         public string? OOB { get; set; }
@@ -23,7 +23,7 @@ namespace ModdingManagerModels
         public bool? ElectionsAllowed { get; set; }
         [JsonIgnore]
         public List<StateConfig> States { get; set; }
-        public Dictionary<string, ImageSource>? CountryFlags { get; set; }
+        //public Dictionary<string, ImageSource>? CountryFlags { get; set; }
         public Dictionary<string, int>? PartyPopularities { get; set; }
         public List<string>? Ideas { get; set; } = new List<string>();
         public List<string>? Characters { get; set; } = new List<string>();

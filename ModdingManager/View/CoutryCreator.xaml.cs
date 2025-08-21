@@ -34,8 +34,9 @@ namespace ModdingManager
             get => CountryDescNameBox.Text;
             set => CountryDescNameBox.Text = value;
         }
-        public string? CountryFileName { 
-            get => CountryFileNameBox.SelectedItem.ToString(); 
+        public string? CountryFileName
+        {
+            get => CountryFileNameBox.SelectedItem.ToString();
             set => CountryFileNameBox.SelectedItem = value;
         }
         public int? Capital
@@ -55,12 +56,12 @@ namespace ModdingManager
             get => GraficalCultureBox.Text;
             set => GraficalCultureBox.Text = value;
         }
-        public Dictionary<string,int>? Technologies
+        public Dictionary<string, int>? Technologies
         {
             get
             {
                 var list = TechnologiesBox.GetLines();
-                var result = new Dictionary<string,int>();
+                var result = new Dictionary<string, int>();
                 foreach (var i in list)
                 {
                     var parts = i.Split(':');
@@ -72,7 +73,7 @@ namespace ModdingManager
                 }
                 return result;
             }
-            set 
+            set
             {
                 var result = new List<string>();
                 foreach (var i in value)
@@ -80,7 +81,7 @@ namespace ModdingManager
                     result.Add($"{i.Value}:{i.Key}");
                 }
                 TechnologiesBox.SetLines(result);
-            } 
+            }
         }
         public int? Convoys
         {
@@ -101,7 +102,7 @@ namespace ModdingManager
 
         public double? WarSup
         {
-            get => double.TryParse(WarSupBox.Text, out double result) ? result / 100: 0;
+            get => double.TryParse(WarSupBox.Text, out double result) ? result / 100 : 0;
             set => WarSupBox.Text = (value * 100).ToString();
         }
 
@@ -148,7 +149,7 @@ namespace ModdingManager
                     if (parts.Length == 2 && int.TryParse(parts[1], out int popularity))
                     {
                         var ideo = Registry.Instance.GetIdeology(parts[0]);
-                        result[ideo.Id] = popularity != null ? popularity: 0  ;
+                        result[ideo?.Id] = popularity != null ? popularity : 0;
                     }
                 }
                 return result;
@@ -214,13 +215,13 @@ namespace ModdingManager
         {
             get
             {
-                Dictionary<string, ImageSource> result = new Dictionary<string, ImageSource>(); 
+                Dictionary<string, ImageSource> result = new Dictionary<string, ImageSource>();
                 foreach (var wrap in CountryFlagsCanvas.Children)
                 {
                     Canvas canvasWrap = wrap as Canvas;
                     var ideo = Registry.Instance.GetIdeology(canvasWrap.Name);
                     var image = (canvasWrap.Children.GetByName(canvasWrap.Name + "Img") as System.Windows.Controls.Image).Source;
-                    result[ideo.Id] = image;
+                    result[ideo?.Id] = image;
                 }
                 return result;
             }
@@ -311,7 +312,7 @@ namespace ModdingManager
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            List<string> lines = new List<string>(); 
+            List<string> lines = new List<string>();
             foreach (var i in Registry.Instance.Ideologies)
             {
                 // Создаём контейнер Canvas, аналогичный XAML
@@ -350,7 +351,7 @@ namespace ModdingManager
 
             CountryFileNameBox.ItemsSource = ModManager.LoadCountryFileNames();
         }
-      
+
 
         private void TechIconCanvas_Drop(object sender, System.Windows.DragEventArgs e)
         {
@@ -382,7 +383,7 @@ namespace ModdingManager
         private void RullingPartyBox_Loaded(object sender, RoutedEventArgs e)
         {
             List<string> strings = new List<string>();
-            foreach(var ideo in Registry.Instance.Ideologies)
+            foreach (var ideo in Registry.Instance.Ideologies)
             {
                 strings.Add(ideo.Id);
             }

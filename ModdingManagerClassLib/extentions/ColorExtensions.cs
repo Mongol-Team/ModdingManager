@@ -6,5 +6,9 @@
         {
             return System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
         }
+        public static System.Drawing.Color ToDrawingColor(this System.Windows.Media.Color color)
+        {
+            return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+        }
     }
 }

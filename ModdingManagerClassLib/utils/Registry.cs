@@ -2,17 +2,12 @@
 using ModdingManager.classes.configs;
 using ModdingManager.classes.managers.gfx;
 using ModdingManager.classes.utils.search;
-using ModdingManager.classes.utils.types;
-using ModdingManager.Models;
 using ModdingManager.managers.@base;
-using OpenCvSharp;
-using System;
-using System.Collections.Generic;
+using ModdingManagerModels;
+using ModdingManagerModels.Types;
+using System.Drawing;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace ModdingManager.classes.utils
@@ -24,13 +19,13 @@ namespace ModdingManager.classes.utils
         public static Registry Instance => _instance ??= new Registry();
         public LocalisationCache LocCache { get; set; }
         public MapCache MapCache { get; set; }
-        public  List<RegimentConfig> Regiments { get; set; }
-        public  List<CountryConfig> Countries { get; set; }
-        public  List<IdeaConfig> Ideas { get; set; }
-        public  List<string> Modifiers { get; set; }
-        public  MapConfig Map { get; set; }
-        public  List<CountryCharacterConfig> Characters { get; set; }
-        public  List<IdeologyConfig> Ideologies { get; set; }
+        public List<RegimentConfig> Regiments { get; set; }
+        public List<CountryConfig> Countries { get; set; }
+        public List<IdeaConfig> Ideas { get; set; }
+        public List<string> Modifiers { get; set; }
+        public MapConfig Map { get; set; }
+        public List<CountryCharacterConfig> Characters { get; set; }
+        public List<IdeologyConfig> Ideologies { get; set; }
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -176,7 +171,7 @@ namespace ModdingManager.classes.utils
                         Terrain = parts[6],
                         ContinentId = int.Parse(parts[7])
                     };
-                    
+
                     if (province.Type.Equals("sea", StringComparison.OrdinalIgnoreCase))
                         seaProvinces.Add(province);
                     else
@@ -203,7 +198,7 @@ namespace ModdingManager.classes.utils
 
             foreach (string folder in priorityFolders)
             {
-                if (!Directory.Exists(folder)) 
+                if (!Directory.Exists(folder))
                     continue;
 
                 string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
@@ -276,7 +271,6 @@ namespace ModdingManager.classes.utils
                                 continue;
                             if (idVar.Value.ToString() == "2")
                             {
-                                var brp = 1;
                             }
                             var nameVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "name");
                             string internalName = nameVar?.Value?.ToString().Trim('"');
@@ -299,6 +293,10 @@ namespace ModdingManager.classes.utils
                             var buildings = historyBracket.SubBrackets.FirstOrDefault(b => b.Header == "buildings")?.SubVars;
                             double.TryParse(stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supplies")?.Value as string, NumberStyles.Float, CultureInfo.InvariantCulture, out double localSupply);
                             var cathegory = stateBracket.SubVars.FirstOrDefault(v => v.Name == "state_category")?.Value.ToString();
+
+                            if (buildings == null) throw new Exception("Buildings equals null.");
+
+
                             stateMap[id] = new StateConfig
                             {
                                 Id = id,
@@ -312,7 +310,7 @@ namespace ModdingManager.classes.utils
                                 Cathegory = cathegory,
                             };
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             Debugger.Instance.LogMessage(ex.Message + $"\n {stateBracket.ToString()}");
                         }
@@ -387,7 +385,7 @@ namespace ModdingManager.classes.utils
                             country = new CountryOnMapConfig
                             {
                                 Tag = ownerTag,
-                                Color = color,
+                                Color = color.ToDrawingColor(),
                                 States = new List<StateConfig>()
                             };
                             countries.Add(country);
@@ -556,7 +554,7 @@ namespace ModdingManager.classes.utils
                                 if (province.VictoryPoints != victoryPoints)
                                 {
                                     province.VictoryPoints = victoryPoints;
-                                    
+
                                 }
                             }
                         }
@@ -627,8 +625,8 @@ namespace ModdingManager.classes.utils
         }
         private static void GetStateNames(List<StateConfig> states)
         {
-            List<Var> stateLocals = new (_instance.LocCache.StateLocalisation);
-            List<Var> allCache = new (_instance.LocCache.AllCache);
+            List<Var> stateLocals = new(_instance.LocCache.StateLocalisation);
+            List<Var> allCache = new(_instance.LocCache.AllCache);
 
             var stateLookup = stateLocals.ToDictionary(v => v.Name, v => v.Value.ToString(), StringComparer.OrdinalIgnoreCase);
             var allLookup = allCache.ToDictionary(v => v.Name, v => v.Value.ToString(), StringComparer.OrdinalIgnoreCase);

@@ -1,6 +1,6 @@
 ﻿using ModdingManager.classes.managers.@base;
 using ModdingManager.classes.views;
-using ModdingManager.Models;
+using ModdingManagerModels;
 using System.Windows;
 
 public class CountryPresenter

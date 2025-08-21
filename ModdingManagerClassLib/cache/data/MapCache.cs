@@ -1,10 +1,6 @@
 ﻿using ModdingManager.classes.cache.cachedFiles;
-using ModdingManager.classes.utils.types;
 using ModdingManager.managers.@base;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using ModdingManagerModels.Types;
 
 namespace ModdingManager.classes.cache.data
 {
@@ -111,7 +107,7 @@ namespace ModdingManager.classes.cache.data
 
         #region Definition Files Management
 
-       
+
         #endregion
 
         #region Province Index Management

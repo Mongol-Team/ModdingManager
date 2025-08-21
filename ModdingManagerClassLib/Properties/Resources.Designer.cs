@@ -59,35 +59,5 @@ namespace ModdingManagerClassLib.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] color_spectrum {
-            get {
-                object obj = ResourceManager.GetObject("color_spectrum", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] err {
-            get {
-                object obj = ResourceManager.GetObject("err", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] warn {
-            get {
-                object obj = ResourceManager.GetObject("warn", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }

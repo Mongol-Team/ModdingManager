@@ -1,7 +1,7 @@
 ﻿using ModdingManager.classes.extentions;
 using ModdingManager.classes.utils.fonts;
-using ModdingManager.Models;
 using ModdingManager.managers.@base;
+using ModdingManagerModels;
 using System.Diagnostics;
 using System.Text;
 using System.Windows;

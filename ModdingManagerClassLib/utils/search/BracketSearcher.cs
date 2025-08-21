@@ -1,9 +1,5 @@
 ﻿using ModdingManager.classes.functional.search;
-using ModdingManager.classes.utils.types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using ModdingManagerModels.Types;
 
 public class BracketSearcher : Searcher
 {

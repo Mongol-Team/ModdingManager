@@ -1,16 +1,11 @@
 using ModdingManager.classes.controls;
 using ModdingManager.classes.utils;
-using ModdingManager.Models;
 using ModdingManager.managers.@base;
-using System;
-using System.Drawing;
+using ModdingManagerModels;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Forms.Integration;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using MessageBox = System.Windows.Forms.MessageBox;
 namespace ModdingManager
 {

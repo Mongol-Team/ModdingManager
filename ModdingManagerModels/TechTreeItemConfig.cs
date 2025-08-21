@@ -21,7 +21,7 @@ namespace ModdingManagerModels
         public string AiWillDo { get; set; }
         public List<string> Dependencies { get; set; }
         [JsonIgnore]
-        public ImageSource Image { get; set; }
+        //public ImageSource Image { get; set; }
         public byte[] ImageData { get; set; }
     }
 }

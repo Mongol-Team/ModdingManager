@@ -1,21 +1,17 @@
-﻿using ModdingManager.classes.extentions;
+﻿using ModdingManager.classes.configs;
 using ModdingManager.classes.utils;
-using ModdingManager.Models;
 using ModdingManager.managers.@base;
-using System;
-using System.Collections.Generic;
+using ModdingManagerModels;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+using System.Windows;
+using MessageBox = System.Windows.MessageBox;
 
 
 public class CountryHandler
 {
-    public CountryConfig CurrentConfig { get;  set; }
-    public  void CreateLocalizationFiles()
+    public CountryConfig CurrentConfig { get; set; }
+    public void CreateLocalizationFiles()
     {
         try
         {
@@ -24,7 +20,7 @@ public class CountryHandler
             Directory.CreateDirectory(ruLocPath);
             Directory.CreateDirectory(enLocPath);
 
-            string ruContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_russian", this.CurrentConfig.Name , this.CurrentConfig.RulingParty);
+            string ruContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_russian", this.CurrentConfig.Name, this.CurrentConfig.RulingParty);
             string enContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_english", this.CurrentConfig.Name, this.CurrentConfig.RulingParty);
 
             string ruFilePath = Path.Combine(ruLocPath, $"{this.CurrentConfig.Tag}_history_l_russian.yml");
@@ -34,12 +30,12 @@ public class CountryHandler
             File.WriteAllText(enFilePath, enContent, new UTF8Encoding(true));
 
             MessageBox.Show("Файлы локализации успешно созданы!", "Успех",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
             MessageBox.Show($"Ошибка создания файлов локализации: {ex.Message}", "Ошибка",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -53,7 +49,7 @@ public class CountryHandler
             sb.AppendLine($" {tag}_{i.Id}: \"\"");
             sb.AppendLine($" {tag}_{i.Id}_DEF: \"\"");
         }
-            
+
         sb.AppendLine($" {tag}: \"{name}\"");
         sb.AppendLine($" {tag}_DEF: \"\"");
         sb.AppendLine($" {tag}_ADJ: \"\"");
@@ -64,7 +60,7 @@ public class CountryHandler
     {
         if (this.CurrentConfig.Tag.Length != 3)
         {
-            MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -98,7 +94,7 @@ public class CountryHandler
                 string content = File.ReadAllText(specificTagFilePath);
                 if (content.Contains($"{countryTag} ="))
                 {
-                    MessageBox.Show($"Тег {countryTag} уже существует в файле {Path.GetFileName(specificTagFilePath)}!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show($"Тег {countryTag} уже существует в файле {Path.GetFileName(specificTagFilePath)}!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -122,7 +118,7 @@ public class CountryHandler
                     string content = File.ReadAllText(tagFile);
                     if (content.Contains($"{countryTag} ="))
                     {
-                        MessageBox.Show($"Тег {countryTag} уже существует в файле тегов!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show($"Тег {countryTag} уже существует в файле тегов!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
 
@@ -135,7 +131,7 @@ public class CountryHandler
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Ошибка при добавлении тега страны:\n{ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Ошибка при добавлении тега страны:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -143,7 +139,7 @@ public class CountryHandler
     {
         if (string.IsNullOrWhiteSpace(this.CurrentConfig.Tag) || this.CurrentConfig.Tag.Length != 3)
         {
-            MessageBox.Show("Не указаны стейты или тег страны неверный!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Не указаны стейты или тег страны неверный!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -181,7 +177,7 @@ public class CountryHandler
                 }
                 else
                 {
-                    MessageBox.Show($"Файл штата с ID {stateId} не найден ни в моде, ни в игре.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show($"Файл штата с ID {stateId} не найден ни в моде, ни в игре.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                     continue;
                 }
             }
@@ -254,24 +250,24 @@ public class CountryHandler
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка при обработке штата {stateId}: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Ошибка при обработке штата {stateId}: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        MessageBox.Show("Обновление владельцев штатов завершено!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show("Обновление владельцев штатов завершено!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     public void CreateCountryHistoryFile()
     {
         if (this.CurrentConfig.Tag.Length != 3)
         {
-            MessageBox.Show("Тег страны должен состоять из 3 символов (например, ANG).", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Тег страны должен состоять из 3 символов (например, ANG).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
         if (string.IsNullOrEmpty(this.CurrentConfig.RulingParty))
         {
-            MessageBox.Show($"Не достаточно информации про страну: Правящая партия = {this.CurrentConfig.RulingParty}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Не достаточно информации про страну: Правящая партия = {this.CurrentConfig.RulingParty}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -302,8 +298,8 @@ public class CountryHandler
 
                     foreach (var techLine in this.CurrentConfig.Technologies)
                     {
-                           
-                            writer.WriteLine($"\t{techLine.Key} = {techLine.Value}");
+
+                        writer.WriteLine($"\t{techLine.Key} = {techLine.Value}");
 
                     }
 
@@ -385,23 +381,23 @@ public class CountryHandler
                 }
             }
 
-            MessageBox.Show($"Файл истории страны успешно создан: {filePath}", "Готово", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"Файл истории страны успешно создан: {filePath}", "Готово", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Ошибка при создании файла: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Ошибка при создании файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
     public void CreateCommonCountriesFile()
     {
         if (this.CurrentConfig.Tag.Length != 3)
         {
-            MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
         if (string.IsNullOrEmpty(this.CurrentConfig.GraphicalCulture))
         {
-            MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
         string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
@@ -420,25 +416,25 @@ public class CountryHandler
                     writer.WriteLine();
                 }
 
-                if (this.CurrentConfig.Color != System.Windows.Media.Color.FromRgb(0, 0, 2))
+                if (this.CurrentConfig.Color != System.Drawing.Color.FromArgb(0, 0, 2))
                 {
-                    System.Windows.Media.Color color = this.CurrentConfig.Color ?? System.Windows.Media.Color.FromRgb(0, 0, 2);
+                    System.Windows.Media.Color color = (this.CurrentConfig.Color ?? System.Drawing.Color.FromArgb(0, 0, 2)).ToMediaColor();
                     writer.WriteLine($"color = rgb {{ {color.R} {color.G} {color.B} }}");
                 }
 
-                MessageBox.Show($"Файл страны успешно создан: {filePath}", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Файл страны успешно создан: {filePath}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Ошибка при создании файла: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Ошибка при создании файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
     public void CreateCountryFlags()
     {
         if (this.CurrentConfig.Tag.Length != 3)
         {
-            MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -449,21 +445,22 @@ public class CountryHandler
         {
             Directory.CreateDirectory(flagsDir);
 
-            foreach (var pair in this.CurrentConfig.CountryFlags)
-            {
-                string ideologySubdir = Path.Combine(flagsDir, $"{countryTag}_{pair.Key}.png");
-                string ideologyDir = Path.GetDirectoryName(ideologySubdir);
-                if (!string.IsNullOrEmpty(ideologyDir))
-                    Directory.CreateDirectory(ideologyDir);
+            //OTM
+            //foreach (var pair in this.CurrentConfig.CountryFlags)
+            //{
+            //    string ideologySubdir = Path.Combine(flagsDir, $"{countryTag}_{pair.Key}.png");
+            //    string ideologyDir = Path.GetDirectoryName(ideologySubdir);
+            //    if (!string.IsNullOrEmpty(ideologyDir))
+            //        Directory.CreateDirectory(ideologyDir);
 
-                pair.Value.ToDrawingDotImage().SaveFlagSet(flagsDir, countryTag, pair.Key);
-            }
+            //    pair.Value.ToDrawingDotImage().SaveFlagSet(flagsDir, countryTag, pair.Key);
+            //}
 
-            MessageBox.Show($"Флаги страны {countryTag} успешно созданы в {flagsDir}", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show($"Флаги страны {countryTag} успешно созданы в {flagsDir}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Ошибка при создании флагов: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show($"Ошибка при создании флагов: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

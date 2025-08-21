@@ -1,10 +1,7 @@
 ﻿using ModdingManager.classes.functional.search;
-using ModdingManager.classes.utils.types;
-using System.Collections.Generic;
-using System.IO;
+using ModdingManagerModels.Types;
 using System.Text;
 using System.Text.RegularExpressions;
-using static System.Windows.Forms.DataFormats;
 
 public class FileSearcher : Searcher
 {

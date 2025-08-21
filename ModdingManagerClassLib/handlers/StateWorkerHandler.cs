@@ -1,22 +1,12 @@
 ﻿using ModdingManager.classes.args;
-using ModdingManager.classes.configs;
 using ModdingManager.classes.utils;
-using ModdingManager.classes.utils.search;
-using ModdingManager.classes.utils.types;
 using ModdingManager.managers.@base;
-using ModdingManager.managers.@base;
+using ModdingManagerModels;
+using ModdingManagerModels.Types;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
-using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection.Metadata;
 using System.Text;
-using System.Windows.Forms;
-using System.Windows.Media;
-using System.Windows.Shapes;
 using Path = System.IO.Path;
 
 
@@ -69,7 +59,7 @@ public class StateWorkerHandler
 
                 if (!isSimple)
                 {
-                    
+
                     Cv2.FindContours(mask, out contours, out _,
                         RetrievalModes.External, ContourApproximationModes.ApproxNone);
 
@@ -98,7 +88,7 @@ public class StateWorkerHandler
                 Debugger.Instance.LogMessage($"🔥 Ошибка при обработке провинции {province.Id}: {ex.Message}");
             }
         });
-        
+
         timer.Stop();
         Debugger.Instance.LogMessage("\n====================================");
         Debugger.Instance.LogMessage($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
@@ -360,7 +350,7 @@ public class StateWorkerHandler
 
             string vpLine = $"{province.Id} {province.VictoryPoints}";
             var victoryPointsBrackets = historyBracket.SubBrackets.Where(b => b.Header == "victory_points");
-            if (victoryPointsBrackets == null )
+            if (victoryPointsBrackets == null)
             {
                 var victoryPointsBracket = new Bracket { Header = "victory_points" };
                 victoryPointsBracket.AddContent(vpLine);
@@ -374,7 +364,7 @@ public class StateWorkerHandler
                 {
                     currentBracket.Content.Clear();
                     currentBracket.Content.Add(vpLine);
-                    
+
                 }
                 else
                 {
@@ -392,11 +382,11 @@ public class StateWorkerHandler
     }
     public void ChangeStrategicRegion(StrategicRegionConfig region)
     {
-        
+
     }
     public void ChangeCountry(CountryOnMapConfig country)
     {
-        
+
     }
     public void MoveProvinceToState(int? provinceId, StateConfig? currentState, StateConfig targetState)
     {

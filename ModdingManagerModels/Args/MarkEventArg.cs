@@ -1,6 +1,4 @@
-﻿using ModdingManager.classes.configs;
-
-namespace ModdingManagerModels.Args
+﻿namespace ModdingManagerModels.Args
 {
     public class MarkEventArg
     {
