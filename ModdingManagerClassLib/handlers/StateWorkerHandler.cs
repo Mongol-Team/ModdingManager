@@ -1,7 +1,7 @@
-﻿using ModdingManager.classes.args;
-using ModdingManager.classes.utils;
+﻿using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
 using ModdingManagerModels;
+using ModdingManagerModels.Args;
 using ModdingManagerModels.Types;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
@@ -76,9 +76,9 @@ public class StateWorkerHandler
                 // 5. Заполняем Shape (берём ВСЕ точки контура)
                 province.Shape = new ProvinceShapeArg
                 {
-                    ContourPoints = mainContour.Select(p => new System.Windows.Point(p.X, p.Y)).ToArray(),
-                    Pos = new System.Windows.Point(moments.M10 / moments.M00, moments.M01 / moments.M00),
-                    FillColor = System.Windows.Media.Color.FromArgb(255, province.Color.R, province.Color.G, province.Color.B)
+                    ContourPoints = mainContour.Select(p => new System.Drawing.Point(p.X, p.Y)).ToArray(),
+                    Pos = new System.Drawing.Point((int)(moments.M10 / moments.M00), (int)(moments.M01 / moments.M00)),
+                    FillColor = System.Drawing.Color.FromArgb(255, province.Color.R, province.Color.G, province.Color.B)
                 };
 
                 Interlocked.Increment(ref successCount);

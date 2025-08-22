@@ -1,5 +1,5 @@
-﻿using ModdingManager.classes.args;
-using ModdingManager.classes.controls;
+﻿using ModdingManager.classes.controls;
+using ModdingManagerModels.Args;
 using System.Windows;
 using System.Windows.Controls;
 

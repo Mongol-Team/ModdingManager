@@ -1,9 +1,4 @@
-﻿using ModdingManager.classes.args;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ModdingManagerModels.Args;
 using System.Windows;
 
 namespace ModdingManager.classes.metadata

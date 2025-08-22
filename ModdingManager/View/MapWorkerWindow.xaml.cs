@@ -1,22 +1,13 @@
-﻿using ModdingManager.classes.args;
-using ModdingManager.classes.configs;
-using ModdingManager.classes.controls;
+﻿using ModdingManager.classes.controls;
 using ModdingManager.classes.utils;
 using ModdingManager.classes.views;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ModdingManagerModels;
+using ModdingManagerModels.Args;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Control = System.Windows.Controls.Control;
 using Cursors = System.Windows.Input.Cursors;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
@@ -137,7 +128,7 @@ namespace ModdingManager
         private ProvinceConfig _draggedProvince;
         private System.Windows.Point _dragStartPoint;
 
-        
+
 
         private void Display_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -356,7 +347,7 @@ namespace ModdingManager
         {
             MapChanged?.Invoke(CurrentMapLayer);
         }
-        
+
         private void ProvinceLayerButton_Click(object sender, RoutedEventArgs e)
         {
             CurrentMapLayer = "PROVINCE";
@@ -388,6 +379,6 @@ namespace ModdingManager
 
         #endregion
 
-        
+
     }
 }

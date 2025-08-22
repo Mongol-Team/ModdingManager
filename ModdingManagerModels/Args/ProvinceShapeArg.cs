@@ -2,6 +2,7 @@
 
 namespace ModdingManagerModels.Args
 {
+
     public class ProvinceShapeArg
     {
         public Point[] ContourPoints { get; set; }  // точки в оригинальном масштабе

@@ -1,21 +1,8 @@
 ﻿using ModdingManager.classes.cache.cachedFiles;
 using ModdingManager.classes.controls;
 using ModdingManager.classes.utils;
-using ModdingManager.classes.utils.types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ModdingManagerModels.Types;
 using System.Windows;
-using System.IO;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ModdingManager
 {
@@ -146,7 +133,7 @@ namespace ModdingManager
                 }
             }
 
-         
+
             string filePath = Registry.Instance.MapCache.MapDefinitionCache.FilePath;
             DefinitionCachedFile defFile = Registry.Instance.MapCache.MapDefinitionCache;
             bool modified = false;
@@ -172,7 +159,7 @@ namespace ModdingManager
             {
                 mapCache.MarkDefinitionFileDirty(filePath);
             }
-            
+
 
             mapCache.SaveAllDirtyFiles();
             Debugger.Instance.LogMessage("Cleanup of non-existing province links completed.");
@@ -323,7 +310,7 @@ namespace ModdingManager
                     errorPanel.AddError(ErrorType.Warning, msg, filePath);
                 }
             }
-            
+
 
             Debugger.Instance.LogMessage("Province defines check completed.");
         }
@@ -542,8 +529,8 @@ namespace ModdingManager
 
             Debugger.Instance.LogMessage("State defines check completed.");
         }
-    
-    
+
+
         private void CheckProvDefines_Click(object sender, RoutedEventArgs e)
         {
             ErrorPanel errorPanel = new ErrorPanel();

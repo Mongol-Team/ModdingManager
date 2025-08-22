@@ -1,5 +1,4 @@
-﻿using ModdingManager.classes.managers.@base;
-using ModdingManager.classes.views;
+﻿using ModdingManager.classes.views;
 using ModdingManagerModels;
 using System.Windows;
 

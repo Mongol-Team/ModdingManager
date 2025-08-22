@@ -59,5 +59,15 @@ namespace ModdingManagerClassLib.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap null_item_image {
+            get {
+                object obj = ResourceManager.GetObject("null_item_image", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

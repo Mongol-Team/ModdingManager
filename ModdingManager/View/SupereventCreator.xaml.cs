@@ -1,8 +1,6 @@
 ﻿using ModdingManager.classes.controls;
 using ModdingManager.classes.extentions;
-using ModdingManager.classes.handlers;
-using ModdingManager.Models;
-using ModdingManager.managers;
+using ModdingManagerModels.SuperEventModels;
 using NAudio.Wave;
 using System.IO;
 using System.Windows;
@@ -13,8 +11,6 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Brushes = System.Windows.Media.Brushes;
-using Color = System.Windows.Media.Color;
 using FontFamily = System.Windows.Media.FontFamily;
 using RichTextBox = System.Windows.Controls.RichTextBox;
 using TextBox = System.Windows.Controls.TextBox;
@@ -95,7 +91,7 @@ namespace ModdingManager
             MainCanvas.MouseLeave += MainCanvas_MouseLeave;
         }
 
-        
+
 
         private UIElement GetTopLevelChild(UIElement hit)
         {
@@ -148,7 +144,7 @@ namespace ModdingManager
             return true;
         }
 
-        
+
 
         private void ResizeElement(UIElement element, Vector delta, ResizeDirection direction)
         {
@@ -229,7 +225,7 @@ namespace ModdingManager
             startPoint = currentPosition;
         }
 
-       
+
 
         private UIElement GetElementUnderMouse(System.Windows.Point position)
         {
@@ -297,7 +293,7 @@ namespace ModdingManager
             };
         }
 
-        
+
 
         private void ResizeContainer(UIElement element, Vector delta, ResizeDirection direction)
         {
@@ -436,7 +432,7 @@ namespace ModdingManager
 
 
         private void AdjustCanvasSizeToImage()
-        { 
+        {
             if (SupereventFrame.Source is BitmapSource original)
             {
                 var formattedBitmap = new FormatConvertedBitmap(original, PixelFormats.Bgra32, null, 0);
@@ -451,19 +447,19 @@ namespace ModdingManager
                     GetPixels(formattedBitmap),
                     formattedBitmap.PixelWidth * (formattedBitmap.Format.BitsPerPixel / 8)
                 );
-                SupereventFrame.Source = fixedBitmap; 
+                SupereventFrame.Source = fixedBitmap;
                 MainCanvas.Width = fixedBitmap.PixelWidth;
                 MainCanvas.Height = fixedBitmap.PixelHeight;
             }
         }
 
-     
-        
+
+
         public MediaPlayer mediaPlayer = new MediaPlayer();
         public bool isPlaying = false;
         public string selectedAudioPath;
         public string currentTempAudioPath = null;
-        
+
 
         private byte[] GetPixels(BitmapSource source)
         {
@@ -775,7 +771,7 @@ namespace ModdingManager
         }
         private void DoneConfigButton_Click(object sender, RoutedEventArgs e)
         {
-            if(!string.IsNullOrEmpty(CurrentConfig.Id))
+            if (!string.IsNullOrEmpty(CurrentConfig.Id))
             {
                 UpdateConfigButton_Click(sender, e);
                 HandlerInstance = new() { CurrentConfig = CurrentConfig };
