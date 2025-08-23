@@ -1,5 +1,4 @@
-﻿
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace ModdingManagerClassLib.Debugging
 {
@@ -13,12 +12,69 @@ namespace ModdingManagerClassLib.Debugging
     public struct Logger
     {
         private static readonly object _logLock = new object();
+
+        // буфер теперь хранит "сырые" данные
+        private class LogEntry
+        {
+            public string Message { get; set; } = "";
+            public ConsoleColor Color { get; set; }
+            public int LogLevel { get; set; }
+            public string MessageType { get; set; } = "UNK";
+            public string Caller { get; set; } = "";
+            public string File { get; set; } = "";
+            public int Line { get; set; }
+            public DateTime Time { get; set; }
+            public int Depth { get; set; }
+            public int ThreadId { get; set; }
+        }
+
+        private static readonly List<LogEntry> _buffer = new List<LogEntry>();
+
         public static int LoggingLevel { get; set; } = 0; // 0 - no logging, 1 - only error, 2 - warnings, 3 - all
         public static int depth = 0;
         public const ConsoleColor _DEFAULT_OUTLINE_COLOR = ConsoleColor.Cyan;
         public static ConsoleColor outline_color = ConsoleColor.Cyan;
         public static string WarnSymbol = "⚠️";
         public static string ErrorSymbol = "❌";
+
+        private static bool HasConsole =>
+            Console.OpenStandardOutput(1) != Stream.Null;
+
+        public static void FlushBuffer()
+        {
+            if (!HasConsole) return;
+
+            lock (_logLock)
+            {
+                foreach (var entry in _buffer)
+                    PrintToConsole(entry);
+
+                _buffer.Clear();
+            }
+        }
+
+        private static void PrintToConsole(LogEntry entry)
+        {
+            string time = entry.Time.ToString("yyyy-MM-dd HH:mm:ss");
+            string offset = "";
+
+            for (int q = 0; q < entry.Depth; q++)
+                offset += " |";
+            if (entry.Depth > 0)
+                offset += "->";
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write($"[{time}]");
+            Console.ForegroundColor = outline_color;
+            Console.Write($"{offset}");
+            Console.ForegroundColor = entry.Color;
+            Console.Write($"{entry.Message} ");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write($"[{entry.MessageType}][{entry.ThreadId}][{entry.Caller} @ {entry.File}:{entry.Line}]");
+            Console.WriteLine();
+            Console.ResetColor();
+        }
+
         public static async Task AddLog(
             string message,
             ConsoleColor color,
@@ -30,57 +86,57 @@ namespace ModdingManagerClassLib.Debugging
         {
             await Task.Yield();
 
-
             if (LoggingLevel >= log_level)
             {
-                string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 string fileShort = System.IO.Path.GetFileName(file);
-
-                string offset = "";
-
-                for (int q = 0; q < depth; q++)
-                    offset += " |";
-                if (depth > 0)
-                    offset += "->";
-                else if (color == ConsoleColor.White)
-                    color = outline_color;
-
-
-                int thread_id = Thread.CurrentThread.ManagedThreadId;
 
                 if (message.Contains(WarnSymbol))
                     color = ConsoleColor.Yellow;
                 if (message.Contains(ErrorSymbol))
                     color = ConsoleColor.Red;
 
+                var entry = new LogEntry
+                {
+                    Message = message,
+                    Color = color,
+                    LogLevel = log_level,
+                    MessageType = message_type,
+                    Caller = caller,
+                    File = fileShort,
+                    Line = line,
+                    Time = DateTime.Now,
+                    Depth = depth,
+                    ThreadId = Thread.CurrentThread.ManagedThreadId
+                };
+
                 lock (_logLock)
                 {
-                                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write($"[{time}]");
-                    Console.ForegroundColor = outline_color;
-                    Console.Write($"{offset}");
-                    Console.ForegroundColor = color;
-                    Console.Write($"{message} ");
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write($"[{message_type}][{thread_id}][{caller} @ {fileShort}:{line}]");
-                    Console.WriteLine();
-                    Console.ResetColor();
+                    if (HasConsole)
+                        PrintToConsole(entry);
+                    else
+                        _buffer.Add(entry);
                 }
             }
         }
+
         public static async Task AddLog(
-        string message,
-        LogLevel msgType = LogLevel.INFO,
-        [CallerMemberName] string caller = "",
-        [CallerFilePath] string file = "",
-        [CallerLineNumber] int line = 0)
+            string message,
+            LogLevel msgType = LogLevel.INFO,
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string file = "",
+            [CallerLineNumber] int line = 0)
         {
-            ConsoleColor color = msgType == LogLevel.ERROR ? ConsoleColor.Red : msgType == LogLevel.WARNING ? ConsoleColor.Yellow : ConsoleColor.White;
-            string type = msgType == LogLevel.ERROR ? "ERR" : msgType == LogLevel.WARNING ? "WAR" : "INF";
-            int level = msgType == LogLevel.ERROR ? 1 : msgType == LogLevel.WARNING ? 2 : 3;
+            ConsoleColor color = msgType == LogLevel.ERROR ? ConsoleColor.Red :
+                                 msgType == LogLevel.WARNING ? ConsoleColor.Yellow :
+                                 ConsoleColor.White;
+
+            string type = msgType == LogLevel.ERROR ? "ERR" :
+                          msgType == LogLevel.WARNING ? "WAR" : "INF";
+
+            int level = msgType == LogLevel.ERROR ? 1 :
+                        msgType == LogLevel.WARNING ? 2 : 3;
+
             await AddLog(message, color, level, type, caller, file, line);
         }
-
-     
     }
 }

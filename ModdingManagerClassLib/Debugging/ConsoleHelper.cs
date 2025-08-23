@@ -20,11 +20,17 @@ namespace ModdingManagerClassLib.Debugging
         public static void ShowConsole()
         {
             AllocConsole();
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.InputEncoding = System.Text.Encoding.UTF8;
+
         }
 
         public static void HideConsole()
         {
             FreeConsole();
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.InputEncoding = System.Text.Encoding.UTF8;
+
         }
     }
 

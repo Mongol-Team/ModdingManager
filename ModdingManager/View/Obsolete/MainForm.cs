@@ -262,26 +262,6 @@ namespace ModdingManager
           
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // 1. Простое тестовое исключение
-                throw new InvalidOperationException("Это тестовое исключение из button1_Click");
-
-                // 2. Альтернативные варианты тестовых исключений (раскомментируйте для проверки):
-                // throw new ArgumentNullException("testParameter", "Параметр не может быть null");
-                // throw new IndexOutOfRangeException("Выход за границы массива");
-                // throw new FileNotFoundException("Файл не найден", "example.txt");
-            }
-            catch (Exception ex)
-            {
-                // Записываем исключение в Debugger
-                Logger.AddLog($"Поймано исключение в button1_Click: {ex}");
-
-
-            }
-        }
 
         private void IdeologyCreatorBtn_Click(object sender, EventArgs e)
         {

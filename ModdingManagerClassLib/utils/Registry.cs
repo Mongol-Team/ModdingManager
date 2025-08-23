@@ -131,9 +131,9 @@ namespace ModdingManager.classes.utils
             string provinceImagePath = System.IO.Path.Combine(ModManager.ModDirectory, "map", "provinces.bmp");
 
             if (!File.Exists(definitionPath))
-                throw new FileNotFoundException("Не найден файл definition.csv", definitionPath);
+                throw new FileNotFoundException("[❌] Не найден файл definition.csv", definitionPath);
             if (!File.Exists(provinceImagePath))
-                throw new FileNotFoundException("Не найден файл provinces.bmp", provinceImagePath);
+                throw new FileNotFoundException("[❌] Не найден файл provinces.bmp", provinceImagePath);
 
             string[] lines = File.ReadAllLines(definitionPath);
             Instance.Map = ParseProvinceMap(lines);
@@ -296,7 +296,7 @@ namespace ModdingManager.classes.utils
                             double.TryParse(stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supplies")?.Value as string, NumberStyles.Float, CultureInfo.InvariantCulture, out double localSupply);
                             var cathegory = stateBracket.SubVars.FirstOrDefault(v => v.Name == "state_category")?.Value.ToString();
 
-                            if (buildings == null) throw new Exception("Buildings equals null.");
+                            if (buildings == null) throw new Exception("[⚠️] Buildings equals null.");
 
 
                             stateMap[id] = new StateConfig
@@ -314,7 +314,7 @@ namespace ModdingManager.classes.utils
                         }
                         catch (Exception ex)
                         {
-                            Logger.AddLog(ex.Message + $"\n {stateBracket.ToString()}");
+                            Logger.AddLog("❌" + ex.Message + $"\n {stateBracket.ToString()}");
                         }
                     }
                 }

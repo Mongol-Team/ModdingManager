@@ -240,9 +240,8 @@ namespace ModdingManager.Presenter
         {
             ModManager.IsDebugRuning = true;
             ConsoleHelper.ShowConsole();
-            Logger.LoggingLevel = 3;
             Logger.AddLog("Режим отладки активирован");
-
+            Logger.FlushBuffer();
             try
             {
                 throw new InvalidOperationException("Тестовое исключение для отладки");
@@ -300,7 +299,7 @@ namespace ModdingManager.Presenter
         {
             string relativePath = System.IO.Path.Combine("..", "..", "..", "data", "dir.json");
             string fullPath = System.IO.Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
-
+            Logger.LoggingLevel = 3;
             try
             {
                 string json = File.ReadAllText(fullPath);
