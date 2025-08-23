@@ -282,8 +282,17 @@ namespace ModdingManager.classes.utils
                             if (string.IsNullOrEmpty(internalName)) continue;
 
                             var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
-                            if (provincesBracket == null) continue;
+                            if (provincesBracket == null) 
+                            { 
+                                Logger.AddLog($"[❌] State {id} ({internalName}) in file {file} has no provinces bracket.");
+                                continue; 
+                            }
                             var historyBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "history");
+                            if (historyBracket == null)
+                            {
+                                Logger.AddLog($"[❌] State {id} ({internalName}) in file {file} has no history bracket.");
+                                continue;
+                            }
                             var provinceIds = provincesBracket.Content
                                 .SelectMany(line => line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
                                 .Select(s => int.TryParse(s, out int value) ? value : (int?)null)
@@ -299,8 +308,9 @@ namespace ModdingManager.classes.utils
                             double.TryParse(stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supplies")?.Value as string, NumberStyles.Float, CultureInfo.InvariantCulture, out double localSupply);
                             var cathegory = stateBracket.SubVars.FirstOrDefault(v => v.Name == "state_category")?.Value.ToString();
 
-                            if (buildings == null) throw new Exception("[⚠️] Buildings equals null.");
-
+                            if (buildings == null) Logger.AddLog($"[⚠️] Buildings equals null in state {id}.");
+                            if (matchedProvinces == null) Logger.AddLog($"[❌] Matched provinces equals null in state {id}.");
+                            
 
                             stateMap[id] = new StateConfig
                             {
@@ -345,17 +355,17 @@ namespace ModdingManager.classes.utils
             }
 
             var tagLookup = tagVars
-    .GroupBy(v => v.Name)
-    .Select(g => g.First())
-    .ToDictionary(v => v.Name, v => v.Value);
+            .GroupBy(v => v.Name)
+            .Select(g => g.First())
+            .ToDictionary(v => v.Name, v => v.Value);
 
             var countries = new List<CountryOnMapConfig>();
             var visitedIds = new HashSet<int>();
 
             string[] stateFolders = {
-        Path.Combine(ModManager.ModDirectory, "history", "states"),
-        Path.Combine(ModManager.GameDirectory, "history", "states")
-    };
+                Path.Combine(ModManager.ModDirectory, "history", "states"),
+                Path.Combine(ModManager.GameDirectory, "history", "states")
+            };
 
             foreach (var folder in stateFolders)
             {
@@ -370,7 +380,8 @@ namespace ModdingManager.classes.utils
                     foreach (var stateBracket in stateBrackets)
                     {
                         var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
-                        var ownerVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "owner");
+                        Bracket historyBr = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "history");
+                        Var ownerVar = historyBr.SubVars.FirstOrDefault(v => v.Name == "owner");
 
                         if (idVar == null || !int.TryParse(idVar.Value as string, out int id) ||
                             ownerVar == null || visitedIds.Contains(id))

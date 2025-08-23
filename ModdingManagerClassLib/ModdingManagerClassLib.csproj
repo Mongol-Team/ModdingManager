@@ -7,7 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Parsers\TxtParser.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Enums\NewFile1.txt" />
+    <None Remove="Enums\ParsingArgumentType" />
     <None Remove="NewFile1.txt" />
+    <None Remove="Parsers\NewFile1.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,6 +53,11 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Composers\" />
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>
