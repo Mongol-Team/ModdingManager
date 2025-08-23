@@ -239,7 +239,8 @@ namespace ModdingManager.Presenter
         private void DebugButton_Click(object? sender, RoutedEventArgs e)
         {
             ModManager.IsDebugRuning = true;
-
+            ConsoleHelper.ShowConsole();
+            Logger.LoggingLevel = 3;
             Logger.AddLog("Режим отладки активирован");
 
             try
