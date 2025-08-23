@@ -6,7 +6,7 @@ using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
-using ModdingManagerModels.Types;
+using ModdingManagerModels.Types.ObectCacheData;
 using System.Drawing;
 using System.Globalization;
 using System.Text;

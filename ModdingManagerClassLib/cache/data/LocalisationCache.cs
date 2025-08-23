@@ -2,7 +2,7 @@
 using ModdingManager.managers.@base;
 using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
-using ModdingManagerModels.Types;
+using ModdingManagerModels.Types.ObectCacheData;
 using System.Collections.Concurrent;
 using System.Text;
 namespace ModdingManager.classes.cache.data

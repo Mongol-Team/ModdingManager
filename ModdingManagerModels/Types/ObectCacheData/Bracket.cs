@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ModdingManagerModels.Types
+namespace ModdingManagerModels.Types.ObectCacheData
 {
     public class Bracket
     {

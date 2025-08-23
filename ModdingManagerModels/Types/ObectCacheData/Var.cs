@@ -1,4 +1,4 @@
-﻿namespace ModdingManagerModels.Types
+﻿namespace ModdingManagerModels.Types.ObectCacheData
 {
     public class Var
     {
@@ -20,7 +20,7 @@
 
         public void SetValue(object val)
         {
-            this.Value = val;
+            Value = val;
         }
         public bool IsEmpty()
         {
@@ -40,14 +40,14 @@
         public bool HasProperty(string propName) => _extraProperties.ContainsKey(propName);
         public override string ToString()
         {
-            if (this.Format == VarFormat.Normal)
+            if (Format == VarFormat.Normal)
             {
                 string namePart = $"{NamePrefix}{Name.Trim('"')}{NamePostfix}";
                 string valueCore = $"{ValuePrefix}{Value}";
                 string valuePart = IsValueQuoted ? $"\"{valueCore}\"" : valueCore;
                 return $"{namePart} {AssignSymbol} {valuePart}";
             }
-            else if (this.Format == VarFormat.Localisation)
+            else if (Format == VarFormat.Localisation)
             {
 
                 string namePart = $"{NamePrefix}{Name.Trim('"')}{NamePostfix}";

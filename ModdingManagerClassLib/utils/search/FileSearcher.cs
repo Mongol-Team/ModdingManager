@@ -1,5 +1,5 @@
 ﻿using ModdingManager.classes.functional.search;
-using ModdingManagerModels.Types;
+using ModdingManagerModels.Types.ObectCacheData;
 using System.Text;
 using System.Text.RegularExpressions;
 

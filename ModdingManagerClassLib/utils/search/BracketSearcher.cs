@@ -1,5 +1,5 @@
 ﻿using ModdingManager.classes.functional.search;
-using ModdingManagerModels.Types;
+using ModdingManagerModels.Types.ObectCacheData;
 
 public class BracketSearcher : Searcher
 {

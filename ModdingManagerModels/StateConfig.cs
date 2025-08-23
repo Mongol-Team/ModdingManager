@@ -1,4 +1,4 @@
-﻿using ModdingManagerModels.Types;
+﻿using ModdingManagerModels.Types.ObectCacheData;
 using System.Drawing;
 using System.Text.Json.Serialization;
 
