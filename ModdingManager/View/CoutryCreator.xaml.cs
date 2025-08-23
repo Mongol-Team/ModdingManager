@@ -8,7 +8,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Label = System.Windows.Controls.Label;
 using Registry = ModdingManager.classes.utils.Registry;
-using Debugger = ModdingManagerClassLib.Debugger;
 namespace ModdingManager
 {
     /// <summary>

@@ -1,6 +1,7 @@
 ﻿using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
 using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels;
 using ModdingManagerModels.Args;
 using ModdingManagerModels.Types;
@@ -19,7 +20,7 @@ public class StateWorkerHandler
         if (mat.Empty())
             throw new InvalidOperationException("Не удалось загрузить provinces.bmp");
 
-        Debugger.Instance.LogMessage($"🔍 Начало обработки {Registry.Instance.Map.Provinces.Count} провинций...");
+        Logger.AddLog($"🔍 Начало обработки {Registry.Instance.Map.Provinces.Count} провинций...");
 
         int successCount = 0;
         var timer = System.Diagnostics.Stopwatch.StartNew();
@@ -40,7 +41,7 @@ public class StateWorkerHandler
                 int pixelCount = Cv2.CountNonZero(mask);
                 if (pixelCount == 0)
                 {
-                    Debugger.Instance.LogMessage($"⚠️ Провинция {province.Id} не найдена (цвет R:{province.Color.R}, G:{province.Color.G}, B:{province.Color.B})");
+                    Logger.AddLog($"⚠️ Провинция {province.Id} не найдена (цвет R:{province.Color.R}, G:{province.Color.G}, B:{province.Color.B})");
                     return;
                 }
 
@@ -70,7 +71,7 @@ public class StateWorkerHandler
                 var moments = Cv2.Moments(mainContour);
                 if (moments.M00 <= 0.5)
                 {
-                    Debugger.Instance.LogMessage($"⚠️ Провинция {province.Id}: контур слишком мал (площадь {moments.M00})");
+                    Logger.AddLog($"⚠️ Провинция {province.Id}: контур слишком мал (площадь {moments.M00})");
                     return;
                 }
 
@@ -86,15 +87,15 @@ public class StateWorkerHandler
             }
             catch (Exception ex)
             {
-                Debugger.Instance.LogMessage($"🔥 Ошибка при обработке провинции {province.Id}: {ex.Message}");
+                Logger.AddLog($"🔥 Ошибка при обработке провинции {province.Id}: {ex.Message}");
             }
         });
 
         timer.Stop();
-        Debugger.Instance.LogMessage("\n====================================");
-        Debugger.Instance.LogMessage($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
-        Debugger.Instance.LogMessage($"Успешно: {successCount} | Не удалось: {Registry.Instance.Map.Provinces.Count - successCount}");
-        Debugger.Instance.LogMessage("====================================\n");
+        Logger.AddLog("\n====================================");
+        Logger.AddLog($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
+        Logger.AddLog($"Успешно: {successCount} | Не удалось: {Registry.Instance.Map.Provinces.Count - successCount}");
+        Logger.AddLog("====================================\n");
 
         return Registry.Instance.Map.Provinces;
     }
@@ -181,7 +182,7 @@ public class StateWorkerHandler
         }
         catch (Exception ex)
         {
-            Debugger.Instance.LogMessage($"Error updating state name: {ex.Message}");
+            Logger.AddLog($"Error updating state name: {ex.Message}");
         }
     }
 

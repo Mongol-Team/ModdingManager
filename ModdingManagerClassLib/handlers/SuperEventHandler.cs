@@ -4,10 +4,12 @@ using ModdingManager.managers.@base;
 using ModdingManagerModels.SuperEventModels;
 using ModdingManagerModels.Types;
 using System.Diagnostics;
-using System.Drawing;                             // Bitmap (для конвертов)
+using System.Drawing;                             // Bi
+                                                  // tmap (для конвертов)
 using System.Text;
 using System.Windows;                             // MessageBox
-using Debugger = ModdingManagerClassLib.Debugger;
+
+using ModdingManagerClassLib.Debugging;
 public class SuperEventHandler
 {
     public SupereventConfig CurrentConfig { get; set; }
@@ -483,29 +485,16 @@ public class SuperEventHandler
         }
         catch (OperationCanceledException)
         {
-            if (Debugger.Instance != null)
-            {
-                Debugger.Instance.LogMessage("[WPF EXEPTION]: Операция отменена пользователем или из-за ошибок покрытия шрифта.");
-            }
-            else
-            {
-                Debug.WriteLine("[WPF EXEPTION]: Операция отменена пользователем или из-за ошибок покрытия шрифта.");
-            }
 
+            Logger.AddLog("[WPF EXEPTION]: Операция отменена пользователем или из-за ошибок покрытия шрифта.");
         }
         catch (Exception ex)
         {
-            if (Debugger.Instance != null)
-            {
-                MessageBox.Show($"Не удалось завершить операцию:\n{ex.Message}",
-                            "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                Debugger.Instance.LogMessage($"[WPF EXEPTION]: Не удалось завершить операцию:{ex.Message}");
-            }
-            else
-            {
-                MessageBox.Show($"Не удалось завершить операцию:\n{ex.Message}",
-                           "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+           
+            MessageBox.Show($"Не удалось завершить операцию:\n{ex.Message}",
+                        "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            Logger.AddLog($"[WPF EXEPTION]: Не удалось завершить операцию:{ex.Message}");
+            
         }
     }
 

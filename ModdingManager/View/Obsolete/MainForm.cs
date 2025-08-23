@@ -2,6 +2,7 @@ using ModdingManager.classes.controls;
 using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
 using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels;
 using System.IO;
 using System.Text.Json;
@@ -160,16 +161,16 @@ namespace ModdingManager
                 ModManager.ModDirectory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
                 Registry.LoadInstance();
-                Debugger.Instance.LogMessage(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
-                Debugger.Instance.LogMessage(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
-                Debugger.Instance.LogMessage(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)));
-                Debugger.Instance.LogMessage(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
+                Logger.AddLog(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
+                Logger.AddLog(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
+                Logger.AddLog(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)));
+                Logger.AddLog(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
 
                 _isLoaded = true;
             }
             catch (Exception ex)
             {
-                Debugger.Instance.LogMessage($"[MAIN Form] On load exeption :{ex.Message + ex.StackTrace}");
+                Logger.AddLog($"[MAIN Form] On load exeption :{ex.Message + ex.StackTrace}");
             }
 
         }
@@ -253,22 +254,12 @@ namespace ModdingManager
         private void DebugButton_Click(object sender, EventArgs e)
         {
             ModManager.IsDebugRuning = true;
-            DebugWindow debugWindow = new DebugWindow();
 
 
             // Пример записи отладочного сообщения
-            Debugger.Instance.LogMessage("Режим отладки активирован");
+            Logger.AddLog("Режим отладки активирован");
 
-            // Можно сразу проверить работу на тестовом исключении
-            try
-            {
-                throw new InvalidOperationException("Тестовое исключение для отладки");
-            }
-            catch (Exception ex)
-            {
-                Debugger.Instance.LogMessage($"Поймано исключение: {ex.Message}");
-            }
-            debugWindow.Show();
+          
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -286,7 +277,7 @@ namespace ModdingManager
             catch (Exception ex)
             {
                 // Записываем исключение в Debugger
-                Debugger.Instance.LogMessage($"Поймано исключение в button1_Click: {ex}");
+                Logger.AddLog($"Поймано исключение в button1_Click: {ex}");
 
 
             }

@@ -3,6 +3,7 @@ using ModdingManager.classes.managers.gfx;
 using ModdingManager.classes.utils.search;
 using ModdingManager.managers.@base;
 using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
 using ModdingManagerModels.Types;
@@ -313,7 +314,7 @@ namespace ModdingManager.classes.utils
                         }
                         catch (Exception ex)
                         {
-                            Debugger.Instance.LogMessage(ex.Message + $"\n {stateBracket.ToString()}");
+                            Logger.AddLog(ex.Message + $"\n {stateBracket.ToString()}");
                         }
                     }
                 }

@@ -1,6 +1,7 @@
 ﻿using ModdingManager.classes.utils.search;
 using ModdingManager.managers.@base;
 using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels.Types;
 using System.Collections.Concurrent;
 using System.Text;
@@ -56,7 +57,7 @@ namespace ModdingManager.classes.cache.data
                     }
                     catch (Exception ex)
                     {
-                        Debugger.Instance.LogMessage("Ошибка при загрузке файлов локализации: " + ex.Message);
+                        Logger.AddLog("Ошибка при загрузке файлов локализации: " + ex.Message);
                     }
                 });
             }

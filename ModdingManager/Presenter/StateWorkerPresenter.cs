@@ -2,7 +2,6 @@
 using ModdingManager.classes.utils;
 using ModdingManager.classes.views;
 using ModdingManager.managers.@base;
-using ModdingManager.WPFExtensions;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
 using ModdingManagerModels.Args;

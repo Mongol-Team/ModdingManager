@@ -1,5 +1,6 @@
 ﻿using ModdingManager.classes.controls;
 using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
 
 using ModdingManagerModels.SuperEventModels;
@@ -956,7 +957,7 @@ namespace ModdingManager
         {
             if (sender is System.Windows.Controls.ComboBox combo)
             {
-                Debugger.Instance.LogMessage("SearchableCombo_SelectionChanged");
+                Logger.AddLog("SearchableCombo_SelectionChanged");
                 string comboName = combo.Name;
 
                 string fontName = combo.SelectedItem as string;
@@ -992,7 +993,7 @@ namespace ModdingManager
                             rtb.FontFamily = newFont;
                     }
                 }
-                Debugger.Instance.LogMessage("fin");
+                Logger.AddLog("fin");
             }
         }
 

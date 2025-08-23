@@ -12,7 +12,6 @@ namespace ModdingManager.View
         {
             InitializeComponent();
             var presenter = new MainWindowPresenter(this);
-
         }
     }
 }

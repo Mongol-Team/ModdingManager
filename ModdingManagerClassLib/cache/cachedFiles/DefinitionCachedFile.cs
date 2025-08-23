@@ -1,4 +1,5 @@
 ﻿using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels;
 using System.Drawing;
 
@@ -51,25 +52,25 @@ namespace ModdingManager.classes.cache.cachedFiles
             // Validate required properties
             if (province.Id <= 0)
             {
-                Debugger.Instance.LogMessage($"⚠️ Failed to set province definition: Invalid ID {province.Id}");
+                Logger.AddLog($"⚠️ Failed to set province definition: Invalid ID {province.Id}");
                 return;
             }
 
             if (province.Color == null)
             {
-                Debugger.Instance.LogMessage($"⚠️ Failed to set province definition for {province.Id}: Color is null");
+                Logger.AddLog($"⚠️ Failed to set province definition for {province.Id}: Color is null");
                 return;
             }
 
             if (string.IsNullOrEmpty(province.Type))
             {
-                Debugger.Instance.LogMessage($"⚠️ Failed to set province definition for {province.Id}: Type is null or empty");
+                Logger.AddLog($"⚠️ Failed to set province definition for {province.Id}: Type is null or empty");
                 return;
             }
 
             if (string.IsNullOrEmpty(province.Terrain))
             {
-                Debugger.Instance.LogMessage($"⚠️ Failed to set province definition for {province.Id}: Terrain is null or empty");
+                Logger.AddLog($"⚠️ Failed to set province definition for {province.Id}: Terrain is null or empty");
                 return;
             }
 
@@ -92,12 +93,12 @@ namespace ModdingManager.classes.cache.cachedFiles
 
             if (!found)
             {
-                Debugger.Instance.LogMessage($"⚠️ Province definition not found for ID {province.Id}, use AddProvinceDefinition instead");
+                Logger.AddLog($"⚠️ Province definition not found for ID {province.Id}, use AddProvinceDefinition instead");
                 return;
             }
 
             MarkDirty();
-            Debugger.Instance.LogMessage($"✓ Updated province definition for ID {province.Id}");
+            Logger.AddLog($"✓ Updated province definition for ID {province.Id}");
         }
 
         /// <summary>
@@ -129,13 +130,13 @@ namespace ModdingManager.classes.cache.cachedFiles
                     }
                     catch (Exception ex)
                     {
-                        Debugger.Instance.LogMessage($"⚠️ Failed to parse province definition for ID {id}: {ex.Message}");
+                        Logger.AddLog($"⚠️ Failed to parse province definition for ID {id}: {ex.Message}");
                         return null;
                     }
                 }
             }
 
-            Debugger.Instance.LogMessage($"⚠️ Province definition not found for ID {id}");
+            Logger.AddLog($"⚠️ Province definition not found for ID {id}");
             return null;
         }
 
@@ -148,7 +149,7 @@ namespace ModdingManager.classes.cache.cachedFiles
             // Validate required properties
             if (province.Id <= 0)
             {
-                Debugger.Instance.LogMessage($"⚠️ Failed to add province definition: Invalid ID {province.Id}");
+                Logger.AddLog($"⚠️ Failed to add province definition: Invalid ID {province.Id}");
                 return;
             }
 
@@ -158,7 +159,7 @@ namespace ModdingManager.classes.cache.cachedFiles
                 var parts = line.Split(';');
                 if (parts.Length > 0 && int.TryParse(parts[0], out int existingId) && existingId == province.Id)
                 {
-                    Debugger.Instance.LogMessage($"⚠️ Province definition already exists for ID {province.Id}, use SetProvinceDefinition instead");
+                    Logger.AddLog($"⚠️ Province definition already exists for ID {province.Id}, use SetProvinceDefinition instead");
                     return;
                 }
             }
@@ -169,7 +170,7 @@ namespace ModdingManager.classes.cache.cachedFiles
 
             DefinitionLines.Add(newLine);
             MarkDirty();
-            Debugger.Instance.LogMessage($"✓ Added new province definition for ID {province.Id}");
+            Logger.AddLog($"✓ Added new province definition for ID {province.Id}");
         }
     }
 }

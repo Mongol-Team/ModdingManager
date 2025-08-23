@@ -1,4 +1,5 @@
 ﻿using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels.Types;
 
 namespace ModdingManager.classes.cache.cachedFiles
@@ -29,7 +30,7 @@ namespace ModdingManager.classes.cache.cachedFiles
             }
             catch (Exception ex)
             {
-                Debugger.Instance.LogMessage($"⚠️ Failed to parse state file {FilePath}: {ex.Message}");
+                Logger.AddLog($"⚠️ Failed to parse state file {FilePath}: {ex.Message}");
             }
         }
         public override void SaveToFile()

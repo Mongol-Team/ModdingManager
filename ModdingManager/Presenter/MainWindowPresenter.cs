@@ -3,6 +3,7 @@ using global::ModdingManager.managers.@base;
 using global::ModdingManager.View;
 using ModdingManager.classes.utils;
 using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels;
 using System.IO;
 using System.Text.Json;
@@ -238,9 +239,8 @@ namespace ModdingManager.Presenter
         private void DebugButton_Click(object? sender, RoutedEventArgs e)
         {
             ModManager.IsDebugRuning = true;
-            var debugWindow = new DebugWindow();
 
-            Debugger.Instance.LogMessage("Режим отладки активирован");
+            Logger.AddLog("Режим отладки активирован");
 
             try
             {
@@ -248,10 +248,8 @@ namespace ModdingManager.Presenter
             }
             catch (Exception ex)
             {
-                Debugger.Instance.LogMessage($"Поймано исключение: {ex.Message}");
+                Logger.AddLog($"Поймано исключение: {ex.Message}");
             }
-
-            debugWindow.Show();
         }
 
         private void IdeologyCreatorBtn_Click(object? sender, RoutedEventArgs e)
@@ -291,7 +289,7 @@ namespace ModdingManager.Presenter
             }
             catch (Exception ex)
             {
-                Debugger.Instance.LogMessage($"Поймано исключение в button1_Click: {ex}");
+                Logger.AddLog($"Поймано исключение в button1_Click: {ex}");
             }
         }
 
@@ -315,20 +313,20 @@ namespace ModdingManager.Presenter
 
                 Registry.LoadInstance();
 
-                Debugger.Instance.LogMessage(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")
+                Logger.AddLog(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")
                                              + Directory.Exists(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
-                Debugger.Instance.LogMessage(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)
+                Logger.AddLog(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)
                                              + Directory.Exists(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
-                Debugger.Instance.LogMessage(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)
+                Logger.AddLog(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)
                                              + Directory.Exists(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)));
-                Debugger.Instance.LogMessage(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")
+                Logger.AddLog(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")
                                              + Directory.Exists(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
 
                 _isLoaded = true;
             }
             catch (Exception ex)
             {
-                Debugger.Instance.LogMessage($"[MAIN WPF] On load exception: {ex.Message}{ex.StackTrace}");
+                Logger.AddLog($"[MAIN WPF] On load exception: {ex.Message}{ex.StackTrace}");
             }
         }
 
