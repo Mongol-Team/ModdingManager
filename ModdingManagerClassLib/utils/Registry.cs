@@ -314,7 +314,7 @@ namespace ModdingManager.classes.utils
                         }
                         catch (Exception ex)
                         {
-                            Logger.AddLog("❌" + ex.Message + $"\n {stateBracket.ToString()}");
+                            Logger.AddLog(ex.Message + $"\n {stateBracket.ToString()}");
                         }
                     }
                 }

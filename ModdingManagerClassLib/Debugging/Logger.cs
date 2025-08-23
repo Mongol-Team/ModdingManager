@@ -90,11 +90,7 @@ namespace ModdingManagerClassLib.Debugging
             {
                 string fileShort = System.IO.Path.GetFileName(file);
 
-                if (message.Contains(WarnSymbol))
-                    color = ConsoleColor.Yellow;
-                if (message.Contains(ErrorSymbol))
-                    color = ConsoleColor.Red;
-
+               
                 var entry = new LogEntry
                 {
                     Message = message,
@@ -129,13 +125,22 @@ namespace ModdingManagerClassLib.Debugging
             ConsoleColor color = msgType == LogLevel.ERROR ? ConsoleColor.Red :
                                  msgType == LogLevel.WARNING ? ConsoleColor.Yellow :
                                  ConsoleColor.White;
-
+           
             string type = msgType == LogLevel.ERROR ? "ERR" :
                           msgType == LogLevel.WARNING ? "WAR" : "INF";
 
             int level = msgType == LogLevel.ERROR ? 1 :
                         msgType == LogLevel.WARNING ? 2 : 3;
-
+            if (message.Contains(WarnSymbol))
+            {
+                color = ConsoleColor.Yellow;
+                type = "WAR";
+            }
+            if (message.Contains(ErrorSymbol))
+            {
+                color = ConsoleColor.Red;
+                type = "ERR";
+            }
             await AddLog(message, color, level, type, caller, file, line);
         }
     }
