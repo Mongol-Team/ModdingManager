@@ -84,7 +84,7 @@ namespace ModdingManagerClassLib.Debugging
             [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
-            await Task.Yield();
+            //await Task.Yield();
 
             if (LoggingLevel >= log_level)
             {

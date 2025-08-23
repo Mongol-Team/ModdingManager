@@ -39,14 +39,17 @@ namespace ModdingManager.classes.utils
         }
         public static void LoadInstance()
         {
-            LoadCache();
-            LoadRegiemts();
-            LoadCountries();
-            LoadIdeas();
-            LoadModifiers();
-            LoadCharacters();
-            LoadIdeologies();
-            LoadMap();
+            using LogScope scope = new LogScope("Loading Registry", ConsoleColor.Magenta);
+            
+                LoadCache();
+                LoadRegiemts();
+                LoadCountries();
+                LoadIdeas();
+                LoadModifiers();
+                LoadCharacters();
+                LoadIdeologies();
+                LoadMap();
+            
         }
         #region Load Methods
         private static void LoadCache()

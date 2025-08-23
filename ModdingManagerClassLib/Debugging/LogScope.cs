@@ -16,7 +16,7 @@ namespace ModdingManagerClassLib.Debugging
         }
         public LogScope(string msg, [CallerMemberName] string caller = "")
         {
-            Logger.AddLog(msg, msgType: LogLevel.INFO).Wait();
+            Logger.AddLog(msg, msgType: LogLevel.INFO);
             Logger.depth++;
             //Logger.AddLog($"+Scope {caller}", LogLevel.ERROR).Wait();
             this.caller = caller;
