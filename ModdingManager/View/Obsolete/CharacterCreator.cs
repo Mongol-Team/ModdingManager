@@ -1,25 +1,8 @@
-﻿using Microsoft.VisualBasic;
-using ModdingManager.Models;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Tga;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using ModdingManager.classes.extentions;
-using System.Runtime.CompilerServices;
+﻿using ModdingManagerClassLib.Extentions;
 using ModdingManager.classes.handlers;
 using ModdingManager.classes.utils;
+using ModdingManagerModels;
+using System.IO;
 
 namespace ModdingManager
 {
@@ -176,15 +159,15 @@ namespace ModdingManager
 
         private void LoadButton_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
-            {
-                WPFConfigManager.LoadConfigWrapper(this);
-            });
+            //Task.Run(() =>
+            //{
+            //    WPFConfigManager.LoadConfigWrapper(this);
+            //});
         }
         private void SaveButton_Click(object sender, EventArgs e)
         {
 
-            WPFConfigManager.SaveConfigWrapper(this);
+            //WPFConfigManager.SaveConfigWrapper(this);
         }
 
         private void CharacterCreator_Load(object sender, EventArgs e)

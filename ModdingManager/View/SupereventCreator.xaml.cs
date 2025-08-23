@@ -1,5 +1,7 @@
 ﻿using ModdingManager.classes.controls;
-using ModdingManager.classes.extentions;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Extentions;
+
 using ModdingManagerModels.SuperEventModels;
 using NAudio.Wave;
 using System.IO;
@@ -50,7 +52,6 @@ namespace ModdingManager
             AdjustCanvasSizeToImage();
             InitializeDragAndResize();
             SupereventFrame.IsHitTestVisible = false;
-            Debugger.AttachIfDebug(this);
             this.DescFontColorPicker.SelectedColorChanged += FontColorPicker_SelectedColorChanged;
             this.HeaderFontColorPicker.SelectedColorChanged += FontColorPicker_SelectedColorChanged;
             this.OptionTextColorPicker.SelectedColorChanged += FontColorPicker_SelectedColorChanged;
@@ -766,8 +767,8 @@ namespace ModdingManager
 
             CurrentConfig.SoundPath = selectedAudioPath;
             CurrentConfig.Id = SuperEventIdBox.Text;
-
-            CurrentConfig.EventConstructor = MainCanvas;
+            //тут нужно создать гуидок по канавасу
+            //CurrentConfig.Gui = MainCanvas;
         }
         private void DoneConfigButton_Click(object sender, RoutedEventArgs e)
         {

@@ -1,6 +1,7 @@
 ﻿using ModdingManager.classes.cache.cachedFiles;
 using ModdingManager.classes.controls;
 using ModdingManager.classes.utils;
+using ModdingManagerClassLib;
 using ModdingManagerModels.Types;
 using System.Windows;
 

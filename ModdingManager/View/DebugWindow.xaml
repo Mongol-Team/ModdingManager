@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="DebugWindow" Height="450" Width="800">
     <Grid Background="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}">
-        <RichTextBox Background="Black" Foreground="White"  Name="DebugBox" FontFamily="Consolas" FontSize="20" TextChanged="DebugBox_TextChanged">
+        <RichTextBox Background="Black" Foreground="White"  Name="DebugBox" FontFamily="Consolas" FontSize="20">
             
             <FlowDocument>
                 <Paragraph>

@@ -1,26 +1,20 @@
-﻿using SixLabors.ImageSharp.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using ModdingManagerClassLib.Extentions;
+using ModdingManager.classes.managers.gfx;
+using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
+using ModdingManagerModels;
+using ModdingManagerModels.Args;
+using SixLabors.ImageSharp.Memory;
+using System.IO;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using ModdingManager.Models;
-using System.IO;
-using System.Text.RegularExpressions;
-using ModdingManager.managers.forms;
-using ModdingManager.classes.args;
-using ModdingManager.classes.extentions;
-using ModdingManager.managers.@base;
-using ModdingManager.classes.managers.gfx;
 namespace ModdingManager
 {
     public partial class TechTreeCreator : Window
@@ -38,7 +32,6 @@ namespace ModdingManager
         {
             InitializeComponent();
             DrawGrid();
-            Debugger.AttachIfDebug(this);
         }
 
         private void DrawGrid()
@@ -168,7 +161,7 @@ namespace ModdingManager
 
             var image = new System.Windows.Controls.Image
             {
-                Source = item.Image.GetCombinedTechImage(item.IsBig ? BigBackgroundImage.Source : SmallBackgroundImage.Source , item.IsBig ? 1 : 2),
+                Source = item.Image.ConvertToImageSource().GetCombinedTechImage(item.IsBig ? BigBackgroundImage.Source : SmallBackgroundImage.Source , item.IsBig ? 1 : 2),
                 Width = imageWidth,
                 Height = imageHeight,
                 IsHitTestVisible = false
@@ -544,7 +537,7 @@ namespace ModdingManager
 
                         AiWillDo = GetRichTextBoxText(AiWillDoBox) ?? "",
                         IsBig = isBig,
-                        Image = overlayimg?.Source
+                        Image = overlayimg?.Source.ToBitmap()
                     };
 
                 }
@@ -1466,10 +1459,10 @@ namespace ModdingManager
           
             string techIconDir = System.IO.Path.Combine(ModManager.ModDirectory, "gfx", "interface", "techtree");
             Directory.CreateDirectory(techIconDir);
-            var firstCopy = window.TabFolderFirstImage.Source.Clone();
-            var secondCopy = window.TabFolderFirstImage.Source.Clone();
-            var bgCopy = window.TabFolderBackgroundImage.Source.Clone();
-            var shadowingCopy = window.TabFolderShadowingImage.Source.Clone();
+            var firstCopy = window.TabFolderFirstImage.Source.Clone().ToBitmap();
+            var secondCopy = window.TabFolderFirstImage.Source.Clone().ToBitmap();
+            var bgCopy = window.TabFolderBackgroundImage.Source.Clone().ToBitmap();
+            var shadowingCopy = window.TabFolderShadowingImage.Source.Clone().ToBitmap();
 
             List<ImageSourceArg> args = new List<ImageSourceArg>
             {
@@ -1651,7 +1644,7 @@ namespace ModdingManager
         private void DoneButton_Click(object sender, RoutedEventArgs e)
         {
             ExportTechTreeToFile();
-            CurrentTechTree.SaveAllTechIconsAsDDS();
+            DDSManager.SaveAllTechIconsAsDDS(CurrentTechTree);
             GenerateGfxFile(CurrentTechTree);
             InsertGUITechTreeEntries(ModManager.ModDirectory, CurrentTechTree, ModManager.GameDirectory);
             InsertGUIFolderTabButton(ModManager.ModDirectory, CurrentTechTree, ModManager.GameDirectory);
@@ -1928,7 +1921,7 @@ namespace ModdingManager
             item.Modifiers = GetRichTextBoxLines(ModdifierBox);
             item.AiWillDo = GetRichTextBoxText(AiWillDoBox);
             item.Dependencies = GetRichTextBoxLines(DependenciesBox);
-            item.Image = item.IsBig ? BigOverlayImage.Source : SmallOverlayImage.Source;
+            item.Image = item.IsBig ? BigOverlayImage.Source.ToBitmap() : SmallOverlayImage.Source.ToBitmap();
             var overlayimg = item.IsBig ? BigOverlayImage : SmallOverlayImage;
             var backgroundimg = item.IsBig ? BigBackgroundImage : BigOverlayImage;
             if (selected is Border border && border.Child is Canvas canavas)
@@ -1955,12 +1948,12 @@ namespace ModdingManager
 
         private async void LoadEvent(object sender, RoutedEventArgs e)
         {
-            await WpfConfigManager.LoadConfigAsync(this);
+            //await WpfConfigManager.LoadConfigAsync(this);
         }
 
         private async void SaveEvent(object sender, RoutedEventArgs e)
         {
-            await WpfConfigManager.SaveConfigAsync(this, TechTreeNameBox.Text);
+            //await WpfConfigManager.SaveConfigAsync(this, TechTreeNameBox.Text);
         }
 
         private void CategoriesBox_TextChanged(object sender, TextChangedEventArgs e)

@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace ModdingManager.classes.extentions
+namespace ModdingManagerClassLib.Extentions
 {
     public static class BorderExtensions
     {

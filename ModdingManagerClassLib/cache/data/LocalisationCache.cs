@@ -1,5 +1,6 @@
 ﻿using ModdingManager.classes.utils.search;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
 using ModdingManagerModels.Types;
 using System.Collections.Concurrent;
 using System.Text;

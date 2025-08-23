@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Drawing;
+using System.Text.Json.Serialization;
 namespace ModdingManagerModels
 {
     public class TechTreeItemConfig
@@ -21,7 +22,7 @@ namespace ModdingManagerModels
         public string AiWillDo { get; set; }
         public List<string> Dependencies { get; set; }
         [JsonIgnore]
-        //public ImageSource Image { get; set; }
+        public Bitmap Image { get; set; }
         public byte[] ImageData { get; set; }
     }
 }

@@ -1,4 +1,7 @@
-﻿using Pfim;
+﻿using ModdingManagerClassLib.Extentions;
+using ModdingManager.managers.@base;
+using ModdingManagerModels;
+using Pfim;
 using System.Drawing;
 using System.Runtime.InteropServices;
 namespace ModdingManager.classes.managers.gfx
@@ -33,7 +36,32 @@ namespace ModdingManager.classes.managers.gfx
             }
         }
 
+        public static void SaveAllTechIconsAsDDS(TechTreeConfig treeConfig)
+        {
 
+            string techIconDir = Path.Combine(ModManager.ModDirectory, "gfx", "interface", "technologies");
+            Directory.CreateDirectory(techIconDir);
+
+            foreach (var item in treeConfig.Items)
+            {
+                if (item.Image == null || string.IsNullOrWhiteSpace(item.Id))
+                    continue;
+
+                try
+                {
+                    using (var bmp = item.Image)
+                    {
+                        bmp.SaveAsDDS(techIconDir, item.Id, 64, 64);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Ошибка при сохранении иконки технологии {item.Id}: {ex.Message}", "Ошибка", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                }
+            }
+
+            System.Windows.MessageBox.Show("Сохранение иконок технологий завершено!", "Успех", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
         public static List<Bitmap> LoadAllDDSFromDirectory(string directory)
         {
             var bitmaps = new List<Bitmap>();

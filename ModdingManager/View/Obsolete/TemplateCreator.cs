@@ -1,19 +1,8 @@
-﻿using Microsoft.Win32;
-using ModdingManager.classes.managers.gfx;
-using ModdingManager.Models;
-using ModdingManager.managers.@base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using ModdingManager.managers.@base;
+using ModdingManagerModels;
 using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Documents;
-using System.Windows.Forms;
 using Registry = ModdingManager.classes.utils.Registry;
 
 namespace ModdingManager
@@ -129,14 +118,14 @@ namespace ModdingManager
         }
         private async void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            await WPFConfigManager.LoadConfigWrapper(this);
-            UpdtadeConfig();
+            //await WPFConfigManager.LoadConfigWrapper(this);
+            //UpdtadeConfig();
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            UpdtadeConfig();
-            WPFConfigManager.SaveConfigWrapper(this);
+            //UpdtadeConfig();
+            //WPFConfigManager.SaveConfigWrapper(this);
         }
 
         private void ApplyButton_Click(object sender, EventArgs e)

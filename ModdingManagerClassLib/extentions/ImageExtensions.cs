@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using TeximpNet;
 using TeximpNet.DDS;
 
-namespace ModdingManager.classes.extentions
+namespace ModdingManagerClassLib.Extentions
 {
     public static class ImageExtensions
     {

@@ -1,5 +1,5 @@
 ﻿using HarfBuzzSharp;
-using ModdingManager.classes.extentions;
+using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels.Types;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;

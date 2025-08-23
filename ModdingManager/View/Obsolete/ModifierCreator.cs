@@ -444,12 +444,12 @@ namespace ModdingManager
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            WPFConfigManager.LoadConfigWrapper(this);
+            //WPFConfigManager.LoadConfigWrapper(this);
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            WPFConfigManager.SaveConfigWrapper(this);
+            //WPFConfigManager.SaveConfigWrapper(this);
         }
 
         public void UpdateInterfaceFiles()

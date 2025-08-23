@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ModdingManager.WPFExtensions;
+using ModdingManagerClassLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,11 +24,7 @@ namespace ModdingManager
         public DebugWindow()
         {
             InitializeComponent();
-        }
-
-        private void DebugBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
+            Debugger.Instance.AttachToWindow(this, this.DebugBox);
         }
     }
 }

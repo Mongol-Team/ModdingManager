@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace ModdingManager.classes.extentions
+namespace ModdingManagerClassLib.Extentions
 {
     public static class FileExtensions
     {

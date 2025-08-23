@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels;
+﻿using ModdingManagerClassLib;
+using ModdingManagerModels;
 using System.Drawing;
 
 namespace ModdingManager.classes.cache.cachedFiles

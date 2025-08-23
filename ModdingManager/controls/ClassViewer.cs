@@ -1,18 +1,15 @@
-﻿using ModdingManager.classes.args;
-using ModdingManager.classes.utils.types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ModdingManagerModels.Args;
+using ModdingManagerModels.Types;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using CheckBox = System.Windows.Controls.CheckBox;
-using Label = System.Windows.Controls.Label;
-using TextBox = System.Windows.Controls.TextBox;
 using Color = System.Windows.Media.Color;
+using Label = System.Windows.Controls.Label;
 using Size = System.Windows.Size;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace ModdingManager.classes.controls
 {

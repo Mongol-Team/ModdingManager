@@ -2,6 +2,7 @@
 using global::ModdingManager.managers.@base;
 using global::ModdingManager.View;
 using ModdingManager.classes.utils;
+using ModdingManagerClassLib;
 using ModdingManagerModels;
 using System.IO;
 using System.Text.Json;
@@ -239,9 +240,6 @@ namespace ModdingManager.Presenter
             ModManager.IsDebugRuning = true;
             var debugWindow = new DebugWindow();
 
-            // подключение к вашему Debugger
-            Debugger.Instance.DebugOutputControl = debugWindow.DebugBox;
-            Debugger.Instance.AttachToWindow(_view);
             Debugger.Instance.LogMessage("Режим отладки активирован");
 
             try

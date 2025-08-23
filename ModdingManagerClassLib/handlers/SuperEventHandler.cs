@@ -1,4 +1,4 @@
-﻿using ModdingManager.classes.extentions;
+﻿using ModdingManagerClassLib.Extentions;
 using ModdingManager.classes.utils.fonts;
 using ModdingManager.managers.@base;
 using ModdingManagerModels.SuperEventModels;
@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Drawing;                             // Bitmap (для конвертов)
 using System.Text;
 using System.Windows;                             // MessageBox
-
+using Debugger = ModdingManagerClassLib.Debugger;
 public class SuperEventHandler
 {
     public SupereventConfig CurrentConfig { get; set; }

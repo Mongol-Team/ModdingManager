@@ -1,10 +1,4 @@
-﻿using ModdingManager.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 
 namespace ModdingManager.classes.views
@@ -28,7 +22,7 @@ namespace ModdingManager.classes.views
         public DateOnly? LastElection { get; set; }
         public int? ElectionFrequency { get; set; }
         public bool? ElectionsAllowed { get; set; }
-        public Dictionary<string, ImageSource>? CountryFlags { get; set; }
+        public Dictionary<string, Bitmap>? CountryFlags { get; set; }
         public Dictionary<string, int>? PartyPopularities { get; set; }
         public List<string>? Ideas { get; set; } 
         public List<string>? Characters { get; set; } 

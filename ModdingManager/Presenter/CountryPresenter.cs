@@ -1,5 +1,6 @@
 ﻿using ModdingManager.classes.views;
 using ModdingManagerModels;
+using ModdingManagerClassLib.Extentions;
 using System.Windows;
 
 public class CountryPresenter
@@ -14,8 +15,8 @@ public class CountryPresenter
         _handler = new CountryHandler();
 
         _view.ApplyClicked += OnApplyClicked;
-        _view.LoadConfigClicked += ConfigManager.OnLoadConfigClickedEvent;
-        _view.SaveConfigClicked += ConfigManager.OnSaveConfigClickedEvent;
+        //_view.LoadConfigClicked += ConfigManager.OnLoadConfigClickedEvent;
+        //_view.SaveConfigClicked += ConfigManager.OnSaveConfigClickedEvent;
     }
 
     private void OnApplyClicked(object sender, RoutedEventArgs e)
@@ -26,7 +27,7 @@ public class CountryPresenter
             Name = _view.Name,
             Capital = _view.Capital,
             GraphicalCulture = _view.GraphicalCulture,
-            Color = _view.Color,
+            Color = _view.Color.ToDrawingColor() ?? Color.AliceBlue,
             Technologies = _view.Technologies,
             Convoys = _view.Convoys,
             OOB = _view.OOB,

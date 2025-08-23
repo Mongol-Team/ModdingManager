@@ -1,8 +1,9 @@
 ﻿using ModdingManager.classes.cache.data;
-using ModdingManager.classes.configs;
 using ModdingManager.classes.managers.gfx;
 using ModdingManager.classes.utils.search;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
 using ModdingManagerModels.Types;
 using System.Drawing;

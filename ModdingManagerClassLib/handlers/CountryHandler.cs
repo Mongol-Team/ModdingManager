@@ -1,6 +1,7 @@
-﻿using ModdingManager.classes.configs;
+﻿
 using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
 using System.Globalization;
 using System.Text;

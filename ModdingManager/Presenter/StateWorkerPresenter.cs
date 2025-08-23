@@ -1,27 +1,15 @@
-﻿using ModdingManager.classes.args;
-using ModdingManager.classes.configs;
-using ModdingManager.classes.controls;
-using ModdingManager.classes.extentions;
-using ModdingManager.classes.metadata;
+﻿using ModdingManager.classes.controls;
 using ModdingManager.classes.utils;
 using ModdingManager.classes.views;
 using ModdingManager.managers.@base;
-using OpenCvSharp;
-using OpenCvSharp.Internal.Vectors;
-using SixLabors.ImageSharp.Drawing;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ModdingManager.WPFExtensions;
+using ModdingManagerClassLib.Extentions;
+using ModdingManagerModels;
+using ModdingManagerModels.Args;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Markup;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-using static System.Windows.Forms.AxHost;
 using Brushes = System.Windows.Media.Brushes;
 using MessageBox = System.Windows.MessageBox;
 using Point = System.Windows.Point;
@@ -328,15 +316,15 @@ public class StateWorkerPresenter
     #endregion
 
     #region Drawing Methods
-    private void DrawProvince(Canvas canvas, ProvinceConfig province, System.Windows.Media.Color color, string tooltipText = null)
+    private void DrawProvince(Canvas canvas, ProvinceConfig province, System.Drawing.Color color, string tooltipText = null)
     {
         if (province.Shape?.ContourPoints == null || province.Shape.ContourPoints.Length < 3)
             return;
 
         var poly = new Polygon
         {
-            Fill = new SolidColorBrush(color),
-            Points = new PointCollection(province.Shape.ContourPoints),
+            Fill = new SolidColorBrush(color.ToMediaColor()),
+            Points = new PointCollection(province.Shape.ContourPoints.ToWindowsPoints()),
             StrokeThickness = 0,
             ToolTip = tooltipText ?? $"Province: {province.Id}",
             Tag = province.Id
@@ -381,7 +369,7 @@ public class StateWorkerPresenter
         sourceRegion?.Provinces.Remove(province);
         targetRegion.Provinces.Add(province);
 
-        UpdateProvinceVisual(_view.StrategicRenderLayer, arg.ProvinceId, arg.TargetRegion.Color);
+        UpdateProvinceVisual(_view.StrategicRenderLayer, arg.ProvinceId, arg.TargetRegion.Color.ToMediaColor());
         UpdateProvinceTooltip(_view.StrategicRenderLayer, arg.ProvinceId,
             $"Province: {arg.ProvinceId}\nRegion: {arg.TargetRegion.Id}");
 
@@ -404,7 +392,7 @@ public class StateWorkerPresenter
         sourceState?.Provinces.Remove(province);
         targetState.Provinces.Add(province);
 
-        UpdateProvinceVisual(_view.StateRenderLayer, arg.ProvinceId, arg.TargetState.Color);
+        UpdateProvinceVisual(_view.StateRenderLayer, arg.ProvinceId, arg.TargetState.Color.ToMediaColor());
         UpdateProvinceTooltip(_view.StateRenderLayer, arg.ProvinceId,
             $"Province: {arg.ProvinceId}\nState: {arg.TargetState.Id}");
 
@@ -427,7 +415,7 @@ public class StateWorkerPresenter
         if (country == null)
             return;
 
-        UpdateProvinceVisual(_view.CountryRenderLayer, arg.ProvinceId, country.Color);
+        UpdateProvinceVisual(_view.CountryRenderLayer, arg.ProvinceId, country.Color.ToMediaColor());
         UpdateProvinceTooltip(_view.CountryRenderLayer, arg.ProvinceId,
             $"Province: {arg.ProvinceId}\nCountry: {country.Tag}");
 
@@ -454,7 +442,7 @@ public class StateWorkerPresenter
 
         foreach (var province in state.Provinces)
         {
-            UpdateProvinceVisual(_view.CountryRenderLayer, province.Id, targetCountry.Color);
+            UpdateProvinceVisual(_view.CountryRenderLayer, province.Id, targetCountry.Color.ToMediaColor());
             UpdateProvinceTooltip(_view.CountryRenderLayer, province.Id,
                 $"Province: {province.Id}\nCountry: {targetCountry.Tag}");
         }
@@ -569,7 +557,7 @@ public class StateWorkerPresenter
         foreach (var province in unassigned)
         {
             // Исправление 5: Отрисовываем в правильный слой
-            DrawProvince(_view.StrategicRenderLayer, province, Colors.Gray,
+            DrawProvince(_view.StrategicRenderLayer, province, Colors.Gray.ToDrawingColor(),
                 $"Province: {province.Id}\nStrategic: NONE");
         }
     }
@@ -610,7 +598,7 @@ public class StateWorkerPresenter
             }
             else
             {
-                DrawProvince(_view.StateRenderLayer, province, Colors.Gray, $"Province: {province.Id}\nState: NONE");
+                DrawProvince(_view.StateRenderLayer, province, Colors.Gray.ToDrawingColor(), $"Province: {province.Id}\nState: NONE");
             }
         }
 
@@ -676,7 +664,7 @@ public class StateWorkerPresenter
                 DrawProvince(
                     _view.CountryRenderLayer,
                     province,
-                    Colors.Gray,
+                    Colors.Gray.ToDrawingColor(),
                     $"Province: {province.Id}\nCountry: NONE"
                 );
             }
@@ -742,24 +730,24 @@ public class StateWorkerPresenter
             }
         }
     }
-    private (double Width, double Height, System.Windows.Point Center) GetBoundingBox(IEnumerable<System.Windows.Point> points)
+    private (double Width, double Height, System.Drawing.Point Center) GetBoundingBox(IEnumerable<System.Drawing.Point> points)
     {
         double minX = points.Min(p => p.X);
         double maxX = points.Max(p => p.X);
         double minY = points.Min(p => p.Y);
         double maxY = points.Max(p => p.Y);
-        return (maxX - minX, maxY - minY, new System.Windows.Point((minX + maxX) / 2, (minY + maxY) / 2));
+        return (maxX - minX, maxY - minY, new System.Drawing.Point((int)((minX + maxX) / 2), (int)((minY + maxY) / 2)));
     }
 
-    private System.Windows.Point FindBestCenterPoint(System.Windows.Point[] contour)
+    private System.Drawing.Point FindBestCenterPoint(System.Drawing.Point[] contour)
     {
         // Пример: средняя точка между крайними вершинами
         var xAvg = contour.Average(p => p.X);
         var yAvg = contour.Average(p => p.Y);
-        return new System.Windows.Point(xAvg, yAvg);
+        return new System.Drawing.Point((int)(xAvg), (int)(yAvg));
     }
 
-    private bool IsInsidePolygon(System.Windows.Point point, System.Windows.Point[] polygon)
+    private bool IsInsidePolygon(System.Drawing.Point point, System.Drawing.Point[] polygon)
     {
         bool result = false;
         int j = polygon.Length - 1;
@@ -826,7 +814,7 @@ public class StateWorkerPresenter
         // Вычисляем новый bounding box
         var allPoints = provinces
             .Where(p => p?.Shape != null)
-            .SelectMany(p => p.Shape.ContourPoints ?? Array.Empty<Point>())
+            .SelectMany(p => p.Shape.ContourPoints ?? Array.Empty<System.Drawing.Point>())
             .ToList();
 
         if (allPoints.Count == 0) return;

@@ -23,7 +23,7 @@ namespace ModdingManagerModels
         public bool? ElectionsAllowed { get; set; }
         [JsonIgnore]
         public List<StateConfig> States { get; set; }
-        //public Dictionary<string, ImageSource>? CountryFlags { get; set; }
+        public Dictionary<string, Bitmap>? CountryFlags { get; set; }
         public Dictionary<string, int>? PartyPopularities { get; set; }
         public List<string>? Ideas { get; set; } = new List<string>();
         public List<string>? Characters { get; set; } = new List<string>();

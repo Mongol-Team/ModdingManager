@@ -2,7 +2,7 @@
 using System.Windows.Documents;
 using System.Windows.Forms;
 
-namespace ModdingManager.classes.extentions
+namespace ModdingManagerClassLib.Extentions
 {
     public static class TextBoxExtensions
     {

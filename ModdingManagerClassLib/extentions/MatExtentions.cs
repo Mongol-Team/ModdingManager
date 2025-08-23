@@ -4,7 +4,7 @@ using OpenCvSharp;
 using System.Drawing;
 using Point = System.Drawing.Point;
 
-namespace ModdingManager.classes.extentions
+namespace ModdingManagerClassLib.Extentions
 {
     public static class MatExtentions
     {

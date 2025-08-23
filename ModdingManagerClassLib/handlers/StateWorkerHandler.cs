@@ -1,5 +1,6 @@
 ﻿using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
 using ModdingManagerModels;
 using ModdingManagerModels.Args;
 using ModdingManagerModels.Types;

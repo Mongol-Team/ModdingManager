@@ -1,13 +1,14 @@
-﻿using ModdingManager.classes.extentions;
+﻿using ModdingManagerClassLib.Extentions;
 using ModdingManager.classes.views;
 using ModdingManager.managers.@base;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Label = System.Windows.Controls.Label;
 using Registry = ModdingManager.classes.utils.Registry;
-
+using Debugger = ModdingManagerClassLib.Debugger;
 namespace ModdingManager
 {
     /// <summary>
@@ -211,17 +212,17 @@ namespace ModdingManager
         }
 
 
-        public Dictionary<string, ImageSource>? CountryFlags
+        public Dictionary<string, Bitmap>? CountryFlags
         {
             get
             {
-                Dictionary<string, ImageSource> result = new Dictionary<string, ImageSource>();
+                Dictionary<string, Bitmap> result = new Dictionary<string, Bitmap>();
                 foreach (var wrap in CountryFlagsCanvas.Children)
                 {
                     Canvas canvasWrap = wrap as Canvas;
                     var ideo = Registry.Instance.GetIdeology(canvasWrap.Name);
                     var image = (canvasWrap.Children.GetByName(canvasWrap.Name + "Img") as System.Windows.Controls.Image).Source;
-                    result[ideo?.Id] = image;
+                    result[ideo?.Id] = image.ToBitmap();
                 }
                 return result;
             }
@@ -232,7 +233,7 @@ namespace ModdingManager
                 foreach (var pair in value)
                 {
                     string ideology = pair.Key;
-                    ImageSource imageSource = pair.Value;
+                    ImageSource imageSource = pair.Value.ToImageSource();
 
                     // Создаём контейнер Canvas
                     Canvas wrap = new Canvas

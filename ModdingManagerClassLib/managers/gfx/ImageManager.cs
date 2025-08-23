@@ -1,4 +1,4 @@
-﻿using ModdingManager.classes.extentions;
+﻿using ModdingManagerClassLib.Extentions;
 using ModdingManager.managers.@base;
 using ModdingManagerModels.Args;
 using System.Drawing;

@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types;
+﻿using ModdingManagerClassLib;
+using ModdingManagerModels.Types;
 
 namespace ModdingManager.classes.cache.cachedFiles
 {

@@ -1,6 +1,7 @@
 using ModdingManager.classes.controls;
 using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
 using ModdingManagerModels;
 using System.IO;
 using System.Text.Json;
@@ -253,11 +254,7 @@ namespace ModdingManager
         {
             ModManager.IsDebugRuning = true;
             DebugWindow debugWindow = new DebugWindow();
-            // Инициализируем Debugger (если используется Singleton, то Instance уже создан)
-            Debugger.Instance.DebugOutputControl = debugWindow.DebugBox; // Подключаем RichTextBox для вывода логов
 
-            // Подключаем текущее окно к Debugger для перехвата исключений
-            Debugger.Instance.AttachToWindow(this);
 
             // Пример записи отладочного сообщения
             Debugger.Instance.LogMessage("Режим отладки активирован");
