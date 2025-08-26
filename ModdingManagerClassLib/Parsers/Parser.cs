@@ -1,19 +1,18 @@
-﻿using ModdingManagerModels.Interfaces;
-using ModdingManagerClassLib.Enums;
+﻿using ModdingManagerClassLib.Interfaces;
+using ModdingManagerModels.Interfaces;
 
 namespace ModdingManagerClassLib.Parsers
 {
     public abstract class Parser
     {
-        protected abstract IHoiData ParseRealisation(string content);
+        protected abstract IHoiData ParseRealization(string content, IParsingPattern pattern);
 
-        public virtual IHoiData Parse(string content, ParsingArgType type)
+        public virtual IHoiData Parse(string content, IParsingPattern pattern)
         {
-            if(type == ParsingArgType.Path && File.Exists(content))
+            if (File.Exists(content))
                 content = File.ReadAllText(content);
-            
 
-            return ParseRealisation(content);
+            return ParseRealization(content, pattern);
         }
     }
 }

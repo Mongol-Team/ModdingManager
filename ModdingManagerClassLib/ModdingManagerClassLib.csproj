@@ -57,7 +57,7 @@
 
   <ItemGroup>
     <Folder Include="Composers\" />
-    <Folder Include="Interfaces\" />
+    <Folder Include="Enums\" />
   </ItemGroup>
 
 </Project>
