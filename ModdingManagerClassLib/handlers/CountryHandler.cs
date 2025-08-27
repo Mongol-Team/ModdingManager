@@ -454,7 +454,7 @@ public class CountryHandler
             //    if (!string.IsNullOrEmpty(ideologyDir))
             //        Directory.CreateDirectory(ideologyDir);
 
-            //    pair.Value.ToDrawingDotImage().SaveFlagSet(flagsDir, countryTag, pair.Key);
+            //    pair.Values.ToDrawingDotImage().SaveFlagSet(flagsDir, countryTag, pair.Key);
             //}
 
             MessageBox.Show($"Флаги страны {countryTag} успешно созданы в {flagsDir}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);

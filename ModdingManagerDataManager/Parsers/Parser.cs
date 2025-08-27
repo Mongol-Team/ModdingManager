@@ -9,8 +9,14 @@ namespace ModdingManagerDataManager.Parsers
 
         public virtual IHoiData Parse(string content, IParsingPattern pattern)
         {
-            if (File.Exists(content))
+            if (content.Length < 300 && File.Exists(content))
+            {
+                string filePath = content;
                 content = File.ReadAllText(content);
+                var result = ParseRealization(content, pattern);
+                result.FilePath = filePath;
+                return result;
+            }
 
             return ParseRealization(content, pattern);
         }

@@ -4,7 +4,7 @@ using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
-using ModdingManagerModels.Types.ObectCacheData;
+using ModdingManagerModels.Types.ObjectCacheData;
 using System.Drawing;
 using System.Globalization;
 using System.Text;

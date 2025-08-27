@@ -4,7 +4,7 @@ using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels;
 using ModdingManagerModels.Args;
-using ModdingManagerModels.Types.ObectCacheData;
+using ModdingManagerModels.Types.ObjectCacheData;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System.Globalization;

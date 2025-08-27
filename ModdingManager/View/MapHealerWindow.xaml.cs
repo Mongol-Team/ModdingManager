@@ -3,7 +3,7 @@ using ModdingManager.Controls;
 using ModdingManager.classes.utils;
 using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
-using ModdingManagerModels.Types.ObectCacheData;
+using ModdingManagerModels.Types.ObjectCacheData;
 using System.Windows;
 
 namespace ModdingManager

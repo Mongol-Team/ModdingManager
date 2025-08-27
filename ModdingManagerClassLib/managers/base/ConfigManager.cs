@@ -277,7 +277,7 @@
 //                        var flagEntry = archive.CreateEntry($"flags/{flag.Key}.png");
 //                        using (var stream = flagEntry.Open())
 //                        {
-//                            await SaveImageSourceToStream(flag.Value, stream, view);
+//                            await SaveImageSourceToStream(flag.Values, stream, view);
 //                        }
 //                    }
 //                }

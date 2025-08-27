@@ -2,7 +2,7 @@
 
 namespace ModdingManagerModels
 {
-    public class IdeologyConfig : IComparable<IdeologyConfig>, IModel
+    public class IdeologyConfig : IModel
     {
         public string Id { get; set; }
         public string Description { get; set; }
@@ -20,10 +20,7 @@ namespace ModdingManagerModels
         public Dictionary<string, double> FactionModifiers { get; set; }
         public string AiIdeologyName { get; set; }
         public List<string> DynamicFactionNames { get; set; }
-        public int CompareTo(IdeologyConfig other)
-        {
-            return string.Compare(this.Name, other.Name, StringComparison.Ordinal);
-        }
+
         public override string ToString()
         {
             return $"IdeologyConfig:\n" +
@@ -42,17 +39,6 @@ namespace ModdingManagerModels
                    $"- Rules: [{string.Join(", ", Rules?.Select(kv => $"{kv.Key}={kv.Value}") ?? Enumerable.Empty<string>())}]\n" +
                    $"- Modifiers: [{string.Join(", ", Modifiers?.Select(kv => $"{kv.Key}={kv.Value:F2}") ?? Enumerable.Empty<string>())}]\n" +
                    $"- FactionModifiers: [{string.Join(", ", FactionModifiers?.Select(kv => $"{kv.Key}={kv.Value:F2}") ?? Enumerable.Empty<string>())}]\n";
-        }
-    }
-    public class IdeologyType
-    {
-        public string Parrent { get; set; }
-        public bool CanBeRandomlySelected { get; set; }
-        public string Name { get; set; }
-        public Color Color { get; set; }
-        public override string ToString()
-        {
-            return $"{Name} (Random: {CanBeRandomlySelected}, Color: {Color.ToString()}, Parrent: {Parrent})";
         }
     }
 }

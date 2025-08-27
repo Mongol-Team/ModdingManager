@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using ModdingManagerModels.Enums;
+using System.Drawing;
 using System.Text.RegularExpressions;
 
 namespace ModdingManagerDataManager
@@ -58,10 +59,22 @@ namespace ModdingManagerDataManager
         }
         public static bool TryParseString(string text, out string result)
         {
-            result = text.Replace("\"", "");
+            if (text.Contains("\""))
+            {
+                result = text.Replace("\"", "");
+                return true;
+            }
+            result = default;
+            return false;
+        }
+        public static bool TryParseHoiReference(string text, out string result)
+        {
+            result = text;
+            if (text.Contains("\""))
+                return false;
             return true;
         }
-        public static bool TryParseAny(string data, out object? value)
+        public static HoiParsingResult TryParseAny(string data, out object? value)
         {
             if (string.IsNullOrEmpty(data))
                 value = null;
@@ -77,12 +90,17 @@ namespace ModdingManagerDataManager
                 value = d;
             else if (TryParseString(data, out var s))
                 value = s;
+            else if (TryParseHoiReference(data, out var r))
+            {
+                value = r;
+                return HoiParsingResult.HoiReference;
+            }
             else
             {
                 value = null;
-                return false;
+                return HoiParsingResult.Fail;
             }
-            return true;
+            return HoiParsingResult.Success;
         }
     }
 }

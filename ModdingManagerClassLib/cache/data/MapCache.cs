@@ -1,6 +1,6 @@
 ﻿using ModdingManager.classes.cache.cachedFiles;
 using ModdingManager.managers.@base;
-using ModdingManagerModels.Types.ObectCacheData;
+using ModdingManagerModels.Types.ObjectCacheData;
 
 namespace ModdingManager.classes.cache.data
 {
