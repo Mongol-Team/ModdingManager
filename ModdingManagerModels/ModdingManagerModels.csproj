@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <Folder Include="Types\TableCacheData\" />
-    <Folder Include="Types\LochalizationData\" />
   </ItemGroup>
 
 </Project>
