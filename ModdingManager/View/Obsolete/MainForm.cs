@@ -1,4 +1,4 @@
-using ModdingManager.classes.controls;
+using ModdingManager.Controls;
 using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
 using ModdingManagerClassLib;

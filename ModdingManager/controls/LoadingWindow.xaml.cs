@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ModdingManager.classes.controls
+namespace ModdingManager.Controls
 {
     public partial class LoadingWindow : Window
     {

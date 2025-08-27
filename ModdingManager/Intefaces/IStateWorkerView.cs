@@ -1,4 +1,4 @@
-﻿using ModdingManager.classes.controls;
+﻿using ModdingManager.Controls;
 using ModdingManagerModels.Args;
 using System.Windows;
 using System.Windows.Controls;

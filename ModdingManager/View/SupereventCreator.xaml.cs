@@ -1,4 +1,4 @@
-﻿using ModdingManager.classes.controls;
+﻿using ModdingManager.Controls;
 using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;

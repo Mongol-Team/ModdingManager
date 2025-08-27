@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ModdingManager"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:cntrls ="clr-namespace:ModdingManager.classes.controls"
+        xmlns:cntrls ="clr-namespace:ModdingManager.Controls"
         mc:Ignorable="d"
         Title="Создатель суперивентов" Height="650" Width="900">
     <Grid>

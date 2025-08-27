@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UserControl = System.Windows.Controls.UserControl;
 
-namespace ModdingManager.classes.controls
+namespace ModdingManager.Controls
 {
     /// <summary>
     /// Логика взаимодействия для ErrorPanel.xaml

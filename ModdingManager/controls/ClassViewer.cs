@@ -11,7 +11,7 @@ using Label = System.Windows.Controls.Label;
 using Size = System.Windows.Size;
 using TextBox = System.Windows.Controls.TextBox;
 
-namespace ModdingManager.classes.controls
+namespace ModdingManager.Controls
 {
     public class ClassViewer : StackPanel
     {

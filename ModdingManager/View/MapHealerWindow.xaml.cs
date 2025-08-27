@@ -1,5 +1,5 @@
 ﻿using ModdingManager.classes.cache.cachedFiles;
-using ModdingManager.classes.controls;
+using ModdingManager.Controls;
 using ModdingManager.classes.utils;
 using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;

@@ -1,4 +1,7 @@
 ﻿using System.Drawing;
+using System.Windows;
+using System.Windows.Controls;
+using Point = System.Drawing.Point;
 
 namespace ModdingManagerClassLib.Extentions
 {
@@ -15,5 +18,7 @@ namespace ModdingManagerClassLib.Extentions
 
         public static IEnumerable<System.Windows.Point> ToWindowsPoints(this IEnumerable<Point> points)
             => points.Select(p => p.ToWindowsPoint());
+        
+
     }
 }

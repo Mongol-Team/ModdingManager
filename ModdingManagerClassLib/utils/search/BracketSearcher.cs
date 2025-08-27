@@ -14,7 +14,7 @@ public class BracketSearcher : Searcher
     /// <summary>
     /// Находит все скобки с указанным именем заголовка
     /// </summary>
-    public List<Bracket> FindBracketsByName(string bracketName)
+    public List<Bracket> FindBracketsByName(string bracketName, string prefixToIgnore = null)
     {
         currentRecursionDepth = 0;
         var brackets = new List<Bracket>();
@@ -29,7 +29,7 @@ public class BracketSearcher : Searcher
             pos = FindExactHeaderPosition(SearchPattern, pos);
             if (pos == -1) break;
 
-            var bracket = GetBracketAtPosition(pos);
+            var bracket = GetBracketAtPosition(pos, prefixToIgnore);
             if (bracket != null)
             {
                 brackets.Add(bracket);
@@ -44,10 +44,11 @@ public class BracketSearcher : Searcher
         return brackets;
     }
 
+
     /// <summary>
     /// Получает информацию о скобке по позиции заголовка
     /// </summary>
-    private Bracket GetBracketAtPosition(int headerStart)
+    private Bracket GetBracketAtPosition(int headerStart, string prefixToIgnore = null)
     {
         if (currentRecursionDepth > maxRecursionDepth)
             return null;
@@ -86,6 +87,22 @@ public class BracketSearcher : Searcher
                     posAfterHeader++;
             }
 
+            // 🔹 Если есть префикс (например rgb), пропускаем его
+            if (!string.IsNullOrEmpty(prefixToIgnore))
+            {
+                int prefixEnd = posAfterHeader;
+                while (prefixEnd < CurrentString.Length && !char.IsWhiteSpace(CurrentString[prefixEnd]) && CurrentString[prefixEnd] != OpenBracketChar)
+                    prefixEnd++;
+
+                string foundPrefix = new string(CurrentString, posAfterHeader, prefixEnd - posAfterHeader);
+                if (string.Equals(foundPrefix, prefixToIgnore, StringComparison.OrdinalIgnoreCase))
+                {
+                    posAfterHeader = prefixEnd;
+                    while (posAfterHeader < CurrentString.Length && char.IsWhiteSpace(CurrentString[posAfterHeader]))
+                        posAfterHeader++;
+                }
+            }
+
             // Проверка открывающей скобки
             if (posAfterHeader >= CurrentString.Length || CurrentString[posAfterHeader] != OpenBracketChar)
                 return null;
@@ -98,7 +115,6 @@ public class BracketSearcher : Searcher
             // Извлекаем заголовок
             string headerName = new string(CurrentString, headerStart, headerEnd - headerStart).Trim();
 
-            // Если был символ присваивания, удаляем его из конца заголовка
             if (hasAssign && headerName.EndsWith("="))
                 headerName = headerName.Substring(0, headerName.Length - 1).Trim();
 
@@ -122,6 +138,7 @@ public class BracketSearcher : Searcher
             currentRecursionDepth--;
         }
     }
+
 
     /// <summary>
     /// Парсит содержимое скобки без рекурсивных вызовов GetBracketAtPosition

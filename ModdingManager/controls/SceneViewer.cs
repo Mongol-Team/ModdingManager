@@ -7,7 +7,7 @@ using Cursors = System.Windows.Input.Cursors;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 
-namespace ModdingManager.classes.controls
+namespace ModdingManager.Controls
 {
     public class SceneViewer : ScrollViewer
     {
@@ -104,6 +104,7 @@ namespace ModdingManager.classes.controls
 
                 ScrollToHorizontalOffset(_scrollStart.X + delta.X);
                 ScrollToVerticalOffset(_scrollStart.Y + delta.Y);
+                this.InvalidateMeasure();
             }
         }
 
@@ -114,8 +115,8 @@ namespace ModdingManager.classes.controls
                 _dragStart = null;
                 Cursor = Cursors.Arrow;
                 ReleaseMouseCapture();
-                e.Handled = true;
                 _isDragging = false;
+                this.InvalidateMeasure();
             }
         }
 

@@ -10,6 +10,8 @@ namespace ModdingManagerModels
         public int GridY { get; set; }
         public bool IsBig { get; set; }
         public int ModifCost { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
         public string LocName { get; set; }
         public string LocDescription { get; set; }
         public string Categories { get; set; }

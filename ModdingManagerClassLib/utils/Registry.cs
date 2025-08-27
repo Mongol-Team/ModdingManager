@@ -340,38 +340,38 @@ namespace ModdingManager.classes.utils
 
         public static List<CountryOnMapConfig> ParseCountryMap(MapConfig map)
         {
-            var tagVars = new List<Var>();
-            string[] tagFolders = {
-                Path.Combine(ModManager.ModDirectory, "common", "country_tags"),
-                Path.Combine(ModManager.GameDirectory, "common", "country_tags")
-            };
-
-            foreach (var folder in tagFolders)
-            {
-                if (Directory.Exists(folder))
-                {
-                    tagVars.AddRange(VarSearcher.TryGetCountryTags(folder));
-                }
-            }
-
-            var tagLookup = tagVars
-            .GroupBy(v => v.Name)
-            .Select(g => g.First())
-            .ToDictionary(v => v.Name, v => v.Value);
-
             var countries = new List<CountryOnMapConfig>();
             var visitedIds = new HashSet<int>();
 
-            string[] stateFolders = {
-                Path.Combine(ModManager.ModDirectory, "history", "states"),
-                Path.Combine(ModManager.GameDirectory, "history", "states")
+            // Папки тегов и стейтов — связаны попарно (порядок важен: сначала мод, потом ваниль)
+            var folders = new[]
+            {
+                new {
+                    TagFolder = Path.Combine(ModManager.ModDirectory, "common", "country_tags"),
+                    StateFolder = Path.Combine(ModManager.ModDirectory, "history", "states")
+                },
+                new {
+                    TagFolder = Path.Combine(ModManager.GameDirectory, "common", "country_tags"),
+                    StateFolder = Path.Combine(ModManager.GameDirectory, "history", "states")
+                }
             };
 
-            foreach (var folder in stateFolders)
+            for (int i = 0; i < folders.Length; i++)
             {
-                if (!Directory.Exists(folder)) continue;
+                var set = folders[i];
+                if (!Directory.Exists(set.TagFolder) || !Directory.Exists(set.StateFolder))
+                    continue;
 
-                foreach (var file in Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories))
+                // 1. Собираем теги для этой зоны
+                var tagVars = VarSearcher.TryGetCountryTags(set.TagFolder);
+
+                var tagLookup = tagVars
+                    .GroupBy(v => v.Name)
+                    .Select(g => g.First())
+                    .ToDictionary(v => v.Name, v => v.Value);
+
+                // 2. Ищем states только в этой зоне
+                foreach (var file in Directory.GetFiles(set.StateFolder, "*.txt", SearchOption.AllDirectories))
                 {
                     string content = File.ReadAllText(file);
                     var searcher = new BracketSearcher { CurrentString = content.ToCharArray() };
@@ -381,7 +381,7 @@ namespace ModdingManager.classes.utils
                     {
                         var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
                         Bracket historyBr = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "history");
-                        Var ownerVar = historyBr.SubVars.FirstOrDefault(v => v.Name == "owner");
+                        Var ownerVar = historyBr?.SubVars.FirstOrDefault(v => v.Name == "owner");
 
                         if (idVar == null || !int.TryParse(idVar.Value as string, out int id) ||
                             ownerVar == null || visitedIds.Contains(id))
@@ -391,6 +391,7 @@ namespace ModdingManager.classes.utils
                         if (state == null) continue;
 
                         string ownerTag = ownerVar.Value as string;
+
                         if (!tagLookup.TryGetValue(ownerTag, out var countryPath))
                             continue;
 
@@ -411,11 +412,18 @@ namespace ModdingManager.classes.utils
                         visitedIds.Add(id);
                     }
                 }
+
+                // если после обработки первого сета уже нашли страны — второй больше не трогаем
+                if (countries.Count > 0)
+                    break;
             }
 
             map.Countries = countries;
             return countries;
         }
+
+
+
         public static IdeologyConfig ParseIdeologyConfig(string name, Bracket bracket)
         {
             var config = new IdeologyConfig
@@ -628,7 +636,7 @@ namespace ModdingManager.classes.utils
                 {
                     var content = File.ReadAllText(path);
                     var searcher = new BracketSearcher { CurrentString = content.ToCharArray() };
-                    var colorBrackets = searcher.FindBracketsByName("color");
+                    var colorBrackets = searcher.FindBracketsByName("color", "rgb");
 
                     if (colorBrackets.Count > 0)
                     {

@@ -74,7 +74,7 @@ namespace ModdingManagerClassLib.Extentions
                 File.WriteAllBytes(fullPath, ms.ToArray());
             }
         }
-        public static ImageSource ConvertToImageSource(this System.Drawing.Image image)
+        public static ImageSource ToImageSource(this System.Drawing.Image image)
         {
             // Конвертация System.Drawing.Image в ImageSource
             using (var ms = new MemoryStream())
@@ -90,6 +90,20 @@ namespace ModdingManagerClassLib.Extentions
 
                 return bitmapImage;
             }
+        }
+        public static Bitmap ToBitmap(this System.Drawing.Image image)
+        {
+            // Если уже Bitmap — просто приводим тип
+            if (image is Bitmap bitmap)
+                return bitmap;
+
+            // Иначе создаём новый Bitmap и рисуем исходное изображение на нём
+            var newBitmap = new Bitmap(image.Width, image.Height);
+            using (var g = Graphics.FromImage(newBitmap))
+            {
+                g.DrawImage(image, 0, 0, image.Width, image.Height);
+            }
+            return newBitmap;
         }
         public static void SaveAsDDS(this Bitmap image, string fullPath)
         {

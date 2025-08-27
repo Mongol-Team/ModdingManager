@@ -5,7 +5,7 @@ using System.Windows.Media;
 using Color = System.Windows.Media.Color;
 using UserControl = System.Windows.Controls.UserControl;
 
-namespace ModdingManager.classes.controls
+namespace ModdingManager.Controls
 {
     public partial class ColorPickerDropdown : UserControl
     {

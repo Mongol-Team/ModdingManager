@@ -1,4 +1,4 @@
-﻿using global::ModdingManager.classes.controls;
+﻿
 using global::ModdingManager.managers.@base;
 using global::ModdingManager.View;
 using ModdingManager.classes.utils;
@@ -45,7 +45,6 @@ namespace ModdingManager.Presenter
             _view.SuperEventCreatorButton.Click += SuperEventCreatorButton_Click;
             _view.DebugButton.Click += DebugButton_Click;
             _view.IdeologyCreatorBtn.Click += IdeologyCreatorBtn_Click;
-            _view.button1.Click += button1_Click_1;
 
             // сохранение dir.json при изменении (как в DirBox_TextChanged)
             _view.DirBox.TextChanged += DirBoxes_TextChanged;
@@ -265,34 +264,6 @@ namespace ModdingManager.Presenter
                 MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
             }
         }
-
-        private void button1_Click_1(object? sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // тест блока ошибок
-                var errorPanel = new ErrorPanel();
-                errorPanel.AddError(ErrorType.Warning, "This feature is not implemented yet.", "MapHealerWindow");
-                errorPanel.AddError(ErrorType.Critical, "Пенис 24 вап ПРОСТО Я вапвап вап.",
-                    @"C:\Users\Acer\Documents\Paradox Interactive\Hearts of Iron IV\mod\SME\history\states\1-France.txt");
-
-                var dialog = new Window
-                {
-                    Title = "Ошибки",
-                    Width = 475,
-                    Height = 338,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                    Content = errorPanel,
-                    Owner = _view
-                };
-                dialog.Show();
-            }
-            catch (Exception ex)
-            {
-                Logger.AddLog($"Поймано исключение в button1_Click: {ex}");
-            }
-        }
-
         // ====== загрузка и автосохранение путей ======
 
         private void OnLoaded(object? sender, RoutedEventArgs e)

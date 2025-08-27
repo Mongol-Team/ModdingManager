@@ -1,4 +1,7 @@
-﻿using System.Windows.Controls;
+﻿using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace ModdingManagerClassLib.Extentions
 {
@@ -12,5 +15,7 @@ namespace ModdingManagerClassLib.Extentions
             }
             return null;
         }
+        
+
     }
 }

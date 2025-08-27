@@ -17,7 +17,7 @@ using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 using UserControl = System.Windows.Controls.UserControl;
 
-namespace ModdingManager.classes.controls
+namespace ModdingManager.Controls
 {
     /// <summary>
     /// Логика взаимодействия для ColorPicker.xaml
