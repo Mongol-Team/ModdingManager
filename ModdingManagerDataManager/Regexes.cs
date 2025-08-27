@@ -1,6 +1,6 @@
-﻿using ModdingManagerClassLib.Interfaces;
+﻿using ModdingManagerDataManager.Interfaces;
 
-namespace ModdingManagerClassLib.utils.Timbuhtuk_
+namespace ModdingManagerDataManager
 {
     public struct Regexes
     {
@@ -11,14 +11,13 @@ namespace ModdingManagerClassLib.utils.Timbuhtuk_
         //CommentChar = '#'
         //AssignChar = '='
 
-        //LOC
+        #region  LOCALIZATION
         public static string localization = @"^(l_\w+:)\n(\ \ [A-Za-z0-9_]+:\ "".+""\n?)+$";
-        //CSV
+        #endregion
+        #region CSV
         public static string csv = @"^([^;]+;)+[^;]+$";
-
-
-
-        //TXT
+        #endregion
+        #region TXT
 
         //use only for extracted Color bracket | { R G B }
         public static string hoiColorPart = @"(25[0-5]|2[0-4]\d|1?\d{1,2})";
@@ -41,7 +40,7 @@ namespace ModdingManagerClassLib.utils.Timbuhtuk_
         public static string funcFileComment = @"#.*\s";
         public static string escapeCharsAroundAssignChar = @"\s*=\s*";
 
-
+        #endregion
 
         // require multiline flag
         public static string emptyLine = @"^\s*$\r?\n?";

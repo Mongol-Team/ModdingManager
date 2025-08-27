@@ -1,4 +1,4 @@
-﻿namespace ModdingManagerClassLib.Interfaces
+﻿namespace ModdingManagerDataManager.Interfaces
 {
     public interface IParsingPattern
     {

@@ -1,14 +1,13 @@
-﻿using ModdingManagerClassLib.Interfaces;
-using ModdingManagerClassLib.utils.Timbuhtuk_;
+﻿using ModdingManagerDataManager.Interfaces;
 using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.ObectCacheData;
 using System.Text.RegularExpressions;
-using Rx = ModdingManagerClassLib.utils.Timbuhtuk_.Regexes;
+using Rx = ModdingManagerDataManager.Regexes;
 
 
 
 
-namespace ModdingManagerClassLib.Parsers
+namespace ModdingManagerDataManager.Parsers
 {
     public class FunkFileParser : Parser
     {

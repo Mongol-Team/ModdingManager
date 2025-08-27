@@ -1,8 +1,6 @@
 ﻿using ModdingManager.classes.cache.data;
 using ModdingManager.classes.managers.gfx;
-using ModdingManager.classes.utils.search;
 using ModdingManager.managers.@base;
-using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
@@ -40,16 +38,16 @@ namespace ModdingManager.classes.utils
         public static void LoadInstance()
         {
             using LogScope scope = new LogScope("Loading Registry", ConsoleColor.Magenta);
-            
-                LoadCache();
-                LoadRegiemts();
-                LoadCountries();
-                LoadIdeas();
-                LoadModifiers();
-                LoadCharacters();
-                LoadIdeologies();
-                LoadMap();
-            
+
+            LoadCache();
+            LoadRegiemts();
+            LoadCountries();
+            LoadIdeas();
+            LoadModifiers();
+            LoadCharacters();
+            LoadIdeologies();
+            LoadMap();
+
         }
         #region Load Methods
         private static void LoadCache()
@@ -282,10 +280,10 @@ namespace ModdingManager.classes.utils
                             if (string.IsNullOrEmpty(internalName)) continue;
 
                             var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
-                            if (provincesBracket == null) 
-                            { 
+                            if (provincesBracket == null)
+                            {
                                 Logger.AddLog($"[❌] State {id} ({internalName}) in file {file} has no provinces bracket.");
-                                continue; 
+                                continue;
                             }
                             var historyBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "history");
                             if (historyBracket == null)
@@ -310,7 +308,7 @@ namespace ModdingManager.classes.utils
 
                             if (buildings == null) Logger.AddLog($"[⚠️] Buildings equals null in state {id}.");
                             if (matchedProvinces == null) Logger.AddLog($"[❌] Matched provinces equals null in state {id}.");
-                            
+
 
                             stateMap[id] = new StateConfig
                             {

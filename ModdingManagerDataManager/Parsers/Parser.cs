@@ -1,7 +1,7 @@
-﻿using ModdingManagerClassLib.Interfaces;
+﻿using ModdingManagerDataManager.Interfaces;
 using ModdingManagerModels.Interfaces;
 
-namespace ModdingManagerClassLib.Parsers
+namespace ModdingManagerDataManager.Parsers
 {
     public abstract class Parser
     {

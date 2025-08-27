@@ -1,6 +1,6 @@
-﻿using ModdingManagerClassLib.Interfaces;
+﻿using ModdingManagerDataManager.Interfaces;
 
-namespace ModdingManagerClassLib.Parsers.Patterns
+namespace ModdingManagerDataManager.Parsers.Patterns
 {
     public struct SomePattern : IParsingPattern
     {

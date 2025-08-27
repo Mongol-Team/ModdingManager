@@ -7,14 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Parsers\TxtParser.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="Enums\NewFile1.txt" />
     <None Remove="Enums\ParsingArgumentType" />
     <None Remove="NewFile1.txt" />
-    <None Remove="Parsers\NewFile1.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -58,6 +53,7 @@
   <ItemGroup>
     <Folder Include="Composers\" />
     <Folder Include="Enums\" />
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>
