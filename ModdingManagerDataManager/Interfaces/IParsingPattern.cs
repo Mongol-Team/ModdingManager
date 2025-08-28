@@ -8,7 +8,5 @@
         string AssignChar { get; }
         IReadOnlyList<Type> Types { get; }
         string Separator { get; }
-        string Apply(string regex);
-
     }
 }

@@ -8,13 +8,12 @@ namespace ModdingManagerDataManager
     {
         private static void Main(string[] args)
         {
-            //var one = File.ReadAllText("C:\\Users\\timpf\\Downloads\\Telegram Desktop\\06_bftb_on_actions.txt");
-            //var one = File.ReadAllText();
-            //var one = File.ReadAllText("C:\\Users\\timpf\\Downloads\\HOIlocal\\adjacencies.csv");
-            CsvFileParser parser = new CsvFileParser();
+
+            //CsvParser parser = new CsvParser(new CsvAdjacenciesPattern());
+            YmlParser parser = new YmlParser(new TxtPattern());
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var result = parser.Parse("C:\\Users\\timpf\\Downloads\\HOIlocal\\definition.csv", new CsvDefinitionsPattern());
+            var result = parser.Parse("C:\\Users\\timpf\\Downloads\\HOIlocal\\afr_countries_l_russian.yml");
             stopwatch.Stop();
             Console.WriteLine(stopwatch.ElapsedMilliseconds);
             Console.ReadLine();

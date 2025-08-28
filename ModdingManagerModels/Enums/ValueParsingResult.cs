@@ -1,6 +1,6 @@
 ﻿namespace ModdingManagerModels.Enums
 {
-    public enum HoiParsingResult
+    public enum ValueParsingResult
     {
         Success,
         Fail,

@@ -1,6 +1,6 @@
 ﻿namespace ModdingManagerModels.Enums
 {
-    public enum ProvinceTypes
+    public enum ProvinceType
     {
         land,
         lake,

@@ -1,8 +1,10 @@
-﻿namespace ModdingManagerModels.Types.LochalizationData
+﻿using ModdingManagerModels.Enums;
+
+namespace ModdingManagerModels.Types.LocalizationData
 {
     public class Localization
     {
-        public string Name { get; set; }
-        public Dictionary<string, string> Data { get; set; }
+        public Language Language { get; set; }
+        public Dictionary<string, string> Data { get; set; } = new Dictionary<string, string>();
     }
 }

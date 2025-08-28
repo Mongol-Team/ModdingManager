@@ -1,4 +1,4 @@
-﻿using ModdingManagerModels.Enums;
+﻿using ModdingManagerModels.Types;
 using System.Drawing;
 using System.Text.RegularExpressions;
 
@@ -23,8 +23,8 @@ namespace ModdingManagerDataManager
         {
             switch (text)
             {
-                case "yes": { result = true; return true; }
-                case "no": { result = false; return true; }
+                case "yes": case "true": { result = true; return true; }
+                case "no": case "false": { result = false; return true; }
                 default: { result = default; return false; }
             }
         }
@@ -46,15 +46,15 @@ namespace ModdingManagerDataManager
         }
         public static bool TryParseColor(string text, out Color result)
         {
-            if (!Regex.IsMatch(text, Regexes.hoiColorVar))
+            if (!Regexes.HoiColorContent.IsMatch(text))
             {
                 result = default;
                 return false;
             }
 
-            MatchCollection RGB = Regex.Matches(text, Regexes.hoiColorPart);
+            MatchCollection RGB = Regexes.HoiColorPart.Matches(text);
 
-            result = Color.FromArgb(int.Parse(RGB[0].Value), int.Parse(RGB[0].Value), int.Parse(RGB[0].Value));
+            result = Color.FromArgb(int.Parse(RGB[0].Value), int.Parse(RGB[1].Value), int.Parse(RGB[2].Value));
             return true;
         }
         public static bool TryParseString(string text, out string result)
@@ -67,14 +67,16 @@ namespace ModdingManagerDataManager
             result = default;
             return false;
         }
-        public static bool TryParseHoiReference(string text, out string result)
+        public static bool TryParseHoiReference(string text, out HoiReference result)
         {
-            result = text;
+            result = null;
             if (text.Contains("\""))
                 return false;
+            result = new HoiReference() { Value = text };
             return true;
         }
-        public static HoiParsingResult TryParseAny(string data, out object? value)
+        //ПИЗДЕЦ ТЯЖЕЛАЯ ДУРА, ВЫЗЫВАТЬ ТОЛЬКО ОТ БЕЗИСХОДНОСТИ
+        public static bool TryParseAny(string data, out object? value)
         {
             if (string.IsNullOrEmpty(data))
                 value = null;
@@ -91,16 +93,13 @@ namespace ModdingManagerDataManager
             else if (TryParseString(data, out var s))
                 value = s;
             else if (TryParseHoiReference(data, out var r))
-            {
                 value = r;
-                return HoiParsingResult.HoiReference;
-            }
             else
             {
                 value = null;
-                return HoiParsingResult.Fail;
+                return false;
             }
-            return HoiParsingResult.Success;
+            return true;
         }
     }
 }

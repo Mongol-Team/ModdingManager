@@ -1,4 +1,7 @@
 ﻿using ModdingManagerDataManager.Interfaces;
+using ModdingManagerModels.Enums;
+using ModdingManagerModels.Types;
+using System.Drawing;
 
 namespace ModdingManagerDataManager.Parsers.Patterns
 {
@@ -13,7 +16,7 @@ namespace ModdingManagerDataManager.Parsers.Patterns
         public string AssignChar => throw new NotImplementedException();
 
         public IReadOnlyList<Type> Types =>
-            [];
+            [typeof(HoiReference), typeof(HoiReference), typeof(AdjacencyType), typeof(HoiReference), typeof(Point), typeof(Point), typeof(string), typeof(string)];
 
 
         public string Separator => ";";

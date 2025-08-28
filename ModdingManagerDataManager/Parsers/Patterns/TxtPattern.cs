@@ -16,9 +16,5 @@ namespace ModdingManagerDataManager.Parsers.Patterns
 
         public string Separator => throw new NotImplementedException();
 
-        public string Apply(string regex)
-        {
-            return regex.Replace(@"\{", $@"\{OpenChar}").Replace(@"\}", CloseChar).Replace("#", CommentChar).Replace("=", AssignChar);
-        }
     }
 }

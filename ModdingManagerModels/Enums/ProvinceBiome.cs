@@ -1,10 +1,10 @@
 ﻿namespace ModdingManagerModels.Enums
 {
-    public enum ProvincesBiomes
+    public enum ProvinceBiome
     {
         unknown,
         lakes,
-        forests,
+        forest,
         ocean,
         hills,
         plains,

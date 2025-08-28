@@ -3,22 +3,24 @@ using ModdingManagerModels.Interfaces;
 
 namespace ModdingManagerDataManager.Parsers
 {
-    public abstract class Parser
+    public abstract class Parser()
     {
-        protected abstract IHoiData ParseRealization(string content, IParsingPattern pattern);
-
-        public virtual IHoiData Parse(string content, IParsingPattern pattern)
+        protected IParsingPattern pattern;
+        public Parser(IParsingPattern _pattern) : this() { this.pattern = _pattern; }
+        protected abstract IHoiData ParseRealization(string content);
+        protected abstract void Normalize(ref string content);
+        public virtual IHoiData Parse(string content)
         {
             if (content.Length < 300 && File.Exists(content))
             {
                 string filePath = content;
                 content = File.ReadAllText(content);
-                var result = ParseRealization(content, pattern);
+                var result = ParseRealization(content);
                 result.FilePath = filePath;
                 return result;
             }
 
-            return ParseRealization(content, pattern);
+            return ParseRealization(content);
         }
     }
 }
