@@ -45,7 +45,7 @@ public class CountryHandler
         var sb = new StringBuilder();
         List<string> lines = new List<string>();
         sb.AppendLine($"{languageKey}:");
-        foreach (var i in Registry.Instance.Ideologies)
+        foreach (var i in ConfigRegistry.Instance.Ideologies)
         {
             sb.AppendLine($" {tag}_{i.Id}: \"\"");
             sb.AppendLine($" {tag}_{i.Id}_DEF: \"\"");

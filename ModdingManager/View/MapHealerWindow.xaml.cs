@@ -24,8 +24,8 @@ namespace ModdingManager
         }
         public static void DeleteAllNonExistingProvLinks()
         {
-            var mapCache = Registry.Instance.MapCache;
-            var existingProvs = new HashSet<int>(Registry.Instance.Map.Provinces
+            var mapCache = ConfigRegistry.Instance.MapCache;
+            var existingProvs = new HashSet<int>(ConfigRegistry.Instance.Map.Provinces
                 .Where(p => p.Shape != null)
                 .Select(p => p.Id));
 
@@ -136,8 +136,8 @@ namespace ModdingManager
             }
 
 
-            string filePath = Registry.Instance.MapCache.MapDefinitionCache.FilePath;
-            DefinitionCachedFile defFile = Registry.Instance.MapCache.MapDefinitionCache;
+            string filePath = ConfigRegistry.Instance.MapCache.MapDefinitionCache.FilePath;
+            DefinitionCachedFile defFile = ConfigRegistry.Instance.MapCache.MapDefinitionCache;
             bool modified = false;
 
             var linesToRemove = new List<string>();
@@ -168,15 +168,15 @@ namespace ModdingManager
         }
         public static void CheckProvincesDefines(ErrorPanel errorPanel)
         {
-            var mapCache = Registry.Instance.MapCache;
+            var mapCache = ConfigRegistry.Instance.MapCache;
             if (mapCache == null || mapCache.MapDefinitionCache == null)
             {
                 Logger.AddLog("MapCache or MapDefinitionCache is not initialized. Cannot perform province defines check.");
                 return;
             }
 
-            var lines = Registry.Instance.MapCache.MapDefinitionCache.DefinitionLines;
-            var filePath = Registry.Instance.MapCache.MapDefinitionCache.FilePath;
+            var lines = ConfigRegistry.Instance.MapCache.MapDefinitionCache.DefinitionLines;
+            var filePath = ConfigRegistry.Instance.MapCache.MapDefinitionCache.FilePath;
             if (lines.Count == 0)
             {
                 return;
@@ -318,14 +318,14 @@ namespace ModdingManager
         }
         private static void CheckStateDefines(ErrorPanel errorPanel)
         {
-            var mapCache = Registry.Instance.MapCache;
+            var mapCache = ConfigRegistry.Instance.MapCache;
             if (mapCache == null || mapCache.StatesCache.Count == 0)
             {
                 Logger.AddLog("MapCache or StatesCache is not initialized. Cannot perform state defines check.");
                 return;
             }
 
-            var existingProvs = new HashSet<int>(Registry.Instance.Map.Provinces
+            var existingProvs = new HashSet<int>(ConfigRegistry.Instance.Map.Provinces
                 .Where(p => p.Shape != null)
                 .Select(p => p.Id));
             var provinceToFile = new Dictionary<int, string>();

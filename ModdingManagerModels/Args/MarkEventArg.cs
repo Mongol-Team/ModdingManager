@@ -5,6 +5,6 @@
         public ProvinceConfig MarkedProvince;
         public StateConfig MarkedState;
         public StrategicRegionConfig MarkedRegion;
-        public CountryOnMapConfig MarkedCountry;
+        public CountryConfig MarkedCountry;
     }
 }

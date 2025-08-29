@@ -137,7 +137,7 @@ namespace ModdingManager
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon polygon && polygon.Tag is int provinceId)
             {
-                _draggedProvince = Registry.Instance.Map.Provinces.FirstOrDefault(p => p.Id == provinceId);
+                _draggedProvince = ConfigRegistry.Instance.Map.Provinces.FirstOrDefault(p => p.Id == provinceId);
                 _dragStartPoint = e.GetPosition(Display);
             }
         }
@@ -159,7 +159,7 @@ namespace ModdingManager
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is int targetProvinceId)
             {
-                var targetProvince = Registry.Instance.Map.Provinces.FirstOrDefault(p => p.Id == targetProvinceId);
+                var targetProvince = ConfigRegistry.Instance.Map.Provinces.FirstOrDefault(p => p.Id == targetProvinceId);
 
                 switch (CurrentMapLayer)
                 {
@@ -263,7 +263,7 @@ namespace ModdingManager
             switch (CurrentMapLayer)
             {
                 case "STATE":
-                    var state = Registry.Instance.Map.States
+                    var state = ConfigRegistry.Instance.Map.States
                         .FirstOrDefault(s => s.Provinces.Any(p => p.Id == targetProvinceId));
                     if (state != null)
                     {
@@ -272,7 +272,7 @@ namespace ModdingManager
                     break;
 
                 case "PROVINCE":
-                    var province = Registry.Instance.Map.Provinces
+                    var province = ConfigRegistry.Instance.Map.Provinces
                         .FirstOrDefault(p => p.Id == targetProvinceId);
                     if (province != null)
                     {
@@ -281,7 +281,7 @@ namespace ModdingManager
                     break;
 
                 case "STRATEGIC":
-                    var region = Registry.Instance.Map.StrategicRegions
+                    var region = ConfigRegistry.Instance.Map.StrategicRegions
                         .FirstOrDefault(r => r.Provinces.Any(p => p.Id == targetProvinceId));
                     if (region != null)
                     {
@@ -290,7 +290,7 @@ namespace ModdingManager
                     break;
 
                 case "COUNTRY":
-                    var country = Registry.Instance.Map.Countries
+                    var country = ConfigRegistry.Instance.Map.Countries
                         .FirstOrDefault(c => c.States.Any(s => s.Provinces.Any(p => p.Id == targetProvinceId)));
                     if (country != null)
                     {
@@ -322,17 +322,17 @@ namespace ModdingManager
 
         private StateConfig GetStateForProvince(int? provinceId)
         {
-            return Registry.Instance.Map.States?.FirstOrDefault(s =>
+            return ConfigRegistry.Instance.Map.States?.FirstOrDefault(s =>
                 s.Provinces?.Any(p => p.Id == provinceId) == true);
         }
         private StrategicRegionConfig GetRegionForProvince(int? provinceId)
         {
-            return Registry.Instance.Map.StrategicRegions?.FirstOrDefault(s =>
+            return ConfigRegistry.Instance.Map.StrategicRegions?.FirstOrDefault(s =>
                 s.Provinces?.Any(p => p.Id == provinceId) == true);
         }
-        private CountryOnMapConfig GetCountryForState(int? stateId)
+        private CountryConfig GetCountryForState(int? stateId)
         {
-            return Registry.Instance.Map.Countries?.FirstOrDefault(c =>
+            return ConfigRegistry.Instance.Map.Countries?.FirstOrDefault(c =>
                 c.States?.Any(s => s.Id == stateId) == true);
         }
 

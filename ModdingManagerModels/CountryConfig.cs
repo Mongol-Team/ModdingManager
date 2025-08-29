@@ -22,6 +22,7 @@ namespace ModdingManagerModels
         public int? ElectionFrequency { get; set; }
         public bool? ElectionsAllowed { get; set; }
         [JsonIgnore]
+
         public List<StateConfig> States { get; set; }
         public Dictionary<string, Bitmap>? CountryFlags { get; set; }
         public Dictionary<string, int>? PartyPopularities { get; set; }

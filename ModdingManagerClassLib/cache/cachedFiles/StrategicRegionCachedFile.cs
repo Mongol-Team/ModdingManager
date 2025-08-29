@@ -21,9 +21,9 @@ namespace ModdingManager.classes.cache.cachedFiles
         }
         private void ParseContent()
         {
-            var searcher = new BracketSearcher { CurrentString = Content.ToCharArray() };
-            RegionBracket = searcher.FindBracketsByName("strategic_region").FirstOrDefault();
-            UpdateIndexTime();
+            //var searcher = new BracketSearcher { CurrentString = Content.ToCharArray() };
+            //RegionBracket = searcher.FindBracketsByName("strategic_region").FirstOrDefault();
+            //UpdateIndexTime();
         }
         public override void SaveToFile()
         {

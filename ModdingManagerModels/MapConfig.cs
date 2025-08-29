@@ -7,7 +7,7 @@ namespace ModdingManagerModels
         public List<StateConfig> States { get; set; }
         public List<ProvinceConfig> Provinces { get; set; }
         public List<StrategicRegionConfig> StrategicRegions { get; set; }
-        public List<CountryOnMapConfig> Countries { get; set; }
+        public List<CountryConfig> Countries { get; set; }
         public Bitmap Bitmap { get; set; }
         public Point? GetProvincePos(int provinceId)
         {

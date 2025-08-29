@@ -16,11 +16,11 @@ public class StateWorkerHandler
 {
     public List<ProvinceConfig> ComputeProvinceShapes()
     {
-        using var mat = Registry.Instance.Map.Bitmap.ToMat();
+        using var mat = ConfigRegistry.Instance.Map.Bitmap.ToMat();
         if (mat.Empty())
             throw new InvalidOperationException("Не удалось загрузить provinces.bmp");
 
-        Logger.AddLog($"🔍 Начало обработки {Registry.Instance.Map.Provinces.Count} провинций...");
+        Logger.AddLog($"🔍 Начало обработки {ConfigRegistry.Instance.Map.Provinces.Count} провинций...");
 
         int successCount = 0;
         var timer = System.Diagnostics.Stopwatch.StartNew();
@@ -28,7 +28,7 @@ public class StateWorkerHandler
         int maxThreads = Math.Max(1, Environment.ProcessorCount / 3);
         var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxThreads };
 
-        Parallel.ForEach(Registry.Instance.Map.Provinces, parallelOptions, province =>
+        Parallel.ForEach(ConfigRegistry.Instance.Map.Provinces, parallelOptions, province =>
         {
             try
             {
@@ -94,10 +94,10 @@ public class StateWorkerHandler
         timer.Stop();
         Logger.AddLog("\n====================================");
         Logger.AddLog($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
-        Logger.AddLog($"Успешно: {successCount} | Не удалось: {Registry.Instance.Map.Provinces.Count - successCount}");
+        Logger.AddLog($"Успешно: {successCount} | Не удалось: {ConfigRegistry.Instance.Map.Provinces.Count - successCount}");
         Logger.AddLog("====================================\n");
 
-        return Registry.Instance.Map.Provinces;
+        return ConfigRegistry.Instance.Map.Provinces;
     }
 
     public void ChangeState(StateConfig state, string oldName, string newName)
@@ -107,12 +107,12 @@ public class StateWorkerHandler
             return;
 
         // Получаем кеш состояний
-        var stateCache = Registry.Instance.MapCache.GetStateFiles();
+        var stateCache = ConfigRegistry.Instance.MapCache.GetStateFiles();
 
         // Если файл отсутствует в кеше, загружаем его
         if (!stateCache.TryGetValue(state.FilePath, out var cachedFile))
         {
-            Registry.Instance.MapCache.AddStateFile(state.FilePath);
+            ConfigRegistry.Instance.MapCache.AddStateFile(state.FilePath);
             if (!stateCache.TryGetValue(state.FilePath, out cachedFile))
                 return; // Файл не удалось загрузить
         }
@@ -131,8 +131,8 @@ public class StateWorkerHandler
 
         UpdateBuildings(stateBracket, state.Buildings);
         cachedFile.IsDirty = true;
-        Registry.Instance.MapCache.MarkStateFileDirty(state.FilePath);
-        Registry.Instance.MapCache.SaveDirtyStateFiles();
+        ConfigRegistry.Instance.MapCache.MarkStateFileDirty(state.FilePath);
+        ConfigRegistry.Instance.MapCache.SaveDirtyStateFiles();
     }
 
     private void UpdateStateName(string oldName, string newName, string newValue)
@@ -176,9 +176,9 @@ public class StateWorkerHandler
 
             // Обновляем кэш
             newVar.AddProperty("sourcePath", filePath1);
-            Registry.Instance.LocCache.StateLocalisation.RemoveAll(v =>
+            ConfigRegistry.Instance.LocCache.StateLocalisation.RemoveAll(v =>
                 v.Value.ToString().Trim('"').Equals(oldName, StringComparison.OrdinalIgnoreCase));
-            Registry.Instance.LocCache.StateLocalisation.Add(newVar);
+            ConfigRegistry.Instance.LocCache.StateLocalisation.Add(newVar);
         }
         catch (Exception ex)
         {
@@ -205,7 +205,7 @@ public class StateWorkerHandler
         else
         {
             // Добавляем новую переменную
-            bracket.AddVar(new Var { Name = varName, Value = value });
+            bracket.SubVars.Add(new Var { Name = varName, Value = value });
         }
     }
 
@@ -213,23 +213,23 @@ public class StateWorkerHandler
     {
         // Ищем брекет истории
         var historyBracket = stateBracket.SubBrackets
-            .FirstOrDefault(b => b.Header.Equals("history", StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(b => b.Name.Equals("history", StringComparison.OrdinalIgnoreCase));
 
         if (historyBracket == null)
         {
-            historyBracket = new Bracket { Header = "history" };
-            stateBracket.AddSubBracket(historyBracket);
+            historyBracket = new Bracket { Name = "history" };
+            stateBracket.SubBrackets.Add(historyBracket);
         }
 
         // Ищем брекет зданий
         var buildingsBracket = historyBracket.SubBrackets
-            .FirstOrDefault(b => b.Header.Equals("buildings", StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(b => b.Name.Equals("buildings", StringComparison.OrdinalIgnoreCase));
 
         // Создаем новый брекет зданий если не найден
         if (buildingsBracket == null)
         {
-            buildingsBracket = new Bracket { Header = "buildings" };
-            historyBracket.AddSubBracket(buildingsBracket);
+            buildingsBracket = new Bracket { Name = "buildings" };
+            historyBracket.SubBrackets.Add(buildingsBracket);
         }
 
         // Полностью заменяем все здания
@@ -254,11 +254,11 @@ public class StateWorkerHandler
                 throw new FileNotFoundException($"Не найден definition.csv ни в моде, ни в игре: {gameDefinitions}");
 
             File.Copy(gameDefinitions, modDefinitions, true);
-            Registry.Instance.MapCache.MapDefinitionCache = new(modDefinitions);
+            ConfigRegistry.Instance.MapCache.MapDefinitionCache = new(modDefinitions);
         }
 
         // Работаем через кеш
-        var definitionsContent = Registry.Instance.MapCache.MapDefinitionCache;
+        var definitionsContent = ConfigRegistry.Instance.MapCache.MapDefinitionCache;
         var lines = definitionsContent.DefinitionLines;
 
         int lineIndex = lines.FindIndex(line =>
@@ -296,7 +296,7 @@ public class StateWorkerHandler
         string replacePath = Path.Combine(replaceFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
         string header = $"﻿l_{ModManager.CurrentLanguage}:\n";
 
-        void EnsureFileHasHeader(string path, string header)
+        void EnsureFileHasName(string path, string header)
         {
             if (!File.Exists(path))
                 File.WriteAllText(path, header, new UTF8Encoding(true));
@@ -323,8 +323,8 @@ public class StateWorkerHandler
             File.WriteAllLines(path, lines, new UTF8Encoding(true));
         }
 
-        EnsureFileHasHeader(filePath, header);
-        EnsureFileHasHeader(replacePath, header);
+        EnsureFileHasName(filePath, header);
+        EnsureFileHasName(replacePath, header);
 
         UpdateLineInFile(filePath, vpKey, newLineLoc);
         UpdateLineInFile(replacePath, vpKey, newLineLoc);
@@ -333,30 +333,30 @@ public class StateWorkerHandler
 
 
         // 3. Обновление Victory Points в файлах состояний через кеш
-        if (Registry.Instance.MapCache.ProvinceIndex == null)
+        if (ConfigRegistry.Instance.MapCache.ProvinceIndex == null)
         {
-            Registry.Instance.MapCache.BuildProvinceIndex();
+            ConfigRegistry.Instance.MapCache.BuildProvinceIndex();
         }
 
-        if (Registry.Instance.MapCache.ProvinceIndex.TryGetValue(province.Id, out var stateInfo))
+        if (ConfigRegistry.Instance.MapCache.ProvinceIndex.TryGetValue(province.Id, out var stateInfo))
         {
             var (fileKey, stateBracket) = stateInfo;
 
             // Находим или создаем history
-            var historyBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "history");
+            var historyBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Name == "history");
             if (historyBracket == null)
             {
-                historyBracket = new Bracket { Header = "history" };
-                stateBracket.AddSubBracket(historyBracket);
+                historyBracket = new Bracket { Name = "history" };
+                stateBracket.SubBrackets.Add(historyBracket);
             }
 
             string vpLine = $"{province.Id} {province.VictoryPoints}";
-            var victoryPointsBrackets = historyBracket.SubBrackets.Where(b => b.Header == "victory_points");
+            var victoryPointsBrackets = historyBracket.SubBrackets.Where(b => b.Name == "victory_points");
             if (victoryPointsBrackets == null)
             {
-                var victoryPointsBracket = new Bracket { Header = "victory_points" };
+                var victoryPointsBracket = new Bracket { Name = "victory_points" };
                 victoryPointsBracket.AddContent(vpLine);
-                historyBracket.AddSubBracket(victoryPointsBracket);
+                historyBracket.SubBrackets.Add(victoryPointsBracket);
             }
             else
             {
@@ -370,23 +370,23 @@ public class StateWorkerHandler
                 }
                 else
                 {
-                    var victoryPointsBracket = new Bracket { Header = "victory_points" };
+                    var victoryPointsBracket = new Bracket { Name = "victory_points" };
                     victoryPointsBracket.AddContent(vpLine);
-                    historyBracket.AddSubBracket(victoryPointsBracket);
+                    historyBracket.SubBrackets.Add(victoryPointsBracket);
                 }
             }
 
             // Помечаем файл как измененный
-            Registry.Instance.MapCache.MarkStateFileDirty(fileKey);
+            ConfigRegistry.Instance.MapCache.MarkStateFileDirty(fileKey);
 
-            Registry.Instance.MapCache.SaveDirtyStateFiles();
+            ConfigRegistry.Instance.MapCache.SaveDirtyStateFiles();
         }
     }
     public void ChangeStrategicRegion(StrategicRegionConfig region)
     {
 
     }
-    public void ChangeCountry(CountryOnMapConfig country)
+    public void ChangeCountry(CountryConfig country)
     {
 
     }
@@ -406,7 +406,7 @@ public class StateWorkerHandler
             if (currentBrackets.Count > 0)
             {
                 var stateBracket = currentBrackets[0];
-                var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+                var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Name == "provinces");
 
                 if (provincesBracket != null)
                 {
@@ -424,12 +424,12 @@ public class StateWorkerHandler
         if (targetBrackets.Count > 0)
         {
             var stateBracket = targetBrackets[0];
-            var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+            var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Name == "provinces");
 
             if (provincesBracket == null)
             {
-                provincesBracket = new Bracket { Header = "provinces" };
-                stateBracket.AddSubBracket(provincesBracket);
+                provincesBracket = new Bracket { Name = "provinces" };
+                stateBracket.SubBrackets.Add(provincesBracket);
             }
 
             provincesBracket.AddContent(provinceStr);
@@ -477,7 +477,7 @@ public class StateWorkerHandler
             if (currentBrackets.Count > 0)
             {
                 var regionBracket = currentBrackets[0];
-                var provincesBracket = regionBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+                var provincesBracket = regionBracket.SubBrackets.FirstOrDefault(b => b.Name == "provinces");
 
                 if (provincesBracket != null)
                 {
@@ -495,12 +495,12 @@ public class StateWorkerHandler
         if (targetBrackets.Count > 0)
         {
             var regionBracket = targetBrackets[0];
-            var provincesBracket = regionBracket.SubBrackets.FirstOrDefault(b => b.Header == "provinces");
+            var provincesBracket = regionBracket.SubBrackets.FirstOrDefault(b => b.Name == "provinces");
 
             if (provincesBracket == null)
             {
-                provincesBracket = new Bracket { Header = "provinces" };
-                regionBracket.AddSubBracket(provincesBracket);
+                provincesBracket = new Bracket { Name = "provinces" };
+                regionBracket.SubBrackets.Add(provincesBracket);
             }
 
             provincesBracket.AddContent(provinceStr);

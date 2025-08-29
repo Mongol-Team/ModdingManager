@@ -94,15 +94,15 @@ namespace ModdingManager.classes.cache.data
             return StrategicRegionsCache.Remove(filePath);
         }
 
-        public bool TryFindStrategicRegionForProvince(int provinceId, out StrategicRegionCachedFile regionFile)
-        {
-            regionFile = StrategicRegionsCache.Values.FirstOrDefault(f =>
-                f.RegionBracket.SubBrackets
-                    .FirstOrDefault(b => b.Header == "provinces")?
-                    .Content.Any(line => line.Contains(provinceId.ToString())) ?? false);
+        //public bool TryFindStrategicRegionForProvince(int provinceId, out StrategicRegionCachedFile regionFile)
+        //{
+        //    regionFile = StrategicRegionsCache.Values.FirstOrDefault(f =>
+        //        f.RegionBracket.SubBrackets
+        //            .FirstOrDefault(b => b.Header == "provinces")?
+        //            .Content.Any(line => line.Contains(provinceId.ToString())) ?? false);
 
-            return regionFile != null;
-        }
+        //    return regionFile != null;
+        //}
         #endregion
 
         #region Definition Files Management
