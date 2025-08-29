@@ -55,9 +55,9 @@ namespace ModdingManagerClassLib.utils.Pathes
             {
                 Id = name,
                 SubTypes = new List<IdeologyType>(),
-                Rules = new List<Var>(),
-                Modifiers = new List<Var>(),
-                FactionModifiers = new List<Var>(),
+                Rules = new Dictionary<RuleConfig, object>(),
+                Modifiers = new Dictionary<ModifierDefenitionConfig, object>(),
+                FactionModifiers = new Dictionary<ModifierDefenitionConfig, object>(),
                 DynamicFactionNames = new List<string>()
             };
 
@@ -518,47 +518,31 @@ namespace ModdingManagerClassLib.utils.Pathes
                 }
             }
         }
-        private static System.Windows.Media.Color GetCountryColor(string tag, string countryPath)
+        private static System.Drawing.Color GetCountryColor(string tag, string countryPath)
         {
            
             string[] possiblePaths = {
                 GamePathes.CommonCountriesGamePath,
                 ModPathes.CommonCountriesModPath
             };
-
+            System.Drawing.Color col = Color.FromArgb(0, 0, 0);
             foreach (var path in possiblePaths)
             {
                 if (File.Exists(path))
                 {
-                    var content = File.ReadAllText(path);
-                    var searcher = new BracketSearcher { CurrentString = content.ToCharArray() };
-                    var colorBrackets = searcher.FindBracketsByName("color", "rgb");
-
-                    if (colorBrackets.Count > 0)
+                    TxtPattern pattern = new TxtPattern();
+                    TxtParser parser = new TxtParser(pattern);
+                    HoiFuncFile file = parser.Parse(File.ReadAllText(path)) as HoiFuncFile;
+                    Var colorVar = file.Vars.Where(v => v.Name == "collor" || v.PossibleCsType is Color).ToList().First();
+                    
+                    if (colorVar != null)
                     {
-                        return VarSearcher.ParseColor(colorBrackets[0].Content.FirstOrDefault()).ToMediaColor();
+                        return (Color)colorVar.Value;
                     }
                 }
             }
         }
-        public static void LoadMap()
-        {
-            string definitionPath = System.IO.Path.Combine(ModManager.ModDirectory, "map", "definition.csv");
-            string provinceImagePath = System.IO.Path.Combine(ModManager.ModDirectory, "map", "provinces.bmp");
-
-            if (!File.Exists(definitionPath))
-                throw new FileNotFoundException("[❌] Не найден файл definition.csv", definitionPath);
-            if (!File.Exists(provinceImagePath))
-                throw new FileNotFoundException("[❌] Не найден файл provinces.bmp", provinceImagePath);
-
-            string[] lines = File.ReadAllLines(definitionPath);
-            Instance.Map = ParseProvinceMap(lines);
-            Instance.Map.States = ParseStateMap(Instance.Map);
-            Instance.Map.StrategicRegions = ParseStrategicMap(Instance.Map);
-            Instance.Map.Countries = ParseCountryMap(Instance.Map);
-            Instance.Map.Bitmap = new Bitmap(provinceImagePath);
-            
-        }
+       
         #endregion
         #region Helper Methods
         private static string GetStateName(StateConfig state)

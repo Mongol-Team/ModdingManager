@@ -3,6 +3,7 @@ using ModdingManager.classes.managers.gfx;
 using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
+using ModdingManagerClassLib.utils;
 using ModdingManagerModels;
 using ModdingManagerModels.Types.ObectCacheData;
 using System.Drawing;
@@ -17,7 +18,7 @@ namespace ModdingManager.classes.utils
         private ConfigRegistry() { }
         private static ConfigRegistry _instance = new();
         public static ConfigRegistry Instance => _instance ??= new ConfigRegistry();
-        public LocalisationCache LocCache { get; set; }
+        public LocalisationRegistry LocCache { get; set; }
         public MapCache MapCache { get; set; }
         public List<RegimentConfig> Regiments { get; set; }
         public List<CountryConfig> Countries { get; set; }
@@ -50,6 +51,24 @@ namespace ModdingManager.classes.utils
 
         }
         #region Load Methods
+        public static void LoadMap()
+        {
+            string definitionPath = System.IO.Path.Combine(ModManager.ModDirectory, "map", "definition.csv");
+            string provinceImagePath = System.IO.Path.Combine(ModManager.ModDirectory, "map", "provinces.bmp");
+
+            if (!File.Exists(definitionPath))
+                throw new FileNotFoundException("[❌] Не найден файл definition.csv", definitionPath);
+            if (!File.Exists(provinceImagePath))
+                throw new FileNotFoundException("[❌] Не найден файл provinces.bmp", provinceImagePath);
+
+            string[] lines = File.ReadAllLines(definitionPath);
+            Instance.Map = ParseProvinceMap(lines);
+            Instance.Map.States = ParseStateMap(Instance.Map);
+            Instance.Map.StrategicRegions = ParseStrategicMap(Instance.Map);
+            Instance.Map.Countries = ParseCountryMap(Instance.Map);
+            Instance.Map.Bitmap = new Bitmap(provinceImagePath);
+
+        }
         private static void LoadCache()
         {
             _instance.LocCache = new();
