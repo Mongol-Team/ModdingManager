@@ -55,6 +55,7 @@
 	<None Remove="graphics\controls\err.png" />
 	<None Remove="graphics\controls\warn.png" />
 	<ProjectReference Include="..\ModdingManagerClassLib\ModdingManagerClassLib.csproj" />
+	<ProjectReference Include="..\ModdingManagerDataManager\ModdingManagerDataManager.csproj" />
 	<ProjectReference Include="..\ModdingManagerModels\ModdingManagerModels.csproj" />
 	<Resource Include="data\gfx\interface\healer.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>

@@ -11,15 +11,15 @@ namespace ModdingManagerModels
         public string Name { get; set; }
         public List<IdeologyType> SubTypes { get; set; }
         public Color Color { get; set; }
-        public List<Var> Rules { get; set; }
-        public List<Var> Modifiers { get; set; }
+        public Dictionary<RuleConfig, object> Rules { get; set; }
+        public Dictionary<ModifierDefenitionConfig, object> Modifiers { get; set; }
         public bool CanFormExileGoverment { get; set; }
         public double WarImpactOnTension { get; set; }
         public double FactionImpactOnTension { get; set; }
         public bool CanBeBoosted { get; set; }
         public bool CanColaborate { get; set; }
-        public List<Var> FactionModifiers { get; set; }
-        public Var AiIdeologyName { get; set; }
+        public Dictionary<ModifierDefenitionConfig, object> FactionModifiers { get; set; }
+        public Dictionary<string, object> AiIdeologyName { get; set; }
         public List<string> DynamicFactionNames { get; set; }
 
         public override string ToString()
@@ -37,9 +37,9 @@ namespace ModdingManagerModels
                    $"- CanColaborate: {CanColaborate}\n" +
                    $"- AiIdeologyName: {AiIdeologyName}\n" +
                    $"- SubTypes: [{string.Join(", ", SubTypes?.Select(s => s.ToString()) ?? Enumerable.Empty<string>())}]\n" +
-                   $"- Rules: [{string.Join(", ", Rules?.Select(kv => $"{kv.Name}={kv.Value}") ?? Enumerable.Empty<string>())}]\n" +
-                   $"- Modifiers: [{string.Join(", ", Modifiers?.Select(kv => $"{kv.Name}={kv.Value:F2}") ?? Enumerable.Empty<string>())}]\n" +
-                   $"- FactionModifiers: [{string.Join(", ", FactionModifiers?.Select(kv => $"{kv.Name}={kv.Value:F2}") ?? Enumerable.Empty<string>())}]\n";
+                   $"- Rules: [{string.Join(", ", Rules?.Select(kv => $"{kv.Key}={kv.Value}") ?? Enumerable.Empty<string>())}]\n" +
+                   $"- Modifiers: [{string.Join(", ", Modifiers?.Select(kv => $"{kv.Key}={kv.Value:F2}") ?? Enumerable.Empty<string>())}]\n" +
+                   $"- FactionModifiers: [{string.Join(", ", FactionModifiers?.Select(kv => $"{kv.Key}={kv.Value:F2}") ?? Enumerable.Empty<string>())}]\n";
         }
     }
 }

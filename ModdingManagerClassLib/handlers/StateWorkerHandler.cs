@@ -4,6 +4,7 @@ using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels;
 using ModdingManagerModels.Args;
+using ModdingManagerModels.Types.ObectCacheData;
 using ModdingManagerModels.Types.ObjectCacheData;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
@@ -165,9 +166,7 @@ public class StateWorkerHandler
             {
                 Name = newName,
                 Value = newValue,
-                AssignSymbol = ':',
-                Format = Var.VarFormat.Localisation,
-                IsValueQuoted = true
+               
             };
 
             // Обновляем или добавляем переменную в оба файла
@@ -236,7 +235,7 @@ public class StateWorkerHandler
         buildingsBracket.SubVars.Clear();
         foreach (var building in buildings)
         {
-            buildingsBracket.AddVar(building);
+            buildingsBracket.SubVars.Add(building);
         }
     }
     public void ChangeProvince(ProvinceConfig province)
@@ -352,27 +351,27 @@ public class StateWorkerHandler
 
             string vpLine = $"{province.Id} {province.VictoryPoints}";
             var victoryPointsBrackets = historyBracket.SubBrackets.Where(b => b.Name == "victory_points");
-            if (victoryPointsBrackets == null)
+            if (victoryPointsBrackets == null || province.VictoryPoints != 0)
             {
-                var victoryPointsBracket = new Bracket { Name = "victory_points" };
-                victoryPointsBracket.AddContent(vpLine);
-                historyBracket.SubBrackets.Add(victoryPointsBracket);
+                HoiArray victoryPointsArr = new HoiArray { Name = "victory_points" };
+                victoryPointsArr.Values.Add(vpLine);
+                historyBracket.Arrays.Add(victoryPointsArr);
             }
             else
             {
-                Bracket currentBracket = historyBracket.SubBrackets
-      .FirstOrDefault(b => b.Content.Any(line => line.Contains(province.Id.ToString())));
-                if (currentBracket != null)
+                HoiArray vpArr = historyBracket.Arrays
+      .Where(b => b.Values.Any(line => line.ToString().Contains(province.Id.ToString()))).Where(a => a.Name == "victory_points").First();
+                if (vpArr != null)
                 {
-                    currentBracket.Content.Clear();
-                    currentBracket.Content.Add(vpLine);
+                    vpArr.Values.Clear();
+                    vpArr.Values.Add(vpLine);
 
                 }
                 else
                 {
-                    var victoryPointsBracket = new Bracket { Name = "victory_points" };
-                    victoryPointsBracket.AddContent(vpLine);
-                    historyBracket.SubBrackets.Add(victoryPointsBracket);
+                    HoiArray newVpArr = new HoiArray { Name = "victory_points" };
+                    newVpArr.Values.Add(vpLine);
+                    historyBracket.Arrays.Add(newVpArr);
                 }
             }
 
@@ -382,129 +381,12 @@ public class StateWorkerHandler
             ConfigRegistry.Instance.MapCache.SaveDirtyStateFiles();
         }
     }
-    public void ChangeStrategicRegion(StrategicRegionConfig region)
+    public void ChangeStrategicRegions(List<StrategicRegionConfig> regions)
     {
 
     }
-    public void ChangeCountry(CountryConfig country)
+    public void ChangeCountries(List<CountryConfig> country)
     {
 
-    }
-    public void MoveProvinceToState(int? provinceId, StateConfig? currentState, StateConfig targetState)
-    {
-        if (provinceId == null) return;
-
-        var provinceStr = provinceId.ToString();
-
-        if (currentState != null)
-        {
-            // Обработка текущего штата (удаление провинции)
-            var currentContent = File.ReadAllText(currentState.FilePath);
-            var currentSearcher = new BracketSearcher { CurrentString = currentContent.ToCharArray() };
-            var currentBrackets = currentSearcher.FindBracketsByName("state");
-
-            if (currentBrackets.Count > 0)
-            {
-                var stateBracket = currentBrackets[0];
-                var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Name == "provinces");
-
-                if (provincesBracket != null)
-                {
-                    provincesBracket.RemoveSubstringFromContentAll(provinceStr);
-                    File.WriteAllText(currentState.FilePath, stateBracket.ToString());
-                }
-            }
-        }
-
-        // Обработка целевого штата (добавление провинции)
-        var targetContent = File.ReadAllText(targetState.FilePath);
-        var targetSearcher = new BracketSearcher { CurrentString = targetContent.ToCharArray() };
-        var targetBrackets = targetSearcher.FindBracketsByName("state");
-
-        if (targetBrackets.Count > 0)
-        {
-            var stateBracket = targetBrackets[0];
-            var provincesBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Name == "provinces");
-
-            if (provincesBracket == null)
-            {
-                provincesBracket = new Bracket { Name = "provinces" };
-                stateBracket.SubBrackets.Add(provincesBracket);
-            }
-
-            provincesBracket.AddContent(provinceStr);
-            File.WriteAllText(targetState.FilePath, stateBracket.ToString());
-        }
-    }
-
-    public void MoveStateToCountry(StateConfig state, string countryTag)
-    {
-        var content = File.ReadAllText(state.FilePath);
-        var searcher = new BracketSearcher { CurrentString = content.ToCharArray() };
-        var stateBrackets = searcher.FindBracketsByName("state");
-
-        if (stateBrackets.Count > 0)
-        {
-            var stateBracket = stateBrackets[0];
-            var ownerVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "owner");
-
-            if (ownerVar != null)
-            {
-                ownerVar.Value = countryTag;
-            }
-            else
-            {
-                stateBracket.AddVar(new Var { Name = "owner", Value = countryTag });
-            }
-
-            File.WriteAllText(state.FilePath, stateBracket.ToString());
-        }
-    }
-
-    public void MoveProvinceToStrategicRegion(int? provinceId, StrategicRegionConfig? currentRegion, StrategicRegionConfig targetRegion)
-    {
-        if (provinceId == null) return;
-
-        var provinceStr = provinceId.ToString();
-
-        if (currentRegion != null)
-        {
-            // Обработка текущего региона (удаление провинции)
-            var currentContent = File.ReadAllText(currentRegion.FilePath);
-            var currentSearcher = new BracketSearcher { CurrentString = currentContent.ToCharArray() };
-            var currentBrackets = currentSearcher.FindBracketsByName("strategic_region");
-
-            if (currentBrackets.Count > 0)
-            {
-                var regionBracket = currentBrackets[0];
-                var provincesBracket = regionBracket.SubBrackets.FirstOrDefault(b => b.Name == "provinces");
-
-                if (provincesBracket != null)
-                {
-                    provincesBracket.RemoveSubstringFromContentAll(provinceStr);
-                    File.WriteAllText(currentRegion.FilePath, regionBracket.ToString());
-                }
-            }
-        }
-
-        // Обработка целевого региона (добавление провинции)
-        var targetContent = File.ReadAllText(targetRegion.FilePath);
-        var targetSearcher = new BracketSearcher { CurrentString = targetContent.ToCharArray() };
-        var targetBrackets = targetSearcher.FindBracketsByName("strategic_region");
-
-        if (targetBrackets.Count > 0)
-        {
-            var regionBracket = targetBrackets[0];
-            var provincesBracket = regionBracket.SubBrackets.FirstOrDefault(b => b.Name == "provinces");
-
-            if (provincesBracket == null)
-            {
-                provincesBracket = new Bracket { Name = "provinces" };
-                regionBracket.SubBrackets.Add(provincesBracket);
-            }
-
-            provincesBracket.AddContent(provinceStr);
-            File.WriteAllText(targetRegion.FilePath, regionBracket.ToString());
-        }
     }
 }

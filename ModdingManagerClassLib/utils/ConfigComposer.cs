@@ -3,11 +3,11 @@ using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerClassLib.utils.Pathes;
-using ModdingManagerDataManager.Interfaces;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Types.ObectCacheData;
+using ModdingManagerModels.Types.ObjectCacheData;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -28,9 +28,9 @@ namespace ModdingManagerClassLib.utils.Pathes
 
             string content = File.ReadAllText(path);
 
-            var parser = new FunkFileParser();
+            var parser = new TxtParser(new TxtPattern());
           
-            var parsedFile = (HoiFunkFile)parser.Parse(content, new TXTPattern());
+            var parsedFile = (HoiFuncFile)parser.Parse(content);
             if (parsedFile == null)
                 throw new InvalidOperationException("Failed to parse the ideology file.");
 
@@ -169,7 +169,7 @@ namespace ModdingManagerClassLib.utils.Pathes
 
             return config;
         }
-        
+
         #region Fimoz
         public static List<ProvinceConfig> ParseProvinceConfigs(string[] lines)
         {
@@ -277,11 +277,11 @@ namespace ModdingManagerClassLib.utils.Pathes
                 throw new FileNotFoundException($"State file not found: {path}");
 
             string content = File.ReadAllText(path);
+            var pattern = new TxtPattern();
+            var parser = new TxtParser(pattern);
+            
 
-            var parser = new FunkFileParser();
-            var pattern = new TXTPattern();
-
-            var parsedFile = (HoiFunkFile)parser.Parse(content, pattern);
+            var parsedFile = (HoiFuncFile)parser.Parse(content, pattern);
             if (parsedFile == null)
                 throw new InvalidOperationException($"Failed to parse state file: {path}");
 
@@ -415,8 +415,8 @@ namespace ModdingManagerClassLib.utils.Pathes
                 }
             };
 
-            var parser = new FunkFileParser();
-            var pattern = new TXTPattern();
+            var parser = new TxtParser();
+            var pattern = new TxtPattern();
             Dictionary<string, object> tagLookup = new Dictionary<string, object>();
             foreach (var set in folders)
             {
@@ -424,7 +424,7 @@ namespace ModdingManagerClassLib.utils.Pathes
                     continue;
                 foreach (var file in Directory.GetFiles(set.TagFolder))
                 {
-                    HoiFunkFile parsedfile = parser.Parse(file, pattern) as HoiFunkFile; // Assuming VarSearcher is still used for tags
+                    HoiFuncFile parsedfile = parser.Parse(file, pattern) as HoiFuncFile; // Assuming VarSearcher is still used for tags
                     tagLookup = parsedfile.Vars
                         .GroupBy(v => v.Name)
                         .Select(g => g.First())
@@ -438,7 +438,7 @@ namespace ModdingManagerClassLib.utils.Pathes
                 foreach (var file in Directory.GetFiles(set.StateFolder, "*.txt", SearchOption.AllDirectories))
                 {
                     string content = File.ReadAllText(file);
-                    var parsedFile = (HoiFunkFile)parser.Parse(content, pattern);
+                    var parsedFile = (HoiFuncFile)parser.Parse(content, pattern);
                     if (parsedFile == null)
                     {
                         Logger.AddLog($"[⚠️] Failed to parse state file: {file}");

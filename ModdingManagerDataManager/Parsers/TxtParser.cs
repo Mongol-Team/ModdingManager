@@ -20,7 +20,7 @@ namespace ModdingManagerDataManager.Parsers
             if (content.Count(c => c.ToString() == pattern.OpenChar) < content.Count(c => c.ToString() == pattern.CloseChar))
                 throw new Exception($"Unclosed {pattern.CloseChar}");
 
-            HoiFunkFile result = new HoiFunkFile();
+            HoiFuncFile result = new HoiFuncFile();
 
             MatchCollection brackets = Rx.FindBracket.Matches(content);
             foreach (Match match in brackets)

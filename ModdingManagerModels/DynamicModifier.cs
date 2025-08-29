@@ -1,17 +1,18 @@
-﻿using ModdingManagerModels.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ModdingManagerModels
 {
-    public class ModifierConfig
+    public class DynamicModifier
     {
-
-        public Dictionary<ModifierDefenitionConfig, object> Modifiers { get; set; }
         public string EnableTrigger { get; set; }
         public string RemovalTrigger { get; set; }
         public string Trigger { get; set; }
-        public string AttackerEffect { get; set; }
+        public bool HasAttackerEffect { get; set; }
         public string PowerBalance { get; set; }
         public string RelationTrigger { get; set; }
-        public string IconPath { get; set; }
     }
 }

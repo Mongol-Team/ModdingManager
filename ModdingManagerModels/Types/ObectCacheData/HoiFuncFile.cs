@@ -3,7 +3,7 @@ using ModdingManagerModels.Types.ObectCacheData;
 
 namespace ModdingManagerModels.Types.ObjectCacheData
 {
-    public class HoiFunkFile : IHoiData
+    public class HoiFuncFile : IHoiData
     {
         public List<Bracket> Brackets { get; set; } = new List<Bracket>();
         public List<Var> Vars { get; set; } = new List<Var>();

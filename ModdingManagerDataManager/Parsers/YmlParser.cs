@@ -31,7 +31,7 @@ namespace ModdingManagerDataManager.Parsers
             MatchCollection localizations = Rx.FindLocalization.Matches(content);
             foreach (Match match in localizations)
             {
-                Localization localization = ParseLocalization(match.Value);
+                LocalizationBlock localization = ParseLocalization(match.Value);
                 if (localization != null)
                     result.localizations.Add(localization);
             }
@@ -39,9 +39,9 @@ namespace ModdingManagerDataManager.Parsers
             return result;
         }
 
-        private Localization ParseLocalization(string content)
+        private LocalizationBlock ParseLocalization(string content)
         {
-            Localization result = new Localization();
+            LocalizationBlock result = new LocalizationBlock();
 
             Language language;
             if (!Enum.TryParse<Language>(Rx.LocalizationLanguage.Match(content).Value, out language)) return null;
