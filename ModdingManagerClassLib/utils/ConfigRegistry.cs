@@ -2,12 +2,8 @@
 using ModdingManager.classes.managers.gfx;
 using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.utils;
 using ModdingManagerModels;
-using ModdingManagerModels.Types.ObectCacheData;
 using System.Drawing;
-using System.Globalization;
 using System.Text;
 using System.Windows.Media;
 
@@ -18,7 +14,7 @@ namespace ModdingManager.classes.utils
         private ConfigRegistry() { }
         private static ConfigRegistry _instance = new();
         public static ConfigRegistry Instance => _instance ??= new ConfigRegistry();
-        public LocalisationRegistry LocCache { get; set; }
+        public ModdingManagerClassLib.utils.LocalisationRegistry LocCache { get; set; }
         public MapCache MapCache { get; set; }
         public List<RegimentConfig> Regiments { get; set; }
         public List<CountryConfig> Countries { get; set; }
@@ -145,14 +141,14 @@ namespace ModdingManager.classes.utils
         {
 
         }
-      
-        #endregion 
+
+        #endregion
         #region Parse Methods
-        
 
 
 
-        
+
+
         #endregion
         #region Helper Methods
         public static void GetProvinceVictoryPoints(List<ProvinceConfig> provinces)
@@ -203,7 +199,7 @@ namespace ModdingManager.classes.utils
                 province.VictoryPoints = 0;
             }
         }
-       
+
         private static void GetProvinceNames(List<ProvinceConfig> list)
         {
             var victoryPoints = _instance.LocCache.VictoryPointsLocalisation;
@@ -255,7 +251,7 @@ namespace ModdingManager.classes.utils
 
             return Colors.Gray;
         }
-        
+
 
         public static List<(string Name, List<string> Categories)> CollectUnitDefinitions()
         {
