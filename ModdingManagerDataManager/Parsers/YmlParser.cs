@@ -29,12 +29,25 @@ namespace ModdingManagerDataManager.Parsers
             LocalizationFile result = new LocalizationFile();
 
             MatchCollection localizations = Rx.FindLocalization.Matches(content);
+            Dictionary<Language, LocalizationBlock> temp = new Dictionary<Language, LocalizationBlock>();
             foreach (Match match in localizations)
             {
                 LocalizationBlock localization = ParseLocalization(match.Value);
                 if (localization != null)
-                    result.localizations.Add(localization);
+                {
+                    if (!temp.TryAdd(localization.Language, localization))
+                    {
+                        foreach (var KvP in localization.Data)
+                            temp[localization.Language].Data.TryAdd(KvP.Key, KvP.Value);
+                    }
+                }
             }
+            foreach (var Kvp in temp)
+            {
+                result.localizations.Add(Kvp.Value);
+            }
+
+
 
             return result;
         }

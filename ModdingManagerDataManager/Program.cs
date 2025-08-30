@@ -8,8 +8,6 @@ namespace ModdingManagerDataManager
     {
         private static void Main(string[] args)
         {
-
-            //CsvParser parser = new CsvParser(new CsvAdjacenciesPattern());
             YmlParser parser = new YmlParser(new TxtPattern());
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
