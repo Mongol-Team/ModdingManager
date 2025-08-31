@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.ObectCacheData;
+﻿using ModdingManagerModels.Enums;
+using ModdingManagerModels.Types.ObectCacheData;
 using System.Drawing;
 
 namespace ModdingManagerModels
@@ -11,7 +12,7 @@ namespace ModdingManagerModels
         public string Name { get; set; }
         public List<IdeologyType> SubTypes { get; set; }
         public Color Color { get; set; }
-        public Dictionary<RuleConfig, object> Rules { get; set; }
+        public Dictionary<RuleConfig, bool> Rules { get; set; }
         public Dictionary<ModifierDefenitionConfig, object> Modifiers { get; set; }
         public bool CanFormExileGoverment { get; set; }
         public double WarImpactOnTension { get; set; }
@@ -19,7 +20,7 @@ namespace ModdingManagerModels
         public bool CanBeBoosted { get; set; }
         public bool CanColaborate { get; set; }
         public Dictionary<ModifierDefenitionConfig, object> FactionModifiers { get; set; }
-        public Dictionary<string, object> AiIdeologyName { get; set; }
+        public IdeologyAIType AiIdeologyName { get; set; }
         public List<string> DynamicFactionNames { get; set; }
 
         public override string ToString()

@@ -23,9 +23,16 @@ namespace ModdingManagerClassLib.utils
         /// <summary>
         /// Параллельно загружает все переменные из .yml файлов в AllCache (с учётом приоритетов)
         /// </summary>
+        /// 
+        public void LoadCache()
 
         private void LoadLocalisation()
         {
+            string[] searchPaths = new[]
+            {
+                GamePathes.LocalisationPath,   
+                GamePathes.LocalisationReplacePath,
+            };
             var files = Directory.EnumerateFiles(GamePathes.LocalisationPath, "*.yml", SearchOption.AllDirectories)
     .Concat(Directory.EnumerateFiles(GamePathes.LocalisationReplacePath, "*.yml", SearchOption.AllDirectories))
     .ToList();

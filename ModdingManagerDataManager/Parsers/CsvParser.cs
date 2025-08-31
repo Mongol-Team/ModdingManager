@@ -83,12 +83,12 @@ namespace ModdingManagerDataManager.Parsers
                         }
                         break;
 
-                    case "ProvincesBiomes":
+                    case "ProvincesBiome":
                         if (Enum.TryParse<ProvinceBiome>(parts[index], out var provBiome))
                             value = provBiome;
                         break;
 
-                    case "ProvinceTypes":
+                    case "ProvinceType":
                         if (Enum.TryParse<ProvinceType>(parts[index], out var provType))
                             value = provType;
                         break;

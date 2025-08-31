@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ModdingManagerModels
 {
-    public class DynamicModifier
+    public class DynamicModifierConfig : IModel
     {
         public string EnableTrigger { get; set; }
         public string RemovalTrigger { get; set; }
@@ -14,5 +14,6 @@ namespace ModdingManagerModels
         public bool HasAttackerEffect { get; set; }
         public string PowerBalance { get; set; }
         public string RelationTrigger { get; set; }
+        public Dictionary<ModifierDefenitionConfig, object> Modifiers { get; set; }
     }
 }

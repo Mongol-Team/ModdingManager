@@ -6,6 +6,6 @@ namespace ModdingManagerModels.Types.TableCacheData
     {
         public string FilePath { get; set; }
         public List<Type> ColumnTypes { get; set; } = new List<Type>();
-        public List<object> Values { get; set; } = new List<object>();
+        public List<List<object>> Values { get; set; } = new List<List<object>>();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ModdingManagerModels.Args;
+using ModdingManagerModels.Enums;
 using System.Drawing;
 using System.Text.Json.Serialization;
 
@@ -12,7 +13,7 @@ namespace ModdingManagerModels
         public Color Color { get; set; }
         public bool IsCoastal { get; set; }
         public int ContinentId { get; set; }
-        public string Type { get; set; }
+        public ProvinceType Type { get; set; }
         public int VictoryPoints { get; set; }
         public string Terrain { get; set; }
         public ProvinceShapeArg Shape { get; set; }

@@ -18,5 +18,6 @@ namespace ModdingManagerClassLib.utils.Pathes
         public readonly static string CountryTagsPath = Path.Combine(ModManager.ModDirectory, "common", "country_tags");
         public readonly static string DefinitionPath = Path.Combine(ModManager.ModDirectory, "map", "definition.csv");
         public readonly static string ProvinceImagePath = Path.Combine(ModManager.ModDirectory, "map", "provinces.bmp");
+        public readonly static string StrategicRegionPath = Path.Combine(ModManager.ModDirectory, "map", "strategicregions");
     }
 }

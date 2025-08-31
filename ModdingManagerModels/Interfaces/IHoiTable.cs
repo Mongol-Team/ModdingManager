@@ -3,6 +3,6 @@
     public interface IHoiTable
     {
         List<Type> ColumnTypes { get; }
-        List<object> Values { get; set; }
+        List<List<object>> Values { get; set; }
     }
 }

@@ -15,10 +15,10 @@ namespace ModdingManagerModels
         [JsonIgnore]
         public string FilePath { get; set; }
         public string LocalizationKey { get; set; } = string.Empty;
-        public string Cathegory { get; set; }
+        public StateCathegoryConfig Cathegory { get; set; }
         public int? Manpower { get; set; }
         public double? LocalSupply { get; set; }
-        public List<Var> Buildings { get; set; } = new List<Var>();
+        public Dictionary<BuildingConfig, int> Buildings { get; set; };
 
     }
 }
