@@ -18,7 +18,7 @@ namespace ModdingManagerModels
         public StateCathegoryConfig Cathegory { get; set; }
         public int? Manpower { get; set; }
         public double? LocalSupply { get; set; }
-        public Dictionary<BuildingConfig, int> Buildings { get; set; };
+        public Dictionary<BuildingConfig, int> Buildings { get; set; }
 
     }
 }

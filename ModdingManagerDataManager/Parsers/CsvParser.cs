@@ -43,9 +43,12 @@ namespace ModdingManagerDataManager.Parsers
         }
         protected override void Normalize(ref string content)
         {
-            content = content.Replace("\r\n", "\n").Replace(" ", "");
-
-            content = Rx.FileComment.Replace(content, "");
+            content = content.Replace("\r\n", "\n");
+            if (pattern.Separator == " ")
+                content.Replace(" ", ";");
+            else
+                content.Replace(" ", "");
+                content = Rx.FileComment.Replace(content, "");
             content = Rx.EmptyLine.Replace(content, "");
             content = content.Replace($"{pattern.Separator}{pattern.Separator}", $"{pattern.Separator} {pattern.Separator}");
         }
