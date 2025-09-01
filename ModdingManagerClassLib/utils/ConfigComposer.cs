@@ -25,6 +25,7 @@ namespace ModdingManagerClassLib.utils.Pathes
 {
     public class ConfigComposer
     {
+        #region Loading Methods
         public static List<IdeologyConfig> ParseIdeologyConfigs(string path)
         {
             if (!File.Exists(path))
@@ -52,7 +53,162 @@ namespace ModdingManagerClassLib.utils.Pathes
 
             return configs;
         }
+        public static List<StrategicRegionConfig> ParseStrategicMap()
+        {
+            var strategicMap = new Dictionary<int, StrategicRegionConfig>();
 
+            string[] priorityFolders = {
+                ModPathes.StrategicRegionPath,
+                GamePathes.StrategicRegionsPath,
+            };
+
+            foreach (string folder in priorityFolders)
+            {
+                if (!Directory.Exists(folder))
+                    continue;
+
+                string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
+
+                foreach (string filePath in files)
+                {
+                    HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(filePath) as HoiFuncFile;
+
+                    foreach (var regionBracket in file.Brackets)
+                    {
+                        var idVar = regionBracket.SubVars.FirstOrDefault(v => v.Name == "id");
+                        if (idVar == null || !int.TryParse(idVar.Value as string, out int id) || strategicMap.ContainsKey(id))
+                            continue;
+
+                        HoiArray provincesBracket = regionBracket.Arrays.FirstOrDefault(b => b.Name == "provinces");
+                        if (provincesBracket == null) continue;
+
+                        var matchedProvinces = ConfigRegistry.Instance.Map.Provinces
+                            .Where(p => provincesBracket.Values.Contains(p.Id))
+                            .ToList();
+
+                        strategicMap[id] = new StrategicRegionConfig
+                        {
+                            Id = id,
+                            Provinces = matchedProvinces,
+                            FilePath = file.FilePath,
+                            Color = ModManager.GenerateColorFromId(id)
+                        };
+                    }
+                }
+            }
+
+            return strategicMap.Values.ToList();
+        }
+        public static List<ProvinceConfig> ParseProvinceConfigs()
+        {
+            List<ProvinceConfig> res = new List<ProvinceConfig>();
+            List<ProvinceConfig> seaProvinces = new List<ProvinceConfig>();
+            List<ProvinceConfig> otherProvinces = new List<ProvinceConfig>();
+            CsvParser csvParser = new CsvParser(new CsvDefinitionsPattern());
+            var defFile = csvParser.Parse(ModPathes.DefinitionPath) as HoiTable;
+            foreach (var line in defFile.Values)
+            {
+                if (line == null || line.Count < 8)
+                    continue;
+                try
+                {
+                    var province = new ProvinceConfig
+                    {
+                        Id = (int)line[0],
+                        Color = (Color)line[1],
+                        Type = (ProvinceType)line[2],
+                        IsCoastal = (bool)line[3],
+                        Terrain = (string)line[4],
+                        ContinentId = (int)line[5],
+                    };
+
+                    if (province.Type == ProvinceType.sea)
+                        seaProvinces.Add(province);
+                    else
+                        otherProvinces.Add(province);
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            res = seaProvinces.Concat(otherProvinces).ToList();
+            return res;
+        }
+        public static List<StateConfig> ParseAllStateProvinces()
+        {
+            var result = new List<StateConfig>();
+
+            string[] priorityFolders = {
+                ModPathes.StatesPath,
+                GamePathes.StatesPath,
+            };
+
+            foreach (string folder in priorityFolders)
+            {
+                if (!Directory.Exists(folder))
+                    continue;
+                foreach (string file in Directory.GetFiles(folder))
+                {
+                    StateConfig stateConfig = ParseStateConfig(file);
+                    result.Add(stateConfig);
+                }
+                if (result.Count > 0)
+                    break;
+                else
+                {
+                    Logger.AddLog($"[⚠️] No state files found in mod folder: {folder}");
+                }
+            }
+
+            return result;
+        }
+        #endregion
+        #region Singleton Methods
+        public static StateConfig ParseStateConfig(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                Logger.AddLog($"Файл не найден: {filePath}");
+                return null;
+            }
+
+            HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(filePath) as HoiFuncFile;
+            if (file == null || file.Brackets.Count == 0)
+            {
+                Logger.AddLog($"Не удалось распарсить файл: {filePath}");
+                return null;
+            }
+
+            var stateBracket = file.Brackets.First();
+
+            var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
+            if (idVar == null || !int.TryParse(idVar.Value as string, out int id))
+            {
+                Logger.AddLog($"Не удалось извлечь ID из файла: {filePath}");
+                return null;
+            }
+
+            var provincesArray = stateBracket.Arrays.FirstOrDefault(a => a.Name == "provinces");
+            var provinceIds = provincesArray?.Values
+                .OfType<object>()
+                .Select(v => v is HoiReference hr ? hr.Value : v)
+                .OfType<int>()
+                .ToList() ?? new List<int>();
+            var matchedProvinces = ConfigRegistry.Instance.Map.Provinces
+                .Where(p => provinceIds.Contains(p.Id))
+                .ToList();
+
+            return new StateConfig
+            {
+                Id = id,
+                Provinces = matchedProvinces,
+                FilePath = file.FilePath,
+                Color = ModManager.GenerateColorFromId(id),
+                Cathegory = ConfigRegistry.Instance.StateCathegories.Where(s => s.Id == stateBracket.SubVars.FirstOrDefault(v => v.Name == "category")?.Value as string).First(),
+            };
+        }
         private static IdeologyConfig ParseIdeologyConfig(string name, Bracket bracket)
         {
             var config = new IdeologyConfig
@@ -198,173 +354,47 @@ namespace ModdingManagerClassLib.utils.Pathes
                         config.CanColaborate = (bool)varItem.Value;
                         break;
                     default:
-                   
+
                         break;
                 }
             }
 
             return config;
         }
-        public static List<ProvinceConfig> ParseProvinceConfigs()
+        public static StrategicRegionConfig ParseStrategicConfig(string filePath)
         {
-            List<ProvinceConfig> res = new List<ProvinceConfig>();
-            List<ProvinceConfig> seaProvinces = new List<ProvinceConfig>();
-            List<ProvinceConfig> otherProvinces = new List<ProvinceConfig>();
-            CsvParser csvParser = new CsvParser(new CsvDefinitionsPattern());
-            var defFile = csvParser.Parse(ModPathes.DefinitionPath) as HoiTable;
-            foreach (var line in defFile.Values)
-            {
-                if (line == null || line.Count < 8)
-                    continue;
-                try
-                {
-                    var province = new ProvinceConfig
-                    {
-                        Id = (int)line[0],
-                        Color = (Color)line[1],
-                        Type = (ProvinceType)line[2],
-                        IsCoastal = (bool)line[3],
-                        Terrain = (string)line[4],
-                        ContinentId = (int)line[5],
-                    };
-
-                    if (province.Type == ProvinceType.sea)
-                        seaProvinces.Add(province);
-                    else
-                        otherProvinces.Add(province);
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-
-            res = seaProvinces.Concat(otherProvinces).ToList();
-            return res;
-        }
-        #region Fimoz
-
-        public static List<StrategicRegionConfig> ParseStrategicMap()
-        {
-            var strategicMap = new Dictionary<int, StrategicRegionConfig>();
-
-            string[] priorityFolders = {
-                ModPathes.StrategicRegionPath,
-                GamePathes.StrategicRegionsPath,
-            };
-
-            foreach (string folder in priorityFolders)
-            {
-                if (!Directory.Exists(folder))
-                    continue;
-
-                string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
-
-                foreach (string filePath in files)
-                {
-                    HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(filePath) as HoiFuncFile;
-
-                    foreach (var regionBracket in file.Brackets)
-                    {
-                        var idVar = regionBracket.SubVars.FirstOrDefault(v => v.Name == "id");
-                        if (idVar == null || !int.TryParse(idVar.Value as string, out int id) || strategicMap.ContainsKey(id))
-                            continue;
-
-                        HoiArray provincesBracket = regionBracket.Arrays.FirstOrDefault(b => b.Name == "provinces");
-                        if (provincesBracket == null) continue;
-
-                        var matchedProvinces = ConfigRegistry.Instance.Map.Provinces
-                            .Where(p => provincesBracket.Values.Contains(p.Id))
-                            .ToList();
-
-                        strategicMap[id] = new StrategicRegionConfig
-                        {
-                            Id = id,
-                            Provinces = matchedProvinces,
-                            FilePath = file.FilePath,
-                            Color = ModManager.GenerateColorFromId(id)
-                        };
-                    }
-                }
-            }
-
-            return strategicMap.Values.ToList();
-        }
-        public static List<ProvinceConfig> ParseAllStateProvinces()
-        {
-            var allProvinces = new List<ProvinceConfig>();
-
-            string[] priorityFolders = {
-                ModPathes.StatesPath,
-                GamePathes.StatesPath,
-            };
-
-            foreach (string folder in priorityFolders)
-            {
-                if (!Directory.Exists(folder))
-                    continue;
-
-                string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
-
-                foreach (string filePath in files)
-                {
-                    var state = ParseSingleState(filePath);
-                    if (state == null || state.Provinces == null)
-                        continue;
-
-                    allProvinces.AddRange(state.Provinces);
-                }
-            }
-
-            return allProvinces;
-        }
-
-        public static StateConfig ParseSingleState(string filePath)
-        {
-            if (!File.Exists(filePath))
-            {
-                Logger.AddLog($"Файл не найден: {filePath}");
-                return null;
-            }
+            var result = new StrategicRegionConfig();
 
             HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(filePath) as HoiFuncFile;
-            if (file == null || file.Brackets.Count == 0)
-            {
-                Logger.AddLog($"Не удалось распарсить файл: {filePath}");
-                return null;
-            }
+            if (file == null) return result;
+            var regionBracket = file.Brackets.FirstOrDefault(b => b.Name == "strategic_region");
 
-            var stateBracket = file.Brackets.First();
-
-            var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
+            var idVar = regionBracket.SubVars.FirstOrDefault(v => v.Name == "id");
             if (idVar == null || !int.TryParse(idVar.Value as string, out int id))
-            {
-                Logger.AddLog($"Не удалось извлечь ID из файла: {filePath}");
                 return null;
-            }
 
-            var provincesArray = stateBracket.Arrays.FirstOrDefault(a => a.Name == "provinces");
-            var provinceIds = provincesArray?.Values
-                .OfType<object>()
-                .Select(v => v is HoiReference hr ? hr.Value : v)
-                .OfType<int>()
-                .ToList() ?? new List<int>();
-            var 
+            HoiArray provincesBracket = regionBracket.Arrays.FirstOrDefault(b => b.Name == "provinces");
+            if (provincesBracket == null) return null;
+
             var matchedProvinces = ConfigRegistry.Instance.Map.Provinces
-                .Where(p => provinceIds.Contains(p.Id))
+                .Where(p => provincesBracket.Values.Contains(p.Id))
                 .ToList();
 
-            return new StateConfig
+            result = new StrategicRegionConfig
             {
                 Id = id,
                 Provinces = matchedProvinces,
                 FilePath = file.FilePath,
-                Color = ModManager.GenerateColorFromId(id),
-                Cathegory = stateBracket.SubVars.FirstOrDefault(v => v.Name == "category")?.Value as string,
+                Color = ModManager.GenerateColorFromId(id)
             };
-        }
 
-        public static void PopulateCountryStates(CountryConfig countryConfig, MapConfig map)
+            return result;
+        }
+        #endregion
+        #region Fimoz
+
+
+        public static void LoadCountryStates(CountryConfig countryConfig)
         {
             if (string.IsNullOrEmpty(countryConfig.Tag))
                 throw new ArgumentException("CountryConfig.Tag cannot be null or empty.");
@@ -372,7 +402,6 @@ namespace ModdingManagerClassLib.utils.Pathes
             var visitedIds = new HashSet<int>();
             countryConfig.States = countryConfig.States ?? new List<StateConfig>();
 
-            // Define folder sets for mod and vanilla paths
             var folders = new[]
             {
                 new
@@ -440,7 +469,7 @@ namespace ModdingManagerClassLib.utils.Pathes
                     if (ownerVar == null || ownerVar.Value as string != countryConfig.Tag)
                         continue;
 
-                    var state = map.States?.FirstOrDefault(s => s.Id == id);
+                    var state = ConfigRegistry.Instance.Map.States?.FirstOrDefault(s => s.Id == id);
                     if (state == null)
                     {
                         Logger.AddLog($"[⚠️] State {id} not found in map.States for file: {file}");
@@ -454,49 +483,16 @@ namespace ModdingManagerClassLib.utils.Pathes
                     }
                 }
 
-                // Stop processing further folders if states are found (mimics original behavior)
                 if (countryConfig.States.Any())
                     break;
             }
 
-            // Update country color if not set
             if (countryConfig.Color == null && tagLookup.TryGetValue(countryConfig.Tag, out var countryPath))
             {
                 countryConfig.Color = GetCountryColor(countryConfig.Tag);
             }
         }
-        
-        private static System.Drawing.Color GetCountryColor(string tag)
-        {
-           
-            string[] possiblePaths = {
-                GamePathes.CommonCountriesPath,
-                ModPathes.CommonCountriesPath
-            };
-            System.Drawing.Color col = Color.FromArgb(128, 128, 128);
-            foreach (var path in possiblePaths)
-            {
-                if (File.Exists(path))
-                {
-                    TxtPattern pattern = new TxtPattern();
-                    TxtParser parser = new TxtParser(pattern);
-                    HoiFuncFile file = parser.Parse(File.ReadAllText(path)) as HoiFuncFile;
-                    Var colorVar = file.Vars.Where(v => v.Name == "collor" || v.PossibleCsType is Color).ToList().First();
-                    
-                    if (colorVar != null)
-                    {
-                        return (Color)colorVar.Value;
-                    }
-                    else
-                    {
-                        Logger.AddLog($"[⚠️] Common countries file not found at: {path}");
-                    }
-                }
-
-                
-            }
-            return col;
-        }
+       
 
         #endregion
         #region Helper Methods
@@ -514,7 +510,37 @@ namespace ModdingManagerClassLib.utils.Pathes
 
             return results;
         }
-       
+        private static System.Drawing.Color GetCountryColor(string tag)
+        {
+
+            string[] possiblePaths = {
+                GamePathes.CommonCountriesPath,
+                ModPathes.CommonCountriesPath
+            };
+            System.Drawing.Color col = Color.FromArgb(128, 128, 128);
+            foreach (var path in possiblePaths)
+            {
+                if (File.Exists(path))
+                {
+                    TxtPattern pattern = new TxtPattern();
+                    TxtParser parser = new TxtParser(pattern);
+                    HoiFuncFile file = parser.Parse(File.ReadAllText(path)) as HoiFuncFile;
+                    Var colorVar = file.Vars.Where(v => v.Name == "collor" || v.PossibleCsType is Color).ToList().First();
+
+                    if (colorVar != null)
+                    {
+                        return (Color)colorVar.Value;
+                    }
+                    else
+                    {
+                        Logger.AddLog($"[⚠️] Common countries file not found at: {path}");
+                    }
+                }
+
+
+            }
+            return col;
+        }
 
         #endregion
     }

@@ -24,7 +24,7 @@ namespace ModdingManagerClassLib.utils
         /// Параллельно загружает все переменные из .yml файлов в AllCache (с учётом приоритетов)
         /// </summary>
         /// 
-        public void LoadCache()
+
 
         private void LoadLocalisation()
         {
