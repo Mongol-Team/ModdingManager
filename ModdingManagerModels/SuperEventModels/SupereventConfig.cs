@@ -2,7 +2,7 @@
 
 namespace ModdingManagerModels.SuperEventModels
 {
-    public class SupereventConfig : IModel
+    public class SupereventConfig : IConfig
     {
         public string Id { get; set; }
         public string SoundPath { get; set; }

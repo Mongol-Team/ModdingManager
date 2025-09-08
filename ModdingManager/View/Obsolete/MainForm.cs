@@ -160,7 +160,7 @@ namespace ModdingManager
                 DirBox.Text = path.ModPath;
                 ModManager.ModDirectory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
-                ConfigRegistry.LoadInstance();
+                ModConfig.LoadInstance();
                 Logger.AddLog(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
                 Logger.AddLog(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
                 Logger.AddLog(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)));

@@ -2,7 +2,7 @@
 
 namespace ModdingManagerModels
 {
-    public class MapConfig : IModel
+    public class MapConfig : IConfig
     {
         public List<StateConfig> States { get; set; }
         public List<ProvinceConfig> Provinces { get; set; }

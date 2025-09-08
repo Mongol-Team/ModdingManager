@@ -1,6 +1,6 @@
 ﻿namespace ModdingManagerModels
 {
-    public class TechTreeConfig : IModel
+    public class TechTreeConfig : IConfig
     {
         public string Name { get; set; }
         public string Orientation { get; set; }

@@ -4,11 +4,9 @@ using ModdingManager.managers.@base;
 using ModdingManagerModels.SuperEventModels;
 using ModdingManagerModels.Types;
 using System.Diagnostics;
-using System.Drawing;                             // Bi
-                                                  // tmap (для конвертов)
+using System.Drawing;                             
 using System.Text;
-using System.Windows;                             // MessageBox
-
+using System.Windows;                             
 using ModdingManagerClassLib.Debugging;
 public class SuperEventHandler
 {

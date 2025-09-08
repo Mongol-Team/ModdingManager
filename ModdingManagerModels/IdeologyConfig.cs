@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace ModdingManagerModels
 {
-    public class IdeologyConfig : IModel
+    public class IdeologyConfig : IConfig
     {
         public string Id { get; set; }
         public string Description { get; set; }

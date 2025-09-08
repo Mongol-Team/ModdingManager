@@ -175,7 +175,7 @@ namespace ModdingManager
             CharacterCreator form = sender as CharacterCreator;
             ComboBox cmb = (ComboBox)form.Controls["IdeologyBox"];
             List<string> list = new();
-            foreach (IdeologyConfig ideo in ConfigRegistry.Instance.Ideologies)
+            foreach (IdeologyConfig ideo in ModConfig.Instance.Ideologies)
             {
                 foreach (IdeologyType type in ideo.SubTypes)
                 {

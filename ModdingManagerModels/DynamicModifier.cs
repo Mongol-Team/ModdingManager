@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ModdingManagerModels
 {
-    public class DynamicModifierConfig : IModel
+    public class DynamicModifierConfig : IConfig
     {
         public string EnableTrigger { get; set; }
         public string RemovalTrigger { get; set; }

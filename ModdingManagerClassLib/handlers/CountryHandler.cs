@@ -21,8 +21,8 @@ public class CountryHandler
             Directory.CreateDirectory(ruLocPath);
             Directory.CreateDirectory(enLocPath);
 
-            string ruContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_russian", this.CurrentConfig.Name, this.CurrentConfig.RulingParty);
-            string enContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_english", this.CurrentConfig.Name, this.CurrentConfig.RulingParty);
+            string ruContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_russian", this.CurrentConfig.Localisation.NameValue, this.CurrentConfig.RulingParty);
+            string enContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_english", this.CurrentConfig.Localisation.NameValue, this.CurrentConfig.RulingParty);
 
             string ruFilePath = Path.Combine(ruLocPath, $"{this.CurrentConfig.Tag}_history_l_russian.yml");
             string enFilePath = Path.Combine(enLocPath, $"{this.CurrentConfig.Tag}_history_l_english.yml");
@@ -45,7 +45,7 @@ public class CountryHandler
         var sb = new StringBuilder();
         List<string> lines = new List<string>();
         sb.AppendLine($"{languageKey}:");
-        foreach (var i in ConfigRegistry.Instance.Ideologies)
+        foreach (var i in ModConfig.Instance.Ideologies)
         {
             sb.AppendLine($" {tag}_{i.Id}: \"\"");
             sb.AppendLine($" {tag}_{i.Id}_DEF: \"\"");
@@ -71,10 +71,10 @@ public class CountryHandler
         string countryFileName = this.CurrentConfig.CountryFileName;
         if (string.IsNullOrWhiteSpace(countryFileName))
         {
-            countryFileName = $"{countryTag} - {this.CurrentConfig.Name}.txt";
+            countryFileName = $"{countryTag} - {this.CurrentConfig.Localisation.NameValue}.txt";
         }
 
-        string newEntry = $"{countryTag} = \"countries/{countryTag} - {this.CurrentConfig.Name}.txt\"";
+        string newEntry = $"{countryTag} = \"countries/{countryTag} - {this.CurrentConfig.Localisation.NameValue}.txt\"";
 
         try
         {
@@ -272,7 +272,7 @@ public class CountryHandler
             return;
         }
 
-        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
+        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Localisation.NameValue}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "history", "countries", fileName);
 
         try
@@ -401,7 +401,7 @@ public class CountryHandler
             MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
+        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Localisation.NameValue}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "common", "countries", fileName);
 
         try

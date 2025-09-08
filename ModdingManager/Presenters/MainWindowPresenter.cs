@@ -282,7 +282,7 @@ namespace ModdingManager.Presenter
                 ModManager.ModDirectory = _view.DirBox.Text;
                 ModManager.GameDirectory = _view.GameDirBox.Text;
 
-                ConfigRegistry.LoadInstance();
+                //ModConfig.LoadInstance();
 
                 Logger.AddLog(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")
                                              + Directory.Exists(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));

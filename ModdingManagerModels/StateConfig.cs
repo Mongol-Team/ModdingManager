@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace ModdingManagerModels
 {
-    public class StateConfig : IModel
+    public class StateConfig : IConfig
     {
         [JsonIgnore]
         public List<ProvinceConfig> Provinces { get; set; }

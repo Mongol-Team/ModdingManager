@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ModdingManagerModels
 {
-    public class StrategicRegionConfig : IModel
+    public class StrategicRegionConfig : IConfig
     {
         public List<ProvinceConfig> Provinces { get; set; }
         public string Name { get; set; }

@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Label = System.Windows.Controls.Label;
-using ConfigRegistry = ModdingManager.classes.utils.ConfigRegistry;
+using ModConfig = ModdingManager.classes.utils.ModConfig;
 namespace ModdingManager
 {
     /// <summary>
@@ -148,7 +148,7 @@ namespace ModdingManager
                     var parts = line.Split(':');
                     if (parts.Length == 2 && int.TryParse(parts[1], out int popularity))
                     {
-                        var ideo = ConfigRegistry.Instance.GetIdeology(parts[0]);
+                        var ideo = ModConfig.Instance.GetIdeology(parts[0]);
                         result[ideo?.Id] = popularity != null ? popularity : 0;
                     }
                 }
@@ -219,7 +219,7 @@ namespace ModdingManager
                 foreach (var wrap in CountryFlagsCanvas.Children)
                 {
                     Canvas canvasWrap = wrap as Canvas;
-                    var ideo = ConfigRegistry.Instance.GetIdeology(canvasWrap.Name);
+                    var ideo = ModConfig.Instance.GetIdeology(canvasWrap.Name);
                     var image = (canvasWrap.Children.GetByName(canvasWrap.Name + "Img") as System.Windows.Controls.Image).Source;
                     result[ideo?.Id] = image.ToBitmap();
                 }
@@ -313,7 +313,7 @@ namespace ModdingManager
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             List<string> lines = new List<string>();
-            foreach (var i in ConfigRegistry.Instance.Ideologies)
+            foreach (var i in ModConfig.Instance.Ideologies)
             {
                 // Создаём контейнер Canvas, аналогичный XAML
                 Canvas wrap = new Canvas
@@ -383,7 +383,7 @@ namespace ModdingManager
         private void RullingPartyBox_Loaded(object sender, RoutedEventArgs e)
         {
             List<string> strings = new List<string>();
-            foreach (var ideo in ConfigRegistry.Instance.Ideologies)
+            foreach (var ideo in ModConfig.Instance.Ideologies)
             {
                 strings.Add(ideo.Id);
             }
