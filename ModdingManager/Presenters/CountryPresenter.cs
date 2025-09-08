@@ -45,7 +45,7 @@ public class CountryPresenter
             PartyPopularities = _view.PartyPopularities,
             CountryFlags = _view.CountryFlags,
         };
-        _handler.CurrentConfig = _currentConfig;
+        _handler.Config = _currentConfig;
         try
         {
             _handler.CreateCountryHistoryFile();

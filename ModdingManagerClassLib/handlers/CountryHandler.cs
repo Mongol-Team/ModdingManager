@@ -11,7 +11,7 @@ using MessageBox = System.Windows.MessageBox;
 
 public class CountryHandler
 {
-    public CountryConfig CurrentConfig { get; set; }
+    public CountryConfig Config { get; set; }
     public void CreateLocalizationFiles()
     {
         try
@@ -21,11 +21,11 @@ public class CountryHandler
             Directory.CreateDirectory(ruLocPath);
             Directory.CreateDirectory(enLocPath);
 
-            string ruContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_russian", this.CurrentConfig.Name, this.CurrentConfig.RulingParty);
-            string enContent = GenerateLocalizationContent(this.CurrentConfig.Tag, "l_english", this.CurrentConfig.Name, this.CurrentConfig.RulingParty);
+            string ruContent = GenerateLocalizationContent(this.Config.Tag, "l_russian", this.Config.Localisation.NameValue, this.Config.RulingParty);
+            string enContent = GenerateLocalizationContent(this.Config.Tag, "l_english", this.Config.Localisation.NameValue, this.Config.RulingParty);
 
-            string ruFilePath = Path.Combine(ruLocPath, $"{this.CurrentConfig.Tag}_history_l_russian.yml");
-            string enFilePath = Path.Combine(enLocPath, $"{this.CurrentConfig.Tag}_history_l_english.yml");
+            string ruFilePath = Path.Combine(ruLocPath, $"{this.Config.Tag}_history_l_russian.yml");
+            string enFilePath = Path.Combine(enLocPath, $"{this.Config.Tag}_history_l_english.yml");
 
             File.WriteAllText(ruFilePath, ruContent, new UTF8Encoding(true));
             File.WriteAllText(enFilePath, enContent, new UTF8Encoding(true));
@@ -59,22 +59,22 @@ public class CountryHandler
     }
     public void AddCountryTag()
     {
-        if (this.CurrentConfig.Tag.Length != 3)
+        if (this.Config.Tag.Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
         string tagsDir = Path.Combine(ModManager.ModDirectory, "common", "country_tags");
-        string countryTag = this.CurrentConfig.Tag;
+        string countryTag = this.Config.Tag;
 
-        string countryFileName = this.CurrentConfig.CountryFileName;
+        string countryFileName = this.Config.CountryFileName;
         if (string.IsNullOrWhiteSpace(countryFileName))
         {
-            countryFileName = $"{countryTag} - {this.CurrentConfig.Name}.txt";
+            countryFileName = $"{countryTag} - {this.Config.Localisation.NameValue}.txt";
         }
 
-        string newEntry = $"{countryTag} = \"countries/{countryTag} - {this.CurrentConfig.Name}.txt\"";
+        string newEntry = $"{countryTag} = \"countries/{countryTag} - {this.Config.Localisation.NameValue}.txt\"";
 
         try
         {
@@ -86,8 +86,8 @@ public class CountryHandler
             string[] tagFiles;
 
             // Если задан конкретный файл — использовать его
-            string specificTagFilePath = !string.IsNullOrWhiteSpace(this.CurrentConfig.CountryFileName)
-                ? Path.Combine(tagsDir, this.CurrentConfig.CountryFileName)
+            string specificTagFilePath = !string.IsNullOrWhiteSpace(this.Config.CountryFileName)
+                ? Path.Combine(tagsDir, this.Config.CountryFileName)
                 : null;
 
             if (!string.IsNullOrWhiteSpace(specificTagFilePath) && File.Exists(specificTagFilePath))
@@ -138,7 +138,7 @@ public class CountryHandler
 
     public void UpdateStateOwnership()
     {
-        if (string.IsNullOrWhiteSpace(this.CurrentConfig.Tag) || this.CurrentConfig.Tag.Length != 3)
+        if (string.IsNullOrWhiteSpace(this.Config.Tag) || this.Config.Tag.Length != 3)
         {
             MessageBox.Show("Не указаны стейты или тег страны неверный!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
@@ -152,8 +152,8 @@ public class CountryHandler
             Directory.CreateDirectory(modStatesDir);
         }
 
-        string countryTag = this.CurrentConfig.Tag;
-        var stateEntries = this.CurrentConfig.StateCores;
+        string countryTag = this.Config.Tag;
+        var stateEntries = this.Config.StateCores;
         Encoding utf8WithoutBom = new UTF8Encoding(false);
 
         foreach (var entry in stateEntries)
@@ -261,18 +261,18 @@ public class CountryHandler
 
     public void CreateCountryHistoryFile()
     {
-        if (this.CurrentConfig.Tag.Length != 3)
+        if (this.Config.Tag.Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов (например, ANG).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        if (string.IsNullOrEmpty(this.CurrentConfig.RulingParty))
+        if (string.IsNullOrEmpty(this.Config.RulingParty))
         {
-            MessageBox.Show($"Не достаточно информации про страну: Правящая партия = {this.CurrentConfig.RulingParty}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Не достаточно информации про страну: Правящая партия = {this.Config.RulingParty}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
-        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
+        string fileName = $"{this.Config.Tag} - {this.Config.Localisation.NameValue}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "history", "countries", fileName);
 
         try
@@ -281,23 +281,23 @@ public class CountryHandler
 
             using (StreamWriter writer = new StreamWriter(filePath, false, new UTF8Encoding(true)))
             {
-                if (int.IsPositive(this.CurrentConfig.Capital ?? 0))
+                if (int.IsPositive(this.Config.Capital ?? 0))
                 {
-                    writer.WriteLine($"capital = {this.CurrentConfig.Capital}");
+                    writer.WriteLine($"capital = {this.Config.Capital}");
                     writer.WriteLine();
                 }
-                if (!string.IsNullOrWhiteSpace(this.CurrentConfig.OOB))
+                if (!string.IsNullOrWhiteSpace(this.Config.OOB))
                 {
-                    writer.WriteLine($"oob = \"{this.CurrentConfig.OOB}\"");
+                    writer.WriteLine($"oob = \"{this.Config.OOB}\"");
                     writer.WriteLine();
                 }
 
-                if (this.CurrentConfig.Technologies.Count > 0)
+                if (this.Config.Technologies.Count > 0)
                 {
                     writer.WriteLine("# Starting tech");
                     writer.WriteLine("set_technology = {");
 
-                    foreach (var techLine in this.CurrentConfig.Technologies)
+                    foreach (var techLine in this.Config.Technologies)
                     {
 
                         writer.WriteLine($"\t{techLine.Key} = {techLine.Value}");
@@ -308,43 +308,43 @@ public class CountryHandler
                     writer.WriteLine();
                 }
 
-                if (this.CurrentConfig.Convoys >= 0)
+                if (this.Config.Convoys >= 0)
                 {
-                    writer.WriteLine($"set_convoys = {this.CurrentConfig.Convoys}");
+                    writer.WriteLine($"set_convoys = {this.Config.Convoys}");
                     writer.WriteLine();
                 }
 
-                if (this.CurrentConfig.ResearchSlots >= 0)
+                if (this.Config.ResearchSlots >= 0)
                 {
-                    writer.WriteLine($"set_research_slots = {this.CurrentConfig.ResearchSlots}");
+                    writer.WriteLine($"set_research_slots = {this.Config.ResearchSlots}");
                     writer.WriteLine();
                 }
 
-                if (!double.IsNegative(this.CurrentConfig.Stab ?? 0))
+                if (!double.IsNegative(this.Config.Stab ?? 0))
                 {
-                    writer.WriteLine($"set_stability = {(this.CurrentConfig.Stab ?? 0).ToString(CultureInfo.InvariantCulture)}");
+                    writer.WriteLine($"set_stability = {(this.Config.Stab ?? 0).ToString(CultureInfo.InvariantCulture)}");
                 }
 
-                if (!double.IsNegative(this.CurrentConfig.WarSup ?? 0))
+                if (!double.IsNegative(this.Config.WarSup ?? 0))
                 {
-                    writer.WriteLine($"set_war_support = {(this.CurrentConfig.WarSup ?? 0).ToString(CultureInfo.InvariantCulture)}");
+                    writer.WriteLine($"set_war_support = {(this.Config.WarSup ?? 0).ToString(CultureInfo.InvariantCulture)}");
                 }
 
                 writer.WriteLine("set_politics = {");
-                if (this.CurrentConfig.RulingParty != null)
+                if (this.Config.RulingParty != null)
                 {
-                    writer.WriteLine($"\truling_party = {this.CurrentConfig.RulingParty}");
+                    writer.WriteLine($"\truling_party = {this.Config.RulingParty}");
                 }
 
-                writer.WriteLine($"\tlast_election = {this.CurrentConfig.LastElection?.ToString("yyyy.MM.dd") ?? "no"}");
-                writer.WriteLine($"\telection_frequency = {this.CurrentConfig.ElectionFrequency}");
-                writer.WriteLine($"\telections_allowed = {(this.CurrentConfig.ElectionsAllowed == true ? "yes" : "no")}");
+                writer.WriteLine($"\tlast_election = {this.Config.LastElection?.ToString("yyyy.MM.dd") ?? "no"}");
+                writer.WriteLine($"\telection_frequency = {this.Config.ElectionFrequency}");
+                writer.WriteLine($"\telections_allowed = {(this.Config.ElectionsAllowed == true ? "yes" : "no")}");
                 writer.WriteLine("}");
                 writer.WriteLine();
 
                 // Популярность партий
                 writer.WriteLine("set_popularities = {");
-                foreach (var item in this.CurrentConfig.PartyPopularities)
+                foreach (var item in this.Config.PartyPopularities)
                 {
                     writer.WriteLine($"{item.Key} = {item.Value}");
                 }
@@ -356,9 +356,9 @@ public class CountryHandler
                 writer.WriteLine("add_ideas = volunteer_only");
                 writer.WriteLine("add_ideas = civilian_economy");
 
-                if (this.CurrentConfig.Ideas.Count > 0)
+                if (this.Config.Ideas.Count > 0)
                 {
-                    foreach (string idea in this.CurrentConfig.Ideas)
+                    foreach (string idea in this.Config.Ideas)
                     {
                         string trimmedIdea = idea.Trim();
                         if (!string.IsNullOrEmpty(trimmedIdea))
@@ -369,9 +369,9 @@ public class CountryHandler
                 }
                 writer.WriteLine();
 
-                if (this.CurrentConfig.Characters.Count > 0)
+                if (this.Config.Characters.Count > 0)
                 {
-                    foreach (string character in this.CurrentConfig.Characters)
+                    foreach (string character in this.Config.Characters)
                     {
                         string trimmedChar = character.Trim();
                         if (!string.IsNullOrEmpty(trimmedChar))
@@ -391,17 +391,17 @@ public class CountryHandler
     }
     public void CreateCommonCountriesFile()
     {
-        if (this.CurrentConfig.Tag.Length != 3)
+        if (this.Config.Tag.Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        if (string.IsNullOrEmpty(this.CurrentConfig.GraphicalCulture))
+        if (string.IsNullOrEmpty(this.Config.GraphicalCulture))
         {
             MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
+        string fileName = $"{this.Config.Tag} - {this.Config.Localisation.NameValue}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "common", "countries", fileName);
 
         try
@@ -410,16 +410,16 @@ public class CountryHandler
 
             using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
             {
-                if (!string.IsNullOrWhiteSpace(this.CurrentConfig.GraphicalCulture))
+                if (!string.IsNullOrWhiteSpace(this.Config.GraphicalCulture))
                 {
-                    writer.WriteLine($"graphical_culture = {this.CurrentConfig.GraphicalCulture}_gfx");
-                    writer.WriteLine($"graphical_culture_2d = {this.CurrentConfig.GraphicalCulture}_2d");
+                    writer.WriteLine($"graphical_culture = {this.Config.GraphicalCulture}_gfx");
+                    writer.WriteLine($"graphical_culture_2d = {this.Config.GraphicalCulture}_2d");
                     writer.WriteLine();
                 }
 
-                if (this.CurrentConfig.Color != System.Drawing.Color.FromArgb(0, 0, 2))
+                if (this.Config.Color != System.Drawing.Color.FromArgb(0, 0, 2))
                 {
-                    System.Windows.Media.Color color = (this.CurrentConfig.Color ?? System.Drawing.Color.FromArgb(0, 0, 2)).ToMediaColor();
+                    System.Windows.Media.Color color = (this.Config.Color ?? System.Drawing.Color.FromArgb(0, 0, 2)).ToMediaColor();
                     writer.WriteLine($"color = rgb {{ {color.R} {color.G} {color.B} }}");
                 }
 
@@ -433,21 +433,21 @@ public class CountryHandler
     }
     public void CreateCountryFlags()
     {
-        if (this.CurrentConfig.Tag.Length != 3)
+        if (this.Config.Tag.Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
         string flagsDir = Path.Combine(ModManager.ModDirectory, "gfx", "flags");
-        string countryTag = this.CurrentConfig.Tag;
+        string countryTag = this.Config.Tag;
 
         try
         {
             Directory.CreateDirectory(flagsDir);
 
             //OTM
-            //foreach (var pair in this.CurrentConfig.CountryFlags)
+            //foreach (var pair in this.Config.CountryFlags)
             //{
             //    string ideologySubdir = Path.Combine(flagsDir, $"{countryTag}_{pair.Key}.png");
             //    string ideologyDir = Path.GetDirectoryName(ideologySubdir);

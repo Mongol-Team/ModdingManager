@@ -769,7 +769,7 @@ namespace ModdingManager
             CurrentConfig.SoundPath = selectedAudioPath;
             CurrentConfig.Id = SuperEventIdBox.Text;
             //тут нужно создать гуидок по канавасу
-            //CurrentConfig.Gui = MainCanvas;
+            //Config.Gui = MainCanvas;
         }
         private void DoneConfigButton_Click(object sender, RoutedEventArgs e)
         {

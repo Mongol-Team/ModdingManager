@@ -1,6 +1,5 @@
 ﻿using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
-using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels;
 using ModdingManagerModels.Args;
@@ -166,7 +165,7 @@ public class StateWorkerHandler
             {
                 Name = newName,
                 Value = newValue,
-               
+
             };
 
             // Обновляем или добавляем переменную в оба файла

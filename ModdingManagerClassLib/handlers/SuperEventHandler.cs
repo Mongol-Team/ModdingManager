@@ -124,7 +124,7 @@ public class SuperEventHandler
 
     /// <summary>
     /// Сохраняет файлы кнопок в gfx/superevent/button/{id}_{button.fontSign}_bg.dds,
-    /// если в CurrentConfig.SpriteSources есть путь для соответствующего sprite (quadTextureSprite или паттерн).
+    /// если в Config.SpriteSources есть путь для соответствующего sprite (quadTextureSprite или паттерн).
     /// </summary>
     public void HandleButtonsImage()
     {
@@ -185,7 +185,7 @@ public class SuperEventHandler
     private bool TryGetSpriteSource(string spriteTypeName, out string path)
     {
         path = null!;
-        // ожидается мапа CurrentConfig.SpriteSources[spriteName] = "C:\...\img.png"
+        // ожидается мапа Config.SpriteSources[spriteName] = "C:\...\img.png"
         if (CurrentConfig.SpriteSources != null &&
             CurrentConfig.SpriteSources.TryGetValue(spriteTypeName, out var p) &&
             File.Exists(p))
@@ -399,7 +399,7 @@ public class SuperEventHandler
         {
             char ch = (char)('A' + i);
             string key = $" SUPEREVENT_{CurrentConfig.Id}_OPTION_{ch}";
-            // Текст опции берём из CurrentConfig.OptionTexts[ch], если есть; иначе — placeholder по имени кнопки
+            // Текст опции берём из Config.OptionTexts[ch], если есть; иначе — placeholder по имени кнопки
             string optionText =
                 (CurrentConfig.OptionTexts != null && CurrentConfig.OptionTexts.TryGetValue(ch, out var txt) ? txt :
                 (!string.IsNullOrWhiteSpace(win.Buttons[i].Name) ? win.Buttons[i].Name : $"Option {ch}"));
