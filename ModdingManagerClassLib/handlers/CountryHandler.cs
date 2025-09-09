@@ -401,7 +401,7 @@ public class CountryHandler
             MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        string fileName = $"{Config.Tag} - {Config.Localisation.NameValue}.txt";
+        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "common", "countries", fileName);
 
         try

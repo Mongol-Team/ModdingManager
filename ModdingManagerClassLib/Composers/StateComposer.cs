@@ -73,6 +73,7 @@ namespace ModdingManagerClassLib.Composers
             var stateBracket = file.Brackets.First();
 
             var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
+            var fim = idVar.Value.ToString();
             if (idVar == null || !int.TryParse(idVar.Value.ToString(), out int id))
             {
                 Logger.AddLog($"Не удалось извлечь ID из файла: {filePath}");
@@ -94,7 +95,10 @@ namespace ModdingManagerClassLib.Composers
                 Id = id,
                 Provinces = matchedProvinces,
                 FilePath = file.FilePath,
+                LocalizationKey = stateBracket.SubVars.FirstOrDefault(v => v.Name == "name")?.Value as string ?? $"state_{id}",
                 Color = ModManager.GenerateColorFromId(id),
+                Manpower = stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower")?.Value as int?,
+                LocalSupply = stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supply")?.Value as double? ?? 0.0,
                 //Cathegory = ModManager.CurrentConfig.StateCathegories.Where(s => s.Id == stateBracket.SubVars.FirstOrDefault(v => v.Name == "category")?.Value as string).First(),
             };
         }

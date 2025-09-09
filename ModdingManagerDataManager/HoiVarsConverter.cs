@@ -74,29 +74,23 @@ namespace ModdingManagerDataManager
 
         public static bool TryParseAny(string data, out object? value)
         {
-            value = null;
-            if (string.IsNullOrWhiteSpace(data)) return false;
-
-            ReadOnlySpan<char> s = data.AsSpan().Trim();
-
-            // Быстрые префильтры по первому символу
-            char c0 = s[0];
-
-            // Строка в кавычках — распознать сразу, не дергать другие парсеры
-            if (c0 == '"' && TryParseString(data, out var str)) { value = str; return true; }
-
-            // Цвет — дешёвый предикат по фигурным скобкам / ключевому слову
-            if (c0 == '{' || (c0 == 'r' || c0 == 'R'))
-            {
-                if (TryParseColor(data, out var color)) { value = color; return true; }
-            }
-
-            // Булево — дёшево, без аллокаций
-            if (TryParseBoolean(data, out var b)) { value = b; return true; }
-
-            // Дата: узнаётся по двум точкам и длине
-            // yyyy.MM.dd -> 2 точки, длина 10
-            if (s.Length == 10 && s[4] == '.' && s[7] == '.')
+            if (string.IsNullOrEmpty(data))
+                value = null;
+            else if (TryParseColor(data, out var color))
+                value = color;
+            else if (TryParseDate(data, out var date))
+                value = date;
+            else if (TryParseBoolean(data, out var b))
+                value = b;
+            else if (TryParseInteger(data, out var i))
+                value = i;
+            else if (TryParseDouble(data, out var d))
+                value = d;
+            else if (TryParseString(data, out var s))
+                value = s;
+            else if (TryParseHoiReference(data, out var r))
+                value = r;
+            else
             {
                 if (TryParseDate(data, out var d)) { value = d; return true; }
             }

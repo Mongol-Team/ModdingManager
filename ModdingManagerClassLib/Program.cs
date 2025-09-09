@@ -15,11 +15,10 @@ namespace ModdingManagerDataManager
             var w = new Stopwatch();
             w.Start();
             List<IConfig> fimoz = StateComposer.Parse();
-            w.Stop();
-
+            
             foreach (var item in fimoz)
             {
-                Console.WriteLine((item as StateConfig).Id);
+                Debug.WriteLine((item as StateConfig).Id);
             }
         }
     }
