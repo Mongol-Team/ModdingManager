@@ -1,5 +1,4 @@
-﻿using ModdingManager.classes.utils;
-using ModdingManager.managers.@base;
+﻿using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.utils.Pathes;
 using ModdingManagerDataManager.Parsers;
@@ -7,11 +6,8 @@ using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Types;
 using ModdingManagerModels.Types.ObjectCacheData;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace ModdingManagerClassLib.Composers
 {
@@ -19,23 +15,34 @@ namespace ModdingManagerClassLib.Composers
     {
         public static List<IConfig> Parse()
         {
-            var result = new List<IConfig>();
+            var watch = Stopwatch.StartNew();
+
+            var result = new ConcurrentBag<IConfig>();
 
             string[] priorityFolders = {
-                ModPathes.StatesPath,
-                GamePathes.StatesPath,
-            };
+        ModPathes.StatesPath,
+        GamePathes.StatesPath,
+    };
 
             foreach (string folder in priorityFolders)
             {
                 if (!Directory.Exists(folder))
                     continue;
-                foreach (string file in Directory.GetFiles(folder))
+
+                var files = Directory.GetFiles(folder);
+
+                //Parallel.ForEach(files, file =>
+                //{
+                //    var stateConfig = ParseStateConfig(file);
+                //    result.Add(stateConfig);
+                //});
+                foreach (var file in files)
                 {
-                    StateConfig stateConfig = ParseStateConfig(file);
+                    var stateConfig = ParseStateConfig(file);
                     result.Add(stateConfig);
                 }
-                if (result.Count > 0)
+
+                if (!result.IsEmpty)
                     break;
                 else
                 {
@@ -43,10 +50,12 @@ namespace ModdingManagerClassLib.Composers
                 }
             }
 
-            return result;
+            watch.Stop();
+            return result.ToList();
         }
         public static StateConfig ParseStateConfig(string filePath)
         {
+
             if (!File.Exists(filePath))
             {
                 Logger.AddLog($"Файл не найден: {filePath}");
@@ -54,6 +63,7 @@ namespace ModdingManagerClassLib.Composers
             }
 
             HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(filePath) as HoiFuncFile;
+
             if (file == null || file.Brackets.Count == 0)
             {
                 Logger.AddLog($"Не удалось распарсить файл: {filePath}");

@@ -4,8 +4,6 @@ using ModdingManagerModels;
 using SixLabors.ImageSharp;
 using System.Text.Json;
 using System.Windows;
-using System.Windows.Forms;
-using System.Windows.Media;
 
 namespace ModdingManager.managers.@base
 {
@@ -15,7 +13,7 @@ namespace ModdingManager.managers.@base
         public static bool IsDebugRuning;
         public static string GameDirectory;
         public static string CurrentLanguage = "russian";
-        public static ModConfig CurrentConfig = new ();
+        public static ModConfig CurrentConfig = new();
         public ModManager()
         {
             OnLoaded();
@@ -62,30 +60,12 @@ namespace ModdingManager.managers.@base
             var fileNamesLines = filePaths.Select(path => Path.GetFileName(path)).ToList();
             return fileNamesLines;
         }
-        public static System.Windows.Media.Color GenerateWpfColorFromId(int id)
-        {
-            byte r = (byte)((id * 53) % 255);
-            byte g = (byte)((id * 97) % 255);
-            byte b = (byte)((id * 151) % 255);
-            return System.Windows.Media.Color.FromRgb(r, g, b);
-        }
         public static System.Drawing.Color GenerateColorFromId(int id)
         {
             byte r = (byte)((id * 53) % 255);
             byte g = (byte)((id * 97) % 255);
             byte b = (byte)((id * 151) % 255);
             return System.Drawing.Color.FromArgb(r, g, b);
-        }
-        public static System.Windows.Media.Color ParseColor(string content)
-        {
-            string[] parts = content.Trim('{', '}').Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length < 3) return Colors.Black;
-
-            return System.Windows.Media.Color.FromRgb(
-                byte.Parse(parts[0]),
-                byte.Parse(parts[1]),
-                byte.Parse(parts[2])
-            );
         }
     }
 }

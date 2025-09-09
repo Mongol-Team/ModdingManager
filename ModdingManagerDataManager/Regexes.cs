@@ -36,7 +36,7 @@ namespace ModdingManagerDataManager
 
         private static string findLocalization = @"l_\w+:*\s+(\ +\w+:\d*\ +"".+""\ *\n?)+";
         public static readonly Regex FindLocalization =
-            new Regex(findLocalization, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(findLocalization, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         private static string localizationVar = @"(?<=\ )+[A-Za-z0-9_]+:.*(?<="").+\""";
         public static readonly Regex LocalizationVar =
@@ -47,11 +47,11 @@ namespace ModdingManagerDataManager
         #region Csv
         private static string csvFile = @"^([^\;]+\;)+[^;]+$";
         public static readonly Regex CsvFile =
-            new Regex(csvFile, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(csvFile, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         private static string csvLine = @"([^\;\n]+\;?)+";
         public static readonly Regex CsvLine =
-            new Regex(csvLine, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(csvLine, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         // require multiline flag
         private static string csvValue = @"(?<=\;|^)[^\;\n]*(?=\;|\n|)";
@@ -60,7 +60,7 @@ namespace ModdingManagerDataManager
 
         private static string csvSeparator = @";";
         public static readonly Regex CsvSeparator =
-            new Regex(csvSeparator, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline, Timeout);
+            new Regex(csvSeparator, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline | RegexOptions.NonBacktracking, Timeout);
 
         #endregion
 
@@ -73,25 +73,25 @@ namespace ModdingManagerDataManager
         //use only for extracted Color bracket | R G B 
         private static string hoiColorPart = @"(25[0-5]|2[0-4]\d|1?\d{1,2})";
         public static readonly Regex HoiColorPart =
-            new Regex(hoiColorPart, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(hoiColorPart, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         //full version finds only valid colors
         private static string hoiColorContent = @"\s*(" + hoiColorPart + @"\s+){2}" + hoiColorPart + @"\s*";
         public static readonly Regex HoiColorContent =
-            new Regex(hoiColorContent, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(hoiColorContent, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         // Vars
-        private static string findVar = @"\w+\s*=\s*((" + hoiColorVar_simple + @")|(\"".+\"")|([-\d.]+)|[\w.]+)";
+        private static string findVar = @"\w+\s*=\s*((rgb\s*)?(\"".+\"")|([-\d.]+)|[\w.]+)";
         public static readonly Regex FindVar =
-            new Regex(findVar, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(findVar, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         private static string var = "^" + findVar + "$";
         public static readonly Regex Var =
-            new Regex(var, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(var, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         private static string findStateVar = @"\w+\s*=\s*((\"".+\"")|[\w.]+|([-\d.]+)|" + hoiColorVar_simple + @")";
         public static readonly Regex FindStateVar =
-            new Regex(findStateVar, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(findStateVar, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         // Brackets
 
@@ -113,11 +113,17 @@ namespace ModdingManagerDataManager
         public static readonly Regex BracketContent =
             new Regex(bracketContent, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline, Timeout);
 
+
+
+        private static string victoryPoint = @"\w+\s*=\s*{(?!\s*(\d+\s+){2}\d+)(?:[^{}=])+?\s*}";
+        public static readonly Regex VictoryPoint =
+            new Regex(victoryPoint, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+
         // Arrays
 
 
         //use only for extracted & validated array | Name={ ... }
-        private static string array = @"\w+\s*=\s*{(?!\s*(\d+\s+){2}\d+)(?:[^{}=])+?\s*}";
+        private static string array = @"\w+\s*=\s*{(?!\s*(\d+\s+){}\d+)(?:[^{}=])+?\s*}";
         public static readonly Regex Array =
             new Regex(array, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
 
@@ -140,16 +146,15 @@ namespace ModdingManagerDataManager
 
         private static string escapeCharsAroundAssignChar = @"\s*=\s*";
         public static readonly Regex EscapeCharsAroundAssignChar =
-            new Regex(escapeCharsAroundAssignChar, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(escapeCharsAroundAssignChar, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         // require multiline flag
         private static string emptyLine = @"^\s*$\r?\n?";
         public static readonly Regex EmptyLine =
-            new Regex(emptyLine, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline, Timeout);
+            new Regex(emptyLine, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline | RegexOptions.NonBacktracking, Timeout);
 
 
     }
 
 
 }
-

@@ -1,5 +1,4 @@
-﻿using ModdingManagerModels.Types.ObjectCacheData;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Text.Json.Serialization;
 
 namespace ModdingManagerModels
@@ -8,7 +7,6 @@ namespace ModdingManagerModels
     {
         [JsonIgnore]
         public List<ProvinceConfig> Provinces { get; set; }
-        public string Name { get; set; }
         [JsonIgnore]
         public int? Id { get; set; }
         public Color Color { get; set; }

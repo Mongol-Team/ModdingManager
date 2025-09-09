@@ -71,10 +71,10 @@ public class CountryHandler
         string countryFileName = this.Config.CountryFileName;
         if (string.IsNullOrWhiteSpace(countryFileName))
         {
-            countryFileName = $"{countryTag} - {this.CurrentConfig.Name}.txt";
+            countryFileName = $"{countryTag} - {Config.Localisation.NameValue}.txt";
         }
 
-        string newEntry = $"{countryTag} = \"countries/{countryTag} - {this.CurrentConfig.Name}.txt\"";
+        string newEntry = $"{countryTag} = \"countries/{countryTag} - {Config.Localisation.NameValue}.txt\"";
 
         try
         {
@@ -272,7 +272,7 @@ public class CountryHandler
             return;
         }
 
-        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
+        string fileName = $"{Config.Tag} - {Config.Localisation.NameValue}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "history", "countries", fileName);
 
         try
@@ -401,7 +401,7 @@ public class CountryHandler
             MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
+        string fileName = $"{Config.Tag} - {Config.Localisation.NameValue}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "common", "countries", fileName);
 
         try
