@@ -2,7 +2,7 @@
 
 namespace ModdingManagerModels
 {
-    public class CountryCharacterConfig : IModel
+    public class CountryCharacterConfig : IConfig
     {
         public string Id { get; set; } = "";
         public string Name { get; set; } = "";

@@ -1,6 +1,6 @@
 ﻿namespace ModdingManagerModels
 {
-    public class IdeaConfig : IModel
+    public class IdeaConfig : IConfig
     {
         public string Id { get; set; }
         public string NameLocKey { get; set; }

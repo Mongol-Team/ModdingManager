@@ -23,7 +23,7 @@ namespace ModdingManagerDataManager.Parsers
             {
                 if (type.Name == "Color")
                     expectedValuesPerLine += 3;
-                if (type.Name == "Point")
+                else if (type.Name == "Point")
                     expectedValuesPerLine += 2;
                 else
                     expectedValuesPerLine++;

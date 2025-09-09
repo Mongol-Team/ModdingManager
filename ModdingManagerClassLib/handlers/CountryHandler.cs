@@ -45,7 +45,7 @@ public class CountryHandler
         var sb = new StringBuilder();
         List<string> lines = new List<string>();
         sb.AppendLine($"{languageKey}:");
-        foreach (var i in ConfigRegistry.Instance.Ideologies)
+        foreach (var i in ModConfig.Instance.Ideologies)
         {
             sb.AppendLine($" {tag}_{i.Id}: \"\"");
             sb.AppendLine($" {tag}_{i.Id}_DEF: \"\"");
@@ -71,10 +71,10 @@ public class CountryHandler
         string countryFileName = this.Config.CountryFileName;
         if (string.IsNullOrWhiteSpace(countryFileName))
         {
-            countryFileName = $"{countryTag} - {this.Config.Localisation.NameValue}.txt";
+            countryFileName = $"{countryTag} - {this.CurrentConfig.Name}.txt";
         }
 
-        string newEntry = $"{countryTag} = \"countries/{countryTag} - {this.Config.Localisation.NameValue}.txt\"";
+        string newEntry = $"{countryTag} = \"countries/{countryTag} - {this.CurrentConfig.Name}.txt\"";
 
         try
         {
@@ -272,7 +272,7 @@ public class CountryHandler
             return;
         }
 
-        string fileName = $"{this.Config.Tag} - {this.Config.Localisation.NameValue}.txt";
+        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "history", "countries", fileName);
 
         try
@@ -401,7 +401,7 @@ public class CountryHandler
             MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        string fileName = $"{this.Config.Tag} - {this.Config.Localisation.NameValue}.txt";
+        string fileName = $"{this.CurrentConfig.Tag} - {this.CurrentConfig.Name}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "common", "countries", fileName);
 
         try

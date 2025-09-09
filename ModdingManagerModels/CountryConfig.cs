@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ModdingManagerModels
 {
-    public class CountryConfig : IModel
+    public class CountryConfig : IConfig
     {
         public string Tag { get; set; }
         public CountryLocalisationConfig? Localisation { get; set; }

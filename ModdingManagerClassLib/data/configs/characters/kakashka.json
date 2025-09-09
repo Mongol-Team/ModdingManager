@@ -1,0 +1,25 @@
+{
+  "Id": "",
+  "Name": "",
+  "Description": "",
+  "Types": [
+    "advisor",
+    "navy_leader",
+    "field_marshal",
+    "corps_commander",
+    "country_leader"
+  ],
+  "Tag": "",
+  "Traits": [],
+  "Skill": 0,
+  "Attack": 0,
+  "Defense": 0,
+  "Supply": 0,
+  "Speed": 0,
+  "AdvisorSlot": "",
+  "AdvisorCost": 0,
+  "AiWillDo": "",
+  "Expire": "",
+  "BigIconPath": "",
+  "SmallIconPath": ""
+}

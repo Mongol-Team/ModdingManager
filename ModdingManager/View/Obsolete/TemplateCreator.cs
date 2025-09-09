@@ -3,7 +3,7 @@ using ModdingManagerModels;
 using System.Data;
 using System.IO;
 using System.Text;
-using ConfigRegistry = ModdingManager.classes.utils.ConfigRegistry;
+using ModConfig = ModdingManager.classes.utils.ModConfig;
 
 namespace ModdingManager
 {
@@ -42,7 +42,7 @@ namespace ModdingManager
                     return;
                 }
 
-                var matchingRegiments = ConfigRegistry.Instance.Regiments
+                var matchingRegiments = ModConfig.Instance.Regiments
                     .Where(r => r.Categories != null &&
                         r.Categories.Contains(requiredCategory, StringComparer.OrdinalIgnoreCase) &&
                         (!type.Equals("Brigade", StringComparison.OrdinalIgnoreCase) ||

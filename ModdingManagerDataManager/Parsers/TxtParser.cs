@@ -53,7 +53,7 @@ namespace ModdingManagerDataManager.Parsers
             content = content.Replace("\r\n", "\n");
 
             content = Rx.FileComment.Replace(content, "");
-            content = Rx.EscapeCharsAroundAssignChar.Replace(content, "");
+            content = Rx.EscapeCharsAroundAssignChar.Replace(content, "=");
             content = Rx.EmptyLine.Replace(content, "");
         }
         private Bracket ParseBracket(string content)
@@ -72,13 +72,18 @@ namespace ModdingManagerDataManager.Parsers
             }
 
             content = Rx.FindBracket.Replace(content, "");
-
+            
             MatchCollection vars = Rx.FindVar.Matches(content);
             foreach (Match match in vars)
             {
                 Var? var = ParseVar(match.Value);
                 if (var != null)
                     result.SubVars.Add(var);
+            }
+            MatchCollection arrays = Rx.Array.Matches(content);
+            foreach (Match match in arrays)
+            {
+                result.Arrays.Add(ParseArray(match.Value));
             }
 
             return result;

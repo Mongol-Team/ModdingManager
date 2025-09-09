@@ -1,6 +1,6 @@
 ﻿namespace ModdingManagerModels
 {
-    public class TemplateConfig : IModel
+    public class TemplateConfig : IConfig
     {
         public List<RegimentConfig>? SupportItems { get; set; } = new List<RegimentConfig>();
         public List<RegimentConfig> BrigadeItems { get; set; } = new List<RegimentConfig>();

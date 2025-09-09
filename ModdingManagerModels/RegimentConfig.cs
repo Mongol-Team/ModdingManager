@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ModdingManagerModels
 {
-    public class RegimentConfig : IModel
+    public class RegimentConfig : IConfig
     {
         public RegimentConfig() { }
         public string Name { get; set; }
