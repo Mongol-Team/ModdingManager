@@ -1,9 +1,4 @@
 ﻿using ModdingManagerModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ModdingManagerClassLib.Composers
 {
@@ -12,7 +7,7 @@ namespace ModdingManagerClassLib.Composers
         public ModifierDefComposer() { }
         public static List<IConfig> Parse()
         {
-
+            throw new NotImplementedException();
         }
         public static ModifierDefenitionConfig ParseModifierDefConfig(string filePath)
         {

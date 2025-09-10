@@ -1,8 +1,7 @@
-﻿
-using ModdingManager.classes.utils;
-using ModdingManager.managers.@base;
+﻿using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
+using ModdingManagerModels.Types.LocalizationData;
 using System.Globalization;
 using System.Text;
 using System.Windows;
@@ -12,6 +11,16 @@ using MessageBox = System.Windows.MessageBox;
 public class CountryHandler
 {
     public CountryConfig Config { get; set; }
+    private LocalizationBlock country_local;
+
+    public CountryHandler(CountryConfig config, LocalizationBlock country_local)
+    {
+        {
+            Config = config;
+            this.country_local = country_local;
+        }
+
+    }
     public void CreateLocalizationFiles()
     {
         try
@@ -21,8 +30,8 @@ public class CountryHandler
             Directory.CreateDirectory(ruLocPath);
             Directory.CreateDirectory(enLocPath);
 
-            string ruContent = GenerateLocalizationContent(this.Config.Tag, "l_russian", this.Config.Localisation.NameValue, this.Config.RulingParty);
-            string enContent = GenerateLocalizationContent(this.Config.Tag, "l_english", this.Config.Localisation.NameValue, this.Config.RulingParty);
+            string ruContent = GenerateLocalizationContent(country_local);
+            string enContent = GenerateLocalizationContent(country_local);
 
             string ruFilePath = Path.Combine(ruLocPath, $"{this.Config.Tag}_history_l_russian.yml");
             string enFilePath = Path.Combine(enLocPath, $"{this.Config.Tag}_history_l_english.yml");
@@ -40,22 +49,23 @@ public class CountryHandler
         }
     }
 
-    private static string GenerateLocalizationContent(string tag, string languageKey, string name, string party)
+    private static string GenerateLocalizationContent(LocalizationBlock country_local)
     {
-        var sb = new StringBuilder();
-        List<string> lines = new List<string>();
-        sb.AppendLine($"{languageKey}:");
-        foreach (var i in ModConfig.Instance.Ideologies)
-        {
-            sb.AppendLine($" {tag}_{i.Id}: \"\"");
-            sb.AppendLine($" {tag}_{i.Id}_DEF: \"\"");
-        }
+        //var sb = new StringBuilder();
+        //List<string> lines = new List<string>();
+        //sb.AppendLine($"{languageKey}:");
+        //foreach (var i in ModConfig.Instance.Ideologies)
+        //{
+        //    sb.AppendLine($" {tag}_{i.Id}: \"\"");
+        //    sb.AppendLine($" {tag}_{i.Id}_DEF: \"\"");
+        //}
 
-        sb.AppendLine($" {tag}: \"{name}\"");
-        sb.AppendLine($" {tag}_DEF: \"\"");
-        sb.AppendLine($" {tag}_ADJ: \"\"");
+        //sb.AppendLine($" {tag}: \"{name}\"");
+        //sb.AppendLine($" {tag}_DEF: \"\"");
+        //sb.AppendLine($" {tag}_ADJ: \"\"");
 
-        return sb.ToString();
+        //return sb.ToString();
+        throw new NotImplementedException();
     }
     public void AddCountryTag()
     {
@@ -71,10 +81,10 @@ public class CountryHandler
         string countryFileName = this.Config.CountryFileName;
         if (string.IsNullOrWhiteSpace(countryFileName))
         {
-            countryFileName = $"{countryTag} - {Config.Localisation.NameValue}.txt";
+            countryFileName = $"{countryTag} - {country_local.Data[this.Config.Tag]}.txt";
         }
 
-        string newEntry = $"{countryTag} = \"countries/{countryTag} - {Config.Localisation.NameValue}.txt\"";
+        string newEntry = $"{countryTag} = \"countries/{countryTag} - {country_local.Data[this.Config.Tag]}.txt\"";
 
         try
         {
@@ -272,7 +282,7 @@ public class CountryHandler
             return;
         }
 
-        string fileName = $"{Config.Tag} - {Config.Localisation.NameValue}.txt";
+        string fileName = $"{Config.Tag} - {country_local.Data[this.Config.Tag]}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "history", "countries", fileName);
 
         try
@@ -401,7 +411,7 @@ public class CountryHandler
             MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        string fileName = $"{Config.Tag} - {Config.Localisation.NameValue}.txt";
+        string fileName = $"{Config.Tag} - {country_local.Data[this.Config.Tag]}.txt";
         string filePath = Path.Combine(ModManager.ModDirectory, "common", "countries", fileName);
 
         try

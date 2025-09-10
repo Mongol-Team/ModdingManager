@@ -4,13 +4,7 @@ using ModdingManagerClassLib.utils.Pathes;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
-using ModdingManagerModels.Types.ObectCacheData;
 using ModdingManagerModels.Types.ObjectCacheData;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ModdingManagerClassLib.Composers
 {
@@ -23,7 +17,7 @@ namespace ModdingManagerClassLib.Composers
             var res = new List<IConfig>();
             string[] priorityFolders = {
                 ModPathes.StrategicRegionPath,
-                GamePathes.StrategicRegionsPath,
+                GamePathes.StrategicRegionPath,
             };
 
             foreach (string folder in priorityFolders)

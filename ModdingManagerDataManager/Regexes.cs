@@ -34,7 +34,7 @@ namespace ModdingManagerDataManager
         public static readonly Regex Localization =
             new Regex(localization, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
 
-        private static string findLocalization = @"l_\w+:*\s+(\ +\w+:\d*\ +"".+""\ *\n?)+";
+        private static string findLocalization = @"l_\w+:\d*\s+(\ +\w+:\d*\ +"".*""\ *\n?)+";
         public static readonly Regex FindLocalization =
             new Regex(findLocalization, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 

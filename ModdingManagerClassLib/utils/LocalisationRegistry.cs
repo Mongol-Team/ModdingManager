@@ -1,12 +1,10 @@
-﻿using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.utils.Pathes;
+﻿using ModdingManagerClassLib.utils.Pathes;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.LochalizationData;
 using System.Collections.Concurrent;
-using System.Text;
 namespace ModdingManagerClassLib.utils
 {
     public class LocalisationRegistry
@@ -34,9 +32,8 @@ namespace ModdingManagerClassLib.utils
                 GamePathes.LocalisationPath,
                 GamePathes.LocalisationReplacePath,
             };
-            var files = Directory.EnumerateFiles(GamePathes.LocalisationPath, "*.yml", SearchOption.AllDirectories)
-    .Concat(Directory.EnumerateFiles(GamePathes.LocalisationReplacePath, "*.yml", SearchOption.AllDirectories))
-    .ToList();
+            var files = Directory.EnumerateFiles(GamePathes.LocalisationPath, "*.yml", SearchOption.AllDirectories).ToList();
+            files = files.OrderBy(s => s).ToList();
 
             // Потокобезопасные накопители по категориям.
             var vpDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -52,14 +49,23 @@ namespace ModdingManagerClassLib.utils
             bool IsCountry(string k) => k.Length == 3 && k.All(char.IsLetter);
 
             YmlParser parser = new YmlParser(new TxtPattern());
-
+            Console.WriteLine($"files  - {files.Count}");
+            Console.WriteLine($"fimoz - {files.Count(f => f == "C:\\Users\\timpf\\Downloads\\Telegram Desktop\\SME\\SME\\localisation\\russian\\state_names_l_russian.yml")}");
+            var f = 0;
             Parallel.ForEach(files, file =>
             {
                 try
                 {
-                    var text = File.ReadAllText(file, new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+                    var text = File.ReadAllText(file);
+                    if (file == "C:\\Users\\timpf\\Downloads\\Telegram Desktop\\SME\\SME\\localisation\\russian\\state_names_l_russian.yml")
+                        Console.WriteLine("HOI DEV HUESOS");
                     var parsed = (LocalizationFile)parser.Parse(text);
+                    if (parsed.localizations.Count < 1)
+                    {
+                        Console.WriteLine(file.Split("\\").Last());
+                        return;
 
+                    }
                     // Пробегаем все блоки и все пары ключ/значение внутри файла
                     foreach (var block in parsed.localizations)
                     {
@@ -67,7 +73,8 @@ namespace ModdingManagerClassLib.utils
                         {
                             var key = kvp.Key;
                             var val = kvp.Value;
-
+                            if (file == "C:\\Users\\timpf\\Downloads\\Telegram Desktop\\SME\\SME\\localisation\\russian\\state_names_l_russian.yml")
+                                Console.WriteLine(key + " " + val);
                             // Определяем целевой словарь
                             ConcurrentDictionary<string, string> target =
                                 IsVictoryPoint(key) ? vpDict :
@@ -80,13 +87,14 @@ namespace ModdingManagerClassLib.utils
                             target.AddOrUpdate(key, val, (_, __) => val);
                         }
                     }
+                    f++;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Logger.AddLog("Ошибка при загрузке файлов локализации: " + ex.Message);
+                    //Logger.AddLog("Ошибка при загрузке файлов локализации: " + ex.Message);
                 }
             });
-
+            Console.WriteLine($" real files  - {f}");
             // Заполняем итоговые блоки (язык — на твое усмотрение; можно оставить по умолчанию)
             VictoryPointsLocalisation = new LocalizationBlock
             {

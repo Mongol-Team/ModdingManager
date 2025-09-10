@@ -85,7 +85,7 @@ namespace ModdingManagerClassLib.Composers
                 .Select(v => v is HoiReference hr ? hr.Value : v)
                 .OfType<int>()
                 .ToList() ?? new List<int>();
-            var matchedProvinces = ModManager.CurrentConfig.Map.Provinces
+            var matchedProvinces = ModManager.Mod.Map.Provinces
                 .Where(p => provinceIds.Contains(p.Id))
                 .ToList();
 

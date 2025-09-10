@@ -15,11 +15,8 @@ namespace ModdingManagerDataManager.Parsers
         protected override void Normalize(ref string content)
         {
             content = content.Replace("\r\n", "\n");
-            Console.WriteLine(content.Length);
             content = Rx.FileComment.Replace(content, "");
-            Console.WriteLine(content.Length);
             content = Rx.EmptyLine.Replace(content, "");
-            Console.WriteLine(content.Length);
         }
 
         protected override IHoiData ParseRealization(string content)
@@ -57,19 +54,20 @@ namespace ModdingManagerDataManager.Parsers
             LocalizationBlock result = new LocalizationBlock();
 
             Language language;
-            if (!Enum.TryParse<Language>(Rx.LocalizationLanguage.Match(content).Value, out language)) return null;
+            if (!Enum.TryParse<Language>(Rx.LocalizationLanguage.Match(content).Value, out language))
+                return null;
 
             result.Language = language;
 
             MatchCollection names = Rx.LocalizationVarName.Matches(content);
             MatchCollection values = Rx.LocalizationVarContent.Matches(content);
-            MatchCollection keyValuepairs = Rx.LocalizationVar.Matches(content);
+            //MatchCollection keyValuepairs = Rx.LocalizationVar.Matches(content);
 
             if (names.Count != values.Count) return null;
 
             for (int q = 0; q < names.Count; q++)
             {
-                result.Data.Add(names[q].Value, values[q].Value);
+                result.Data.TryAdd(names[q].Value, values[q].Value);
             }
 
             return result;
