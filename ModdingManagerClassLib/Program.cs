@@ -1,5 +1,6 @@
 ﻿using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Composers;
+using ModdingManagerClassLib.utils;
 using ModdingManagerModels;
 using System.Diagnostics;
 
@@ -17,10 +18,12 @@ namespace ModdingManagerDataManager
             List<IConfig> fimoz = StateComposer.Parse();
             w.Stop();
 
-            foreach (var item in fimoz)
-            {
-                Console.WriteLine((item as StateConfig).Id);
-            }
+            //foreach (var item in fimoz)
+            //{
+            //    Console.WriteLine((item as StateConfig).Id);
+            //}
+
+            var reg = new LocalisationRegistry(fimoz.OfType<StateConfig>().ToList());
         }
     }
 }

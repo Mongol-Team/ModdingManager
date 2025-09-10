@@ -2,6 +2,7 @@
 using ModdingManagerClassLib.utils.Pathes;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
+using ModdingManagerModels;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.LochalizationData;
 using System.Collections.Concurrent;
@@ -16,9 +17,9 @@ namespace ModdingManagerClassLib.utils
         public LocalizationBlock StateLocalisation { get; private set; }
         public LocalizationBlock OtherLocalisation { get; private set; }
 
-        public LocalisationRegistry()
+        public LocalisationRegistry(List<StateConfig>? states = null)
         {
-            LoadLocalisation();
+            LoadLocalisation(states);
         }
         /// <summary>
         /// Параллельно загружает все переменные из .yml файлов в AllCache (с учётом приоритетов)
@@ -26,11 +27,11 @@ namespace ModdingManagerClassLib.utils
         /// 
 
 
-        private void LoadLocalisation()
+        private async void LoadLocalisation(List<StateConfig>? states)
         {
             string[] searchPaths = new[]
             {
-                GamePathes.LocalisationPath,   
+                GamePathes.LocalisationPath,
                 GamePathes.LocalisationReplacePath,
             };
             var files = Directory.EnumerateFiles(GamePathes.LocalisationPath, "*.yml", SearchOption.AllDirectories)
@@ -46,7 +47,8 @@ namespace ModdingManagerClassLib.utils
 
             bool IsVictoryPoint(string k) => k.StartsWith("VICTORY_POINTS_", StringComparison.OrdinalIgnoreCase);
             bool IsIdeology(string k) => k.StartsWith("IDEOLOGY_", StringComparison.OrdinalIgnoreCase);
-            bool IsState(string k) => k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase);
+            bool IsState(string k) =>
+                states == null ? k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase) : states.Count(s => s.LocalizationKey == k) != 0;
             bool IsCountry(string k) => k.Length == 3 && k.All(char.IsLetter);
 
             YmlParser parser = new YmlParser(new TxtPattern());
