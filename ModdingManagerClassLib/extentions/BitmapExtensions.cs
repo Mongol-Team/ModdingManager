@@ -1,21 +1,18 @@
-﻿using BCnEncoder.Encoder; // Install BCnEncoder nuget package
+﻿using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Tga;
-using SixLabors.ImageSharp.PixelFormats;
+using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace ModdingManager.classes.extentions
+namespace ModdingManagerClassLib.Extentions
 {
     public static class BitmapExtensions
     {
-      
+
         public static void SaveAsDds(this Bitmap bitmap, string path)
         {
             var encoder = new BcEncoder(CompressionFormat.Bc3);

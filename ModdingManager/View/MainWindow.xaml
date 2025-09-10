@@ -1,0 +1,122 @@
+﻿<Window x:Class="ModdingManager.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Главное меню"
+        Width="963" Height="694"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        WindowStyle="SingleBorderWindow">
+    <!--Icon="pack://application:,,,/Assets/app.ico"-->
+    <Grid Margin="0">
+        <!-- Сетка примерно повторяет координаты WinForms -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <!-- левый столбец -->
+            <ColumnDefinition Width="*" />
+            <!-- центр -->
+            <ColumnDefinition Width="*" />
+            <!-- правый столбец -->
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <!-- 0 -->
+            <RowDefinition Height="80"/>
+            <!-- 1 -->
+            <RowDefinition Height="80"/>
+            <!-- 2 -->
+            <RowDefinition Height="80"/>
+            <!-- 3 -->
+            <RowDefinition Height="80"/>
+            <!-- 4 -->
+            <RowDefinition Height="*" />
+            <!-- 5 заполнитель -->
+            <RowDefinition Height="80"/>
+            <!-- 6 нижние поля/кнопки -->
+            <RowDefinition Height="50"/>
+            <!-- 7 нижние подписи -->
+        </Grid.RowDefinitions>
+
+        <!-- Кнопки ряд 0 -->
+        <Button x:Name="LocConvertButton" Grid.Row="0" Grid.Column="0" Margin="44,16,44,8"
+                Content="Локализация по дерву фокусов"
+                Background="#FF00C000" Foreground="White" />
+        <Button x:Name="StateManagerBtn" Grid.Row="0" Grid.Column="1" Margin="44,16,44,8"
+                Content="Работа со картой"
+                Background="#FF00C0C0" Foreground="Black" />
+        <Button x:Name="CountryCrtButton" Grid.Row="0" Grid.Column="2" Margin="44,16,44,8"
+                Content="Создатель стран"
+                Background="#FF00C000" Foreground="White" />
+
+        <!-- Кнопки ряд 1 -->
+        <Button x:Name="LocTechButton" Grid.Row="1" Grid.Column="0" Margin="44,8"
+                Content="Локализация по файлу технологии" />
+        <Button x:Name="ModButton" Grid.Row="1" Grid.Column="1" Margin="44,8"
+                Content="Создатель снаряжения" />
+        <Button x:Name="CharCreator" Grid.Row="1" Grid.Column="2" Margin="44,8"
+                Content="Создатель персонажей"
+                Background="#FF00C000" Foreground="White" />
+
+        <!-- Кнопки ряд 2 -->
+        <Button x:Name="LocStateButton" Grid.Row="2" Grid.Column="0" Margin="44,8"
+                Content="Локализация по файлу стейта"
+                Background="#FF00C000" Foreground="White" />
+        <Button x:Name="TechButton" Grid.Row="2" Grid.Column="1" Margin="44,8"
+                Content="Создатель технологий"
+                Background="#FF00C0C0" Foreground="Black" />
+        <Button x:Name="IdeaCreatorButton" Grid.Row="2" Grid.Column="2" Margin="44,8"
+                Content="Создатель идей"
+                Background="#FF00C000" Foreground="White" />
+
+        <!-- Кнопки ряд 3 -->
+        <Button x:Name="LocIdeaButton" Grid.Row="3" Grid.Column="0" Margin="44,8"
+                Content="Локализация для идей"
+                Background="#FF00C000" Foreground="White" />
+        <Button x:Name="FlagCrtButton" Grid.Row="3" Grid.Column="1" Margin="44,8"
+                Content="Создатель флагов"
+                Background="#FFFFC000" Foreground="Black" />
+        <Button x:Name="TemplateCreatorBtn" Grid.Row="3" Grid.Column="2" Margin="44,8"
+                Content="Создатель шаблонов юнитов" />
+
+        <!-- Кнопки ряд 4 -->
+        <Button x:Name="SuperEventCreatorButton" Grid.Row="4" Grid.Column="0" Margin="44,8"
+                Content="Создатель суперивентов"
+                Background="#FF00C0C0" Foreground="Black" />
+        <Button x:Name="IdeologyCreatorBtn" Grid.Row="4" Grid.Column="1" Margin="44,8"
+                Content="Создатель идеологий" />
+        <Button x:Name="OOBCreatorBtn" Grid.Row="4" Grid.Column="2" Margin="44,8"
+                Content="Создатель стартовых юнитов"
+                Background="#FF00C0C0" Foreground="Black" />
+
+        <!-- Нижняя панель ввода директорий -->
+        <Grid Grid.Row="6" Grid.ColumnSpan="3" Margin="24,8,24,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="DirBox" Grid.Column="0" Margin="0,4,12,4" Height="32"
+                     VerticalContentAlignment="Center" />
+            <Label Grid.Column="1" VerticalAlignment="Center" Content="Дирректория мода" />
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" >
+                <Button x:Name="DebugButton" Width="131" Height="37" Margin="16,0,0,0"
+                        Content="Debug" Background="#FF404040" Foreground="White"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="7" Grid.ColumnSpan="3" Margin="24,0,24,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="GameDirBox" Grid.Column="0" Margin="0,0,12,0" Height="32"
+                     VerticalContentAlignment="Center" />
+            <Label Grid.Column="1" VerticalAlignment="Center" Content="Дирректория игры" />
+            <Button x:Name="button1" Grid.Column="2" Width="131" Height="33"
+                    Content="писюн ф6" Margin="16,0,0,0"/>
+        </Grid>
+    </Grid>
+</Window>
+

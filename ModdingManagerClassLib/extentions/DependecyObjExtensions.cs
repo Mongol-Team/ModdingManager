@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Media;
 
-namespace ModdingManager.classes.extentions
+namespace ModdingManagerClassLib.Extentions
 {
     public static class DependecyObjExtensions
     {

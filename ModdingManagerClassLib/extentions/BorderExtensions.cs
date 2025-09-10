@@ -1,6 +1,9 @@
-﻿using System.Windows.Controls;
+﻿using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
-namespace ModdingManager.classes.extentions
+namespace ModdingManagerClassLib.Extentions
 {
     public static class BorderExtensions
     {
@@ -12,5 +15,7 @@ namespace ModdingManager.classes.extentions
             }
             return null;
         }
+        
+
     }
 }

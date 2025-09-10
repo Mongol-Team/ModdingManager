@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cntrls="clr-namespace:ModdingManager.Controls"
         xmlns:local="clr-namespace:ModdingManager"
         mc:Ignorable="d"
         Title="TechCreator" Height="820" Width="1500"
@@ -145,7 +146,7 @@
             </RichTextBox>
             <Label Content="Леджер" HorizontalAlignment="Left" Margin="267,104,0,0" VerticalAlignment="Top"/>
             <TextBox x:Name="TreeLedgerBox" HorizontalAlignment="Left" Margin="218,128,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" />
-            <Button x:Name="TreeDoneButton" Content="Древо" HorizontalAlignment="Left" Margin="180,743,0,0" VerticalAlignment="Top" Height="20" Width="81" Click="DoneTreeButton_Click" Background="#FF6CB45F"/>
+            <Button x:Name="TreeDoneButton" Content="Древо" HorizontalAlignment="Left" Margin="180,743,0,0" VerticalAlignment="Top" Height="20" Width="81" Background="#FF6CB45F"/>
             <Canvas x:Name="TabFolderImageCanvas" Height="61" Width ="182" 
                 AllowDrop="True"
                 Drop="TabFolderImageCanvas_Drop"
@@ -174,41 +175,8 @@
             <!-- пока ничего -->
         </Grid>
 
-        <!-- Канвас с фоном -->
-        <ScrollViewer Grid.Column="1"
-                      x:Name="MainScrollViewer"
-                      HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Auto" Margin="0,0,0,0">
-            <Grid x:Name="WrapperGridCanvas" Width="1240" Height="1240" Drop="WrapperGridCanvas_Drop" AllowDrop="True">
-                <!-- Новый задний фон -->
-
-                <Image 
-                   x:Name="TreeBGImage"
-                   Source="/data/gfx/interface/tiled_plain_bg.png"
-                   
-                   Stretch="UniformToFill"
-                   Panel.ZIndex="0" 
-                />
-
-                <!-- Слой с канвасом -->
-                <Canvas x:Name="GridCanvas"
-                    Width="1240" Height="1240"
-                    MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
-                    MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
-                    MouseMove="Canvas_MouseMove"
-                    Panel.ZIndex="1">
-                    <Canvas.Background>
-                        <ImageBrush x:Name="TechBGImage"
-                            Stretch="None"
-                            TileMode="None"
-                            AlignmentX="Left"
-                            AlignmentY="Top"/>
-                    </Canvas.Background>
-
-                </Canvas>
-            </Grid>
-
-        </ScrollViewer>
+        <cntrls:TechnologyGrid x:Name="TechGrid"  Grid.Column="1">
+        </cntrls:TechnologyGrid >
 
     </Grid>
 </Window>

@@ -1,20 +1,9 @@
-﻿using Microsoft.Win32;
-using ModdingManager.classes.managers.gfx;
-using ModdingManager.configs;
-using ModdingManager.managers.@base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using ModdingManager.managers.@base;
+using ModdingManagerModels;
 using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Documents;
-using System.Windows.Forms;
-using Registry = ModdingManager.classes.utils.Registry;
+using ModConfig = ModdingManager.classes.utils.ModConfig;
 
 namespace ModdingManager
 {
@@ -53,7 +42,7 @@ namespace ModdingManager
                     return;
                 }
 
-                var matchingRegiments = Registry.Instance.Regiments
+                var matchingRegiments = ModConfig.Instance.Regiments
                     .Where(r => r.Categories != null &&
                         r.Categories.Contains(requiredCategory, StringComparer.OrdinalIgnoreCase) &&
                         (!type.Equals("Brigade", StringComparison.OrdinalIgnoreCase) ||
@@ -129,14 +118,14 @@ namespace ModdingManager
         }
         private async void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            await WPFConfigManager.LoadConfigWrapper(this);
-            UpdtadeConfig();
+            //await WPFConfigManager.LoadConfigWrapper(this);
+            //UpdtadeConfig();
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            UpdtadeConfig();
-            WPFConfigManager.SaveConfigWrapper(this);
+            //UpdtadeConfig();
+            //WPFConfigManager.SaveConfigWrapper(this);
         }
 
         private void ApplyButton_Click(object sender, EventArgs e)

@@ -1,8 +1,9 @@
-﻿using ModdingManager.classes.controls;
-using ModdingManager.classes.extentions;
-using ModdingManager.classes.handlers;
-using ModdingManager.configs;
-using ModdingManager.managers;
+﻿using ModdingManager.Controls;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
+using ModdingManagerClassLib.Extentions;
+
+using ModdingManagerModels.SuperEventModels;
 using NAudio.Wave;
 using System.IO;
 using System.Windows;
@@ -13,8 +14,6 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Brushes = System.Windows.Media.Brushes;
-using Color = System.Windows.Media.Color;
 using FontFamily = System.Windows.Media.FontFamily;
 using RichTextBox = System.Windows.Controls.RichTextBox;
 using TextBox = System.Windows.Controls.TextBox;
@@ -54,7 +53,6 @@ namespace ModdingManager
             AdjustCanvasSizeToImage();
             InitializeDragAndResize();
             SupereventFrame.IsHitTestVisible = false;
-            Debugger.AttachIfDebug(this);
             this.DescFontColorPicker.SelectedColorChanged += FontColorPicker_SelectedColorChanged;
             this.HeaderFontColorPicker.SelectedColorChanged += FontColorPicker_SelectedColorChanged;
             this.OptionTextColorPicker.SelectedColorChanged += FontColorPicker_SelectedColorChanged;
@@ -95,7 +93,7 @@ namespace ModdingManager
             MainCanvas.MouseLeave += MainCanvas_MouseLeave;
         }
 
-        
+
 
         private UIElement GetTopLevelChild(UIElement hit)
         {
@@ -148,7 +146,7 @@ namespace ModdingManager
             return true;
         }
 
-        
+
 
         private void ResizeElement(UIElement element, Vector delta, ResizeDirection direction)
         {
@@ -229,7 +227,7 @@ namespace ModdingManager
             startPoint = currentPosition;
         }
 
-       
+
 
         private UIElement GetElementUnderMouse(System.Windows.Point position)
         {
@@ -297,7 +295,7 @@ namespace ModdingManager
             };
         }
 
-        
+
 
         private void ResizeContainer(UIElement element, Vector delta, ResizeDirection direction)
         {
@@ -436,7 +434,7 @@ namespace ModdingManager
 
 
         private void AdjustCanvasSizeToImage()
-        { 
+        {
             if (SupereventFrame.Source is BitmapSource original)
             {
                 var formattedBitmap = new FormatConvertedBitmap(original, PixelFormats.Bgra32, null, 0);
@@ -451,19 +449,19 @@ namespace ModdingManager
                     GetPixels(formattedBitmap),
                     formattedBitmap.PixelWidth * (formattedBitmap.Format.BitsPerPixel / 8)
                 );
-                SupereventFrame.Source = fixedBitmap; 
+                SupereventFrame.Source = fixedBitmap;
                 MainCanvas.Width = fixedBitmap.PixelWidth;
                 MainCanvas.Height = fixedBitmap.PixelHeight;
             }
         }
 
-     
-        
+
+
         public MediaPlayer mediaPlayer = new MediaPlayer();
         public bool isPlaying = false;
         public string selectedAudioPath;
         public string currentTempAudioPath = null;
-        
+
 
         private byte[] GetPixels(BitmapSource source)
         {
@@ -770,12 +768,12 @@ namespace ModdingManager
 
             CurrentConfig.SoundPath = selectedAudioPath;
             CurrentConfig.Id = SuperEventIdBox.Text;
-
-            CurrentConfig.EventConstructor = MainCanvas;
+            //тут нужно создать гуидок по канавасу
+            //Config.Gui = MainCanvas;
         }
         private void DoneConfigButton_Click(object sender, RoutedEventArgs e)
         {
-            if(!string.IsNullOrEmpty(CurrentConfig.Id))
+            if (!string.IsNullOrEmpty(CurrentConfig.Id))
             {
                 UpdateConfigButton_Click(sender, e);
                 HandlerInstance = new() { CurrentConfig = CurrentConfig };
@@ -959,7 +957,7 @@ namespace ModdingManager
         {
             if (sender is System.Windows.Controls.ComboBox combo)
             {
-                Debugger.Instance.LogMessage("SearchableCombo_SelectionChanged");
+                Logger.AddLog("SearchableCombo_SelectionChanged");
                 string comboName = combo.Name;
 
                 string fontName = combo.SelectedItem as string;
@@ -995,7 +993,7 @@ namespace ModdingManager
                             rtb.FontFamily = newFont;
                     }
                 }
-                Debugger.Instance.LogMessage("fin");
+                Logger.AddLog("fin");
             }
         }
 

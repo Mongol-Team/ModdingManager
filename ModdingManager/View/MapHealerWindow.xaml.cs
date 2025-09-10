@@ -1,21 +1,10 @@
 ﻿using ModdingManager.classes.cache.cachedFiles;
-using ModdingManager.classes.controls;
+using ModdingManager.Controls;
 using ModdingManager.classes.utils;
-using ModdingManager.classes.utils.types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
+using ModdingManagerModels.Types.ObjectCacheData;
 using System.Windows;
-using System.IO;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ModdingManager
 {
@@ -35,12 +24,12 @@ namespace ModdingManager
         }
         public static void DeleteAllNonExistingProvLinks()
         {
-            var mapCache = Registry.Instance.MapCache;
-            var existingProvs = new HashSet<int>(Registry.Instance.Map.Provinces
+            var mapCache = ModConfig.Instance.MapCache;
+            var existingProvs = new HashSet<int>(ModConfig.Instance.Map.Provinces
                 .Where(p => p.Shape != null)
                 .Select(p => p.Id));
 
-            Debugger.Instance.LogMessage("Starting cleanup of non-existing province links...");
+            Logger.AddLog("Starting cleanup of non-existing province links...");
 
             void CleanBracketContent(Bracket bracket, string filePath, string context)
             {
@@ -55,7 +44,7 @@ namespace ModdingManager
                         if (!int.TryParse(part, out int id) || !existingProvs.Contains(id))
                         {
                             badParts.Add(part);
-                            Debugger.Instance.LogMessage($"Removed invalid province part '{part}' from {context} in file: {filePath}");
+                            Logger.AddLog($"Removed invalid province part '{part}' from {context} in file: {filePath}");
                         }
                     }
                 }
@@ -111,7 +100,7 @@ namespace ModdingManager
                         if (hasBad)
                         {
                             historyBracket.SubBrackets.Remove(vpBracket);
-                            Debugger.Instance.LogMessage($"Removed invalid victory_points bracket from state file: {stateFilePath}");
+                            Logger.AddLog($"Removed invalid victory_points bracket from state file: {stateFilePath}");
                             statemodified = true;
                         }
                     }
@@ -146,9 +135,9 @@ namespace ModdingManager
                 }
             }
 
-         
-            string filePath = Registry.Instance.MapCache.MapDefinitionCache.FilePath;
-            DefinitionCachedFile defFile = Registry.Instance.MapCache.MapDefinitionCache;
+
+            string filePath = ModConfig.Instance.MapCache.MapDefinitionCache.FilePath;
+            DefinitionCachedFile defFile = ModConfig.Instance.MapCache.MapDefinitionCache;
             bool modified = false;
 
             var linesToRemove = new List<string>();
@@ -158,7 +147,7 @@ namespace ModdingManager
                 if (parts.Length > 0 && int.TryParse(parts[0], out int provId) && !existingProvs.Contains(provId))
                 {
                     linesToRemove.Add(line);
-                    Debugger.Instance.LogMessage($"Removed non-existing province {provId} from definition file: {filePath}");
+                    Logger.AddLog($"Removed non-existing province {provId} from definition file: {filePath}");
                 }
             }
 
@@ -172,22 +161,22 @@ namespace ModdingManager
             {
                 mapCache.MarkDefinitionFileDirty(filePath);
             }
-            
+
 
             mapCache.SaveAllDirtyFiles();
-            Debugger.Instance.LogMessage("Cleanup of non-existing province links completed.");
+            Logger.AddLog("Cleanup of non-existing province links completed.");
         }
         public static void CheckProvincesDefines(ErrorPanel errorPanel)
         {
-            var mapCache = Registry.Instance.MapCache;
+            var mapCache = ModConfig.Instance.MapCache;
             if (mapCache == null || mapCache.MapDefinitionCache == null)
             {
-                Debugger.Instance.LogMessage("MapCache or MapDefinitionCache is not initialized. Cannot perform province defines check.");
+                Logger.AddLog("MapCache or MapDefinitionCache is not initialized. Cannot perform province defines check.");
                 return;
             }
 
-            var lines = Registry.Instance.MapCache.MapDefinitionCache.DefinitionLines;
-            var filePath = Registry.Instance.MapCache.MapDefinitionCache.FilePath;
+            var lines = ModConfig.Instance.MapCache.MapDefinitionCache.DefinitionLines;
+            var filePath = ModConfig.Instance.MapCache.MapDefinitionCache.FilePath;
             if (lines.Count == 0)
             {
                 return;
@@ -323,20 +312,20 @@ namespace ModdingManager
                     errorPanel.AddError(ErrorType.Warning, msg, filePath);
                 }
             }
-            
 
-            Debugger.Instance.LogMessage("Province defines check completed.");
+
+            Logger.AddLog("Province defines check completed.");
         }
         private static void CheckStateDefines(ErrorPanel errorPanel)
         {
-            var mapCache = Registry.Instance.MapCache;
+            var mapCache = ModConfig.Instance.MapCache;
             if (mapCache == null || mapCache.StatesCache.Count == 0)
             {
-                Debugger.Instance.LogMessage("MapCache or StatesCache is not initialized. Cannot perform state defines check.");
+                Logger.AddLog("MapCache or StatesCache is not initialized. Cannot perform state defines check.");
                 return;
             }
 
-            var existingProvs = new HashSet<int>(Registry.Instance.Map.Provinces
+            var existingProvs = new HashSet<int>(ModConfig.Instance.Map.Provinces
                 .Where(p => p.Shape != null)
                 .Select(p => p.Id));
             var provinceToFile = new Dictionary<int, string>();
@@ -540,10 +529,10 @@ namespace ModdingManager
                 }
             }
 
-            Debugger.Instance.LogMessage("State defines check completed.");
+            Logger.AddLog("State defines check completed.");
         }
-    
-    
+
+
         private void CheckProvDefines_Click(object sender, RoutedEventArgs e)
         {
             ErrorPanel errorPanel = new ErrorPanel();

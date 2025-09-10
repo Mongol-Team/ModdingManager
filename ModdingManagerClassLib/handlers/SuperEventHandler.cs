@@ -1,688 +1,545 @@
-﻿using ModdingManager.classes.extentions;
-using ModdingManager.classes.managers.gfx;
+﻿using ModdingManagerClassLib.Extentions;
 using ModdingManager.classes.utils.fonts;
-using ModdingManager.configs;
 using ModdingManager.managers.@base;
-using System;
+using ModdingManagerModels.SuperEventModels;
+using ModdingManagerModels.Types;
 using System.Diagnostics;
-using System.IO;
+using System.Drawing;                             
 using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using MessageBox = System.Windows.MessageBox;
+using System.Windows;                             
+using ModdingManagerClassLib.Debugging;
+public class SuperEventHandler
+{
+    public SupereventConfig CurrentConfig { get; set; }
 
-    public class SuperEventHandler
+    // ==== AUDIO ====
+
+    public void SaveSupereventAudioFile()
     {
-        public SupereventConfig CurrentConfig {  get; set; }
-        public void SaveSupereventAudioFile()
+        if (CurrentConfig?.SoundPath == null || string.IsNullOrEmpty(CurrentConfig.Id)) return;
+
+        try
         {
-            if (CurrentConfig == null || CurrentConfig.SoundPath == null || string.IsNullOrEmpty(CurrentConfig.Id))
-            {
-                return; 
-            }
+            var sourceUri = new Uri(CurrentConfig.SoundPath, UriKind.Absolute);
+            if (!sourceUri.IsFile) return;
 
-            try
-            {
-                Uri sourceUri = new Uri(CurrentConfig.SoundPath, UriKind.Absolute);
-                if (sourceUri == null || !sourceUri.IsFile)
-                {
-                    return; 
-                }
+            string sourcePath = sourceUri.LocalPath;
+            string destinationDirectory = Path.Combine(ModManager.ModDirectory, "sound", "customsound");
+            Directory.CreateDirectory(destinationDirectory);
 
-                string sourcePath = sourceUri.LocalPath;
-                string destinationDirectory = Path.Combine(ModManager.ModDirectory, "sound", "customsound");
-
-                Directory.CreateDirectory(destinationDirectory);
-
-                string destinationFileName = $"{CurrentConfig.Id}_sound.wav";
-                string destinationPath = Path.Combine(destinationDirectory, destinationFileName);
-
-                File.Copy(sourcePath, destinationPath, overwrite: true);
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Error saving superevent audio: {ex.Message}");
-            }
+            string destinationPath = Path.Combine(destinationDirectory, $"{CurrentConfig.Id}_sound.wav");
+            File.Copy(sourcePath, destinationPath, overwrite: true);
         }
-        public void HandleButtonsImage()
+        catch (Exception ex)
         {
-            var mainCanvas = CurrentConfig.EventConstructor;
-            if (mainCanvas == null)
+            MessageBox.Show($"Error saving superevent audio: {ex.Message}");
+        }
+    }
+
+    public void CreateCustomAssetsFiles()
+    {
+        if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id)) return;
+
+        string soundDirectory = Path.Combine(ModManager.ModDirectory, "sound");
+        Directory.CreateDirectory(soundDirectory);
+        Directory.CreateDirectory(Path.Combine(soundDirectory, "customsound"));
+
+        UpdateSupereventsAsset(soundDirectory);
+        CreateSoundAsset(soundDirectory);
+        CreateSoundEffectAsset(soundDirectory);
+    }
+
+    private void UpdateSupereventsAsset(string soundDirectory)
+    {
+        string assetPath = Path.Combine(soundDirectory, "superevents.asset");
+        List<string> soundEffects = new();
+
+        if (File.Exists(assetPath))
+        {
+            string[] lines = File.ReadAllLines(assetPath);
+            bool inSection = false;
+            foreach (string line in lines)
             {
-                System.Windows.MessageBox.Show("Main canvas not found!");
-                return;
-            }
-
-            var buttonCanvases = mainCanvas.FindElementsOfType<Canvas>();
-
-            foreach (var buttonCanvas in buttonCanvases)
-            {
-                var buttonImage = buttonCanvas.FindElementsOfType<System.Windows.Controls.Image>().FirstOrDefault();
-                if (buttonImage == null) continue;
-
-                string optionName = buttonCanvas.Name ?? buttonImage.Name ?? "unnamed_button";
-                optionName = optionName.Replace(" ", "_").ToLower();
-
-                // Create the path for the DDS file
-                string directoryPath = Path.Combine(ModManager.ModDirectory, "gfx", "superevent", "button");
-                string filePath = Path.Combine(directoryPath, $"{CurrentConfig.Id}_{optionName}_bg.dds");
-
-                // Ensure directory exists
-                Directory.CreateDirectory(directoryPath);
-
-                // Get the image source
-                if (buttonImage.Source is BitmapSource bitmapSource)
+                var t = line.Trim();
+                if (t.StartsWith("soundeffects = {")) { inSection = true; continue; }
+                if (inSection)
                 {
-                    if(buttonImage.Source != ModdingManager.Properties.Resources.null_item_image.ToBitmapSource())
-                    {
-                        // Convert to DDS (BC3 RGBA format)
-                        byte[] ddsBytes = bitmapSource.ConvertToDdsBC3();
-
-                        // Save the file
-                        File.WriteAllBytes(filePath, ddsBytes);
-
-                        System.Windows.MessageBox.Show($"Saved button image to: {filePath}");
-                    }
+                    if (t.StartsWith("}")) { inSection = false; continue; }
+                    string cleaned = line.Split('/')[0].Trim();
+                    if (!string.IsNullOrEmpty(cleaned)) soundEffects.Add(cleaned);
                 }
             }
         }
-        public void CreateCustomAssetsFiles()
+
+        string newEffect = $"{CurrentConfig.Id}_soundeffect";
+        if (!soundEffects.Contains(newEffect)) soundEffects.Add(newEffect);
+
+        using var w = new StreamWriter(assetPath);
+        w.WriteLine("category = {");
+        w.WriteLine("\tname = \"SuperEventsSoundEffects\"");
+        w.WriteLine("\tsoundeffects = {");
+        foreach (var e in soundEffects) w.WriteLine($"\t\t{e}");
+        w.WriteLine("\t}");
+        w.WriteLine("\tcompressor = {");
+        w.WriteLine("\t\tenabled = yes");
+        w.WriteLine("\t\tpregain = 3.0");
+        w.WriteLine("\t\tpostgain = 0.0");
+        w.WriteLine("\t\tratio = 10.0");
+        w.WriteLine("\t\tthreshold = -15.0");
+        w.WriteLine("\t\tattacktime = 0.030");
+        w.WriteLine("\t\treleasetime = 1.2");
+        w.WriteLine("\t}");
+        w.WriteLine("}");
+    }
+
+    private void CreateSoundAsset(string soundDirectory)
+    {
+        using var w = new StreamWriter(Path.Combine(soundDirectory, $"{CurrentConfig.Id}_sound.asset"));
+        w.WriteLine("sound = { ");
+        w.WriteLine($"\tname = \"{CurrentConfig.Id}_sound\"");
+        w.WriteLine($"\tfile = \"customsound/{CurrentConfig.Id}_sound.wav\"");
+        w.WriteLine("\talways_load = no");
+        w.WriteLine("}");
+    }
+
+    private void CreateSoundEffectAsset(string soundDirectory)
+    {
+        using var w = new StreamWriter(Path.Combine(soundDirectory, $"{CurrentConfig.Id}_soundeffect.asset"));
+        w.WriteLine("soundeffect = { ");
+        w.WriteLine($"\tname = {CurrentConfig.Id}_soundeffect");
+        w.WriteLine("\tloop = no");
+        w.WriteLine("\tsounds = {");
+        w.WriteLine($"\t\tsound = {CurrentConfig.Id}_sound");
+        w.WriteLine("\t}");
+        w.WriteLine("\tis3d = no");
+        w.WriteLine("\tmax_audible = 1");
+        w.WriteLine("\tmax_audible_behaviour = fail");
+        w.WriteLine("\tvolume = 1.5");
+        w.WriteLine("}");
+    }
+
+    // ==== IMAGES (из GuiDocument, через маппинг Sprite -> filePath) ====
+
+    /// <summary>
+    /// Сохраняет файлы кнопок в gfx/superevent/button/{id}_{button.fontSign}_bg.dds,
+    /// если в Config.SpriteSources есть путь для соответствующего sprite (quadTextureSprite или паттерн).
+    /// </summary>
+    public void HandleButtonsImage()
+    {
+        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id)) { MessageBox.Show("GUI not loaded!"); return; }
+        var win = CurrentConfig.Gui.Containers.FirstOrDefault();
+        if (win == null) { MessageBox.Show("Gui window not found!"); return; }
+
+        string dir = Path.Combine(ModManager.ModDirectory, "gfx", "superevent", "button");
+        Directory.CreateDirectory(dir);
+
+        for (int i = 0; i < win.Buttons.Count; i++)
         {
-            if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id))
+            var btn = win.Buttons[i];
+            // имя файла берём из имени кнопки (или OptionA/B/C по индексу)
+            string optionName = !string.IsNullOrWhiteSpace(btn.Name) ? btn.Name : $"Option{(char)('A' + i)}";
+            optionName = optionName.Replace(' ', '_').ToLowerInvariant();
+
+            string spriteName = btn.QuadTextureSprite ?? $"GFX_{CurrentConfig.Id}_option_{(char)('A' + i)}_bg";
+            if (TryGetSpriteSource(spriteName, out string sourcePath))
             {
-                return; 
-            }
-
-            string soundDirectory = Path.Combine(ModManager.ModDirectory, "sound");
-            string customSoundDirectory = Path.Combine(soundDirectory, "customsound");
-
-            Directory.CreateDirectory(soundDirectory);
-            Directory.CreateDirectory(customSoundDirectory);
-
-            UpdateSupereventsAsset(soundDirectory);
-            CreateSoundAsset(soundDirectory);
-            CreateSoundEffectAsset(soundDirectory);
-        }
-        private void UpdateSupereventsAsset(string soundDirectory)
-        {
-            string assetPath = Path.Combine(soundDirectory, "superevents.asset");
-            List<string> soundEffects = new List<string>();
-
-            if (File.Exists(assetPath))
-            {
-                string[] lines = File.ReadAllLines(assetPath);
-                bool inSoundEffectsSection = false;
-
-                foreach (string line in lines)
-                {
-                    if (line.Trim().StartsWith("soundeffects = {"))
-                    {
-                        inSoundEffectsSection = true;
-                        continue;
-                    }
-
-                    if (inSoundEffectsSection)
-                    {
-                        if (line.Trim().StartsWith("}"))
-                        {
-                            inSoundEffectsSection = false;
-                            continue;
-                        }
-
-                        string cleanedLine = line.Split('/')[0].Trim();
-                        if (!string.IsNullOrEmpty(cleanedLine))
-                        {
-                            soundEffects.Add(cleanedLine);
-                        }
-                    }
-                }
-            }
-            string newSoundEffect = $"{CurrentConfig.Id}_soundeffect";
-            if (!soundEffects.Contains(newSoundEffect))
-            {
-                soundEffects.Add(newSoundEffect);
-            }
-
-            using (StreamWriter writer = new StreamWriter(assetPath))
-            {
-                writer.WriteLine("category = {");
-                writer.WriteLine("\tname = \"SuperEventsSoundEffects\"");
-                writer.WriteLine("\tsoundeffects = {");
-
-                foreach (string effect in soundEffects)
-                {
-                    writer.WriteLine($"\t\t{effect}");
-                }
-
-                writer.WriteLine("\t}");
-                writer.WriteLine("\tcompressor = {");
-                writer.WriteLine("\t\tenabled = yes");
-                writer.WriteLine("\t\tpregain = 3.0");
-                writer.WriteLine("\t\tpostgain = 0.0");
-                writer.WriteLine("\t\tratio = 10.0");
-                writer.WriteLine("\t\tthreshold = -15.0");
-                writer.WriteLine("\t\tattacktime = 0.030");
-                writer.WriteLine("\t\treleasetime = 1.2");
-                writer.WriteLine("\t}");
-                writer.WriteLine("}");
-            }
-        }
-        private void CreateSoundAsset(string soundDirectory)
-        {
-            string assetPath = Path.Combine(soundDirectory, $"{CurrentConfig.Id}_sound.asset");
-
-            using (StreamWriter writer = new StreamWriter(assetPath))
-            {
-                writer.WriteLine("sound = { ");
-                writer.WriteLine($"\tname = \"{CurrentConfig.Id}_sound\"");
-                writer.WriteLine($"\tfile = \"customsound/{CurrentConfig.Id}_sound.wav\"");
-                writer.WriteLine("\talways_load = no");
-                writer.WriteLine("}");
-            }
-        }
-        private void CreateSoundEffectAsset(string soundDirectory)
-        {
-            string assetPath = Path.Combine(soundDirectory, $"{CurrentConfig.Id}_soundeffect.asset");
-
-            using (StreamWriter writer = new StreamWriter(assetPath))
-            {
-                writer.WriteLine("soundeffect = { ");
-                writer.WriteLine($"\tname = {CurrentConfig.Id}_soundeffect");
-                writer.WriteLine("\tloop = no");
-                writer.WriteLine("\tsounds = {");
-                writer.WriteLine($"\t\tsound = {CurrentConfig.Id}_sound");
-                writer.WriteLine("\t}");
-                writer.WriteLine("\tis3d = no");
-                writer.WriteLine("\tmax_audible = 1");
-                writer.WriteLine("\tmax_audible_behaviour = fail");
-                writer.WriteLine("\tvolume = 1.5");
-                writer.WriteLine("}");
-            }
-        }
-        public void SaveSupereventImages()
-        {
-            System.Windows.Controls.Image frame = CurrentConfig.EventConstructor.Children.OfType<System.Windows.Controls.Image>().Where(i => i.Name == "SupereventFrame").FirstOrDefault();
-            System.Windows.Controls.Image image = CurrentConfig.EventConstructor.Children.OfType<System.Windows.Controls.Image>().Where(i => i.Name == "SupereventImage").FirstOrDefault();
-            if (CurrentConfig == null)
-                return;
-
-            string basePath = ModManager.ModDirectory;
-            if (image != null)
-            {
-                string imageDir = Path.Combine(basePath, "gfx", "superevent_pictures");
-                Directory.CreateDirectory(imageDir);
-
-                int targetWidth = (int)image.Width;
-                int targetHeight = (int)image.Height;
-
-                var renderBitmap = new RenderTargetBitmap(
-                    targetWidth,
-                    targetHeight,
-                    96, 96, // DPI
-                    PixelFormats.Pbgra32
-                );
-                image.Measure(new System.Windows.Size(targetWidth, targetHeight));
-                image.Arrange(new Rect(new System.Windows.Size(targetWidth, targetHeight)));
-                renderBitmap.Render(image);
-
-                BitmapSource scaledSource = renderBitmap;
-
-                using (var originalImage = scaledSource.ToDrawingDotImage())
-                {
-                    if (originalImage != null)
-                    {
-                        using (var resizedImage = new Bitmap(originalImage, new System.Drawing.Size(targetWidth, targetHeight)))
-                        {
-                            resizedImage.ConvertToImageSharp().SaveAsTGA(Path.Combine(imageDir, $"superevent_image_{CurrentConfig.Id}.tga")
-                            );
-                        }
-                    }
-                }
-            }
-
-
-            if (frame != null)
-            {
-                string frameDir = Path.Combine(basePath, "gfx", "interface", "superevent");
-                string frameFilename = $"superevent_frame_{CurrentConfig.Id}";
-
-                using (var drawingImage = frame.Source.ToBitmapSource().ToDrawingDotImage())
-                {
-                    if (drawingImage != null)
-                    {
-                        drawingImage.SaveAsDDS(
-                            frameDir,
-                            frameFilename,
-                            (int)frame.ActualWidth,
-                            (int)frame.ActualHeight
-                        );
-                    }
-                }
-            }
-        }
-        public void HandleGFXFile()
-        {
-            string guiDirectory = Path.Combine(ModManager.ModDirectory, "interface");
-            Directory.CreateDirectory(guiDirectory);
-            string filePath = Path.Combine(guiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_window.gfx");
-
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                // Write main sprites
-                writer.WriteLine("spriteTypes = {");
-                writer.WriteLine("\tspriteType = {");
-                writer.WriteLine($"\t\tname = \"GFX_superevent_{CurrentConfig.Id}_image\"");
-                writer.WriteLine($"\t\ttextureFile = \"gfx\\\\superevent_pictures\\\\superevent_image_{CurrentConfig.Id}.tga\"");
-                writer.WriteLine("\t}");
-                writer.WriteLine("\tspriteType = {");
-                writer.WriteLine($"\t\tname = \"GFX_superevent_{CurrentConfig.Id}_bakground\"");
-                writer.WriteLine($"\t\ttextureFile = \"gfx\\\\interface\\\\superevent\\\\superevent_frame_{CurrentConfig.Id}.dds\"");
-                writer.WriteLine("\t}");
-
-                // Add button sprites with optionChar (A, B, C...)
-                var mainCanvas = CurrentConfig.EventConstructor;
-                if (mainCanvas != null)
-                {
-                    int optionIndex = 0;
-                    foreach (var child in mainCanvas.Children)
-                    {
-                        if (child is Canvas optionCanvas && optionCanvas.Name?.StartsWith("OptionButton") == true)
-                        {
-                            if (optionCanvas.FindWrappedImage().Source.ToBitmapSource() != ModdingManager.Properties.Resources.null_item_image.ToBitmapSource())
-                            {
-                                char optionChar = (char)('A' + optionIndex);
-                                string optionName = optionCanvas.Name ?? "unnamed_button";
-                                optionName = optionName.Replace(" ", "_").ToLower();
-                                writer.WriteLine("\tspriteType = {");
-                                writer.WriteLine($"\t\tname = \"GFX_{CurrentConfig.Id}_option_{optionChar}_bg\"");
-                                writer.WriteLine($"\t\ttextureFile = \"gfx\\\\superevent\\\\button\\\\{CurrentConfig.Id}_{optionName}_bg.dds\"");
-                                writer.WriteLine("\t\tnoOfFrames = 1");
-                                writer.WriteLine("\t\teffectFile = \"gfx/FX/buttonstate.lua\"");
-                                writer.WriteLine("\t}");
-
-                                optionIndex++;
-                            }
-                        }
-                    }
-                }
-
-                writer.WriteLine("}");
-            }
-        }
-        public void HandleGUIFile()
-        {
-            if (CurrentConfig == null || CurrentConfig.EventConstructor == null || string.IsNullOrEmpty(CurrentConfig.Id))
-            {
-                return;
-            }
-
-            var mainCanvas = CurrentConfig.EventConstructor;
-            double canvasWidth = mainCanvas.ActualWidth;
-            double canvasHeight = mainCanvas.ActualHeight;
-            double centerX = canvasWidth / 2;
-            double centerY = canvasHeight / 2;
-
-            string guiDirectory = Path.Combine(ModManager.ModDirectory, "interface");
-            Directory.CreateDirectory(guiDirectory);
-            string filePath = Path.Combine(guiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_window.gui");
-
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                writer.WriteLine("guiTypes = {");
-                writer.WriteLine("\tcontainerWindowType = {");
-                writer.WriteLine($"\t\tname = \"SUPEREVENT_{CurrentConfig.Id}_window\"");
-                writer.WriteLine($"\t\tsize = {{ width = {canvasWidth} height = {canvasHeight} }}");
-                writer.WriteLine("\t\tposition = { x=0 y=0 }");
-                writer.WriteLine("\t\tOrientation = center");
-                writer.WriteLine("\t\tOrigo = center");
-                writer.WriteLine("\t\tclipping = no");
-                writer.WriteLine($"\t\tshow_sound = {CurrentConfig.Id}_soundeffect");
-                writer.WriteLine();
-
-                // Находим фоновое изображение (рамку)
-                var frame = mainCanvas.FindVisualChild<System.Windows.Controls.Image>("SupereventFrame");
-                if (frame == null) return;
-
-                // Фоновая рамка - смещаем так, чтобы центр был в (0,0)
-                double frameX = -frame.ActualWidth / 2;
-                double frameY = -frame.ActualHeight / 2;
-
-                writer.WriteLine("\t\ticonType = {");
-                writer.WriteLine("\t\t\tname = \"background\"");
-                writer.WriteLine($"\t\t\tspriteType = \"GFX_superevent_{CurrentConfig.Id}_bakground\"");
-                writer.WriteLine($"\t\t\tposition = {{ x = {frameX:0} y = {frameY:0} }}");
-                writer.WriteLine("\t\t\tOrientation = center");
-                writer.WriteLine("\t\t\talwaystransparent = yes");
-                writer.WriteLine("\t\t}");
-                writer.WriteLine();
-
-                // Основное изображение - учитываем смещение на канвасе + центрирование
-                var image = mainCanvas.FindVisualChild<System.Windows.Controls.Image>("SupereventImage");
-                if (image != null)
-                {
-                    // Смещение на канвасе
-                    double imgX = Canvas.GetLeft(image);
-                    double imgY = Canvas.GetTop(image);
-
-
-                    // Преобразование относительно центра окна
-                    imgX -= centerX;
-                    imgY -= centerY;
-
-                    writer.WriteLine("\t\ticonType = {");
-                    writer.WriteLine("\t\t\tname = \"image\"");
-                    writer.WriteLine($"\t\t\tspriteType = \"GFX_superevent_{CurrentConfig.Id}_image\"");
-                    writer.WriteLine($"\t\t\tposition = {{ x = {imgX:0} y = {imgY:0} }}");
-                    writer.WriteLine("\t\t\tOrientation = center");
-                    writer.WriteLine("\t\t\talwaystransparent = yes");
-                    writer.WriteLine("\t\t}");
-                    writer.WriteLine();
-                }
-
-                // Заголовок - учитываем смещение на канвасе + центрирование
-                var header = mainCanvas.FindVisualChild<System.Windows.Controls.RichTextBox>( "HeaderTextLocalizedField");
-                if (header != null)
-                {
-                    // Смещение на канвасе
-                    double headerX = Canvas.GetLeft(header);
-                    double headerY = Canvas.GetTop(header);
-
-
-                    // Преобразование относительно центра окна
-                    headerX -= centerX;
-                    headerY -= centerY;
-
-                    writer.WriteLine("\t\tinstantTextBoxType = {");
-                    writer.WriteLine("\t\t\tname = \"Title\"");
-                    writer.WriteLine($"\t\t\tposition = {{ x = {headerX:0} y = {headerY:0} }}");
-                    writer.WriteLine($"\t\t\tfont = \"{(header.FontFamily+"_"+ header.FontSize).ToLowerInvariant()}\"");
-                    writer.WriteLine("\t\t\tborderSize = {x = 0 y = 0}");
-                    writer.WriteLine($"\t\t\ttext = \"SUPEREVENT_{CurrentConfig.Id}_TITLE\"");
-                    writer.WriteLine($"\t\t\tmaxWidth = {header.ActualWidth:0}");
-                    writer.WriteLine($"\t\t\tmaxHeight = {header.ActualHeight:0}");
-                    writer.WriteLine("\t\t\tOrientation = center");
-                    writer.WriteLine("\t\t\tformat = centre");
-                    writer.WriteLine("\t\t}");
-                    writer.WriteLine();
-                }
-
-                // Описание - учитываем смещение на канвасе + ориентация lower_left
-                var desc = mainCanvas.FindVisualChild<System.Windows.Controls.RichTextBox>("DescTextLocalizedField");
-                if (desc != null)
-                {
-                    // Смещение на канвасе
-                    double descX = Canvas.GetLeft(desc);
-                    double descY = Canvas.GetTop(desc); // нижний край
-
-                    // Преобразование относительно центра окна
-                    descX -= centerX;
-                    descY -= centerY;
-
-                    writer.WriteLine("\t\tinstantTextBoxType = {");
-                    writer.WriteLine("\t\t\tname = \"Desc\"");
-                    writer.WriteLine($"\t\t\tposition = {{ x = {descX:0} y = {descY:0} }}");
-                    writer.WriteLine($"\t\t\tfont = \"{(desc.FontFamily+"_"+desc.FontSize).ToLowerInvariant()}\"");
-                    writer.WriteLine($"\t\t\ttext = \"SUPEREVENT_{CurrentConfig.Id}_DESC\"");
-                    writer.WriteLine($"\t\t\tmaxWidth = {desc.ActualWidth:0}");
-                    writer.WriteLine($"\t\t\tmaxHeight = {desc.ActualHeight:0}");
-                    writer.WriteLine("\t\t\tfixedsize = yes");
-                    writer.WriteLine("\t\t\tOrientation = center");
-                    writer.WriteLine("\t\t\tformat = centre");
-                    writer.WriteLine("\t\t}");
-                    writer.WriteLine();
-                }
-
-                // Кнопки - учитываем смещение на канвасе + центрирование
-                int optionIndex = 0;
-                foreach (var child in mainCanvas.Children)
-                {
-                    if (child is Canvas optionCanvas && optionCanvas.Name?.StartsWith("OptionButton") == true)
-                    {
-                        char optionChar = (char)('A' + optionIndex);
-
-                        // Смещение на канвасе
-                        double btnX = Canvas.GetLeft(optionCanvas);
-                        double btnY = Canvas.GetTop(optionCanvas);
-
-                        // Преобразование относительно центра окна
-                        btnX -= centerX;
-                        btnY -= centerY;
-
-                        writer.WriteLine("\t\tbuttonType = {");
-                        writer.WriteLine($"\t\t\tname = \"Option{optionChar}\"");
-                        writer.WriteLine($"\t\t\ttext = \"SUPEREVENT_{CurrentConfig.Id}_OPTION_{optionChar}\"");
-
-                        if (optionIndex == 0)
-                        {
-                            writer.WriteLine("\t\t\tshortcut = \"ESCAPE\"");
-                        }
-
-                        writer.WriteLine($"\t\t\tposition = {{ x = {btnX:0} y = {btnY:0} }}");
-                        if (optionCanvas.FindWrappedImage().Source.ToBitmapSource() != ModdingManager.Properties.Resources.null_item_image.ToBitmapSource())
-                        {
-                            writer.WriteLine($"\t\t\tquadTextureSprite =\"GFX_{CurrentConfig.Id}_option_{optionChar}_bg\"");
-                        }
-                        else
-                        {
-                            writer.WriteLine($"\t\t\tquadTextureSprite =\"GFX_button_221x34\"");
-                        }
-                        writer.WriteLine($"\t\t\tbuttonFont = \"{(optionCanvas.FindWrappedTextBox().FontFamily + "_" + optionCanvas.FindWrappedTextBox().FontSize).ToLowerInvariant()}\"");
-                        writer.WriteLine("\t\t\tOrientation = center");
-                        writer.WriteLine("\t\t}");
-                        writer.WriteLine();
-
-                        optionIndex++;
-                    }
-                }
-
-                writer.WriteLine("\t}");
-                writer.WriteLine("}");
-            }
-        }
-        public void HandleLocalizationFiles()
-        {
-            if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id))
-            {
-                return;
-            }
-
-            try
-            {
-                HandleLocalizationFile("russian", "l_russian:",
-                    CurrentConfig.Header, CurrentConfig.Description);
-
-                HandleLocalizationFile("english", "l_english:",
-                    "", "");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка при создании файлов локализации: {ex.Message}");
-            }
-        }
-        public void HandleFontFiles()
-        {
-            string fontsDirectory = Path.Combine(ModManager.ModDirectory, "gfx", "fonts");
-            Directory.CreateDirectory(fontsDirectory);
-
-            var uniqueFonts = new HashSet<FontSignature>();
-            FontSignature.CollectUniqueFonts(CurrentConfig.EventConstructor, uniqueFonts);
-
-            try
-            {
-                foreach (var fontSignature in uniqueFonts)
-                {
-                    string fontFileName = fontSignature.GenerateFontName();
-                    string fntPath = Path.Combine(fontsDirectory, $"{fontFileName}.fnt");
-                    string ddsPath = Path.Combine(fontsDirectory, $"{fontFileName}.dds");
-                    string tgaPath = Path.Combine(fontsDirectory, $"{fontFileName}.tga");
-
-                    if (File.Exists(fntPath) && (File.Exists(ddsPath) || File.Exists(tgaPath))) continue;
-
-                    fontSignature.HandleFontFolderWithChecks(fontsDirectory);
-                }
-            }
-            catch(OperationCanceledException) 
-            {
-                if (Debugger.Instance != null)
-                {
-                    Debugger.Instance.LogMessage("[WPF EXEPTION]: Операция отменена пользователем или из-за ошибок покрытия шрифта.");
-                }
-                else
-                {
-                    Debug.WriteLine("[WPF EXEPTION]: Операция отменена пользователем или из-за ошибок покрытия шрифта.");
-                }
-                
-            }
-            catch (Exception ex)
-            {
-                if (Debugger.Instance != null)
-                {
-                    MessageBox.Show($"Не удалось завершить операцию:\n{ex.Message}",
-                                "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Debugger.Instance.LogMessage($"[WPF EXEPTION]: Не удалось завершить операцию:{ex.Message}");
-                }
-                else
-                {
-                    MessageBox.Show($"Не удалось завершить операцию:\n{ex.Message}",
-                               "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-        private void HandleLocalizationFile(string language, string header, string titleValue, string descValue)
-        {
-            var mainCanvas = CurrentConfig.EventConstructor;
-            string locDirectory = Path.Combine(ModManager.ModDirectory, "localisation", language);
-            Directory.CreateDirectory(locDirectory);
-
-            string filePath = Path.Combine(locDirectory, $"superevents_l_{language}.yml");
-            List<string> lines = new List<string>();
-
-            if (File.Exists(filePath))
-            {
-                lines = File.ReadAllLines(filePath, Encoding.UTF8).ToList();
-            }
-            if (lines.Count == 0 || !lines[0].StartsWith(header))
-            {
-                lines.Insert(0, header);
-            }
-            string titleKey = $" SUPEREVENT_{CurrentConfig.Id}_TITLE";
-            string descKey = $" SUPEREVENT_{CurrentConfig.Id}_DESC";
-            int optionIndex = 0;
-            foreach (var child in mainCanvas.Children)
-            {
-                if (child is Canvas optionCanvas && optionCanvas.Name?.StartsWith("OptionButton") == true)
-                {
-                    char optionChar = (char)('A' + optionIndex);
-                    string optionText = optionCanvas.FindWrappedTextBox().GetTextFromRichTextBox();
-                    lines.Add($" SUPEREVENT_{CurrentConfig.Id}_OPTION_{optionChar}: \"§M{EscapeYamlString(optionText)}\"");
-                    optionIndex++;
-                }
-            }
-            lines = lines.Where(line =>
-                !line.StartsWith(titleKey + ":") &&
-                !line.StartsWith(descKey + ":")).ToList();
-
-            lines.Add($" {titleKey}: \"§M{EscapeYamlString(titleValue)}\"");
-            lines.Add($" {descKey}: \"§M{EscapeYamlString(descValue)}\"");
-           
-            File.WriteAllLines(filePath, lines, Encoding.UTF8);
-        }
-
-        private string EscapeYamlString(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
-
-            // Удалить \r и \n, заменить на пробел, затем экранировать кавычки
-            input = input.Replace("\r", "").Replace("\n", " ").Trim();
-            return input.Replace("\"", "\\\"");
-        }
-
-        public void HandleScriptedGuiFile()
-        {
-            if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id) || CurrentConfig.EventConstructor == null)
-            {
-                return;
-            }
-            string scriptedGuiDirectory = Path.Combine(ModManager.ModDirectory, "common", "scripted_guis");
-            Directory.CreateDirectory(scriptedGuiDirectory);
-
-            string filePath = Path.Combine(scriptedGuiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_scripted_gui.txt");
-
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                writer.WriteLine("scripted_gui = {");
-                writer.WriteLine();
-                writer.WriteLine($"\tSUPEREVENT_{CurrentConfig.Id}_window = {{ ");
-                writer.WriteLine("\t\tcontext_type = player_context");
-                writer.WriteLine($"\t\twindow_name = \"SUPEREVENT_{CurrentConfig.Id}_window\"");
-                writer.WriteLine();
-                writer.WriteLine("\t\tvisible = {");
-                writer.WriteLine($"\t\t\thas_country_flag = superevent_{CurrentConfig.Id}_flag");
-                writer.WriteLine("\t\t}");
-                writer.WriteLine();
-                writer.WriteLine("\t\teffects = {");
-
-                int optionIndex = 0;
-                foreach (var child in CurrentConfig.EventConstructor.Children)
-                {
-                    if (child is Canvas optionCanvas && optionCanvas.Name?.StartsWith("OptionButton") == true)
-                    {
-                        char optionChar = (char)('A' + optionIndex);
-
-                        writer.WriteLine($"\t\t\tOption{optionChar}_click = {{");
-                        writer.WriteLine($"\t\t\t\tclr_country_flag = superevent_{CurrentConfig.Id}_flag");
-                        writer.WriteLine("\t\t\t}");
-
-                        optionIndex++;
-                    }
-                }
-
-                writer.WriteLine("\t\t}");
-                writer.WriteLine("\t}");
-                writer.WriteLine("}");
-            }
-        }
-
-        public void HandleFontDefineFiles()
-        {
-            string interfaceDirectory = Path.Combine(ModManager.ModDirectory, "interface");
-            Directory.CreateDirectory(interfaceDirectory);
-            string filePath = Path.Combine(interfaceDirectory, "font_definitions.gfx");
-
-            // Собираем все уникальные шрифты из интерфейса
-            var uniqueFonts = new HashSet<FontSignature>();
-            FontSignature.CollectUniqueFonts(CurrentConfig.EventConstructor, uniqueFonts);
-
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                writer.WriteLine("bitmapfonts = {");
-
-                foreach (var fontSignature in uniqueFonts)
-                {
-                    // Преобразуем цвет в формат RGB (0.0-1.0)
-                    var color = fontSignature.Color;
-                    int r = color.R;
-                    int g = color.G;
-                    int b = color.B;
-
-                    // Формируем запись для шрифта
-                    writer.WriteLine("\tbitmapfont = {");
-                    writer.WriteLine($"\t\tname = \"{fontSignature.Name}\"");
-                    writer.WriteLine("\t\tfontfiles = {");
-                    writer.WriteLine($"\t\t\t\"gfx/fonts/{fontSignature.Name}\"");
-                    writer.WriteLine("\t\t}");
-                    writer.WriteLine("\t\tcolor = 0xffffffff");
-                    writer.WriteLine("\t\ttextcolors = {");
-                    writer.WriteLine($"\t\t\tM = {{ {r:0} {g:0} {b:0} }} // Основной цвет");
-                    writer.WriteLine("\t\t}");
-                    writer.WriteLine("\t}");
-                    writer.WriteLine();
-                }
-
-                writer.WriteLine("}");
+                string outPath = Path.Combine(dir, $"{CurrentConfig.Id}_{optionName}_bg.dds");
+                SaveAsDDS(sourcePath, outPath);
             }
         }
     }
+
+    /// <summary>
+    /// Сохраняет картинку и рамку суперивента:
+    ///  - image → gfx/superevent_pictures/superevent_image_{id}.tga
+    ///  - background → gfx/interface/superevent/superevent_frame_{id}.dds
+    /// </summary>
+    public void SaveSupereventImages()
+    {
+        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id)) return;
+        var win = CurrentConfig.Gui.Containers.FirstOrDefault();
+        if (win == null) return;
+
+        var img = win.Icons.FirstOrDefault(i => (i.Name ?? "").Equals("image", StringComparison.OrdinalIgnoreCase));
+        var bg = win.Icons.FirstOrDefault(i => (i.Name ?? "").Equals("background", StringComparison.OrdinalIgnoreCase));
+
+        if (img != null && TryGetSpriteSource(img.SpriteType, out string imgSrc))
+        {
+            string imageDir = Path.Combine(ModManager.ModDirectory, "gfx", "superevent_pictures");
+            Directory.CreateDirectory(imageDir);
+            string outTga = Path.Combine(imageDir, $"superevent_image_{CurrentConfig.Id}.tga");
+            SaveAsTGA(imgSrc, outTga);
+        }
+
+        if (bg != null && TryGetSpriteSource(bg.SpriteType, out string bgSrc))
+        {
+            string frameDir = Path.Combine(ModManager.ModDirectory, "gfx", "interface", "superevent");
+            Directory.CreateDirectory(frameDir);
+            string outDds = Path.Combine(frameDir, $"superevent_frame_{CurrentConfig.Id}.dds");
+            SaveAsDDS(bgSrc, outDds);
+        }
+    }
+
+    private bool TryGetSpriteSource(string spriteTypeName, out string path)
+    {
+        path = null!;
+        // ожидается мапа Config.SpriteSources[spriteName] = "C:\...\img.png"
+        if (CurrentConfig.SpriteSources != null &&
+            CurrentConfig.SpriteSources.TryGetValue(spriteTypeName, out var p) &&
+            File.Exists(p))
+        {
+            path = p; return true;
+        }
+        return false;
+    }
+
+    private void SaveAsDDS(string sourceImagePath, string outDdsPath)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(outDdsPath)!);
+        using var img = Image.FromFile(sourceImagePath);
+        // предполагается, что у тебя есть расширение SaveAsDDS(System.Drawing.Image, ...)
+        img.SaveAsDDS(Path.GetDirectoryName(outDdsPath)!, Path.GetFileNameWithoutExtension(outDdsPath),
+                      img.Width, img.Height);
+    }
+
+    private void SaveAsTGA(string sourceImagePath, string outTgaPath)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(outTgaPath)!);
+        using var img = Image.FromFile(sourceImagePath);
+        // предполагается расширение ConvertToImageSharp().SaveAsTGA(...)
+        img.ConvertToImageSharp().SaveAsTGA(outTgaPath);
+    }
+
+    // ==== .GFX из GuiDocument ====
+
+    public void HandleGFXFile()
+    {
+        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id)) return;
+
+        string guiDir = Path.Combine(ModManager.ModDirectory, "interface");
+        Directory.CreateDirectory(guiDir);
+        string filePath = Path.Combine(guiDir, $"SUPEREVENT_{CurrentConfig.Id}_window.gfx");
+
+        var win = CurrentConfig.Gui.Containers.FirstOrDefault();
+        if (win == null) return;
+
+        using var w = new StreamWriter(filePath);
+        w.WriteLine("spriteTypes = {");
+
+        // Иконки (image/background) — пишем как есть по spriteType
+        foreach (var ic in win.Icons)
+        {
+            // по конвенции кладём:
+            //  - image → gfx/superevent_pictures/superevent_image_{id}.tga
+            //  - background → gfx/interface/superevent/superevent_frame_{id}.dds
+            string texture = ic.Name?.Equals("image", StringComparison.OrdinalIgnoreCase) == true
+                ? $"gfx\\\\superevent_pictures\\\\superevent_image_{CurrentConfig.Id}.tga"
+                : ic.Name?.Equals("background", StringComparison.OrdinalIgnoreCase) == true
+                    ? $"gfx\\\\interface\\\\superevent\\\\superevent_frame_{CurrentConfig.Id}.dds"
+                    : $"gfx\\\\interface\\\\{ic.SpriteType}.dds"; // fallback
+
+            w.WriteLine("\tspriteType = {");
+            w.WriteLine($"\t\tname = \"{ic.SpriteType}\"");
+            w.WriteLine($"\t\ttextureFile = \"{texture}\"");
+            w.WriteLine("\t}");
+        }
+
+        // Кнопки — если у кнопки есть свой sprite (quadTextureSprite)
+        for (int i = 0; i < win.Buttons.Count; i++)
+        {
+            var btn = win.Buttons[i];
+            string spriteName = btn.QuadTextureSprite ?? $"GFX_{CurrentConfig.Id}_option_{(char)('A' + i)}_bg";
+            string optionName = !string.IsNullOrWhiteSpace(btn.Name) ? btn.Name : $"Option{(char)('A' + i)}";
+            optionName = optionName.Replace(' ', '_').ToLowerInvariant();
+
+            w.WriteLine("\tspriteType = {");
+            w.WriteLine($"\t\tname = \"{spriteName}\"");
+            w.WriteLine($"\t\ttextureFile = \"gfx\\\\superevent\\\\button\\\\{CurrentConfig.Id}_{optionName}_bg.dds\"");
+            w.WriteLine("\t\tnoOfFrames = 1");
+            w.WriteLine("\t\teffectFile = \"gfx/FX/buttonstate.lua\"");
+            w.WriteLine("\t}");
+        }
+
+        w.WriteLine("}");
+    }
+
+    // ==== .GUI из GuiDocument ====
+
+    public void HandleGUIFile()
+    {
+        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id)) return;
+
+        var win = CurrentConfig.Gui.Containers.FirstOrDefault();
+        if (win == null) return;
+
+        string guiDirectory = Path.Combine(ModManager.ModDirectory, "interface");
+        Directory.CreateDirectory(guiDirectory);
+        string filePath = Path.Combine(guiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_window.gui");
+
+        using var w = new StreamWriter(filePath);
+        w.WriteLine("guiTypes = {");
+        w.WriteLine("\tcontainerWindowType = {");
+        w.WriteLine($"\t\tname = \"SUPEREVENT_{CurrentConfig.Id}_window\"");
+        w.WriteLine($"\t\tsize = {{ width = {win.Size.Width} height = {win.Size.Height} }}");
+        w.WriteLine("\t\tposition = { x=0 y=0 }");
+        w.WriteLine($"\t\tOrientation = {win.Orientation ?? "center"}");
+        w.WriteLine($"\t\tOrigo = {win.Origo ?? "center"}");
+        w.WriteLine($"\t\tclipping = {(win.Clipping == true ? "yes" : "no")}");
+        w.WriteLine($"\t\tshow_sound = {CurrentConfig.Id}_soundeffect");
+        w.WriteLine();
+
+        // Icons
+        foreach (var ic in win.Icons)
+        {
+            w.WriteLine("\t\ticonType = {");
+            w.WriteLine($"\t\t\tname = \"{ic.Name}\"");
+            w.WriteLine($"\t\t\tspriteType = \"{ic.SpriteType}\"");
+            w.WriteLine($"\t\t\tposition = {{ x = {ic.Position.X} y = {ic.Position.Y} }}");
+            if (!string.IsNullOrEmpty(ic.Orientation)) w.WriteLine($"\t\t\tOrientation = {ic.Orientation}");
+            if (ic.AlwaysTransparent == true) w.WriteLine("\t\t\talwaystransparent = yes");
+            w.WriteLine("\t\t}");
+            w.WriteLine();
+        }
+
+        // Texts
+        foreach (var t in win.Texts)
+        {
+            w.WriteLine("\t\tinstantTextBoxType = {");
+            w.WriteLine($"\t\t\tname = \"{t.Name}\"");
+            w.WriteLine($"\t\t\tposition = {{ x = {t.Position.X} y = {t.Position.Y} }}");
+            w.WriteLine($"\t\t\tfont = \"{t.Font}\"");
+            if (t.BorderSize.HasValue) w.WriteLine($"\t\t\tborderSize = {{x = {t.BorderSize.Value.X} y = {t.BorderSize.Value.Y}}}");
+            w.WriteLine($"\t\t\ttext = \"{t.Text}\"");
+            if (t.MaxWidth.HasValue) w.WriteLine($"\t\t\tmaxWidth = {t.MaxWidth.Value}");
+            if (t.MaxHeight.HasValue) w.WriteLine($"\t\t\tmaxHeight = {t.MaxHeight.Value}");
+            if (t.FixedSize == true) w.WriteLine("\t\t\tfixedsize = yes");
+            if (!string.IsNullOrEmpty(t.Orientation)) w.WriteLine($"\t\t\tOrientation = {t.Orientation}");
+            if (!string.IsNullOrEmpty(t.Format)) w.WriteLine($"\t\t\tformat = {t.Format}");
+            w.WriteLine("\t\t}");
+            w.WriteLine();
+        }
+
+        // Buttons
+        for (int i = 0; i < win.Buttons.Count; i++)
+        {
+            var b = win.Buttons[i];
+            char ch = (char)('A' + i);
+
+            w.WriteLine("\t\tbuttonType = {");
+            w.WriteLine($"\t\t\tname = \"{b.Name}\"");
+            // если в модели уже хранится конечный ключ, используем его; иначе соберём как в твоём генераторе
+            string buttonKey = !string.IsNullOrWhiteSpace(b.Text) ? b.Text : $"SUPEREVENT_{CurrentConfig.Id}_OPTION_{ch}";
+            w.WriteLine($"\t\t\ttext = \"{buttonKey}\"");
+            if (!string.IsNullOrWhiteSpace(b.Shortcut)) w.WriteLine($"\t\t\tshortcut = \"{b.Shortcut}\"");
+            else if (i == 0) w.WriteLine("\t\t\tshortcut = \"ESCAPE\"");
+            w.WriteLine($"\t\t\tposition = {{ x = {b.Position.X} y = {b.Position.Y} }}");
+            if (!string.IsNullOrWhiteSpace(b.QuadTextureSprite))
+                w.WriteLine($"\t\t\tquadTextureSprite =\"{b.QuadTextureSprite}\"");
+            else
+                w.WriteLine($"\t\t\tquadTextureSprite =\"GFX_button_221x34\"");
+            if (!string.IsNullOrWhiteSpace(b.Font.Family))
+                w.WriteLine($"\t\t\tbuttonFont = \"{b.Font.Family}\"");
+            if (!string.IsNullOrWhiteSpace(b.Orientation))
+                w.WriteLine($"\t\t\tOrientation = {b.Orientation}");
+            w.WriteLine("\t\t}");
+            w.WriteLine();
+        }
+
+        w.WriteLine("\t}");
+        w.WriteLine("}");
+    }
+
+    // ==== LOCALIZATION (.yml) из GuiDocument ====
+
+    public void HandleLocalizationFiles()
+    {
+        if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id) || CurrentConfig.Gui == null) return;
+
+        try
+        {
+            HandleLocalizationFile("russian", "l_russian:", CurrentConfig.Header ?? "", CurrentConfig.Description ?? "");
+            HandleLocalizationFile("english", "l_english:", "", "");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Ошибка при создании файлов локализации: {ex.Message}");
+        }
+    }
+
+    private void HandleLocalizationFile(string language, string header, string titleValue, string descValue)
+    {
+        var win = CurrentConfig.Gui.Containers.FirstOrDefault();
+        if (win == null) return;
+
+        string locDirectory = Path.Combine(ModManager.ModDirectory, "localisation", language);
+        Directory.CreateDirectory(locDirectory);
+
+        string filePath = Path.Combine(locDirectory, $"superevents_l_{language}.yml");
+        List<string> lines = File.Exists(filePath)
+            ? File.ReadAllLines(filePath, Encoding.UTF8).ToList()
+            : new List<string>();
+
+        if (lines.Count == 0 || !lines[0].StartsWith(header))
+            lines.Insert(0, header);
+
+        string titleKey = $" SUPEREVENT_{CurrentConfig.Id}_TITLE";
+        string descKey = $" SUPEREVENT_{CurrentConfig.Id}_DESC";
+
+        // Удаляем старые записи Title/Desc
+        lines = lines.Where(line => !line.StartsWith(titleKey + ":") && !line.StartsWith(descKey + ":")).ToList();
+
+        // Title/Desc
+        lines.Add($" {titleKey}: \"§M{EscapeYamlString(titleValue)}\"");
+        lines.Add($" {descKey}: \"§M{EscapeYamlString(descValue)}\"");
+
+        // Опции по порядку кнопок
+        for (int i = 0; i < win.Buttons.Count; i++)
+        {
+            char ch = (char)('A' + i);
+            string key = $" SUPEREVENT_{CurrentConfig.Id}_OPTION_{ch}";
+            // Текст опции берём из Config.OptionTexts[ch], если есть; иначе — placeholder по имени кнопки
+            string optionText =
+                (CurrentConfig.OptionTexts != null && CurrentConfig.OptionTexts.TryGetValue(ch, out var txt) ? txt :
+                (!string.IsNullOrWhiteSpace(win.Buttons[i].Name) ? win.Buttons[i].Name : $"Option {ch}"));
+
+            // удаляем старую строку ключа
+            lines = lines.Where(line => !line.StartsWith(key + ":")).ToList();
+            lines.Add($" {key}: \"§M{EscapeYamlString(optionText)}\"");
+        }
+
+        File.WriteAllLines(filePath, lines, Encoding.UTF8);
+    }
+
+    private string EscapeYamlString(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        input = input.Replace("\r", "").Replace("\n", " ").Trim();
+        return input.Replace("\"", "\\\"");
+    }
+
+    // ==== SCRIPTED GUI (.txt) из GuiDocument ====
+
+    public void HandleScriptedGuiFile()
+    {
+        if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id) || CurrentConfig.Gui == null) return;
+
+        string dir = Path.Combine(ModManager.ModDirectory, "common", "scripted_guis");
+        Directory.CreateDirectory(dir);
+        string filePath = Path.Combine(dir, $"SUPEREVENT_{CurrentConfig.Id}_scripted_gui.txt");
+
+        using var w = new StreamWriter(filePath);
+        w.WriteLine("scripted_gui = {");
+        w.WriteLine();
+        w.WriteLine($"\tSUPEREVENT_{CurrentConfig.Id}_window = {{ ");
+        w.WriteLine("\t\tcontext_type = player_context");
+        w.WriteLine($"\t\twindow_name = \"SUPEREVENT_{CurrentConfig.Id}_window\"");
+        w.WriteLine();
+        w.WriteLine("\t\tvisible = {");
+        w.WriteLine($"\t\t\thas_country_flag = superevent_{CurrentConfig.Id}_flag");
+        w.WriteLine("\t\t}");
+        w.WriteLine();
+        w.WriteLine("\t\teffects = {");
+
+        var win = CurrentConfig.Gui.Containers.FirstOrDefault();
+        int count = win?.Buttons.Count ?? 0;
+        for (int i = 0; i < count; i++)
+        {
+            char ch = (char)('A' + i);
+            w.WriteLine($"\t\t\tOption{ch}_click = {{");
+            w.WriteLine($"\t\t\t\tclr_country_flag = superevent_{CurrentConfig.Id}_flag");
+            w.WriteLine("\t\t\t}");
+        }
+
+        w.WriteLine("\t\t}");
+        w.WriteLine("\t}");
+        w.WriteLine("}");
+    }
+
+    // ==== FONTS ====
+    // Из GuiDocument достаём имена шрифтов (TextBox.Font + Button.ButtonFont) и генерим ассеты.
+    // Если у тебя остаётся свой FontSignature с цветами — подставь нужные конструкторы.
+
+    public void HandleFontFiles()
+    {
+        string fontsDirectory = Path.Combine(ModManager.ModDirectory, "gfx", "fonts");
+        Directory.CreateDirectory(fontsDirectory);
+
+        var uniqueFonts = FontManager.CollectUniqueFonts(CurrentConfig.Gui);
+
+
+        try
+        {
+            foreach (var fontSignature in uniqueFonts)
+            {
+                string fontFileName = FontManager.GenerateFontName(fontSignature);
+                string fntPath = Path.Combine(fontsDirectory, $"{fontFileName}.fnt");
+                string ddsPath = Path.Combine(fontsDirectory, $"{fontFileName}.dds");
+                string tgaPath = Path.Combine(fontsDirectory, $"{fontFileName}.tga");
+
+                if (File.Exists(fntPath) && (File.Exists(ddsPath) || File.Exists(tgaPath))) continue;
+
+                FontManager.HandleFontFolderWithChecks(fontsDirectory, fontSignature);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+
+            Logger.AddLog("[WPF EXEPTION]: Операция отменена пользователем или из-за ошибок покрытия шрифта.");
+        }
+        catch (Exception ex)
+        {
+           
+            MessageBox.Show($"Не удалось завершить операцию:\n{ex.Message}",
+                        "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            Logger.AddLog($"[WPF EXEPTION]: Не удалось завершить операцию:{ex.Message}");
+            
+        }
+    }
+
+    public void HandleFontDefineFiles()
+    {
+        if (CurrentConfig?.Gui == null) return;
+
+        string interfaceDirectory = Path.Combine(ModManager.ModDirectory, "interface");
+        Directory.CreateDirectory(interfaceDirectory);
+        string filePath = Path.Combine(interfaceDirectory, "font_definitions.gfx");
+
+        HashSet<FontSignature> uniqueFonts = CollectFontSignatures();
+
+        using var w = new StreamWriter(filePath);
+        w.WriteLine("bitmapfonts = {");
+
+        foreach (var fontSign in uniqueFonts)
+        {
+            // если нужны цвета, возьми их из своей модели/настроек; здесь фиксируем белый
+            w.WriteLine("\tbitmapfont = {");
+            w.WriteLine($"\t\tname = \"{FontManager.GenerateFontName(fontSign)}\"");
+            w.WriteLine("\t\tfontfiles = {");
+            w.WriteLine($"\t\t\t\"gfx/fonts/{FontManager.GenerateFontName(fontSign)}\"");
+            w.WriteLine("\t\t}");
+            w.WriteLine("\t\tcolor = 0xffffffff");
+            w.WriteLine("\t\ttextcolors = {");
+            w.WriteLine("\t\t\tM = { 255 255 255 }");
+            w.WriteLine("\t\t}");
+            w.WriteLine("\t}");
+            w.WriteLine();
+        }
+
+        w.WriteLine("}");
+    }
+
+    private HashSet<FontSignature> CollectFontSignatures()
+    {
+        HashSet<FontSignature> set = new HashSet<FontSignature>();
+        var win = CurrentConfig.Gui.Containers.FirstOrDefault();
+        if (win != null)
+        {
+            foreach (var t in win.Texts)
+                if (!string.IsNullOrWhiteSpace(t.Font.Family)) set.Add(t.Font);
+
+            foreach (var b in win.Buttons)
+                if (!string.IsNullOrWhiteSpace(b.Font.Family)) set.Add(b.Font);
+        }
+        return set;
+    }
+}

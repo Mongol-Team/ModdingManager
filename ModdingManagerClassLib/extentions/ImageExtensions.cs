@@ -1,23 +1,18 @@
 ﻿
 using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
-using ModdingManager.classes.managers.gfx;
-using ModdingManager.classes.utils.fonts;
-using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using System.Drawing.Imaging;
-using System.IO;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Xml.Linq;
 using TeximpNet;
 using TeximpNet.DDS;
 
-namespace ModdingManager.classes.extentions
+namespace ModdingManagerClassLib.Extentions
 {
     public static class ImageExtensions
     {
@@ -49,7 +44,7 @@ namespace ModdingManager.classes.extentions
             }
         }
 
-        
+
 
         public static void SaveAsDDS(this Image<Rgba32> image, string fullPath)
         {
@@ -79,7 +74,7 @@ namespace ModdingManager.classes.extentions
                 File.WriteAllBytes(fullPath, ms.ToArray());
             }
         }
-        public static ImageSource ConvertToImageSource(this System.Drawing.Image image)
+        public static ImageSource ToImageSource(this System.Drawing.Image image)
         {
             // Конвертация System.Drawing.Image в ImageSource
             using (var ms = new MemoryStream())
@@ -95,6 +90,20 @@ namespace ModdingManager.classes.extentions
 
                 return bitmapImage;
             }
+        }
+        public static Bitmap ToBitmap(this System.Drawing.Image image)
+        {
+            // Если уже Bitmap — просто приводим тип
+            if (image is Bitmap bitmap)
+                return bitmap;
+
+            // Иначе создаём новый Bitmap и рисуем исходное изображение на нём
+            var newBitmap = new Bitmap(image.Width, image.Height);
+            using (var g = Graphics.FromImage(newBitmap))
+            {
+                g.DrawImage(image, 0, 0, image.Width, image.Height);
+            }
+            return newBitmap;
         }
         public static void SaveAsDDS(this Bitmap image, string fullPath)
         {
@@ -202,7 +211,7 @@ namespace ModdingManager.classes.extentions
                 emptyFlag.Mutate(x => x.BackgroundColor(new Rgba32(255, 0, 255, 255)));
                 return emptyFlag;
             }
-            
+
             using (var ms = new MemoryStream())
             {
                 systemDrawingImage.Save(ms, System.Drawing.Imaging.ImageFormat.Png);

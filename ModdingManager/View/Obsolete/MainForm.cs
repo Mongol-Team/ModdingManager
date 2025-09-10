@@ -1,16 +1,13 @@
-using ModdingManager.classes.controls;
+using ModdingManager.Controls;
 using ModdingManager.classes.utils;
-using ModdingManager.configs;
 using ModdingManager.managers.@base;
-using System;
-using System.Drawing;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Debugging;
+using ModdingManagerModels;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Forms.Integration;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using MessageBox = System.Windows.Forms.MessageBox;
 namespace ModdingManager
 {
@@ -163,17 +160,17 @@ namespace ModdingManager
                 DirBox.Text = path.ModPath;
                 ModManager.ModDirectory = DirBox.Text;
                 ModManager.GameDirectory = GameDirBox.Text;
-                Registry.LoadInstance();
-                Debugger.Instance.LogMessage(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
-                Debugger.Instance.LogMessage(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
-                Debugger.Instance.LogMessage(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)));
-                Debugger.Instance.LogMessage(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
+                ModConfig.LoadInstance();
+                Logger.AddLog(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
+                Logger.AddLog(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
+                Logger.AddLog(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)));
+                Logger.AddLog(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
 
                 _isLoaded = true;
             }
             catch (Exception ex)
             {
-                Debugger.Instance.LogMessage($"[MAIN Form] On load exeption :{ex.Message + ex.StackTrace}");
+                Logger.AddLog($"[MAIN Form] On load exeption :{ex.Message + ex.StackTrace}");
             }
 
         }
@@ -257,48 +254,14 @@ namespace ModdingManager
         private void DebugButton_Click(object sender, EventArgs e)
         {
             ModManager.IsDebugRuning = true;
-            DebugWindow debugWindow = new DebugWindow();
-            // Инициализируем Debugger (если используется Singleton, то Instance уже создан)
-            Debugger.Instance.DebugOutputControl = debugWindow.DebugBox; // Подключаем RichTextBox для вывода логов
 
-            // Подключаем текущее окно к Debugger для перехвата исключений
-            Debugger.Instance.AttachToWindow(this);
 
             // Пример записи отладочного сообщения
-            Debugger.Instance.LogMessage("Режим отладки активирован");
+            Logger.AddLog("Режим отладки активирован");
 
-            // Можно сразу проверить работу на тестовом исключении
-            try
-            {
-                throw new InvalidOperationException("Тестовое исключение для отладки");
-            }
-            catch (Exception ex)
-            {
-                Debugger.Instance.LogMessage($"Поймано исключение: {ex.Message}");
-            }
-            debugWindow.Show();
+          
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // 1. Простое тестовое исключение
-                throw new InvalidOperationException("Это тестовое исключение из button1_Click");
-
-                // 2. Альтернативные варианты тестовых исключений (раскомментируйте для проверки):
-                // throw new ArgumentNullException("testParameter", "Параметр не может быть null");
-                // throw new IndexOutOfRangeException("Выход за границы массива");
-                // throw new FileNotFoundException("Файл не найден", "example.txt");
-            }
-            catch (Exception ex)
-            {
-                // Записываем исключение в Debugger
-                Debugger.Instance.LogMessage($"Поймано исключение в button1_Click: {ex}");
-
-
-            }
-        }
 
         private void IdeologyCreatorBtn_Click(object sender, EventArgs e)
         {

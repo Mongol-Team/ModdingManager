@@ -1,18 +1,9 @@
-﻿using ModdingManager.classes.extentions;
-using ModdingManager.classes.managers.gfx;
-using ModdingManager.configs;
+﻿using ModdingManagerClassLib.Extentions;
 using ModdingManager.managers.@base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace ModdingManager
 {
@@ -315,12 +306,12 @@ namespace ModdingManager
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            WPFConfigManager.SaveConfigWrapper(this);
+            //WPFConfigManager.SaveConfigWrapper(this);
         }
 
         private void ConfigLoadButton_Click(object sender, EventArgs e)
         {
-            WPFConfigManager.LoadConfigWrapper(this);
+            //WPFConfigManager.LoadConfigWrapper(this);
         }
 
         private void AddIdeaButtn_Click(object sender, EventArgs e)

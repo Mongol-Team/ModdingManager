@@ -1,13 +1,9 @@
-﻿using ModdingManager.classes.extentions;
-using ModdingManager.configs;
+﻿using ModdingManagerClassLib.Extentions;
 using ModdingManager.managers.@base;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using ModdingManagerModels;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+using System.Windows;
+using MessageBox = System.Windows.MessageBox;
 
 namespace ModdingManager.classes.handlers
 {
@@ -57,7 +53,7 @@ namespace ModdingManager.classes.handlers
                 {
                     if (!Directory.Exists(gamePath))
                     {
-                        MessageBox.Show($"Папка оригинальной игры не найдена: {gamePath}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Папка оригинальной игры не найдена: {gamePath}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -65,7 +61,7 @@ namespace ModdingManager.classes.handlers
 
                     if (gameFile == null)
                     {
-                        MessageBox.Show($"Файл с тегом '{tag}' не найден ни в моде, ни в оригинальной игре.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Файл с тегом '{tag}' не найден ни в моде, ни в оригинальной игре.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
@@ -73,7 +69,7 @@ namespace ModdingManager.classes.handlers
                     modFile = Path.Combine(modPath, fileName);
                     File.Copy(gameFile, modFile, overwrite: true);
 
-                    MessageBox.Show($"Файл с тегом '{tag}' не найден в моде. Использован файл из оригинальной игры: {fileName}", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"Файл с тегом '{tag}' не найден в моде. Использован файл из оригинальной игры: {fileName}", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
                 string recruitLine = $"recruit_character = {CurrentConfig.Id}";
@@ -94,7 +90,7 @@ namespace ModdingManager.classes.handlers
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Произошла ошибка при обработке рекрутинга:\n{ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Произошла ошибка при обработке рекрутинга:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -122,12 +118,12 @@ namespace ModdingManager.classes.handlers
                 ProcessLocalizationFile(enFilePath, "l_english", enEntries);
 
                 MessageBox.Show("Файлы локализации созданы успешно!", "Успех",
-                              MessageBoxButtons.OK, MessageBoxIcon.Information);
+                              MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка создания локализации: {ex.Message}", "Ошибка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                              MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private static string GenerateLocalizationEntries(string charId, string name, string desc, bool isCountryLeader, bool isEnglish)
@@ -175,7 +171,7 @@ namespace ModdingManager.classes.handlers
                 if (bigIcon == null && smallIcon == null)
                 {
                     MessageBox.Show("Необходимо добавить хотя бы 1 изображение!",
-                                  "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                  "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -188,12 +184,12 @@ namespace ModdingManager.classes.handlers
                 smallIcon?.SaveAsDDS(advisorsDir, $"{CurrentConfig.Id}_small", 65, 67);
 
                 MessageBox.Show("Портреты сохранены успешно!", "Успех",
-                              MessageBoxButtons.OK, MessageBoxIcon.Information);
+                              MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                              MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         public void CreateCharacterFile()
@@ -314,12 +310,12 @@ namespace ModdingManager.classes.handlers
 
                 File.WriteAllText(filePath, finalContent, new UTF8Encoding(false));
                 MessageBox.Show("Файл персонажа успешно создан/обновлен!", "Успех",
-                              MessageBoxButtons.OK, MessageBoxIcon.Information);
+                              MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка при создании файла персонажа: {ex.Message}", "Ошибка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                              MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

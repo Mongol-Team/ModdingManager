@@ -1,0 +1,52 @@
+﻿<UserControl 
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="root"
+    x:Class="ModdingManager.Controls.SearchableComboBox">
+
+    <!-- Single parent Grid -->
+    <Grid>
+        <!-- Row/column definitions if you need them -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Your “real” ComboBox + search button in Row 0 -->
+        <Grid Grid.Row="0">
+            <ComboBox x:Name="PART_ComboBox"
+                ItemsSource="{Binding ItemsSource, ElementName=root}"
+                SelectedItem="{Binding SelectedItem, ElementName=root, Mode=TwoWay}"
+                Width="{Binding ComboWidth, ElementName=root}" />
+
+            <Button Content="🔍"
+              Width="24" Height="24"
+              VerticalAlignment="Center"
+              HorizontalAlignment="Right"
+              Margin="0,0,-1,0"
+              Click="OnSearchButtonClick"/>
+        </Grid>
+
+        <!-- The Popup can live in the same parent Grid (it floats by PlacementTarget) -->
+        <Popup x:Name="PART_Popup"
+           PlacementTarget="{Binding ElementName=PART_ComboBox}"
+           Placement="Bottom"
+           StaysOpen="False"
+           AllowsTransparency="True"
+           Grid.Row="0">
+            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="4">
+                <StackPanel>
+                    <TextBox x:Name="PART_SearchBox"
+                   Width="{Binding ComboWidth, ElementName=root}"
+                   Margin="0,0,0,4"
+                   TextChanged="OnSearchTextChanged"
+                   KeyDown="OnSearchBoxKeyDown"/>
+
+                    <ListBox x:Name="PART_ListBox"
+                   Width="{Binding ComboWidth, ElementName=root}"
+                   MouseDoubleClick="OnListBoxDoubleClick"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

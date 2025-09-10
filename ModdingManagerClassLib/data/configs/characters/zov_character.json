@@ -1,0 +1,28 @@
+{
+  "Id": "ZOV",
+  "Name": "nik",
+  "Description": "dsfg",
+  "Types": [
+    "advisor",
+    "navy_leader",
+    "field_marshal",
+    "corps_commander",
+    "country_leader"
+  ],
+  "Tag": "dsfg",
+  "Traits": [
+    "dsfg",
+    "dsfg2"
+  ],
+  "Skill": 2,
+  "Attack": 2,
+  "Defense": 1,
+  "Supply": 1,
+  "Speed": 2,
+  "AdvisorSlot": "theorist",
+  "AdvisorCost": 222,
+  "AiWillDo": "2",
+  "Expire": "122",
+  "BigIconPath": "",
+  "SmallIconPath": ""
+}

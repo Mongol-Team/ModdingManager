@@ -1,23 +1,11 @@
-﻿using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TeximpNet;
-using SixLabors.ImageSharp.Processing;
-using System.IO;
-using System.Windows.Controls;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Windows;
-using System.Drawing.Imaging;
-using ModdingManager.classes.args;
-using System.Text.RegularExpressions;
+﻿using ModdingManagerClassLib.Extentions;
 using ModdingManager.managers.@base;
-using ModdingManager.classes.extentions;
+using ModdingManagerModels.Args;
+using System.Drawing;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 namespace ModdingManager.classes.managers.gfx
 {
     public static class ImageManager
@@ -87,10 +75,10 @@ namespace ModdingManager.classes.managers.gfx
                 }
             }
 
-            return Properties.Resources.null_item_image;
+            return ModdingManagerClassLib.Properties.Resources.null_item_image;
         }
 
-        
+
         public static ImageSource GetCombinedImages(List<ImageSourceArg> images, int width, int height)
         {
             if (images == null || images.Count == 0)
@@ -117,7 +105,7 @@ namespace ModdingManager.classes.managers.gfx
 
                     if (imageArg.IsCompresed)
                     {
-                        dc.DrawImage(source, new Rect(0, 0, width, height));
+                        dc.DrawImage(source.ToImageSource(), new Rect(0, 0, width, height));
                     }
                     else
                     {
@@ -134,7 +122,7 @@ namespace ModdingManager.classes.managers.gfx
                         ));
 
                         dc.PushTransform(transformGroup);
-                        dc.DrawImage(source, new Rect(x, y, scaledWidth, scaledHeight));
+                        dc.DrawImage(source.ToImageSource(), new Rect(x, y, scaledWidth, scaledHeight));
                         dc.Pop();
                     }
                 }

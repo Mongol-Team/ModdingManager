@@ -1,0 +1,29 @@
+{
+  "Tag": "UAR",
+  "Name": "Вольная Территория Юкатана",
+  "Capital": 474,
+  "GraphicalCulture": "european",
+  "Color": "128 128 64",
+  "Technologies": [
+    "infantry_weapons:1",
+    "tech_support:1\u000Belectronic_mechanical_engineering:1"
+  ],
+  "Convoys": 100,
+  "OOB": "UAR_1965",
+  "Stab": 65,
+  "WarSup": 70,
+  "ResearchSlots": 2,
+  "RulingParty": "neutrality",
+  "LastElection": "1955.12.1",
+  "ElectionFrequency": 48,
+  "ElectionsAllowed": false,
+  "NeutralityPopularity": 7,
+  "FascismPopularity": 5,
+  "CommunismPopularity": 5,
+  "DemocraticPopularity": 83,
+  "Ideas": [],
+  "Characters": [],
+  "States": {
+    "474": true
+  }
+}

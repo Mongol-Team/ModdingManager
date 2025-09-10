@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ModdingManager"
     
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:controls="clr-namespace:ModdingManager.classes.controls" x:Class="ModdingManager.IdeologyCreator"
+        xmlns:controls="clr-namespace:ModdingManager.Controls" x:Class="ModdingManager.IdeologyCreator"
         mc:Ignorable="d"
         Title="IdeologyCreator" Height="450" Width="900">
     <Grid Margin="0,0,0,0" >
