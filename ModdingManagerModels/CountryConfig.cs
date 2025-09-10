@@ -6,7 +6,6 @@ namespace ModdingManagerModels
     public class CountryConfig : IConfig
     {
         public string Tag { get; set; }
-        public CountryLocalisationConfig? Localisation { get; set; }
         public int? Capital { get; set; }
         public string? CountryFileName { get; set; }
         public string? GraphicalCulture { get; set; }

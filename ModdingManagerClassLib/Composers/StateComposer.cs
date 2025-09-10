@@ -20,9 +20,9 @@ namespace ModdingManagerClassLib.Composers
             var result = new ConcurrentBag<IConfig>();
 
             string[] priorityFolders = {
-        ModPathes.StatesPath,
-        GamePathes.StatesPath,
-    };
+                ModPathes.StatesPath,
+                GamePathes.StatesPath,
+            };
 
             foreach (string folder in priorityFolders)
             {
@@ -97,7 +97,8 @@ namespace ModdingManagerClassLib.Composers
                 FilePath = file.FilePath,
                 LocalizationKey = stateBracket.SubVars.FirstOrDefault(v => v.Name == "name")?.Value as string ?? $"state_{id}",
                 Color = ModManager.GenerateColorFromId(id),
-                Manpower = stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower")?.Value as int?,
+                LocalizationKey = stateBracket.SubVars.FirstOrDefault(v => v.Name == "name")?.Value as string ?? string.Empty,
+                Manpower = stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower")?.Value as int? ?? 0,
                 LocalSupply = stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supply")?.Value as double? ?? 0.0,
                 //Cathegory = ModManager.CurrentConfig.StateCathegories.Where(s => s.Id == stateBracket.SubVars.FirstOrDefault(v => v.Name == "category")?.Value as string).First(),
             };
