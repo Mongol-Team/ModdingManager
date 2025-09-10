@@ -12,6 +12,7 @@ namespace ModdingManagerClassLib.utils.Pathes
         public readonly static string IdeologyPath = Path.Combine(ModManager.GameDirectory, "common", "ideologies");
         public readonly static string IdeasPath = Path.Combine(ModManager.GameDirectory, "common", "ideas");
         public readonly static string StrategicRegionPath = Path.Combine(ModManager.GameDirectory, "map", "strategicregions");
+        public readonly static string StateCathegoryPath = Path.Combine(ModManager.GameDirectory, "common", "state_categories");
         public readonly static string CountryTagsPath = Path.Combine(ModManager.GameDirectory, "common", "country_tags");
         public readonly static string CommonCountriesPath = Path.Combine(ModManager.GameDirectory, "common", "countries");
         public readonly static string HistoryCountriesPath = Path.Combine(ModManager.GameDirectory, "history", "countries");
@@ -20,7 +21,5 @@ namespace ModdingManagerClassLib.utils.Pathes
         public readonly static string LocalisationReplacePath = Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace");
         public readonly static string DefinitionPath = Path.Combine(ModManager.GameDirectory, "map", "definition.csv");
         public readonly static string ProvinceImagePath = Path.Combine(ModManager.GameDirectory, "map", "provinces.bmp");
-
-        public static string StrategicRegionsPath { get; internal set; }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ModdingManagerClassLib.Composers
 {
-    public  interface IComposer
+    public interface IComposer
     {
         public static abstract List<IConfig> Parse();
     }

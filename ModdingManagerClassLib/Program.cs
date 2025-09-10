@@ -10,17 +10,18 @@ namespace ModdingManagerDataManager
         private static void Main(string[] args)
         {
             var mm = new ModManager();
+            var sw = Stopwatch.StartNew();
             List<IConfig> mifoz = ProvinceComposer.Parse();
             ModManager.CurrentConfig.Map.Provinces = mifoz.Cast<ProvinceConfig>().ToList();
-            var w = new Stopwatch();
-            w.Start();
+           
             List<IConfig> fimoz = StateComposer.Parse();
-            w.Stop();
-
+            sw.Stop();
             foreach (var item in fimoz)
             {
                 Console.WriteLine((item as StateConfig).Id);
+                
             }
+            Console.WriteLine($"Time: {sw.ElapsedMilliseconds} ms");
         }
     }
 }

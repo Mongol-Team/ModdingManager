@@ -6,7 +6,7 @@ namespace ModdingManagerModels
     public class StrategicRegionConfig : IConfig
     {
         public List<ProvinceConfig> Provinces { get; set; }
-        public string Name { get; set; }
+        public string LocKey { get; set; }
         [JsonIgnore]
         public int Id { get; set; }
         public Color Color { get; set; }
