@@ -11,10 +11,10 @@ namespace ModdingManagerDataManager
         private static void Main(string[] args)
         {
             var mm = new ModManager();
+            var sw = Stopwatch.StartNew();
             List<IConfig> mifoz = ProvinceComposer.Parse();
             ModManager.CurrentConfig.Map.Provinces = mifoz.Cast<ProvinceConfig>().ToList();
-            var w = new Stopwatch();
-            w.Start();
+           
             List<IConfig> fimoz = StateComposer.Parse();
             w.Stop();
 

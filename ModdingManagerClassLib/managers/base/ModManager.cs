@@ -13,7 +13,7 @@ namespace ModdingManager.managers.@base
         public static bool IsDebugRuning;
         public static string GameDirectory;
         public static string CurrentLanguage = "russian";
-        public static ModConfig CurrentConfig = new();
+        public static ModConfig Mod = new();
         public ModManager()
         {
             OnLoaded();
