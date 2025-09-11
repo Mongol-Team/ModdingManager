@@ -1,19 +1,16 @@
 ﻿using ModdingManagerModels.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ModdingManagerModels.Interfaces;
 
 namespace ModdingManagerModels
 {
-    public class ModifierDefenitionConfig
+    public class ModifierDefenitionConfig : IConfig, IFimoz
     {
         public string Name { get; set; }
         public ModifierDefenitionValueType ValueType { get; set; } = ModifierDefenitionValueType.Number;
         public int Precision { get; set; } = 1;
         public ModifierDefinitionCathegoryType Cathegory { get; set; } = ModifierDefinitionCathegoryType.Country;
-        public ModifierDefenitionColorType ColorType { get; set; } = ModifierDefenitionColorType.Neutral;
+        public ModifierDefenitionColorType ColorType { get; set; } = ModifierDefenitionColorType.Good;
+        public ScopeTypes ScopeType { get; set; }
 
     }
 }

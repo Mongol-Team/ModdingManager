@@ -1,10 +1,12 @@
-﻿using ModdingManagerClassLib.utils.Pathes;
+﻿using ModdingManagerClassLib.Debugging;
+using ModdingManagerClassLib.utils.Pathes;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.LochalizationData;
 using System.Collections.Concurrent;
+
 namespace ModdingManagerClassLib.utils
 {
     public class LocalisationRegistry
@@ -15,17 +17,14 @@ namespace ModdingManagerClassLib.utils
         public LocalizationBlock StateLocalisation { get; private set; }
         public LocalizationBlock OtherLocalisation { get; private set; }
 
-        public LocalisationRegistry(List<StateConfig>? states = null)
-        {
-            LoadLocalisation(states);
-        }
+        public LocalisationRegistry(out List<string> failedFiles, List<StateConfig>? states = null) { failedFiles = LoadLocalisation(states); }
+        public LocalisationRegistry(List<StateConfig>? states = null) { }
+
         /// <summary>
         /// Параллельно загружает все переменные из .yml файлов в AllCache (с учётом приоритетов)
         /// </summary>
         /// 
-
-
-        private async void LoadLocalisation(List<StateConfig>? states)
+        private List<string> LoadLocalisation(List<StateConfig>? states)
         {
             string[] searchPaths = new[]
             {
@@ -44,27 +43,25 @@ namespace ModdingManagerClassLib.utils
 
             bool IsVictoryPoint(string k) => k.StartsWith("VICTORY_POINTS_", StringComparison.OrdinalIgnoreCase);
             bool IsIdeology(string k) => k.StartsWith("IDEOLOGY_", StringComparison.OrdinalIgnoreCase);
-            bool IsState(string k) =>
-                states == null ? k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase) : states.Count(s => s.LocalizationKey == k) != 0;
+            bool IsState(string k) => states == null ? k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase) : states.Count(s => s.LocalizationKey == k) != 0;
             bool IsCountry(string k) => k.Length == 3 && k.All(char.IsLetter);
 
             YmlParser parser = new YmlParser(new TxtPattern());
-            Console.WriteLine($"files  - {files.Count}");
-            Console.WriteLine($"fimoz - {files.Count(f => f == "C:\\Users\\timpf\\Downloads\\Telegram Desktop\\SME\\SME\\localisation\\russian\\state_names_l_russian.yml")}");
-            var f = 0;
+
+            var failedFiles = new ConcurrentBag<string>();
+
             Parallel.ForEach(files, file =>
             {
                 try
                 {
                     var text = File.ReadAllText(file);
-                    if (file == "C:\\Users\\timpf\\Downloads\\Telegram Desktop\\SME\\SME\\localisation\\russian\\state_names_l_russian.yml")
+                    if (file == "C:\\Users\\timpf\\Downloads\\Telegram Desktop\\SME\\SME\\localisation\\russian\\replace\\victory_points_l_russian.yml")
                         Console.WriteLine("HOI DEV HUESOS");
                     var parsed = (LocalizationFile)parser.Parse(text);
                     if (parsed.localizations.Count < 1)
                     {
-                        Console.WriteLine(file.Split("\\").Last());
+                        failedFiles.Add(file);
                         return;
-
                     }
                     // Пробегаем все блоки и все пары ключ/значение внутри файла
                     foreach (var block in parsed.localizations)
@@ -87,14 +84,14 @@ namespace ModdingManagerClassLib.utils
                             target.AddOrUpdate(key, val, (_, __) => val);
                         }
                     }
-                    f++;
+
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    //Logger.AddLog("Ошибка при загрузке файлов локализации: " + ex.Message);
+                    Logger.AddLog("Ошибка при загрузке файлов локализации: " + ex.Message);
                 }
             });
-            Console.WriteLine($" real files  - {f}");
+
             // Заполняем итоговые блоки (язык — на твое усмотрение; можно оставить по умолчанию)
             VictoryPointsLocalisation = new LocalizationBlock
             {
@@ -120,6 +117,8 @@ namespace ModdingManagerClassLib.utils
             {
                 Data = new Dictionary<string, string>(otherDict, StringComparer.OrdinalIgnoreCase)
             };
+
+            return failedFiles.ToList();
         }
     }
 }

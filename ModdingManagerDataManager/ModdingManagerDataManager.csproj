@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ModdingManagerModels\ModdingManagerModels.csproj" />
   </ItemGroup>
 

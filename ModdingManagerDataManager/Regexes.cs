@@ -22,11 +22,11 @@ namespace ModdingManagerDataManager
         public static readonly Regex LocalizationLanguage =
             new Regex(localizationLanguage, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
 
-        private static string localizationVarName = @"(?<=\ )+[A-Za-z0-9_]+(?=:)";
+        private static string localizationVarName = @"(?<=\ )+[A-Za-z0-9_]+(?=\s*:)";
         public static readonly Regex LocalizationVarName =
             new Regex(localizationVarName, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
 
-        private static string localizationVarContent = @"(?<="").+(?="")";
+        private static string localizationVarContent = @"(?<="").*(?="")";
         public static readonly Regex LocalizationVarContent =
             new Regex(localizationVarContent, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
 
@@ -34,11 +34,11 @@ namespace ModdingManagerDataManager
         public static readonly Regex Localization =
             new Regex(localization, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
 
-        private static string findLocalization = @"l_\w+:\d*\s+(\ +\w+:\d*\ +"".*""\ *\n?)+";
+        private static string findLocalization = @"l_\w+:\d*\s*(\ *\w+\ *:\ *\d*\ *"".*""\ *\n?)+";
         public static readonly Regex FindLocalization =
             new Regex(findLocalization, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
-        private static string localizationVar = @"(?<=\ )+[A-Za-z0-9_]+:.*(?<="").+\""";
+        private static string localizationVar = @"(?<=\ )+[A-Za-z0-9_]+\s*:.*(?<="").*\""";
         public static readonly Regex LocalizationVar =
             new Regex(localizationVar, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
 
