@@ -50,7 +50,7 @@ namespace ModdingManagerClassLib.Composers
             foreach (var regionBracket in file.Brackets)
             {
                 var idVar = regionBracket.SubVars.FirstOrDefault(v => v.Name == "id");
-                if (idVar == null || !int.TryParse(idVar.Value as string, out int id) || existingMap.ContainsKey(id))
+                if (idVar == null || !int.TryParse(idVar.Value.ToString(), out int id) || existingMap.ContainsKey(id))
                     continue;
 
                 var keyVar = regionBracket.SubVars.FirstOrDefault(v => v.Name == "name");

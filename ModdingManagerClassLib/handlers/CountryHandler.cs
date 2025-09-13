@@ -28,16 +28,16 @@ public class CountryHandler
             string ruLocPath = Path.Combine(ModManager.ModDirectory, "localisation", "russian");
             string enLocPath = Path.Combine(ModManager.ModDirectory, "localisation", "english");
             Directory.CreateDirectory(ruLocPath);
-            Directory.CreateDirectory(enLocPath);
+            //Directory.CreateDirectory(enLocPath);
 
-            string ruContent = GenerateLocalizationContent(country_local);
-            string enContent = GenerateLocalizationContent(country_local);
+            //string ruContent = GenerateLocalizationContent(this.Config.Tag, "l_russian", this.Config.Localisation.NameValue, this.Config.RulingParty);
+            //string enContent = GenerateLocalizationContent(this.Config.Tag, "l_english", this.Config.Localisation.NameValue, this.Config.RulingParty);
 
             string ruFilePath = Path.Combine(ruLocPath, $"{this.Config.Tag}_history_l_russian.yml");
             string enFilePath = Path.Combine(enLocPath, $"{this.Config.Tag}_history_l_english.yml");
 
-            File.WriteAllText(ruFilePath, ruContent, new UTF8Encoding(true));
-            File.WriteAllText(enFilePath, enContent, new UTF8Encoding(true));
+            //File.WriteAllText(ruFilePath, ruContent, new UTF8Encoding(true));
+            //File.WriteAllText(enFilePath, enContent, new UTF8Encoding(true));
 
             MessageBox.Show("Файлы локализации успешно созданы!", "Успех",
                             MessageBoxButton.OK, MessageBoxImage.Information);
@@ -81,10 +81,10 @@ public class CountryHandler
         string countryFileName = this.Config.CountryFileName;
         if (string.IsNullOrWhiteSpace(countryFileName))
         {
-            countryFileName = $"{countryTag} - {country_local.Data[this.Config.Tag]}.txt";
+            //countryFileName = $"{countryTag} - {Config.Localisation.NameValue}.txt";
         }
 
-        string newEntry = $"{countryTag} = \"countries/{countryTag} - {country_local.Data[this.Config.Tag]}.txt\"";
+        //string newEntry = $"{countryTag} = \"countries/{countryTag} - {Config.Localisation.NameValue}.txt\"";
 
         try
         {
@@ -111,7 +111,7 @@ public class CountryHandler
 
                 using (StreamWriter writer = File.AppendText(specificTagFilePath))
                 {
-                    writer.WriteLine(newEntry);
+                    //writer.WriteLine(newEntry);
                 }
             }
             else
@@ -120,8 +120,8 @@ public class CountryHandler
 
                 if (tagFiles.Length == 0)
                 {
-                    string newTagFile = Path.Combine(tagsDir, "00_countries.txt");
-                    File.WriteAllText(newTagFile, newEntry, new UTF8Encoding(false));
+                    //string newTagFile = Path.Combine(tagsDir, "00_countries.txt");
+                    //File.WriteAllText(newTagFile, newEntry, new UTF8Encoding(false));
                 }
                 else
                 {
@@ -135,7 +135,7 @@ public class CountryHandler
 
                     using (StreamWriter writer = File.AppendText(tagFile))
                     {
-                        writer.WriteLine(newEntry);
+                        //writer.WriteLine(newEntry);
                     }
                 }
             }
@@ -282,7 +282,7 @@ public class CountryHandler
             return;
         }
 
-        string fileName = $"{Config.Tag} - {country_local.Data[this.Config.Tag]}.txt";
+        string fileName = "pisda";/*$"{Config.Tag} - {Config.Localisation.NameValue}.txt";*/
         string filePath = Path.Combine(ModManager.ModDirectory, "history", "countries", fileName);
 
         try
@@ -411,7 +411,7 @@ public class CountryHandler
             MessageBox.Show("не выбрана граф культура", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        string fileName = $"{Config.Tag} - {country_local.Data[this.Config.Tag]}.txt";
+        string fileName = "pisyn";/*$"{this.Config.Tag} - {this.Config.Name}.txt";*/
         string filePath = Path.Combine(ModManager.ModDirectory, "common", "countries", fileName);
 
         try

@@ -13,6 +13,9 @@ namespace ModdingManagerClassLib.utils.Pathes
         public readonly static string CommonCountriesPath = Path.Combine(ModManager.ModDirectory, "common", "countries");
         public readonly static string HistoryCountriesPath = Path.Combine(ModManager.ModDirectory, "history", "countries");
         public readonly static string StatesPath = Path.Combine(ModManager.ModDirectory, "history", "states");
+        public readonly static string ModifierDefFirstPath = Path.Combine(ModManager.ModDirectory, "common", "modifier_definitions");
+        public readonly static string ModifierDefSecondPath = Path.Combine(ModManager.ModDirectory, "documentation", "modifiers_documentation.html");
+        public readonly static string IdeasPath = Path.Combine(ModManager.ModDirectory, "common", "ideas");
         public readonly static string StateCathegoryPath = Path.Combine(ModManager.ModDirectory, "common", "state_categories");
         public readonly static string LocalisationReplacePath = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace");
         public readonly static string LocalisationPath = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage);

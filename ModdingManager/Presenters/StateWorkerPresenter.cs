@@ -372,7 +372,7 @@ public class StateWorkerPresenter
         UpdateProvinceTooltip(_view.StrategicRenderLayer, arg.ProvinceId,
             $"Province: {arg.ProvinceId}\nRegion: {arg.TargetRegion.Id}");
 
-        _handler.MoveProvinceToStrategicRegion(arg.ProvinceId, sourceRegion, targetRegion);
+        //_handler.MoveProvinceToStrategicRegion(arg.ProvinceId, sourceRegion, targetRegion);
         UpdateTextBlockPosition(arg.TargetRegion.Id, _view.CurrentMapState);
         if (arg.SourceRegion != null)
         {
@@ -395,7 +395,7 @@ public class StateWorkerPresenter
         UpdateProvinceTooltip(_view.StateRenderLayer, arg.ProvinceId,
             $"Province: {arg.ProvinceId}\nState: {arg.TargetState.Id}");
 
-        _handler.MoveProvinceToState(arg.ProvinceId, sourceState, targetState);
+        //_handler.MoveProvinceToState(arg.ProvinceId, sourceState, targetState);
         UpdateTextBlockPosition(arg.TargetState.Id ?? -1, _view.CurrentMapState);
         if (arg.SourceState != null)
         {
@@ -414,11 +414,11 @@ public class StateWorkerPresenter
         if (country == null)
             return;
 
-        UpdateProvinceVisual(_view.CountryRenderLayer, arg.ProvinceId, country.Color.ToMediaColor());
+        UpdateProvinceVisual(_view.CountryRenderLayer, arg.ProvinceId, country.Color.ToMediaColor() ?? System.Windows.Media.Color.FromArgb(255, 128, 128, 128));
         UpdateProvinceTooltip(_view.CountryRenderLayer, arg.ProvinceId,
             $"Province: {arg.ProvinceId}\nCountry: {country.Tag}");
 
-        _handler.MoveStateToCountry(state, country.Tag);
+        //_handler.MoveStateToCountry(state, country.Tag);
     }
 
 
@@ -441,7 +441,7 @@ public class StateWorkerPresenter
 
         foreach (var province in state.Provinces)
         {
-            UpdateProvinceVisual(_view.CountryRenderLayer, province.Id, targetCountry.Color.ToMediaColor());
+            UpdateProvinceVisual(_view.CountryRenderLayer, province.Id, targetCountry.Color.ToMediaColor() ?? System.Windows.Media.Color.FromArgb(255, 128, 128, 128));
             UpdateProvinceTooltip(_view.CountryRenderLayer, province.Id,
                 $"Province: {province.Id}\nCountry: {targetCountry.Tag}");
         }
@@ -654,7 +654,7 @@ public class StateWorkerPresenter
                 DrawProvince(
                     _view.CountryRenderLayer,
                     province,
-                    country.Color,
+                    country.Color ?? System.Drawing.Color.FromArgb(255, 128, 128, 128),
                     $"Province: {province.Id}\nCountry: {country.Tag}"
                 );
             }

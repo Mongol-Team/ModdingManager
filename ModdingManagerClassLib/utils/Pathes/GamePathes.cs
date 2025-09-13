@@ -12,6 +12,8 @@ namespace ModdingManagerClassLib.utils.Pathes
         public readonly static string IdeologyPath = Path.Combine(ModManager.GameDirectory, "common", "ideologies");
         public readonly static string IdeasPath = Path.Combine(ModManager.GameDirectory, "common", "ideas");
         public readonly static string StrategicRegionPath = Path.Combine(ModManager.GameDirectory, "map", "strategicregions");
+        public readonly static string ModifierDefFirstPath = Path.Combine(ModManager.GameDirectory, "common", "modifier_definitions");
+        public readonly static string ModifierDefSecondPath = Path.Combine(ModManager.GameDirectory, "documentation", "modifiers_documentation.html");
         public readonly static string StateCathegoryPath = Path.Combine(ModManager.GameDirectory, "common", "state_categories");
         public readonly static string CountryTagsPath = Path.Combine(ModManager.GameDirectory, "common", "country_tags");
         public readonly static string CommonCountriesPath = Path.Combine(ModManager.GameDirectory, "common", "countries");

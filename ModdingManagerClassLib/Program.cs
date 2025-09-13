@@ -4,22 +4,18 @@
     {
         private static void Main(string[] args)
         {
-            //var mm = new ModManager();
-            //var sw = Stopwatch.StartNew();
-            //List<IConfig> mifoz = ProvinceComposer.Parse();
-            //ModManager.Mod.Map.Provinces = mifoz.Cast<ProvinceConfig>().ToList();
-
-            //List<IConfig> fimoz = StateComposer.Parse();
-            //sw.Stop();
-
-            //List<string> failedFiles;
-            //var reg = new LocalisationRegistry(out failedFiles, fimoz.OfType<StateConfig>().ToList());
-            //foreach (var file in failedFiles)
-            //{
-            //    Console.WriteLine(file);
-            //}
-            var p = new ModifierParser();
-            var r = p.Parse("C:\\Users\\timpf\\Downloads\\Telegram Desktop\\modifiers_documentation.html");
+            var mm = new ModManager();
+            var sw = Stopwatch.StartNew();
+            
+            ModManager.Mod.Map.Provinces = ProvinceComposer.Parse().OfType<ProvinceConfig>().ToList();
+            List<IConfig> mifoz = SRegionComposer.Parse();
+            sw.Stop();
+            foreach (var item in mifoz)
+            {
+                Console.WriteLine((item as StrategicRegionConfig).FilePath);
+                
+            }
+            Console.WriteLine($"Time: {sw.ElapsedMilliseconds} ms");
         }
     }
 }
