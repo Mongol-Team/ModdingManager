@@ -1,9 +1,11 @@
-﻿using System.Drawing;
+﻿using ModdingManagerModels.Types.Utils;
+using System.Drawing;
 
 namespace ModdingManagerModels
 {
     public class MapConfig : IConfig
     {
+        public Identifier Id { get; set; }
         public List<StateConfig> States { get; set; }
         public List<ProvinceConfig> Provinces { get; set; }
         public List<StrategicRegionConfig> StrategicRegions { get; set; }
@@ -11,7 +13,7 @@ namespace ModdingManagerModels
         public Bitmap Bitmap { get; set; }
         public Point? GetProvincePos(int provinceId)
         {
-            var province = Provinces?.FirstOrDefault(p => p.Id == provinceId);
+            var province = Provinces?.FirstOrDefault(p => p.Id.AsInt() == provinceId);
             if (province?.Shape == null)
                 return null;
 

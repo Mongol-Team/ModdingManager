@@ -30,7 +30,7 @@ namespace ModdingManagerClassLib.handlers
         }
         private string GenerateTechTreeContent(TechTreeConfig techTree, bool isVertical, int innerTabCount)
         {
-            string techTreeName = techTree.Name;
+            string techTreeName = techTree.Id.AsString();
             var rootItems = FindRootItems(techTree);
 
             StringBuilder entries = new StringBuilder();

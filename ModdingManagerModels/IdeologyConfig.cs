@@ -1,12 +1,13 @@
 ﻿using ModdingManagerModels.Enums;
 using ModdingManagerModels.Types.ObectCacheData;
+using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 
 namespace ModdingManagerModels
 {
     public class IdeologyConfig : IConfig
     {
-        public string Id { get; set; }
+        public Identifier Id { get; set; }
         public string Description { get; set; }
         public string Noun { get; set; }
         public string Name { get; set; }

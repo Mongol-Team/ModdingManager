@@ -107,11 +107,11 @@ namespace ModdingManager.classes.handlers
                 string enFilePath = Path.Combine(enLocPath, $"{CurrentConfig.Tag}_characters_l_english.yml");
 
                 string ruEntries = GenerateLocalizationEntries(
-                    CurrentConfig.Id, CurrentConfig.Name, CurrentConfig.Description,
+                    CurrentConfig.Id.AsString(), CurrentConfig.Name, CurrentConfig.Description,
                     CurrentConfig.Types.Contains("country_leader"), false);
 
                 string enEntries = GenerateLocalizationEntries(
-                    CurrentConfig.Id, "", "",
+                    CurrentConfig.Id.AsString(), "", "",
                     CurrentConfig.Types.Contains("country_leader"), true);
 
                 ProcessLocalizationFile(ruFilePath, "l_russian", ruEntries);

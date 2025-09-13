@@ -233,7 +233,7 @@ public class StateWorkerPresenter
     public void SearchCountry(int id)
     {
         SearchAndCenterView(_view.CountryIDLayer, id.ToString());
-        CountryConfig country = ModConfig.Instance.Map.Countries.FirstOrDefault(c => c.Tag == id.ToString());
+        CountryConfig country = ModConfig.Instance.Map.Countries.FirstOrDefault(c => c.Id == id.ToString());
         MarkEventArg markEventArg = new MarkEventArg
         {
             MarkedCountry = country
@@ -416,7 +416,7 @@ public class StateWorkerPresenter
 
         UpdateProvinceVisual(_view.CountryRenderLayer, arg.ProvinceId, country.Color.ToMediaColor() ?? System.Windows.Media.Color.FromArgb(255, 128, 128, 128));
         UpdateProvinceTooltip(_view.CountryRenderLayer, arg.ProvinceId,
-            $"Province: {arg.ProvinceId}\nCountry: {country.Tag}");
+            $"Province: {arg.ProvinceId}\nCountry: {country.Id}");
 
         //_handler.MoveStateToCountry(state, country.Tag);
     }
@@ -431,7 +431,7 @@ public class StateWorkerPresenter
         var sourceCountry = ModConfig.Instance.Map.Countries.FirstOrDefault(c =>
             c.States.Any(s => s.Id == arg.StateId));
         var targetCountry = ModConfig.Instance.Map.Countries.FirstOrDefault(c =>
-            c.Tag == arg.TargetCountryTag);
+            c.Id == arg.TargetCountryTag);
 
         if (targetCountry == null)
             return;
@@ -655,7 +655,7 @@ public class StateWorkerPresenter
                     _view.CountryRenderLayer,
                     province,
                     country.Color ?? System.Drawing.Color.FromArgb(255, 128, 128, 128),
-                    $"Province: {province.Id}\nCountry: {country.Tag}"
+                    $"Province: {province.Id}\nCountry: {country.Id}"
                 );
             }
             else
@@ -695,7 +695,7 @@ public class StateWorkerPresenter
 
             if (allProvinces.Count > 0)
             {
-                var textBlocks = CreateTextBlocksUniversal(allProvinces, country.Tag);
+                var textBlocks = CreateTextBlocksUniversal(allProvinces, country.Id);
                 foreach (var textBlock in textBlocks)
                 {
                     _view.CountryIDLayer.Children.Add(textBlock);
@@ -796,7 +796,7 @@ public class StateWorkerPresenter
         List<ProvinceConfig> provinces = layerType switch
         {
             "COUNTRY" => ModConfig.Instance.Map.Countries
-                .FirstOrDefault(c => c.Tag == entityId.ToString())?
+                .FirstOrDefault(c => c.Id == entityId.ToString())?
                 .States.SelectMany(s => s.Provinces)
                 .ToList(),
             "STATE" => ModConfig.Instance.Map.States

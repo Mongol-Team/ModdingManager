@@ -9,6 +9,7 @@ using ModdingManagerModels;
 using ModdingManagerModels.Enums;
 using ModdingManagerModels.Types;
 using ModdingManagerModels.Types.ObjectCacheData;
+using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -62,7 +63,7 @@ namespace ModdingManagerClassLib.Composers
         {
             var config = new IdeologyConfig
             {
-                Id = name,
+                Id = new Identifier(name),
                 SubTypes = new List<IdeologyType>(),
                 Rules = new Dictionary<RuleConfig, bool>(),
                 Modifiers = new Dictionary<ModifierDefenitionConfig, object>(),
@@ -135,7 +136,7 @@ namespace ModdingManagerClassLib.Composers
             {
                 foreach (var varItem in modsBracket.SubVars)
                 {
-                    var mod = ModConfig.Instance.ModifierDefenitions.Where(r => r.Name == (varItem.Value as HoiReference).Value).FirstOrDefault();
+                    var mod = ModConfig.Instance.ModifierDefenitions.Where(r => r.Id.AsString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
                     {
                         Logger.AddLog($"Не удалось добавить модифер с Id = {(varItem.Value as HoiReference).Value}");
@@ -149,7 +150,7 @@ namespace ModdingManagerClassLib.Composers
             {
                 foreach (var varItem in factionModsBracket.SubVars)
                 {
-                    var mod = ModConfig.Instance.ModifierDefenitions.Where(r => r.Name == (varItem.Value as HoiReference).Value).FirstOrDefault();
+                    var mod = ModConfig.Instance.ModifierDefenitions.Where(r => r.Id.AsString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
                     {
                         Logger.AddLog($"Не удалось добавить модифер для фракции с Id = {(varItem.Value as HoiReference).Value}");

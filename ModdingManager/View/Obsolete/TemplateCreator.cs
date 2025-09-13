@@ -47,14 +47,14 @@ namespace ModdingManager
                         r.Categories.Contains(requiredCategory, StringComparer.OrdinalIgnoreCase) &&
                         (!type.Equals("Brigade", StringComparison.OrdinalIgnoreCase) ||
                          !r.Categories.Contains("category_support_battalions", StringComparer.OrdinalIgnoreCase)))
-                    .OrderBy(r => r.Name);
+                    .OrderBy(r => r.Id);
 
 
                 ContextMenuStrip menu = new ContextMenuStrip();
 
                 foreach (var regiment in matchingRegiments)
                 {
-                    var item = new ToolStripMenuItem(regiment.Name)
+                    var item = new ToolStripMenuItem(regiment.Id)
                     {
                         Tag = regiment,
                         Image = regiment.Icon
@@ -72,7 +72,7 @@ namespace ModdingManager
 
                         var regimentItem = new RegimentConfig
                         {
-                            Name = selected.Name,
+                            Id = selected.Id,
                             Icon = selected.Icon,
                             Categories = selected.Categories,
                             X = x,
@@ -105,7 +105,7 @@ namespace ModdingManager
 
         private void UpdtadeConfig()
         {
-            CurrentConfig.Name = this.NameBox.Text;
+            CurrentConfig.Id = this.NameBox.Text;
             CurrentConfig.IsLocked = this.IsLocked.Checked;
             CurrentConfig.Namespace = this.GroupNameBox.Text;
             CurrentConfig.AllowTraining = this.CanRecrutingLocked.Checked;
@@ -133,7 +133,7 @@ namespace ModdingManager
             UpdtadeConfig();
             var config = CurrentConfig;
 
-            if (string.IsNullOrWhiteSpace(config.Name))
+            if (string.IsNullOrWhiteSpace(config.Id))
             {
                 MessageBox.Show("Название шаблона обязательно");
                 return;
@@ -153,7 +153,7 @@ namespace ModdingManager
 
             var content = new StringBuilder();
             content.AppendLine("division_template = {");
-            content.AppendLine($"    name = \"{config.Name}\"");
+            content.AppendLine($"    name = \"{config.Id}\"");
 
             if (!string.IsNullOrWhiteSpace(config.Namespace))
                 content.AppendLine($"    division_names_group = \"{config.Namespace}\"");
@@ -179,7 +179,7 @@ namespace ModdingManager
             content.AppendLine("    regiments = {");
             foreach (var regiment in config.BrigadeItems)
             {
-                content.AppendLine($"        {regiment.Name} = {{ x = {regiment.X} y = {regiment.Y} }}");
+                content.AppendLine($"        {regiment.Id} = {{ x = {regiment.X} y = {regiment.Y} }}");
             }
             content.AppendLine("    }");
 
@@ -188,7 +188,7 @@ namespace ModdingManager
                 content.AppendLine("    support = {");
                 foreach (var support in config.SupportItems)
                 {
-                    content.AppendLine($"        {support.Name} = {{ x = {support.X} y = {support.Y} }}");
+                    content.AppendLine($"        {support.Id} = {{ x = {support.X} y = {support.Y} }}");
                 }
                 content.AppendLine("    }");
             }

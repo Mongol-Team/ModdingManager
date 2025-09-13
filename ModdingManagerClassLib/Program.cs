@@ -1,4 +1,9 @@
-﻿namespace ModdingManagerDataManager
+﻿using ModdingManager.managers.@base;
+using ModdingManagerClassLib.Composers;
+using ModdingManagerModels;
+using System.Diagnostics;
+
+namespace ModdingManagerDataManager
 {
     internal class Program
     {

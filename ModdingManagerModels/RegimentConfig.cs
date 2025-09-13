@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using ModdingManagerModels.Types.Utils;
+using System.Drawing;
 using System.Text.Json.Serialization;
 
 namespace ModdingManagerModels
@@ -6,7 +7,7 @@ namespace ModdingManagerModels
     public class RegimentConfig : IConfig
     {
         public RegimentConfig() { }
-        public string Name { get; set; }
+        public Identifier Id { get; set; }
 
         [JsonIgnore]
         public Image Icon { get; set; }

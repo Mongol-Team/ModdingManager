@@ -6,8 +6,10 @@ using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Types;
 using ModdingManagerModels.Types.ObjectCacheData;
+using ModdingManagerModels.Types.Utils;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ModdingManagerClassLib.Composers
 {
@@ -86,12 +88,12 @@ namespace ModdingManagerClassLib.Composers
                 .OfType<int>()
                 .ToList() ?? new List<int>();
             var matchedProvinces = ModManager.Mod.Map.Provinces
-                .Where(p => provinceIds.Contains(p.Id))
+                .Where(p => provinceIds.Contains(p.Id.AsInt()))
                 .ToList();
 
             return new StateConfig
             {
-                Id = id,
+                Id = new Identifier(id),
                 Provinces = matchedProvinces,
                 FilePath = file.FilePath,
                 Color = ModManager.GenerateColorFromId(id),

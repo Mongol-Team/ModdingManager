@@ -1,10 +1,11 @@
-﻿using System.Drawing;
+﻿using ModdingManagerModels.Types.Utils;
+using System.Drawing;
 
 namespace ModdingManagerModels
 {
     public class CountryCharacterConfig : IConfig
     {
-        public string Id { get; set; } = "";
+        public Identifier Id { get; set; } = new("");
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
         public string Ideology { get; set; } = "";

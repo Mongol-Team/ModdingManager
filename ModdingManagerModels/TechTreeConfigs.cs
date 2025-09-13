@@ -1,8 +1,10 @@
-﻿namespace ModdingManagerModels
+﻿using ModdingManagerModels.Types.Utils;
+
+namespace ModdingManagerModels
 {
     public class TechTreeConfig : IConfig
     {
-        public string Name { get; set; }
+        public Identifier Id { get; set; }
         public string Orientation { get; set; }
         public List<TechTreeItemConfig> Items { get; set; } = new List<TechTreeItemConfig>();
         public List<List<string>> ChildOf { get; set; } = new List<List<string>>();

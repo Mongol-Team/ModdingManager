@@ -3,7 +3,9 @@ using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Enums;
+using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.ObjectCacheData;
+using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,9 +24,9 @@ namespace ModdingManagerClassLib.Composers
                 ModPathes.ModifierDefFirstPath,
                 GamePathes.ModifierDefSecondPath,
             };
-            string[] possibleDocPath = {
-                GamePathes.ModifierDefSecondPath,
+            string[] possibleDocPaths = {
                 ModPathes.ModifierDefSecondPath,
+                GamePathes.ModifierDefSecondPath,
             };
             List<IConfig> res = new List<IConfig>();   
             foreach (string defPath in possibleDefPaths)
@@ -45,12 +47,21 @@ namespace ModdingManagerClassLib.Composers
                 if (res.Count > 0)
                     return res;
             }
+            List<IConfig> docmodif = new List<IConfig>();
+            ModifierParser parser = new ModifierParser();
+            foreach (string path in possibleDocPaths)
+            {
+                if (!File.Exists(path) || docmodif.Count == 0)
+                    continue;
+                docmodif = parser.Parse(path);
+            }
+            res.AddRange(docmodif.Where(d => !res.Any(r => r.Id.AsString() == d.Id.AsString())));
             return res;
         }
         public static ModifierDefenitionConfig ParseModifierDefConfig(Bracket bracket)
         {
             ModifierDefenitionConfig config = new ModifierDefenitionConfig();
-            config.Name = bracket.Name;
+            config.Id = new Identifier(bracket.Name);
             foreach(var var in bracket.SubVars)
             {
                 switch(var.Name)

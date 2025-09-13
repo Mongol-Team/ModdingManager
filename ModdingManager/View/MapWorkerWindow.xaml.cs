@@ -232,17 +232,17 @@ namespace ModdingManager
             var sourceCountry = GetCountryForState(sourceState.Id);
             var targetCountry = GetCountryForState(targetState.Id);
 
-            if (targetCountry != null && sourceCountry.Tag != targetCountry.Tag)
+            if (targetCountry != null && sourceCountry.Id != targetCountry.Id)
             {
-                if (sourceState != null && sourceCountry.Tag != targetCountry.Tag)
+                if (sourceState != null && sourceCountry.Id != targetCountry.Id)
                 {
                     return;
                 }
                 StateTransferRequested?.Invoke(new StateTransferArg
                 {
                     StateId = sourceState.Id ?? -1,
-                    SourceCountryTag = sourceCountry.Tag ?? "None",
-                    TargetCountryTag = targetCountry.Tag
+                    SourceCountryTag = sourceCountry.Id ?? "None",
+                    TargetCountryTag = targetCountry.Id
                 });
             }
         }

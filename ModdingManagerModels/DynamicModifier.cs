@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ModdingManagerModels.Types.Utils;
+
 
 namespace ModdingManagerModels
 {
     public class DynamicModifierConfig : IConfig
     {
+        public Identifier Id { get; set; }
         public string EnableTrigger { get; set; }
         public string RemovalTrigger { get; set; }
         public string Trigger { get; set; }

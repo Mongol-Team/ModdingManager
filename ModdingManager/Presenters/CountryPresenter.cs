@@ -23,7 +23,7 @@ public class CountryPresenter
     {
         _currentConfig = new CountryConfig
         {
-            Tag = _view.Tag,
+            Id = _view.Tag,
             Name = _view.Name,
             Capital = _view.Capital,
             GraphicalCulture = _view.GraphicalCulture,

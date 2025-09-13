@@ -33,8 +33,8 @@ public class CountryHandler
             //string ruContent = GenerateLocalizationContent(this.Config.Tag, "l_russian", this.Config.Localisation.NameValue, this.Config.RulingParty);
             //string enContent = GenerateLocalizationContent(this.Config.Tag, "l_english", this.Config.Localisation.NameValue, this.Config.RulingParty);
 
-            string ruFilePath = Path.Combine(ruLocPath, $"{this.Config.Tag}_history_l_russian.yml");
-            string enFilePath = Path.Combine(enLocPath, $"{this.Config.Tag}_history_l_english.yml");
+            string ruFilePath = Path.Combine(ruLocPath, $"{this.Config.Id}_history_l_russian.yml");
+            string enFilePath = Path.Combine(enLocPath, $"{this.Config.Id}_history_l_english.yml");
 
             //File.WriteAllText(ruFilePath, ruContent, new UTF8Encoding(true));
             //File.WriteAllText(enFilePath, enContent, new UTF8Encoding(true));
@@ -69,14 +69,14 @@ public class CountryHandler
     }
     public void AddCountryTag()
     {
-        if (this.Config.Tag.Length != 3)
+        if (this.Config.Id.AsString().Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
         string tagsDir = Path.Combine(ModManager.ModDirectory, "common", "country_tags");
-        string countryTag = this.Config.Tag;
+        string countryTag = this.Config.Id.AsString();
 
         string countryFileName = this.Config.CountryFileName;
         if (string.IsNullOrWhiteSpace(countryFileName))
@@ -148,7 +148,7 @@ public class CountryHandler
 
     public void UpdateStateOwnership()
     {
-        if (string.IsNullOrWhiteSpace(this.Config.Tag) || this.Config.Tag.Length != 3)
+        if (string.IsNullOrWhiteSpace(this.Config.Id.AsString()) || this.Config.Id.AsString().Length != 3)
         {
             MessageBox.Show("Не указаны стейты или тег страны неверный!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
@@ -162,7 +162,7 @@ public class CountryHandler
             Directory.CreateDirectory(modStatesDir);
         }
 
-        string countryTag = this.Config.Tag;
+        string countryTag = this.Config.Id.AsString();
         var stateEntries = this.Config.StateCores;
         Encoding utf8WithoutBom = new UTF8Encoding(false);
 
@@ -271,7 +271,7 @@ public class CountryHandler
 
     public void CreateCountryHistoryFile()
     {
-        if (this.Config.Tag.Length != 3)
+        if (this.Config.Id.AsString().Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов (например, ANG).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
@@ -401,7 +401,7 @@ public class CountryHandler
     }
     public void CreateCommonCountriesFile()
     {
-        if (this.Config.Tag.Length != 3)
+        if (this.Config.Id.AsString().Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
@@ -443,14 +443,14 @@ public class CountryHandler
     }
     public void CreateCountryFlags()
     {
-        if (this.Config.Tag.Length != 3)
+        if (this.Config.Id.AsString().Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
         string flagsDir = Path.Combine(ModManager.ModDirectory, "gfx", "flags");
-        string countryTag = this.Config.Tag;
+        string countryTag = this.Config.Id.AsString();
 
         try
         {

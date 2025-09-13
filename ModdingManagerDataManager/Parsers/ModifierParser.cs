@@ -2,6 +2,8 @@
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerModels;
 using ModdingManagerModels.Enums;
+using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.Utils;
 using System.Text.RegularExpressions;
 
 public class ModifierParser : HtmlParser
@@ -77,7 +79,7 @@ public class ModifierParser : HtmlParser
 
                 var cfg = new ModifierDefenitionConfig
                 {
-                    Name = key,
+                    Id = new Identifier(key),
                     ScopeType = modifierToScope.TryGetValue(key, out var st) ? st : ScopeTypes.country
                 };
 

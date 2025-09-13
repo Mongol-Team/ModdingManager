@@ -5,6 +5,7 @@ using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Types.ObjectCacheData;
+using ModdingManagerModels.Types.Utils;
 
 namespace ModdingManagerClassLib.Composers
 {
@@ -32,7 +33,7 @@ namespace ModdingManagerClassLib.Composers
                     var configs = ParseConfig(filePath, strategicMap);
                     foreach (var config in configs)
                     {
-                        strategicMap[config.Id] = config;
+                        strategicMap[config.Id.AsInt()] = config;
                     }
                 }
             }
@@ -63,7 +64,7 @@ namespace ModdingManagerClassLib.Composers
 
                 result.Add(new StrategicRegionConfig
                 {
-                    Id = id,
+                    Id = new Identifier(id),
                     Provinces = matchedProvinces,
                     FilePath = file.FilePath,
                     Color = ModManager.GenerateColorFromId(id),

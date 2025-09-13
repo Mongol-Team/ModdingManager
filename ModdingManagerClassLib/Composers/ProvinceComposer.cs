@@ -4,6 +4,7 @@ using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Enums;
 using ModdingManagerModels.Types.TableCacheData;
+using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -30,7 +31,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     var province = new ProvinceConfig
                     {
-                        Id = (int)line[0],
+                        Id = new Identifier((int)line[0]),
                         Color = (Color)line[1],
                         Type = (ProvinceType)line[2],
                         IsCoastal = (bool)line[3],

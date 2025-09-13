@@ -136,7 +136,7 @@ namespace ModdingManager.Presenters
             try
             {
                 var config = _view.TechTreeConfig;
-                config.Name = _view.TreeName;
+                config.Id = _view.TreeName;
                 config.Orientation = _view.TreeOrientation;
                 config.Ledger = _view.TreeLedger;
 
