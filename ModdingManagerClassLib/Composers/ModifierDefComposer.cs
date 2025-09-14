@@ -45,17 +45,27 @@ namespace ModdingManagerClassLib.Composers
                     }
                 }
                 if (res.Count > 0)
-                    return res;
+                    break;
             }
             List<IConfig> docmodif = new List<IConfig>();
             ModifierParser parser = new ModifierParser();
             foreach (string path in possibleDocPaths)
             {
-                if (!File.Exists(path) || docmodif.Count == 0)
+                if (!File.Exists(path))
                     continue;
                 docmodif = parser.Parse(path);
+                foreach (var modifier in docmodif)
+                {
+                    var corecfg = modifier as ModifierDefenitionConfig;
+                    corecfg.IsCore = true;
+                    res.Add(corecfg);
+                }
+                if (docmodif.Count != 0)
+                {
+                    break;
+                }
             }
-            res.AddRange(docmodif.Where(d => !res.Any(r => r.Id.AsString() == d.Id.AsString())));
+            
             return res;
         }
         public static ModifierDefenitionConfig ParseModifierDefConfig(Bracket bracket)

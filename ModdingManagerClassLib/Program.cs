@@ -1,5 +1,7 @@
 ﻿using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Composers;
+using ModdingManagerClassLib.utils.Pathes;
+using ModdingManagerDataManager.Parsers;
 using ModdingManagerModels;
 using System.Diagnostics;
 
@@ -11,14 +13,13 @@ namespace ModdingManagerDataManager
         {
             var mm = new ModManager();
             var sw = Stopwatch.StartNew();
-            
-            ModManager.Mod.Map.Provinces = ProvinceComposer.Parse().OfType<ProvinceConfig>().ToList();
-            List<IConfig> mifoz = SRegionComposer.Parse();
+            List<IConfig> mifoz = ModifierDefComposer.Parse();
             sw.Stop();
+            int index = 0;
             foreach (var item in mifoz)
             {
-                Console.WriteLine((item as StrategicRegionConfig).FilePath);
-                
+                Console.WriteLine($"{ item.Id.AsString()}  " + index +  $"    {(item as ModifierDefenitionConfig).IsCore} ");
+                index++;
             }
             Console.WriteLine($"Time: {sw.ElapsedMilliseconds} ms");
         }
