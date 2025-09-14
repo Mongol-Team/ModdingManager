@@ -28,7 +28,7 @@ namespace ModdingManagerModels
         public Dictionary<IdeologyConfig, int>? PartyPopularities { get; set; }
         public List<IdeaConfig>? Ideas { get; set; } = new List<IdeaConfig>();
         public List<CountryCharacterConfig>? Characters { get; set; } = new List<CountryCharacterConfig>();
-        public Dictionary<StateConfig, bool>? StateCores { get; set; } = new Dictionary<int, bool>();
+        public Dictionary<StateConfig, bool>? StateCores { get; set; } = new Dictionary<StateConfig, bool>();
     }
 
 }
