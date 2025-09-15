@@ -1,20 +1,20 @@
-﻿using System.Drawing;
+﻿using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.Utils;
+using System.Drawing;
 
 namespace ModdingManagerModels.GfxTypes
 {
-    public struct ProgressbarType
+    public class ProgressbarType : IConfig, IGfx
     {
-        public string name;              // "GFX_<name>"
-        public string texturefile1;      // "<path>"
-        public string texturefile2;      // "<path>"
-
-        public Color color;              // { r g b [a] }
-        public Color colortwo;           // { r g b [a] }
-
-        public Point size;               // { x y }
-
-        public string effectfile;        // "<path>"
-        public bool horizontal;          // <bool>
-        public int steps;                // <int>
+        public Identifier Id { get; set; }              // "GFX_<name>"
+        public string TexturePath { get; set; }      // "<path>"
+        public string SecondTexturePath { get; set; } 
+        public Bitmap Content { get; set; }
+        public Color Color { get; set; }              // { r g b [a] }
+        public Color SecondColor { get; set; }    
+        public Point Size { get; set; }       
+        public string EffectFile { get; set; }        // "<path>"
+        public bool IsHorisontal { get; set; }          // <bool>
+        public int Steps { get; set; }                // <int>
     }
 }

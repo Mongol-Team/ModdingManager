@@ -2,13 +2,14 @@
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
+using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.ObjectCacheData;
 
 namespace ModdingManagerClassLib.Composers
 {
-    public class GfxComposer : IComposer
+    public class GfxComposer 
     {
-        public static List<IConfig> Parse()
+        public static List<IGfx> Parse()
         {
             string[] files = Directory.GetFiles(GamePathes.InterfacePath);
             var parser = new TxtParser(new TxtPattern());

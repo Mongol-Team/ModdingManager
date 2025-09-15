@@ -1,11 +1,12 @@
-﻿using System.Drawing;
+﻿using ModdingManagerModels.Types.Utils;
+using System.Drawing;
 
 namespace ModdingManagerModels.Interfaces
 {
     public interface IGfx
     {
-        string Name { get; set; }
-        string Filetexture { get; set; }
+        Identifier Id { get; set; }
+        string TexturePath { get; set; }
         Bitmap? Content { get; set; }
     }
 }

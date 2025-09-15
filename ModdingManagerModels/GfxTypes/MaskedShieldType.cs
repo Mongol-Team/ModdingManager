@@ -1,11 +1,13 @@
-﻿namespace ModdingManagerModels.GfxTypes
+﻿using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.Utils;
+using System.Drawing;
+
+namespace ModdingManagerModels.GfxTypes
 {
-    public struct CorneredTileSpriteType
+    public class MaskedShieldType : IConfig, IGfx
     {
-        public string name;          // "GFX_<name>"
-        public string texturefile1;  // <path>
-        public string texturefile2;  // <path>
-        public string effectfile;    // <path>
+        //tyt bil duvblicat CorneredTileSpriteType, nyzhno realizovat етот класс
+
     }
 
 }
