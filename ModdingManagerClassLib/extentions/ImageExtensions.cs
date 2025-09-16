@@ -51,11 +51,9 @@ namespace ModdingManagerClassLib.Extentions
             string directory = Path.GetDirectoryName(fullPath);
             Directory.CreateDirectory(directory);
 
-            // 1. Подготавливаем данные пикселей
             byte[] pixelData = new byte[image.Width * image.Height * 4];
             image.CopyPixelDataTo(pixelData);
 
-            // 2. Создаем энкодер BC3
             var encoder = new BcEncoder(CompressionFormat.Bc3)
             {
                 OutputOptions =
@@ -67,7 +65,6 @@ namespace ModdingManagerClassLib.Extentions
                 }
             };
 
-            // 3. Кодируем и сохраняем
             using (var ms = new MemoryStream())
             {
                 encoder.EncodeToStream(pixelData, image.Width, image.Height, BCnEncoder.Encoder.PixelFormat.Rgba32, ms);
@@ -76,7 +73,6 @@ namespace ModdingManagerClassLib.Extentions
         }
         public static ImageSource ToImageSource(this System.Drawing.Image image)
         {
-            // Конвертация System.Drawing.Image в ImageSource
             using (var ms = new MemoryStream())
             {
                 image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
@@ -120,7 +116,6 @@ namespace ModdingManagerClassLib.Extentions
                     for (int x = 0; x < resized.Width; x++)
                     {
                         System.Drawing.Color pixel = resized.GetPixel(x, y);
-                        // Swap R and B
                         pixelData[index++] = pixel.B; // R <- B
                         pixelData[index++] = pixel.G;
                         pixelData[index++] = pixel.R; // B <- R
@@ -136,20 +131,16 @@ namespace ModdingManagerClassLib.Extentions
             }
         }
 
-        public static void SaveFlagSet(this System.Drawing.Image image, string flagsDir,
-                                string countryTag, string ideology)
+        public static void SaveFlagSet(this System.Drawing.Image image, string flagsDir, string countryTag, string ideology)
         {
             using (var imageSharp = image.ConvertToImageSharp())
             {
-                // Основной флаг
                 string pathLarge = Path.Combine(flagsDir, $"{countryTag}_{ideology}.tga");
                 Directory.CreateDirectory(Path.GetDirectoryName(pathLarge)!);
                 using (var resized = ResizeStretch(imageSharp, 82, 52))
                 {
                     resized.SaveAsTGA(pathLarge);
                 }
-
-                // Средний флаг
                 string mediumDir = Path.Combine(flagsDir, "medium");
                 Directory.CreateDirectory(mediumDir);
                 using (var resized = ResizeStretch(imageSharp, 41, 26))

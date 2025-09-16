@@ -1,7 +1,11 @@
-﻿namespace ModdingManagerModels
+﻿using ModdingManagerModels.Types.ObectCacheData;
+using ModdingManagerModels.Types.Utils;
+
+namespace ModdingManagerModels
 {
-    public class ScriptedTriggerConfig
+    public class ScriptedTriggerConfig : IConfig
     {
-        public string Name { get; set; }
+        public Identifier Id { get; set; }
+        public List<Trigger> Triggers { get; set; } = new List<Trigger>();
     }
 }

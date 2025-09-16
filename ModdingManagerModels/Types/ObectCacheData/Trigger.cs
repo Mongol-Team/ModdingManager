@@ -5,6 +5,6 @@ namespace ModdingManagerModels.Types.ObectCacheData
 {
     public class Trigger : Var
     {
-        public TriggerCondition condition { get; set; }
+        public OperatorType Condition { get; set; }
     }
 }
