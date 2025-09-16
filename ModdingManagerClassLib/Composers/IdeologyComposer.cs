@@ -66,8 +66,8 @@ namespace ModdingManagerClassLib.Composers
                 Id = new Identifier(name),
                 SubTypes = new List<IdeologyType>(),
                 Rules = new Dictionary<RuleConfig, bool>(),
-                Modifiers = new Dictionary<ModifierDefenitionConfig, object>(),
-                FactionModifiers = new Dictionary<ModifierDefenitionConfig, object>(),
+                Modifiers = new Dictionary<ModifierDefinitionConfig, object>(),
+                FactionModifiers = new Dictionary<ModifierDefinitionConfig, object>(),
                 DynamicFactionNames = new List<string>()
             };
 

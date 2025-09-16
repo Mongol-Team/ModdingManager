@@ -3,16 +3,17 @@ using ModdingManagerDataManager.Parsers;
 using ModdingManagerModels;
 using ModdingManagerModels.Enums;
 using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.HtmlFilesData;
 using ModdingManagerModels.Types.Utils;
 using System.Text.RegularExpressions;
 
-public class ModifierParser : HtmlParser
+public class ModifierParser : Parser
 {
     public ModifierParser() : base() { }
 
     protected override void Normalize(ref string content) { }
 
-    protected override List<IConfig> ParseRealization(string content)
+    protected override IHoiData ParseRealization(string content)
     {
         var doc = new HtmlDocument { OptionFixNestedTags = true };
         doc.LoadHtml(content);
@@ -67,7 +68,7 @@ public class ModifierParser : HtmlParser
         var reCategories = new Regex(@"^\s*Categories\s*:\s*(?<v>.+?)\s*$",
                                      RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        var result = new List<IConfig>();
+        var configs = new List<ModifierDefinitionConfig>();
         var h3Nodes = doc.DocumentNode.SelectNodes("//h3[@id]");
 
         if (h3Nodes != null)
@@ -77,7 +78,7 @@ public class ModifierParser : HtmlParser
                 var key = h3.GetAttributeValue("id", null);
                 if (string.IsNullOrWhiteSpace(key)) continue;
 
-                var cfg = new ModifierDefenitionConfig
+                var cfg = new ModifierDefinitionConfig
                 {
                     Id = new Identifier(key),
                     ScopeType = modifierToScope.TryGetValue(key, out var st) ? st : ScopeTypes.country
@@ -119,10 +120,10 @@ public class ModifierParser : HtmlParser
                     }
                 }
 
-                result.Add(cfg);
+                configs.Add(cfg);
             }
         }
-
+        var result = new ModifierDefinitionFile() { ModifierDefinitions = configs };
         return result;
     }
 

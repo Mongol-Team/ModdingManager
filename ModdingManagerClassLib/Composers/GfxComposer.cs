@@ -1,13 +1,12 @@
 ﻿using ModdingManagerClassLib.utils.Pathes;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
-using ModdingManagerModels;
 using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.ObjectCacheData;
 
 namespace ModdingManagerClassLib.Composers
 {
-    public class GfxComposer 
+    public static class GfxComposer
     {
         public static List<IGfx> Parse()
         {
@@ -17,7 +16,7 @@ namespace ModdingManagerClassLib.Composers
 
             foreach (string file in files)
             {
-                data.Add((HoiFuncFile)parser.Parse(file));
+                try { data.Add((HoiFuncFile)parser.Parse(file)); } catch (Exception e) { Console.WriteLine(e.Message); }
             }
 
             throw new NotImplementedException();

@@ -11,6 +11,6 @@ namespace ModdingManagerModels
     {
         public Color Color { get; set; }
         public string Id { get; set; }
-        public Dictionary<ModifierDefenitionConfig, object> Modifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
     }
 }

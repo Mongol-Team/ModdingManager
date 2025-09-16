@@ -14,13 +14,13 @@ namespace ModdingManagerModels
         public List<IdeologyType> SubTypes { get; set; }
         public Color Color { get; set; }
         public Dictionary<RuleConfig, bool> Rules { get; set; }
-        public Dictionary<ModifierDefenitionConfig, object> Modifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
         public bool CanFormExileGoverment { get; set; }
         public double WarImpactOnTension { get; set; }
         public double FactionImpactOnTension { get; set; }
         public bool CanBeBoosted { get; set; }
         public bool CanColaborate { get; set; }
-        public Dictionary<ModifierDefenitionConfig, object> FactionModifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> FactionModifiers { get; set; }
         public IdeologyAIType AiIdeologyName { get; set; }
         public List<string> DynamicFactionNames { get; set; }
 

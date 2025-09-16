@@ -12,6 +12,6 @@ namespace ModdingManagerModels
         public string Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public Dictionary<ModifierDefenitionConfig, object> Modifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
     }
 }

@@ -15,7 +15,7 @@ namespace ModdingManager.classes.utils
         public List<StaticModifierConfig> StaticModifiers { get; set; }
         public List<OpinionModifierConfig> OpinionModifiers { get; set; }
         public List<DynamicModifierConfig> DynamicModifiers { get; set; }
-        public List<ModifierDefenitionConfig> ModifierDefenitions { get; set; }
+        public List<ModifierDefinitionConfig> ModifierDefenitions { get; set; }
         public MapConfig Map { get; set; } = new MapConfig();
         public List<TechTreeConfig> TechTreeLedgers { get; set; } = new List<TechTreeConfig>();
         public List<CountryCharacterConfig> Characters { get; set; }

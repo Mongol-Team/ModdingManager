@@ -26,8 +26,8 @@ namespace ModdingManagerModels
         public bool HideIfMissingTech { get; set; }
         public List<BuildingConfig> RaidGroupBuildings { get; set; }
         public bool IsBuildable { get; set; }
-        public Dictionary<ModifierDefenitionConfig, object> ProvineDamageModifiers { get; set; }
-        public Dictionary<ModifierDefenitionConfig, object> StateDamageModifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> ProvineDamageModifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> StateDamageModifiers { get; set; }
         public int ShowOnMap { get; set; }
         public int ShowOnMapMeshes { get; set; }
         public bool AlwaysShown { get; set; }

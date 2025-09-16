@@ -8,6 +8,7 @@ using Rx = ModdingManagerDataManager.Regexes;
 
 namespace ModdingManagerDataManager.Parsers
 {
+    /// <exclude/>
     public class CsvParser : Parser
     {
         public CsvParser(IParsingPattern _pattern) : base(_pattern) { }
@@ -48,7 +49,7 @@ namespace ModdingManagerDataManager.Parsers
                 content.Replace(" ", ";");
             else
                 content.Replace(" ", "");
-                content = Rx.FileComment.Replace(content, "");
+            content = Rx.FileComment.Replace(content, "");
             content = Rx.EmptyLine.Replace(content, "");
             content = content.Replace($"{pattern.Separator}{pattern.Separator}", $"{pattern.Separator} {pattern.Separator}");
         }

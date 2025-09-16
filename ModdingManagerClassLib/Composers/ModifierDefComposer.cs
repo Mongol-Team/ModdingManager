@@ -3,15 +3,9 @@ using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Enums;
-using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.HtmlFilesData;
 using ModdingManagerModels.Types.ObjectCacheData;
 using ModdingManagerModels.Types.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ModdingManagerClassLib.Composers
 {
@@ -28,7 +22,7 @@ namespace ModdingManagerClassLib.Composers
                 ModPathes.ModifierDefSecondPath,
                 GamePathes.ModifierDefSecondPath,
             };
-            List<IConfig> res = new List<IConfig>();   
+            List<IConfig> res = new List<IConfig>();
             foreach (string defPath in possibleDefPaths)
             {
                 var files = Directory.GetFiles(defPath, "*.txt", SearchOption.AllDirectories).ToList();
@@ -37,26 +31,26 @@ namespace ModdingManagerClassLib.Composers
                 foreach (var file in files)
                 {
                     HoiFuncFile hoiFuncFile = new TxtParser(new TxtPattern()).Parse(file) as HoiFuncFile;
-                    foreach(var bracket in hoiFuncFile.Brackets)
+                    foreach (var bracket in hoiFuncFile.Brackets)
                     {
-                        ModifierDefenitionConfig cfg = ParseModifierDefConfig(bracket);
-                        if( cfg != null)
+                        ModifierDefinitionConfig cfg = ParseModifierDefConfig(bracket);
+                        if (cfg != null)
                             res.Add(cfg);
                     }
                 }
                 if (res.Count > 0)
                     break;
             }
-            List<IConfig> docmodif = new List<IConfig>();
+            List<ModifierDefinitionConfig> docmodif = new List<ModifierDefinitionConfig>();
             ModifierParser parser = new ModifierParser();
             foreach (string path in possibleDocPaths)
             {
                 if (!File.Exists(path))
                     continue;
-                docmodif = parser.Parse(path);
+                docmodif = (parser.Parse(path) as ModifierDefinitionFile).ModifierDefinitions;
                 foreach (var modifier in docmodif)
                 {
-                    var corecfg = modifier as ModifierDefenitionConfig;
+                    var corecfg = modifier;
                     corecfg.IsCore = true;
                     res.Add(corecfg);
                 }
@@ -65,16 +59,16 @@ namespace ModdingManagerClassLib.Composers
                     break;
                 }
             }
-            
+
             return res;
         }
-        public static ModifierDefenitionConfig ParseModifierDefConfig(Bracket bracket)
+        public static ModifierDefinitionConfig ParseModifierDefConfig(Bracket bracket)
         {
-            ModifierDefenitionConfig config = new ModifierDefenitionConfig();
+            ModifierDefinitionConfig config = new ModifierDefinitionConfig();
             config.Id = new Identifier(bracket.Name);
-            foreach(var var in bracket.SubVars)
+            foreach (var var in bracket.SubVars)
             {
-                switch(var.Name)
+                switch (var.Name)
                 {
                     case "value_type":
                         if (Enum.TryParse<ModifierDefenitionValueType>(var.Value.ToString(), true, out var valueType))

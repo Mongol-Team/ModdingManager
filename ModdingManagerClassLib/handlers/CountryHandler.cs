@@ -168,7 +168,7 @@ public class CountryHandler
 
         foreach (var entry in stateEntries)
         {
-            int stateId = entry.Key;
+            int stateId = entry.Key.Id.AsInt();
             bool isCore = entry.Value;
             string[] stateFiles = Directory.GetFiles(modStatesDir, $"{stateId}-*.txt");
 
@@ -276,7 +276,7 @@ public class CountryHandler
             MessageBox.Show("Тег страны должен состоять из 3 символов (например, ANG).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
-        if (string.IsNullOrEmpty(this.Config.RulingParty))
+        if (this.Config.RulingParty == null)
         {
             MessageBox.Show($"Не достаточно информации про страну: Правящая партия = {this.Config.RulingParty}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
@@ -368,9 +368,9 @@ public class CountryHandler
 
                 if (this.Config.Ideas.Count > 0)
                 {
-                    foreach (string idea in this.Config.Ideas)
+                    foreach (IdeaConfig idea in this.Config.Ideas)
                     {
-                        string trimmedIdea = idea.Trim();
+                        string trimmedIdea = idea.Id.AsString().Trim();
                         if (!string.IsNullOrEmpty(trimmedIdea))
                         {
                             writer.WriteLine($"add_ideas = {trimmedIdea}");
@@ -381,9 +381,9 @@ public class CountryHandler
 
                 if (this.Config.Characters.Count > 0)
                 {
-                    foreach (string character in this.Config.Characters)
+                    foreach (CountryCharacterConfig character in this.Config.Characters)
                     {
-                        string trimmedChar = character.Trim();
+                        string trimmedChar = character.Id.AsString().Trim();
                         if (!string.IsNullOrEmpty(trimmedChar))
                         {
                             writer.WriteLine($"recruit_character = {trimmedChar}");

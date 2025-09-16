@@ -12,6 +12,6 @@ namespace ModdingManagerModels
         public bool HasAttackerEffect { get; set; }
         public string PowerBalance { get; set; }
         public string RelationTrigger { get; set; }
-        public Dictionary<ModifierDefenitionConfig, object> Modifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
     }
 }
