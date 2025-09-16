@@ -23,7 +23,7 @@ namespace ModdingManagerModels
         public List<TechTreeConfig> Mutal { get; set; } = new List<TechTreeConfig>();
         public List<string> Allowed { get; set; }
         public List<string> AllowBranch { get; set; }
-        public Dictionary<ModifierDefenitionConfig, object> Modifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
         public List<string> Effects { get; set; }
         public string AiWillDo { get; set; }
         public List<string> Dependencies { get; set; }

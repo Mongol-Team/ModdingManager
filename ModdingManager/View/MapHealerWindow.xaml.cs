@@ -1,4 +1,4 @@
-﻿using ModdingManager.classes.cache.cachedFiles;
+﻿
 using ModdingManager.Controls;
 using ModdingManager.classes.utils;
 using ModdingManagerClassLib;

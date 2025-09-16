@@ -2,6 +2,7 @@
 using BCnEncoder.Shared;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+using SixLabors.ImageSharp.PixelFormats;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Interop;
@@ -112,7 +113,41 @@ namespace ModdingManagerClassLib.Extentions
                 return System.Drawing.Image.FromStream(outStream, true, true);
             }
         }
+        public static Bitmap LoadFromDDS(string path)
+        {
+            // Validate the input path
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            {
+                throw new ArgumentException("Invalid or non-existent DDS file path.", nameof(path));
+            }
 
+            try
+            {
+                // Load the DDS image using ImageSharp
+                using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(path);
+
+                // Set the DPI to 96 (WPF default)
+                image.Metadata.HorizontalResolution = 96;
+                image.Metadata.VerticalResolution = 96;
+
+                // Convert ImageSharp image to System.Drawing.Bitmap
+                using var memoryStream = new MemoryStream();
+                image.SaveAsBmp(memoryStream); // Save as BMP to ensure compatibility
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                // Create Bitmap from stream
+                var bitmap = new Bitmap(memoryStream);
+
+                // Set the Bitmap DPI to 96
+                bitmap.SetResolution(96f, 96f);
+
+                return bitmap;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to load or process DDS image.", ex);
+            }
+        }
         private static class NativeMethods
         {
             [System.Runtime.InteropServices.DllImport("gdi32.dll")]
