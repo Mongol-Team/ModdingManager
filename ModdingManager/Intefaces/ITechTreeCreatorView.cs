@@ -42,7 +42,7 @@ namespace ModdingManager.Intefaces
         List<string> Enables { get; set; }
         List<string> Allowed { get; set; }
         List<string> Effects { get; set; }
-        List<string> Modifiers { get; set; }
+        Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
         string AiWillDo { get; set; }
         List<string> Dependencies { get; set; }
         string Categories { get; set; }

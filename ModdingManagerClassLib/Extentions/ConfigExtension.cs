@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels;
+﻿using ModdingManager.classes.utils;
+using ModdingManagerModels;
 
 namespace ModdingManagerClassLib.Extentions
 {
@@ -13,6 +14,14 @@ namespace ModdingManagerClassLib.Extentions
                     return item;
             }
             return null;
+        }
+        public static StateConfig GetState(this ModConfig mod, int id)
+        {
+            return mod.Map.States.FirstOrDefault(s => s.Id.AsInt() == id);
+        }
+        public static IdeologyConfig GetIdeology(this ModConfig mod, string id)
+        {
+            return mod.Ideologies.FirstOrDefault();
         }
         
     }

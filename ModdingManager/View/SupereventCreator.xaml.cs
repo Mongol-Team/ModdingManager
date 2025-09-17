@@ -767,13 +767,13 @@ namespace ModdingManager
                 DescTextLocalizedField.Document.ContentEnd).Text.TrimEnd('\r', '\n');
 
             CurrentConfig.SoundPath = selectedAudioPath;
-            CurrentConfig.Id = SuperEventIdBox.Text;
+            CurrentConfig.Id = new(SuperEventIdBox.Text);
             //тут нужно создать гуидок по канавасу
             //Config.Gui = MainCanvas;
         }
         private void DoneConfigButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(CurrentConfig.Id))
+            if (CurrentConfig.Id.HasValue())
             {
                 UpdateConfigButton_Click(sender, e);
                 HandlerInstance = new() { CurrentConfig = CurrentConfig };

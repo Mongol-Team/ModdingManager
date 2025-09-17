@@ -1,5 +1,8 @@
 ﻿using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Composers;
+using ModdingManagerClassLib.Extentions;
+using ModdingManagerClassLib.Properties;
+using System.Drawing;
 
 namespace ModdingManagerDataManager
 {
@@ -7,8 +10,8 @@ namespace ModdingManagerDataManager
     {
         private static void Main(string[] args)
         {
-            var g = new ModManager();
-            var r = GfxComposer.Parse();
+            Bitmap bitmap = BitmapExtensions.LoadFromDDS("C:\\Users\\Acer\\Documents\\Paradox Interactive\\Hearts of Iron IV\\mod\\SME\\gfx\\interface\\goals\\annex_bya.dds");
+            BitmapExtensions.SaveAsDDS(bitmap, "E:\\dada\\мем\\syka.dds");
         }
     }
 }

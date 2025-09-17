@@ -58,13 +58,13 @@ namespace ModdingManagerClassLib.utils
                     if (file == "C:\\Users\\timpf\\Downloads\\Telegram Desktop\\SME\\SME\\localisation\\russian\\replace\\victory_points_l_russian.yml")
                         Console.WriteLine("HOI DEV HUESOS");
                     var parsed = (LocalizationFile)parser.Parse(text);
-                    if (parsed.localizations.Count < 1)
+                    if (parsed.Localizations.Count < 1)
                     {
                         failedFiles.Add(file);
                         return;
                     }
                     // Пробегаем все блоки и все пары ключ/значение внутри файла
-                    foreach (var block in parsed.localizations)
+                    foreach (var block in parsed.Localizations)
                     {
                         foreach (var kvp in block.Data)
                         {

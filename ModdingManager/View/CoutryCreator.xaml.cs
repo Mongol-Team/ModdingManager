@@ -9,6 +9,8 @@ using System.Windows.Media.Imaging;
 using Label = System.Windows.Controls.Label;
 using ModConfig = ModdingManager.classes.utils.ModConfig;
 using ModdingManagerModels.Types.Utils;
+using ModdingManagerModels;
+using ModdingManagerModels.Types.LocalizationData;
 namespace ModdingManager
 {
     /// <summary>
@@ -23,11 +25,11 @@ namespace ModdingManager
             InitializeComponent();
             _presenter = new CountryPresenter(this);
         }
-
+        public ConfigLocalisation Localisation { get; set; }
         public Identifier Tag
         {
-            get => TagBox.Text;
-            set => TagBox.Text = value;
+            get => new(TagBox.Text);
+            set => TagBox.Text = value.AsString();
         }
 
         public string? Name
@@ -57,18 +59,18 @@ namespace ModdingManager
             get => GraficalCultureBox.Text;
             set => GraficalCultureBox.Text = value;
         }
-        public Dictionary<string, int>? Technologies
+        public Dictionary<TechTreeItemConfig, int>? Technologies
         {
             get
             {
                 var list = TechnologiesBox.GetLines();
-                var result = new Dictionary<string, int>();
+                var result = new Dictionary<TechTreeItemConfig, int>();
                 foreach (var i in list)
                 {
                     var parts = i.Split(':');
                     if (parts.Length == 2 && int.TryParse(parts[1], out int value))
                     {
-                        result[parts[0]] = value;
+                        result[ModManager.Mod.TechTreeLedgers.GetTreeItem(parts[0])] = value;
                     }
 
                 }
@@ -113,9 +115,9 @@ namespace ModdingManager
             set => ResearchSlotsBox.Text = value.ToString();
         }
 
-        public string? RulingParty
+        public IdeologyConfig? RulingParty
         {
-            get => RullingPartyBox.SelectedItem?.ToString() ?? string.Empty;
+            get => (IdeologyConfig)RullingPartyBox.SelectedItem ?? null;
             set => RullingPartyBox.SelectedItem = value;
         }
 
@@ -137,11 +139,11 @@ namespace ModdingManager
             set => HaveElectionsBox.IsChecked = value;
         }
 
-        public Dictionary<string, int>? PartyPopularities
+        public Dictionary<IdeologyConfig, int>? PartyPopularities
         {
             get
             {
-                var result = new Dictionary<string, int>();
+                var result = new Dictionary<IdeologyConfig, int>();
                 var lines = PartyPopularitiesBox.GetLines(); // предполагается, что StatesBox — это RichTextBox
 
                 foreach (var line in lines)
@@ -150,7 +152,7 @@ namespace ModdingManager
                     if (parts.Length == 2 && int.TryParse(parts[1], out int popularity))
                     {
                         var ideo = ModManager.Mod.GetIdeology(parts[0]);
-                        result[ideo?.Id] = popularity != null ? popularity : 0;
+                        result[ideo] = popularity != null ? popularity : 0;
                     }
                 }
                 return result;
@@ -182,11 +184,11 @@ namespace ModdingManager
             }
         }
 
-        public Dictionary<int, bool>? States
+        public Dictionary<StateConfig, bool>? States
         {
             get
             {
-                var result = new Dictionary<int, bool>();
+                var result = new Dictionary<StateConfig, bool>();
                 var lines = StatesBox.GetLines(); // Получаем строки из RichTextBox
 
                 foreach (var line in lines)
@@ -197,7 +199,7 @@ namespace ModdingManager
                     {
                         string boolPart = parts[1];
                         bool isCore = boolPart == "true" || boolPart == "1";
-                        result[id] = isCore;
+                        result[ModManager.Mod.GetState(id)] = isCore;
                     }
                 }
 
@@ -212,17 +214,17 @@ namespace ModdingManager
         }
 
 
-        public Dictionary<string, Bitmap>? CountryFlags
+        public Dictionary<IdeologyConfig, Bitmap>? CountryFlags
         {
             get
             {
-                Dictionary<string, Bitmap> result = new Dictionary<string, Bitmap>();
+                Dictionary<IdeologyConfig, Bitmap> result = new Dictionary<IdeologyConfig, Bitmap>();
                 foreach (var wrap in CountryFlagsCanvas.Children)
                 {
                     Canvas canvasWrap = wrap as Canvas;
-                    var ideo = ModManager.Mod.GetIdeology(canvasWrap.Name);
+                    IdeologyConfig ideo = ModManager.Mod.GetIdeology(canvasWrap.Name);
                     var image = (canvasWrap.Children.GetByName(canvasWrap.Name + "Img") as System.Windows.Controls.Image).Source;
-                    result[ideo?.Id] = image.ToBitmap();
+                    result[ideo] = image.ToBitmap();
                 }
                 return result;
             }
@@ -232,7 +234,7 @@ namespace ModdingManager
 
                 foreach (var pair in value)
                 {
-                    string ideology = pair.Key;
+                    string ideology = pair.Key.Id.AsString();
                     ImageSource imageSource = pair.Value.ToImageSource();
 
                     // Создаём контейнер Canvas
@@ -323,7 +325,7 @@ namespace ModdingManager
                     Height = 72,
                     AllowDrop = true
                 };
-                wrap.Name = i.Id;
+                wrap.Name = i.Id.AsString();
                 // Создаём изображение
                 var img = new System.Windows.Controls.Image
                 {
@@ -386,7 +388,7 @@ namespace ModdingManager
             List<string> strings = new List<string>();
             foreach (var ideo in ModManager.Mod.Ideologies)
             {
-                strings.Add(ideo.Id);
+                strings.Add(ideo.Id.AsString());
             }
             RullingPartyBox.ItemsSource = strings;
         }

@@ -101,35 +101,7 @@ namespace ModdingManagerClassLib.Extentions
             }
             return newBitmap;
         }
-        public static void SaveAsDDS(this Bitmap image, string fullPath)
-        {
-            string directory = Path.GetDirectoryName(fullPath);
-            Directory.CreateDirectory(directory);
-
-            using (var resized = new Bitmap(image, image.Width, image.Height))
-            {
-                var pixelData = new byte[resized.Width * resized.Height * 4];
-
-                int index = 0;
-                for (int y = 0; y < resized.Height; y++)
-                {
-                    for (int x = 0; x < resized.Width; x++)
-                    {
-                        System.Drawing.Color pixel = resized.GetPixel(x, y);
-                        pixelData[index++] = pixel.B; // R <- B
-                        pixelData[index++] = pixel.G;
-                        pixelData[index++] = pixel.R; // B <- R
-                        pixelData[index++] = pixel.A;
-                    }
-                }
-
-                using (var surface = new Surface(resized.Width, resized.Height))
-                {
-                    Marshal.Copy(pixelData, 0, surface.DataPtr, pixelData.Length);
-                    DDSFile.Write(fullPath, surface, TextureDimension.Two, DDSFlags.None);
-                }
-            }
-        }
+       
 
         public static void SaveFlagSet(this System.Drawing.Image image, string flagsDir, string countryTag, string ideology)
         {

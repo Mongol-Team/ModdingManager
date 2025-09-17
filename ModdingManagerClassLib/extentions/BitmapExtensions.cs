@@ -6,47 +6,47 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using TeximpNet;
+using TeximpNet.DDS;
+using Pfim;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace ModdingManagerClassLib.Extentions
 {
     public static class BitmapExtensions
     {
 
-        public static void SaveAsDds(this Bitmap bitmap, string path)
+        public static void SaveAsDDS(this Bitmap image, string fullPath)
         {
-            var encoder = new BcEncoder(CompressionFormat.Bc3);
-            encoder.OutputOptions.Quality = CompressionQuality.Balanced;
-            encoder.OutputOptions.GenerateMipMaps = false;
+            string directory = Path.GetDirectoryName(fullPath);
+            Directory.CreateDirectory(directory);
 
-            // Конвертируем Bitmap в массив RGBA
-            var data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            try
+            using (var resized = new Bitmap(image, image.Width, image.Height))
             {
-                byte[] bytes = new byte[data.Stride * data.Height];
-                System.Runtime.InteropServices.Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
+                var pixelData = new byte[resized.Width * resized.Height * 4];
 
-                // BCnEncoder ожидает RGBA, а WPF дает BGRA, поэтому меняем каналы
-                for (int i = 0; i < bytes.Length; i += 4)
+                int index = 0;
+                for (int y = 0; y < resized.Height; y++)
                 {
-                    byte temp = bytes[i];
-                    bytes[i] = bytes[i + 2];
-                    bytes[i + 2] = temp;
+                    for (int x = 0; x < resized.Width; x++)
+                    {
+                        System.Drawing.Color pixel = resized.GetPixel(x, y);
+                        pixelData[index++] = pixel.B; // R <- B
+                        pixelData[index++] = pixel.G;
+                        pixelData[index++] = pixel.R; // B <- R
+                        pixelData[index++] = pixel.A;
+                    }
                 }
 
-                using (var ms = new MemoryStream())
+                using (var surface = new Surface(resized.Width, resized.Height))
                 {
-                    encoder.EncodeToStream(bytes, bitmap.Width, bitmap.Height, BCnEncoder.Encoder.PixelFormat.Rgba32, ms);
-                    File.WriteAllBytes(path, ms.ToArray());
+                    Marshal.Copy(pixelData, 0, surface.DataPtr, pixelData.Length);
+                    DDSFile.Write(fullPath, surface, TextureDimension.Two, DDSFlags.None);
                 }
-            }
-            finally
-            {
-                bitmap.UnlockBits(data);
             }
         }
 
@@ -116,38 +116,57 @@ namespace ModdingManagerClassLib.Extentions
         }
         public static Bitmap LoadFromDDS(string path)
         {
-            // Validate the input path
-            if (string.IsNullOrEmpty(path) || !File.Exists(path))
-            {
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
                 throw new ArgumentException("Invalid or non-existent DDS file path.", nameof(path));
-            }
 
-            try
+            // 1) Загружаем и декодируем DDS
+            using Pfim.IImage dds = Pfim.Pfimage.FromFile(path);
+
+            int width = dds.Width;
+            int height = dds.Height;
+            byte[] raw = dds.Data;
+
+            // 2) Мапим формат Pfim → System.Drawing.Imaging.PixelFormat
+            PixelFormat sysFmt = dds.Format switch
             {
-                // Load the DDS image using ImageSharp
-                using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(path);
+                Pfim.ImageFormat.Rgba32 => PixelFormat.Format32bppArgb,
+                Pfim.ImageFormat.Rgb24 => PixelFormat.Format24bppRgb,
+                Pfim.ImageFormat.R5g5b5 => PixelFormat.Format16bppRgb555,
+                Pfim.ImageFormat.R5g6b5 => PixelFormat.Format16bppRgb565,
+                Pfim.ImageFormat.Rgba16 => PixelFormat.Format16bppArgb1555,
+                _ => throw new NotSupportedException($"DDS формат {dds.Format} не поддерживается")
+            };
 
-                // Set the DPI to 96 (WPF default)
-                image.Metadata.HorizontalResolution = 96;
-                image.Metadata.VerticalResolution = 96;
+            // 3) Создаём Bitmap и копируем данные
+            var bmp = new Bitmap(width, height, sysFmt);
+            var rect = new System.Drawing.Rectangle(0, 0, width, height);
+            var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, sysFmt);
 
-                // Convert ImageSharp image to System.Drawing.Bitmap
-                using var memoryStream = new MemoryStream();
-                image.SaveAsBmp(memoryStream); // Save as BMP to ensure compatibility
-                memoryStream.Seek(0, SeekOrigin.Begin);
-
-                // Create Bitmap from stream
-                var bitmap = new Bitmap(memoryStream);
-
-                // Set the Bitmap DPI to 96
-                bitmap.SetResolution(96f, 96f);
-
-                return bitmap;
-            }
-            catch (Exception ex)
+            // Проверяем, совпадают ли stride
+            if (bmpData.Stride == dds.Stride)
             {
-                throw new InvalidOperationException("Failed to load or process DDS image.", ex);
+                Marshal.Copy(raw, 0, bmpData.Scan0, raw.Length);
             }
+            else
+            {
+                // Копируем по строкам, если stride отличаются
+                int bytesPerPixel = dds.Format switch
+                {
+                    Pfim.ImageFormat.Rgba32 => 4,
+                    Pfim.ImageFormat.Rgb24 => 3,
+                    _ => 2 // для 16-битных форматов
+                };
+                int rowBytes = width * bytesPerPixel;
+                for (int y = 0; y < height; y++)
+                {
+                    Marshal.Copy(raw, y * dds.Stride, bmpData.Scan0 + y * bmpData.Stride, rowBytes);
+                }
+            }
+
+            bmp.UnlockBits(bmpData);
+            bmp.SetResolution(96, 96);  // DPI по умолчанию для WPF
+
+            return bmp;
         }
         private static class NativeMethods
         {

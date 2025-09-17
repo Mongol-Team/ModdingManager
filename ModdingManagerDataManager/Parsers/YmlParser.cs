@@ -41,7 +41,7 @@ namespace ModdingManagerDataManager.Parsers
             }
             foreach (var Kvp in temp)
             {
-                result.localizations.Add(Kvp.Value);
+                result.Localizations.Add(Kvp.Value);
             }
 
 

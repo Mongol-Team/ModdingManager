@@ -211,7 +211,7 @@ namespace ModdingManager
         {
             if (config == null) return;
 
-            TreeName = config.Id;
+            TreeName = config.Id.AsString();
             TreeOrientation = config.Orientation;
             TreeLedger = config.Ledger;
         }

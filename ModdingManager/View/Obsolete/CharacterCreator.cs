@@ -3,6 +3,7 @@ using ModdingManager.classes.handlers;
 using ModdingManager.classes.utils;
 using ModdingManagerModels;
 using System.IO;
+using ModdingManager.managers.@base;
 
 namespace ModdingManager
 {
@@ -18,7 +19,7 @@ namespace ModdingManager
         private void UpdateCurrentConfig()
         {
             CurrentConfig.Tag = TagBox.Text;
-            CurrentConfig.Id = IdBox.Text;
+            CurrentConfig.Id = new(IdBox.Text);
             CurrentConfig.Name = NameBox.Text;
             CurrentConfig.Expire = ExpireTimePicker.Value.ToString("yyyy.MM.dd");
             CurrentConfig.Attack = TryParseOrDefault(AtkBox.Text, 0);

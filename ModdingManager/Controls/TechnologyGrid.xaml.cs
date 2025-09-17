@@ -93,12 +93,12 @@ namespace ModdingManager.Controls
 
         public void EditItem(TechTreeItemConfig updatedItem)
         {
-            var border = FindElementBorderById(updatedItem.OldId ?? updatedItem.Id);
+            var border = FindElementBorderById(updatedItem.OldId.AsString() ?? updatedItem.Id.AsString());
             if (border == null) return;
 
             if (updatedItem.OldId != null && updatedItem.OldId != updatedItem.Id)
             {
-                UpdateTechId(updatedItem.OldId, updatedItem.Id);
+                UpdateTechId(updatedItem.OldId.AsString(), updatedItem.Id.AsString());
             }
 
             if (border.Child is Canvas innerCanvas && innerCanvas.Children[0] is Image image)
@@ -317,7 +317,7 @@ namespace ModdingManager.Controls
             {
                 Width = CellSize,
                 Height = CellSize,
-                Name = item.Id,
+                Name = item.Id.AsString(),
                 BorderBrush = System.Windows.Media.Brushes.Black,
                 BorderThickness = new Thickness(1),
                 Background = System.Windows.Media.Brushes.Transparent,
@@ -389,7 +389,7 @@ namespace ModdingManager.Controls
         private void DeleteElement(Border border)
         {
             TechGrid.Children.Remove(border);
-            var item = _techTree.Items.FirstOrDefault(i => i.Id == border.Name);
+            var item = _techTree.Items.FirstOrDefault(i => i.Id.AsString() == border.Name);
             if (item != null)
             {
                 _techTree.Items.Remove(item);
@@ -470,13 +470,13 @@ namespace ModdingManager.Controls
             }
             return false;
         }
-        private Border FindElementBorderById(Identifier id)
+        private Border FindElementBorderById(string id)
         {
             foreach (UIElement child in TechGrid.Children)
             {
                 if (child is Border border)
                 {
-                    if (border.Name == id.AsString())
+                    if (border.Name == id)
                     {
                         return border;
                     }
@@ -638,7 +638,7 @@ namespace ModdingManager.Controls
             if (element is Border border)
             {
                 string id = border.Name;
-                var item = _techTree.Items.FirstOrDefault(i => i.Id == id);
+                var item = _techTree.Items.FirstOrDefault(i => i.Id.AsString() == id);
                 if (item != null)
                 {
                     double left = Canvas.GetLeft(border);
@@ -694,7 +694,7 @@ namespace ModdingManager.Controls
             }
             if (element == null)
                 return;
-            TechTreeItemConfig cfg = _techTree.Items.FirstOrDefault(i => i.Id == element.Name);
+            TechTreeItemConfig cfg = _techTree.Items.FirstOrDefault(i => i.Id.AsString() == element.Name);
             var contextMenu = new ContextMenu();
 
             var deleteItem = new MenuItem { Header = "Удалить" };

@@ -1,4 +1,5 @@
 ﻿using ModdingManagerModels;
+using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +13,23 @@ namespace ModdingManagerClassLib.handlers
         private List<TechTreeItemConfig> FindRootItems(TechTreeConfig techTree)
         {
             var rootItems = new List<TechTreeItemConfig>();
-            var allChildren = techTree.ChildOf.SelectMany(pair => pair.Skip(1)).ToHashSet();
+
+            // Собираем все ID, которые являются чьими-то детьми
+            var allChildren = techTree.Items
+                .Where(item => item.ChildOf != null && item.ChildOf.Id != null)
+                .Select(item => item.ChildOf.Id)
+                .ToHashSet();
 
             foreach (var item in techTree.Items)
             {
-                bool hasChildren = techTree.ChildOf.Any(pair => pair[0] == item.Id);
+                // Проверяем, есть ли у текущего элемента дети
+                bool hasChildren = techTree.Items.Any(child =>
+                    child.ChildOf != null && child.ChildOf.Id == item.Id);
 
+                // Проверяем, является ли текущий элемент чьим-то ребёнком
                 bool isChild = allChildren.Contains(item.Id);
 
+                // Корневой элемент — тот, у кого есть дети, но он сам не ребёнок
                 if (hasChildren && !isChild)
                 {
                     rootItems.Add(item);
@@ -28,6 +38,9 @@ namespace ModdingManagerClassLib.handlers
 
             return rootItems;
         }
+
+
+
         private string GenerateTechTreeContent(TechTreeConfig techTree, bool isVertical, int innerTabCount)
         {
             string techTreeName = techTree.Id.AsString();

@@ -64,7 +64,7 @@ namespace ModdingManager.Presenters
                 }
 
                 var id = markedIds.First();
-                var item = _view.TechTreeConfig.Items.FirstOrDefault(x => x.Id == id);
+                var item = _view.TechTreeConfig.Items.FirstOrDefault(x => x.Id.AsString() == id);
                 if (item == null)
                 {
                     _view.ShowError("Не удалось найти элемент в конфигурации.", "Ошибка");
@@ -136,7 +136,7 @@ namespace ModdingManager.Presenters
             try
             {
                 var config = _view.TechTreeConfig;
-                config.Id = _view.TreeName;
+                config.Id = new(_view.TreeName);
                 config.Orientation = _view.TreeOrientation;
                 config.Ledger = _view.TreeLedger;
 
@@ -173,7 +173,7 @@ namespace ModdingManager.Presenters
         #region Helper Methods
         private void UpdateItemFromControls(TechTreeItemConfig item)
         {
-            item.Id = _view.TechId;
+            item.Id = new(_view.TechId);
             item.Name = _view.TechName;
             item.Description = _view.TechDescription;
             item.ModifCost = _view.TechModifCost;
@@ -192,7 +192,7 @@ namespace ModdingManager.Presenters
         {
             TechTreeItemConfig item = new TechTreeItemConfig
             {
-                Id = _view.TechId,
+                Id = new(_view.TechId),
                 Name = _view.TechName,
                 Description = _view.TechDescription,
                 ModifCost = _view.TechModifCost,
@@ -211,7 +211,7 @@ namespace ModdingManager.Presenters
         }
         private void FillControlsWithItem(TechTreeItemConfig item)
         {
-            _view.TechId = item.Id;
+            _view.TechId = item.Id.AsString();
             _view.TechName = item.Name;
             _view.TechDescription = item.Description;
             _view.TechModifCost = item.ModifCost;

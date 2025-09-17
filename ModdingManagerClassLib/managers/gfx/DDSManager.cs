@@ -44,7 +44,7 @@ namespace ModdingManager.classes.managers.gfx
 
             foreach (var item in treeConfig.Items)
             {
-                if (item.Image == null || string.IsNullOrWhiteSpace(item.Id))
+                if (item.Image == null || item.Id == null)
                     continue;
 
                 try
