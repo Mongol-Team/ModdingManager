@@ -8,11 +8,11 @@ public class CountryPresenter
     private readonly ICountryView _view;
     private readonly CountryHandler _handler;
     private CountryConfig _currentConfig = new CountryConfig();
-
+  
     public CountryPresenter(ICountryView view)
     {
         _view = view;
-        _handler = new CountryHandler();
+        _handler = new CountryHandler(_currentConfig, view.Localisation);
 
         _view.ApplyClicked += OnApplyClicked;
         //_view.LoadConfigClicked += ConfigManager.OnLoadConfigClickedEvent;
@@ -24,7 +24,6 @@ public class CountryPresenter
         _currentConfig = new CountryConfig
         {
             Id = _view.Tag,
-            Name = _view.Name,
             Capital = _view.Capital,
             GraphicalCulture = _view.GraphicalCulture,
             Color = _view.Color.ToDrawingColor() ?? Color.AliceBlue,

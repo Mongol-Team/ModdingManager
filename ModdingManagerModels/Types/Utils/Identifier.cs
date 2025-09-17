@@ -21,5 +21,13 @@ namespace ModdingManagerModels.Types.Utils
         {
             return int.Parse(RawItendifier.ToString());
         }
+        public bool HasValue()
+        {
+            if (RawItendifier != null)
+            {
+                return true;
+            }
+            else return false;
+        }
     }
 }

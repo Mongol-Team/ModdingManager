@@ -1,8 +1,11 @@
-﻿using ModdingManager.Controls;
-using ModdingManager.classes.utils;
+﻿using ModdingManager.classes.utils;
 using ModdingManager.classes.views;
+using ModdingManager.Controls;
+using ModdingManager.managers.@base;
 using ModdingManagerModels;
 using ModdingManagerModels.Args;
+using ModdingManagerModels.Types.Utils;
+using OpenCvSharp.Features2D;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -137,7 +140,7 @@ namespace ModdingManager
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon polygon && polygon.Tag is int provinceId)
             {
-                _draggedProvince = ModConfig.Instance.Map.Provinces.FirstOrDefault(p => p.Id == provinceId);
+                _draggedProvince = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.AsInt() == provinceId);
                 _dragStartPoint = e.GetPosition(Display);
             }
         }
@@ -159,7 +162,7 @@ namespace ModdingManager
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is int targetProvinceId)
             {
-                var targetProvince = ModConfig.Instance.Map.Provinces.FirstOrDefault(p => p.Id == targetProvinceId);
+                var targetProvince = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.AsInt() == targetProvinceId);
 
                 switch (CurrentMapLayer)
                 {
@@ -197,7 +200,7 @@ namespace ModdingManager
                 }
                 ProvinceTransferRequested?.Invoke(new ProvinceTransferArg
                 {
-                    ProvinceId = sourceProvince.Id,
+                    ProvinceId = sourceProvince.Id.HasValue() ? sourceProvince.Id.AsInt() : -1,
                     SourceState = sourceState,
                     TargetState = targetState
                 });
@@ -216,7 +219,7 @@ namespace ModdingManager
                 }
                 ProvinceTransferRequested?.Invoke(new ProvinceTransferArg
                 {
-                    ProvinceId = sourceProvince.Id,
+                    ProvinceId = sourceProvince.Id.HasValue() ? sourceProvince.Id.AsInt() : -1,
                     SourceRegion = sourceState,
                     TargetRegion = targetState
                 });
@@ -240,9 +243,9 @@ namespace ModdingManager
                 }
                 StateTransferRequested?.Invoke(new StateTransferArg
                 {
-                    StateId = sourceState.Id ?? -1,
-                    SourceCountryTag = sourceCountry.Id ?? "None",
-                    TargetCountryTag = targetCountry.Id
+                    StateId = sourceState.Id.HasValue() ? (int?)sourceState.Id.AsInt() : null,
+                    SourceCountryTag = sourceCountry.Id.HasValue() ? sourceCountry.Id.AsString() : "None",
+                    TargetCountryTag = targetCountry.Id.HasValue() ? targetCountry.Id.AsString() : "None"
                 });
             }
         }
@@ -263,8 +266,8 @@ namespace ModdingManager
             switch (CurrentMapLayer)
             {
                 case "STATE":
-                    var state = ModConfig.Instance.Map.States
-                        .FirstOrDefault(s => s.Provinces.Any(p => p.Id == targetProvinceId));
+                    var state = ModManager.Mod.Map.States
+                        .FirstOrDefault(s => s.Provinces.Any(p => p.Id.AsInt() == targetProvinceId));
                     if (state != null)
                     {
                         _markedElement = new MarkEventArg { MarkedState = state };
@@ -272,8 +275,8 @@ namespace ModdingManager
                     break;
 
                 case "PROVINCE":
-                    var province = ModConfig.Instance.Map.Provinces
-                        .FirstOrDefault(p => p.Id == targetProvinceId);
+                    var province = ModManager.Mod.Map.Provinces
+                        .FirstOrDefault(p => p.Id.AsInt() == targetProvinceId);
                     if (province != null)
                     {
                         _markedElement = new MarkEventArg { MarkedProvince = province };
@@ -281,8 +284,8 @@ namespace ModdingManager
                     break;
 
                 case "STRATEGIC":
-                    var region = ModConfig.Instance.Map.StrategicRegions
-                        .FirstOrDefault(r => r.Provinces.Any(p => p.Id == targetProvinceId));
+                    var region = ModManager.Mod.Map.StrategicRegions
+                        .FirstOrDefault(r => r.Provinces.Any(p => p.Id.AsInt() == targetProvinceId));
                     if (region != null)
                     {
                         _markedElement = new MarkEventArg { MarkedRegion = region };
@@ -290,8 +293,8 @@ namespace ModdingManager
                     break;
 
                 case "COUNTRY":
-                    var country = ModConfig.Instance.Map.Countries
-                        .FirstOrDefault(c => c.States.Any(s => s.Provinces.Any(p => p.Id == targetProvinceId)));
+                    var country = ModManager.Mod.Map.Countries
+                        .FirstOrDefault(c => c.States.Any(s => s.Provinces.Any(p => p.Id.AsInt() == targetProvinceId)));
                     if (country != null)
                     {
                         _markedElement = new MarkEventArg { MarkedCountry = country };
@@ -320,19 +323,19 @@ namespace ModdingManager
         #endregion
         #region Helper Methods
 
-        private StateConfig GetStateForProvince(int? provinceId)
+        private StateConfig GetStateForProvince(Identifier? provinceId)
         {
-            return ModConfig.Instance.Map.States?.FirstOrDefault(s =>
+            return ModManager.Mod.Map.States?.FirstOrDefault(s =>
                 s.Provinces?.Any(p => p.Id == provinceId) == true);
         }
-        private StrategicRegionConfig GetRegionForProvince(int? provinceId)
+        private StrategicRegionConfig GetRegionForProvince(Identifier? provinceId)
         {
-            return ModConfig.Instance.Map.StrategicRegions?.FirstOrDefault(s =>
+            return ModManager.Mod.Map.StrategicRegions?.FirstOrDefault(s =>
                 s.Provinces?.Any(p => p.Id == provinceId) == true);
         }
-        private CountryConfig GetCountryForState(int? stateId)
+        private CountryConfig GetCountryForState(Identifier? stateId)
         {
-            return ModConfig.Instance.Map.Countries?.FirstOrDefault(c =>
+            return ModManager.Mod.Countries?.FirstOrDefault(c =>
                 c.States?.Any(s => s.Id == stateId) == true);
         }
 

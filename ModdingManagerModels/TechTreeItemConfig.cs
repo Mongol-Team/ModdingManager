@@ -6,7 +6,7 @@ namespace ModdingManagerModels
     public class TechTreeItemConfig : IConfig
     {
         public Identifier Id { get; set; }
-        public string OldId { get; set; }
+        public Identifier OldId { get; set; }
         public int GridX { get; set; }
         public int GridY { get; set; }
         public bool IsBig { get; set; }

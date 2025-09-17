@@ -48,7 +48,7 @@ namespace ModdingManagerClassLib.Composers
                 var states = new List<StateConfig>();
                 foreach (var state in techs.Values)
                 {
-                    var stateConfig = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.AsInt() == state);
+                    var stateConfig = ModManager.Mod.States.FirstOrDefault(s => s.Id.AsInt() == state);
                     if (stateConfig != null)
                         states.Add(stateConfig);
                 }
@@ -89,7 +89,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     if (var != null && int.TryParse(var.Value.ToString(), out int isCore))
                     {
-                        var state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.AsInt() == int.Parse(var.Name));
+                        var state = ModManager.Mod.States.FirstOrDefault(s => s.Id.AsInt() == int.Parse(var.Name));
                         if (state != null)
                             stateCores[state] = isCore != 0;
                     }

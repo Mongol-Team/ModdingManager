@@ -2,6 +2,7 @@
 using BCnEncoder.Shared;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Drawing;
 using System.Drawing.Imaging;

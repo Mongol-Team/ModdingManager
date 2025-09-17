@@ -5,6 +5,7 @@ using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels.Types.ObjectCacheData;
 using System.Windows;
+using ModdingManager.managers.@base;
 
 namespace ModdingManager
 {
@@ -24,37 +25,14 @@ namespace ModdingManager
         }
         public static void DeleteAllNonExistingProvLinks()
         {
-            var mapCache = ModConfig.Instance.MapCache;
-            var existingProvs = new HashSet<int>(ModConfig.Instance.Map.Provinces
+            var mapCache = ModManager.Mod.MapCache;
+            var existingProvs = new HashSet<int>(ModManager.Instance.Map.Provinces
                 .Where(p => p.Shape != null)
                 .Select(p => p.Id));
 
             Logger.AddLog("Starting cleanup of non-existing province links...");
 
-            void CleanBracketContent(Bracket bracket, string filePath, string context)
-            {
-                if (bracket == null) return;
-
-                var badParts = new List<string>();
-                foreach (var line in bracket.Content)
-                {
-                    var parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var part in parts)
-                    {
-                        if (!int.TryParse(part, out int id) || !existingProvs.Contains(id))
-                        {
-                            badParts.Add(part);
-                            Logger.AddLog($"Removed invalid province part '{part}' from {context} in file: {filePath}");
-                        }
-                    }
-                }
-
-                foreach (var badPart in badParts.Distinct())
-                {
-                    bracket.RemoveSubstringFromContentAll(badPart);
-                }
-            }
-
+           
             // Process State files
             foreach (var kvp in mapCache.StatesCache)
             {
@@ -136,8 +114,8 @@ namespace ModdingManager
             }
 
 
-            string filePath = ModConfig.Instance.MapCache.MapDefinitionCache.FilePath;
-            DefinitionCachedFile defFile = ModConfig.Instance.MapCache.MapDefinitionCache;
+            string filePath = ModManager.Mod.MapCache.MapDefinitionCache.FilePath;
+            DefinitionCachedFile defFile = ModManager.Mod.MapCache.MapDefinitionCache;
             bool modified = false;
 
             var linesToRemove = new List<string>();
@@ -168,15 +146,15 @@ namespace ModdingManager
         }
         public static void CheckProvincesDefines(ErrorPanel errorPanel)
         {
-            var mapCache = ModConfig.Instance.MapCache;
+            var mapCache = ModManager.Mod.MapCache;
             if (mapCache == null || mapCache.MapDefinitionCache == null)
             {
                 Logger.AddLog("MapCache or MapDefinitionCache is not initialized. Cannot perform province defines check.");
                 return;
             }
 
-            var lines = ModConfig.Instance.MapCache.MapDefinitionCache.DefinitionLines;
-            var filePath = ModConfig.Instance.MapCache.MapDefinitionCache.FilePath;
+            var lines = ModManager.Mod.MapCache.MapDefinitionCache.DefinitionLines;
+            var filePath = ModManager.Mod.MapCache.MapDefinitionCache.FilePath;
             if (lines.Count == 0)
             {
                 return;
@@ -318,14 +296,14 @@ namespace ModdingManager
         }
         private static void CheckStateDefines(ErrorPanel errorPanel)
         {
-            var mapCache = ModConfig.Instance.MapCache;
+            var mapCache = ModManager.Mod.MapCache;
             if (mapCache == null || mapCache.StatesCache.Count == 0)
             {
                 Logger.AddLog("MapCache or StatesCache is not initialized. Cannot perform state defines check.");
                 return;
             }
 
-            var existingProvs = new HashSet<int>(ModConfig.Instance.Map.Provinces
+            var existingProvs = new HashSet<int>(ModManager.Mod.Map.Provinces
                 .Where(p => p.Shape != null)
                 .Select(p => p.Id));
             var provinceToFile = new Dictionary<int, string>();

@@ -42,7 +42,7 @@ namespace ModdingManager
                     return;
                 }
 
-                var matchingRegiments = ModConfig.Instance.Regiments
+                var matchingRegiments = ModManager.Mod.Regiments
                     .Where(r => r.Categories != null &&
                         r.Categories.Contains(requiredCategory, StringComparer.OrdinalIgnoreCase) &&
                         (!type.Equals("Brigade", StringComparison.OrdinalIgnoreCase) ||

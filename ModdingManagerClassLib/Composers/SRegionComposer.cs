@@ -58,7 +58,7 @@ namespace ModdingManagerClassLib.Composers
                 var provincesBracket = regionBracket.Arrays.FirstOrDefault(b => b.Name == "provinces");
                 if (provincesBracket == null) continue;
 
-                var matchedProvinces = ModConfig.Instance.Map.Provinces
+                var matchedProvinces = ModManager.Mod.Map.Provinces
                     .Where(p => provincesBracket.Values.Contains(p.Id))
                     .ToList();
 

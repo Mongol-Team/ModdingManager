@@ -1,5 +1,6 @@
 ﻿using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
+using ModdingManagerModels.Types.Utils;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -469,13 +470,13 @@ namespace ModdingManager.Controls
             }
             return false;
         }
-        private Border FindElementBorderById(string id)
+        private Border FindElementBorderById(Identifier id)
         {
             foreach (UIElement child in TechGrid.Children)
             {
                 if (child is Border border)
                 {
-                    if (border.Name == id)
+                    if (border.Name == id.AsString())
                     {
                         return border;
                     }

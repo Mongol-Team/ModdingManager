@@ -16,11 +16,11 @@ public class StateWorkerHandler
 {
     public List<ProvinceConfig> ComputeProvinceShapes()
     {
-        using var mat = ModConfig.Instance.Map.Bitmap.ToMat();
+        using var mat = ModManager.Mod.Map.Bitmap.ToMat();
         if (mat.Empty())
             throw new InvalidOperationException("Не удалось загрузить provinces.bmp");
 
-        Logger.AddLog($"🔍 Начало обработки {ModConfig.Instance.Map.Provinces.Count} провинций...");
+        Logger.AddLog($"🔍 Начало обработки {ModManager.Mod.Map.Provinces.Count} провинций...");
 
         int successCount = 0;
         var timer = System.Diagnostics.Stopwatch.StartNew();
@@ -28,7 +28,7 @@ public class StateWorkerHandler
         int maxThreads = Math.Max(1, Environment.ProcessorCount / 3);
         var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxThreads };
 
-        Parallel.ForEach(ModConfig.Instance.Map.Provinces, parallelOptions, province =>
+        Parallel.ForEach(ModManager.Mod.Map.Provinces, parallelOptions, province =>
         {
             try
             {
@@ -94,10 +94,10 @@ public class StateWorkerHandler
         timer.Stop();
         Logger.AddLog("\n====================================");
         Logger.AddLog($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
-        Logger.AddLog($"Успешно: {successCount} | Не удалось: {ModConfig.Instance.Map.Provinces.Count - successCount}");
+        Logger.AddLog($"Успешно: {successCount} | Не удалось: {ModManager.Mod.Map.Provinces.Count - successCount}");
         Logger.AddLog("====================================\n");
 
-        return ModConfig.Instance.Map.Provinces;
+        return ModManager.Mod.Map.Provinces;
     }
 
     public void ChangeState(StateConfig state, string oldName, string newName)
@@ -107,12 +107,12 @@ public class StateWorkerHandler
         //    return;
 
         //// Получаем кеш состояний
-        //var stateCache = ModConfig.Instance.MapCache.GetStateFiles();
+        //var stateCache = ModManager.Mod.MapCache.GetStateFiles();
 
         //// Если файл отсутствует в кеше, загружаем его
         //if (!stateCache.TryGetValue(state.FilePath, out var cachedFile))
         //{
-        //    ModConfig.Instance.MapCache.AddStateFile(state.FilePath);
+        //    ModManager.Mod.MapCache.AddStateFile(state.FilePath);
         //    if (!stateCache.TryGetValue(state.FilePath, out cachedFile))
         //        return; // Файл не удалось загрузить
         //}
@@ -131,8 +131,8 @@ public class StateWorkerHandler
 
         //UpdateBuildings(stateBracket, state.Buildings);
         //cachedFile.IsDirty = true;
-        //ModConfig.Instance.MapCache.MarkStateFileDirty(state.FilePath);
-        //ModConfig.Instance.MapCache.SaveDirtyStateFiles();
+        //ModManager.Mod.MapCache.MarkStateFileDirty(state.FilePath);
+        //ModManager.Mod.MapCache.SaveDirtyStateFiles();
     }
 
     private void UpdateStateName(string oldName, string newName, string newValue)
@@ -174,9 +174,9 @@ public class StateWorkerHandler
 
         //    // Обновляем кэш
         //    newVar.AddProperty("sourcePath", filePath1);
-        //    ModConfig.Instance.LocCache.StateLocalisation.RemoveAll(v =>
+        //    ModManager.Mod.LocCache.StateLocalisation.RemoveAll(v =>
         //        v.Value.ToString().Trim('"').Equals(oldName, StringComparison.OrdinalIgnoreCase));
-        //    ModConfig.Instance.LocCache.StateLocalisation.Add(newVar);
+        //    ModManager.Mod.LocCache.StateLocalisation.Add(newVar);
         //}
         //catch (Exception ex)
         //{
@@ -252,11 +252,11 @@ public class StateWorkerHandler
       //          throw new FileNotFoundException($"Не найден definition.csv ни в моде, ни в игре: {gameDefinitions}");
 
       //      File.Copy(gameDefinitions, modDefinitions, true);
-      //      ModConfig.Instance.MapCache.MapDefinitionCache = new(modDefinitions);
+      //      ModManager.Mod.MapCache.MapDefinitionCache = new(modDefinitions);
       //  }
 
       //  // Работаем через кеш
-      //  var definitionsContent = ModConfig.Instance.MapCache.MapDefinitionCache;
+      //  var definitionsContent = ModManager.Mod.MapCache.MapDefinitionCache;
       //  var lines = definitionsContent.DefinitionLines;
 
       //  int lineIndex = lines.FindIndex(line =>
@@ -331,12 +331,12 @@ public class StateWorkerHandler
 
 
       //  // 3. Обновление Victory Points в файлах состояний через кеш
-      //  if (ModConfig.Instance.MapCache.ProvinceIndex == null)
+      //  if (ModManager.Mod.MapCache.ProvinceIndex == null)
       //  {
-      //      ModConfig.Instance.MapCache.BuildProvinceIndex();
+      //      ModManager.Mod.MapCache.BuildProvinceIndex();
       //  }
 
-      //  if (ModConfig.Instance.MapCache.ProvinceIndex.TryGetValue(province.Id, out var stateInfo))
+      //  if (ModManager.Mod.MapCache.ProvinceIndex.TryGetValue(province.Id, out var stateInfo))
       //  {
       //      var (fileKey, stateBracket) = stateInfo;
 
@@ -375,9 +375,9 @@ public class StateWorkerHandler
       //      }
 
       //      // Помечаем файл как измененный
-      //      ModConfig.Instance.MapCache.MarkStateFileDirty(fileKey);
+      //      ModManager.Mod.MapCache.MarkStateFileDirty(fileKey);
 
-      //      ModConfig.Instance.MapCache.SaveDirtyStateFiles();
+      //      ModManager.Mod.MapCache.SaveDirtyStateFiles();
       //  }
     }
     public void ChangeStrategicRegions(List<StrategicRegionConfig> regions)
