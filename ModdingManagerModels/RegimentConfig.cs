@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.Utils;
+﻿using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 using System.Text.Json.Serialization;
 
@@ -11,7 +12,7 @@ namespace ModdingManagerModels
 
         [JsonIgnore]
         public Image Icon { get; set; }
-
+        public ConfigLocalisation Localisation { get; set; }
         public List<string> Categories { get; set; }
         public int X { get; set; }
         public int Y { get; set; }

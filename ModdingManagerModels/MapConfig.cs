@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.Utils;
+﻿using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 
 namespace ModdingManagerModels
@@ -6,6 +7,7 @@ namespace ModdingManagerModels
     public class MapConfig : IConfig
     {
         public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
         public List<StateConfig> States { get; set; }
         public List<ProvinceConfig> Provinces { get; set; }
         public List<StrategicRegionConfig> StrategicRegions { get; set; }

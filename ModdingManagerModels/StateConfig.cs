@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.Utils;
+﻿using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 using System.Text.Json.Serialization;
 
@@ -10,6 +11,7 @@ namespace ModdingManagerModels
         public List<ProvinceConfig> Provinces { get; set; }
         [JsonIgnore]
         public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
         public Color Color { get; set; }
         [JsonIgnore]
         public string FilePath { get; set; }

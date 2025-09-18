@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.Utils;
+﻿using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 using System.Text.Json.Serialization;
 
@@ -7,6 +8,7 @@ namespace ModdingManagerModels
     public class CountryConfig : IConfig
     {
         public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
         public int? Capital { get; set; }
         public string? CountryFileName { get; set; }
         public string? GraphicalCulture { get; set; }

@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.Utils;
+﻿using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 using System.Text.Json.Serialization;
 namespace ModdingManagerModels
@@ -6,7 +7,9 @@ namespace ModdingManagerModels
     public class TechTreeItemConfig : IConfig
     {
         public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
         public Identifier OldId { get; set; }
+
         public int GridX { get; set; }
         public int GridY { get; set; }
         public bool IsBig { get; set; }

@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.ObectCacheData;
+﻿using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.ObectCacheData;
 using ModdingManagerModels.Types.Utils;
 
 namespace ModdingManagerModels
@@ -6,6 +7,7 @@ namespace ModdingManagerModels
     public class ScriptedTriggerConfig : IConfig
     {
         public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
         public List<Trigger> Triggers { get; set; } = new List<Trigger>();
     }
 }

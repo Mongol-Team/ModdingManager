@@ -1,10 +1,12 @@
-﻿using ModdingManagerModels.Types.Utils;
+﻿using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 
 namespace ModdingManagerModels
 {
     public class IdeaConfig : IConfig
     {
         public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
         public string NameLocKey { get; set; }
         public string Description { get; set; }
         public string Tag { get; set; }

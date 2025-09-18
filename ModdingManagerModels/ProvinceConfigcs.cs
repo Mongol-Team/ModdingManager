@@ -1,5 +1,6 @@
 ﻿using ModdingManagerModels.Args;
 using ModdingManagerModels.Enums;
+using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 using System.Text.Json.Serialization;
@@ -10,6 +11,7 @@ namespace ModdingManagerModels
     {
         [JsonIgnore]
         public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
         public string Name { get; set; }
         public Color Color { get; set; }
         public bool IsCoastal { get; set; }

@@ -1,4 +1,5 @@
 ﻿using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 
@@ -7,6 +8,7 @@ namespace ModdingManagerModels.GfxTypes
     public class ProgressbarType : IConfig, IGfx
     {
         public Identifier Id { get; set; }              // "GFX_<name>"
+        public ConfigLocalisation Localisation { get; set; }
         public string TexturePath { get; set; }      // "<path>"
         public string SecondTexturePath { get; set; } 
         public Bitmap Content { get; set; }

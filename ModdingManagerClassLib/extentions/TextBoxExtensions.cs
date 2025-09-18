@@ -34,6 +34,20 @@ namespace ModdingManagerClassLib.Extentions
             }
             rtb.Document = document;
         }
+        public static void AddLine(this System.Windows.Controls.RichTextBox rtb, string line)
+        {
+            if (rtb.Document == null)
+                rtb.Document = new FlowDocument();
+
+            if (rtb.Document.Blocks.LastBlock is not Paragraph paragraph)
+            {
+                paragraph = new Paragraph();
+                rtb.Document.Blocks.Add(paragraph);
+            }
+
+            paragraph.Inlines.Add(new Run(line + "\n"));
+        }
+
 
         public static List<string> GetLines(this RichTextBox rtb)
         {

@@ -25,7 +25,11 @@ namespace ModdingManager
             InitializeComponent();
             _presenter = new CountryPresenter(this);
         }
-        public ConfigLocalisation Localisation { get; set; }
+        public ConfigLocalisation Localisation
+        {
+            get;
+            set;
+        }
         public Identifier Tag
         {
             get => new(TagBox.Text);
@@ -164,23 +168,47 @@ namespace ModdingManager
             }
         }
 
-        public List<string>? Ideas
+        public List<IdeaConfig>? Ideas
         {
-            get => StartingIdeasBox.GetLines();
+            get
+            {
+                List<IdeaConfig> result = new List<IdeaConfig>();
+                foreach (string ideo in StartingIdeasBox.GetLines())
+                {
+                    IdeaConfig cfg = ModManager.Mod.Ideas.FindById(ideo);
+                    result.Add(cfg);
+                }
+                return result;  
+            }
             set
             {
                 StartingIdeasBox.Document.Blocks.Clear();
-                StartingIdeasBox.SetLines(value);
+                foreach (IdeaConfig cfg in value)
+                { 
+                    StartingIdeasBox.AddLine(cfg.Id.AsString());
+                }
             }
         }
 
-        public List<string>? Characters
+        public List<CountryCharacterConfig>? Characters
         {
-            get => RecruitingCharactersBox.GetLines();
+            get
+            {
+                List<CountryCharacterConfig> result = new List<CountryCharacterConfig>();
+                foreach (var line in RecruitingCharactersBox.GetLines())
+                {
+                    CountryCharacterConfig cfg = ModManager.Mod.Characters.FindById(line);
+                    result.Add(cfg);
+                }
+                return result;
+            }
             set
             {
                 RecruitingCharactersBox.Document.Blocks.Clear();
-                RecruitingCharactersBox.SetLines(value);
+                foreach (CountryCharacterConfig cfg in value)
+                {
+                    RecruitingCharactersBox.AddLine(cfg.Id.AsString());
+                }
             }
         }
 

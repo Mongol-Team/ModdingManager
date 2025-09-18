@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.Utils;
+﻿using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,8 @@ namespace ModdingManagerModels
 {
     public class BuildingConfig : IConfig
     {
-        public Identifier Id { get; set; }  
+        public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
         public int BaseCost { get; set; }
         public int PerLevelCost { get; set; }
         public int PerControlledBuildingExtraCost { get; set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModdingManagerModels.Types.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,8 @@ namespace ModdingManagerModels.Interfaces
 {
     public interface IModifier
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public Identifier Id { get; set; }
+        
 
     }
 }

@@ -1,8 +1,10 @@
 ﻿using ModdingManager.Controls;
 using ModdingManager.Intefaces;
+using ModdingManager.managers.@base;
 using ModdingManager.Presenters;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
+using ModdingManagerModels.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -151,10 +153,34 @@ namespace ModdingManager
             set => SetRichTextBoxLines(EffectBox, value);
         }
 
-        public List<string> Modifiers
+        public Dictionary<ModifierDefinitionConfig, object> Modifiers
         {
-            get => GetRichTextBoxLines(ModdifierBox);
-            set => SetRichTextBoxLines(ModdifierBox, value);
+            get
+            {
+                Dictionary<ModifierDefinitionConfig, object> mods = new Dictionary<ModifierDefinitionConfig, object>();
+                foreach (string modstr in ModdifierBox.GetLines())
+                {
+                    string[] splited = modstr.Split(':');
+                    if (splited.Length != 2)
+                    {
+                        continue;
+                    }
+                    double.TryParse(splited[1], out double value);
+                    if (value == null || value == 0)
+                    {
+                        continue;
+                    }
+                    mods.Add(ModManager.Mod.ModifierDefenitions.FindById(splited[0]), value);
+                }
+                return mods;
+            }
+            set
+            {
+                foreach (var kvp in value)
+                {
+                    ModdifierBox.AddLine($"{kvp.Key}:{kvp.Value}");
+                }
+            }
         }
 
         public string AiWillDo
@@ -227,7 +253,7 @@ namespace ModdingManager
             Enables = new List<string>();
             Allowed = new List<string>();
             Effects = new List<string>();
-            Modifiers = new List<string>();
+            Modifiers = new Dictionary<ModifierDefinitionConfig, object>();
             AiWillDo = string.Empty;
             Dependencies = new List<string>();
             Categories = string.Empty;

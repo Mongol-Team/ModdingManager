@@ -1,5 +1,6 @@
 ﻿using ModdingManager.Controls;
 using ModdingManagerModels;
+using ModdingManagerModels.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

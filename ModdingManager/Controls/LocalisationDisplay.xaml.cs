@@ -79,7 +79,7 @@ namespace ModdingManager.Controls
                 case RegimentConfig regim:
                     _localisation.Data.Add($"{regim.Id}:", "");
                     break;
-                case IConfig genericConfig:   // обработка других реализаций
+                case IConfig genericConfig:
                     _localisation.Data.Add($"{genericConfig.Id}:", "");
                     break;
                 default:

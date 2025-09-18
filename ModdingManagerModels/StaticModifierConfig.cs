@@ -1,4 +1,5 @@
 ﻿using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace ModdingManagerModels
 {
     public class StaticModifierConfig : IModifier
     {
-        public string Id { get; set; }
+        public Identifier Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }

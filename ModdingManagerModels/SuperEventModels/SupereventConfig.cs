@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.Utils;
+﻿using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 using static ModdingManagerModels.SuperEventModels.SuperEventGuiElements;
 
 namespace ModdingManagerModels.SuperEventModels
@@ -6,6 +7,7 @@ namespace ModdingManagerModels.SuperEventModels
     public class SupereventConfig : IConfig
     {
         public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
         public string SoundPath { get; set; }
         public string Header { get; set; }
         public string Description { get; set; }
