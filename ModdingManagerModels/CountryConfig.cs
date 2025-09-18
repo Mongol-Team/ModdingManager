@@ -26,7 +26,7 @@ namespace ModdingManagerModels
         [JsonIgnore]
 
         public List<StateConfig> States { get; set; }
-        public Dictionary<string, Bitmap>? CountryFlags { get; set; }
+        public Dictionary<IdeologyConfig, Bitmap>? CountryFlags { get; set; }
         public Dictionary<IdeologyConfig, int>? PartyPopularities { get; set; }
         public List<IdeaConfig>? Ideas { get; set; } = new List<IdeaConfig>();
         public List<CountryCharacterConfig>? Characters { get; set; } = new List<CountryCharacterConfig>();

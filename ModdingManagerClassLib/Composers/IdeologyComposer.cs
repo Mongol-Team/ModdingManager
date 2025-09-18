@@ -136,7 +136,7 @@ namespace ModdingManagerClassLib.Composers
             {
                 foreach (var varItem in modsBracket.SubVars)
                 {
-                    var mod = ModManager.Mod.ModifierDefenitions.Where(r => r.Id.AsString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
+                    var mod = ModManager.Mod.ModifierDefenitions.Where(r => r.Id.ToString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
                     {
                         Logger.AddLog($"Не удалось добавить модифер с Id = {(varItem.Value as HoiReference).Value}");
@@ -150,7 +150,7 @@ namespace ModdingManagerClassLib.Composers
             {
                 foreach (var varItem in factionModsBracket.SubVars)
                 {
-                    var mod = ModManager.Mod.ModifierDefenitions.Where(r => r.Id.AsString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
+                    var mod = ModManager.Mod.ModifierDefenitions.Where(r => r.Id.ToString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
                     {
                         Logger.AddLog($"Не удалось добавить модифер для фракции с Id = {(varItem.Value as HoiReference).Value}");

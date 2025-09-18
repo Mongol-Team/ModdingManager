@@ -11,13 +11,11 @@ using MessageBox = System.Windows.MessageBox;
 public class CountryHandler
 {
     public CountryConfig Config { get; set; }
-    private LocalizationBlock country_local;
 
-    public CountryHandler(CountryConfig config, LocalizationBlock country_local)
+    public CountryHandler(CountryConfig config)
     {
         {
             Config = config;
-            this.country_local = country_local;
         }
 
     }
@@ -69,14 +67,14 @@ public class CountryHandler
     }
     public void AddCountryTag()
     {
-        if (this.Config.Id.AsString().Length != 3)
+        if (this.Config.Id.ToString().Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
         string tagsDir = Path.Combine(ModManager.ModDirectory, "common", "country_tags");
-        string countryTag = this.Config.Id.AsString();
+        string countryTag = this.Config.Id.ToString();
 
         string countryFileName = this.Config.CountryFileName;
         if (string.IsNullOrWhiteSpace(countryFileName))
@@ -148,7 +146,7 @@ public class CountryHandler
 
     public void UpdateStateOwnership()
     {
-        if (string.IsNullOrWhiteSpace(this.Config.Id.AsString()) || this.Config.Id.AsString().Length != 3)
+        if (string.IsNullOrWhiteSpace(this.Config.Id.ToString()) || this.Config.Id.ToString().Length != 3)
         {
             MessageBox.Show("Не указаны стейты или тег страны неверный!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
@@ -162,13 +160,13 @@ public class CountryHandler
             Directory.CreateDirectory(modStatesDir);
         }
 
-        string countryTag = this.Config.Id.AsString();
+        string countryTag = this.Config.Id.ToString();
         var stateEntries = this.Config.StateCores;
         Encoding utf8WithoutBom = new UTF8Encoding(false);
 
         foreach (var entry in stateEntries)
         {
-            int stateId = entry.Key.Id.AsInt();
+            int stateId = entry.Key.Id.ToInt();
             bool isCore = entry.Value;
             string[] stateFiles = Directory.GetFiles(modStatesDir, $"{stateId}-*.txt");
 
@@ -271,7 +269,7 @@ public class CountryHandler
 
     public void CreateCountryHistoryFile()
     {
-        if (this.Config.Id.AsString().Length != 3)
+        if (this.Config.Id.ToString().Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов (например, ANG).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
@@ -370,7 +368,7 @@ public class CountryHandler
                 {
                     foreach (IdeaConfig idea in this.Config.Ideas)
                     {
-                        string trimmedIdea = idea.Id.AsString().Trim();
+                        string trimmedIdea = idea.Id.ToString().Trim();
                         if (!string.IsNullOrEmpty(trimmedIdea))
                         {
                             writer.WriteLine($"add_ideas = {trimmedIdea}");
@@ -383,7 +381,7 @@ public class CountryHandler
                 {
                     foreach (CountryCharacterConfig character in this.Config.Characters)
                     {
-                        string trimmedChar = character.Id.AsString().Trim();
+                        string trimmedChar = character.Id.ToString().Trim();
                         if (!string.IsNullOrEmpty(trimmedChar))
                         {
                             writer.WriteLine($"recruit_character = {trimmedChar}");
@@ -401,7 +399,7 @@ public class CountryHandler
     }
     public void CreateCommonCountriesFile()
     {
-        if (this.Config.Id.AsString().Length != 3)
+        if (this.Config.Id.ToString().Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
@@ -443,14 +441,14 @@ public class CountryHandler
     }
     public void CreateCountryFlags()
     {
-        if (this.Config.Id.AsString().Length != 3)
+        if (this.Config.Id.ToString().Length != 3)
         {
             MessageBox.Show("Тег страны должен состоять из 3 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
         string flagsDir = Path.Combine(ModManager.ModDirectory, "gfx", "flags");
-        string countryTag = this.Config.Id.AsString();
+        string countryTag = this.Config.Id.ToString();
 
         try
         {

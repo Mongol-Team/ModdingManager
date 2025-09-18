@@ -147,34 +147,7 @@ namespace ModdingManager
 
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            string relativePath = Path.Combine("..", "..", "..", "data", "dir.json");
-            string fullPath = Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
-
-            try
-            {
-                string json = File.ReadAllText(fullPath);
-                var path = JsonSerializer.Deserialize<PathConfig>(json);
-                GameDirBox.Text = path.GamePath;
-                DirBox.Text = path.ModPath;
-                ModManager.ModDirectory = DirBox.Text;
-                ModManager.GameDirectory = GameDirBox.Text;
-                ModConfig.LoadInstance();
-                Logger.AddLog(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
-                Logger.AddLog(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
-                Logger.AddLog(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage) + Directory.Exists(Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)));
-                Logger.AddLog(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace") + Directory.Exists(Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
-
-                _isLoaded = true;
-            }
-            catch (Exception ex)
-            {
-                Logger.AddLog($"[MAIN Form] On load exeption :{ex.Message + ex.StackTrace}");
-            }
-
-        }
-
+        
         private void CharCreator_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(DirBox.Text) || !string.IsNullOrEmpty(GameDirBox.Text))

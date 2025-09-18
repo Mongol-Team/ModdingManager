@@ -88,7 +88,7 @@ namespace ModdingManagerClassLib.Composers
                 .OfType<int>()
                 .ToList() ?? new List<int>();
             var matchedProvinces = ModManager.Mod.Map.Provinces
-                .Where(p => provinceIds.Contains(p.Id.AsInt()))
+                .Where(p => provinceIds.Contains(p.Id.ToInt()))
                 .ToList();
 
             return new StateConfig

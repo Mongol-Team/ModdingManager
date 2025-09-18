@@ -15,7 +15,7 @@ namespace ModdingManagerModels
         public Bitmap Bitmap { get; set; }
         public Point? GetProvincePos(int provinceId)
         {
-            var province = Provinces?.FirstOrDefault(p => p.Id.AsInt() == provinceId);
+            var province = Provinces?.FirstOrDefault(p => p.Id.ToInt() == provinceId);
             if (province?.Shape == null)
                 return null;
 

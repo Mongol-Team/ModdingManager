@@ -51,7 +51,7 @@ namespace ModdingManager.classes.managers.gfx
                 {
                     using (var bmp = item.Image)
                     {
-                        bmp.SaveAsDDS(techIconDir, item.Id.AsString(), 64, 64);
+                        bmp.SaveAsDDS(techIconDir, item.Id.ToString(), 64, 64);
                     }
                 }
                 catch (Exception ex)

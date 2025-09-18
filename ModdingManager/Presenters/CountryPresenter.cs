@@ -12,7 +12,7 @@ public class CountryPresenter
     public CountryPresenter(ICountryView view)
     {
         _view = view;
-        _handler = new CountryHandler(_currentConfig, view.Localisation);
+        _handler = new CountryHandler(_currentConfig);
 
         _view.ApplyClicked += OnApplyClicked;
         //_view.LoadConfigClicked += ConfigManager.OnLoadConfigClickedEvent;

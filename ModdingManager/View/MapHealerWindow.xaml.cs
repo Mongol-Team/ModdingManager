@@ -510,7 +510,14 @@ namespace ModdingManager
         //    Logger.AddLog("State defines check completed.");
         }
 
+        private void CheckStateDefines_Click(object sender, RoutedEventArgs e)
+        {
 
+        }
+        private void CheckRegionDefinesButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
         private void CheckProvDefines_Click(object sender, RoutedEventArgs e)
         {
         //    ErrorPanel errorPanel = new ErrorPanel();

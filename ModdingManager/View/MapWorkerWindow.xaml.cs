@@ -140,7 +140,7 @@ namespace ModdingManager
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon polygon && polygon.Tag is int provinceId)
             {
-                _draggedProvince = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.AsInt() == provinceId);
+                _draggedProvince = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == provinceId);
                 _dragStartPoint = e.GetPosition(Display);
             }
         }
@@ -162,7 +162,7 @@ namespace ModdingManager
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is int targetProvinceId)
             {
-                var targetProvince = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.AsInt() == targetProvinceId);
+                var targetProvince = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
 
                 switch (CurrentMapLayer)
                 {
@@ -200,7 +200,7 @@ namespace ModdingManager
                 }
                 ProvinceTransferRequested?.Invoke(new ProvinceTransferArg
                 {
-                    ProvinceId = sourceProvince.Id.HasValue() ? sourceProvince.Id.AsInt() : -1,
+                    ProvinceId = sourceProvince.Id.HasValue() ? sourceProvince.Id.ToInt() : -1,
                     SourceState = sourceState,
                     TargetState = targetState
                 });
@@ -219,7 +219,7 @@ namespace ModdingManager
                 }
                 ProvinceTransferRequested?.Invoke(new ProvinceTransferArg
                 {
-                    ProvinceId = sourceProvince.Id.HasValue() ? sourceProvince.Id.AsInt() : -1,
+                    ProvinceId = sourceProvince.Id.HasValue() ? sourceProvince.Id.ToInt() : -1,
                     SourceRegion = sourceState,
                     TargetRegion = targetState
                 });
@@ -243,9 +243,9 @@ namespace ModdingManager
                 }
                 StateTransferRequested?.Invoke(new StateTransferArg
                 {
-                    StateId = sourceState.Id.HasValue() ? (int?)sourceState.Id.AsInt() : null,
-                    SourceCountryTag = sourceCountry.Id.HasValue() ? sourceCountry.Id.AsString() : "None",
-                    TargetCountryTag = targetCountry.Id.HasValue() ? targetCountry.Id.AsString() : "None"
+                    StateId = sourceState.Id.HasValue() ? (int?)sourceState.Id.ToInt() : null,
+                    SourceCountryTag = sourceCountry.Id.HasValue() ? sourceCountry.Id.ToString() : "None",
+                    TargetCountryTag = targetCountry.Id.HasValue() ? targetCountry.Id.ToString() : "None"
                 });
             }
         }
@@ -267,7 +267,7 @@ namespace ModdingManager
             {
                 case "STATE":
                     var state = ModManager.Mod.Map.States
-                        .FirstOrDefault(s => s.Provinces.Any(p => p.Id.AsInt() == targetProvinceId));
+                        .FirstOrDefault(s => s.Provinces.Any(p => p.Id.ToInt() == targetProvinceId));
                     if (state != null)
                     {
                         _markedElement = new MarkEventArg { MarkedState = state };
@@ -276,7 +276,7 @@ namespace ModdingManager
 
                 case "PROVINCE":
                     var province = ModManager.Mod.Map.Provinces
-                        .FirstOrDefault(p => p.Id.AsInt() == targetProvinceId);
+                        .FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
                     if (province != null)
                     {
                         _markedElement = new MarkEventArg { MarkedProvince = province };
@@ -285,7 +285,7 @@ namespace ModdingManager
 
                 case "STRATEGIC":
                     var region = ModManager.Mod.Map.StrategicRegions
-                        .FirstOrDefault(r => r.Provinces.Any(p => p.Id.AsInt() == targetProvinceId));
+                        .FirstOrDefault(r => r.Provinces.Any(p => p.Id.ToInt() == targetProvinceId));
                     if (region != null)
                     {
                         _markedElement = new MarkEventArg { MarkedRegion = region };
@@ -294,7 +294,7 @@ namespace ModdingManager
 
                 case "COUNTRY":
                     var country = ModManager.Mod.Map.Countries
-                        .FirstOrDefault(c => c.States.Any(s => s.Provinces.Any(p => p.Id.AsInt() == targetProvinceId)));
+                        .FirstOrDefault(c => c.States.Any(s => s.Provinces.Any(p => p.Id.ToInt() == targetProvinceId)));
                     if (country != null)
                     {
                         _markedElement = new MarkEventArg { MarkedCountry = country };

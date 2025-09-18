@@ -33,7 +33,7 @@ namespace ModdingManagerClassLib.Composers
                     var configs = ParseConfig(filePath, strategicMap);
                     foreach (var config in configs)
                     {
-                        strategicMap[config.Id.AsInt()] = config;
+                        strategicMap[config.Id.ToInt()] = config;
                     }
                 }
             }

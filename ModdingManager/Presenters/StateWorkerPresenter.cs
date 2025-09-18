@@ -212,7 +212,7 @@ public class StateWorkerPresenter
     public void SearchProvince(int id)
     {
         SearchAndCenterView(_view.ProvinceIDLayer, id.ToString());
-        ProvinceConfig prov = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.AsInt() == id);
+        ProvinceConfig prov = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == id);
         MarkEventArg markEventArg = new MarkEventArg
         {
             MarkedProvince = prov
@@ -223,7 +223,7 @@ public class StateWorkerPresenter
     public void SearchState(int id)
     {
         SearchAndCenterView(_view.StateIDLayer, id.ToString());
-        StateConfig state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.AsInt() == id);
+        StateConfig state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == id);
         MarkEventArg markEventArg = new MarkEventArg
         {
             MarkedState = state
@@ -233,7 +233,7 @@ public class StateWorkerPresenter
     public void SearchCountry(int id)
     {
         SearchAndCenterView(_view.CountryIDLayer, id.ToString());
-        CountryConfig country = ModManager.Mod.Map.Countries.FirstOrDefault(c => c.Id.AsString() == id.ToString());
+        CountryConfig country = ModManager.Mod.Map.Countries.FirstOrDefault(c => c.Id.ToString() == id.ToString());
         MarkEventArg markEventArg = new MarkEventArg
         {
             MarkedCountry = country
@@ -243,7 +243,7 @@ public class StateWorkerPresenter
     public void SearchStrategicRegion(int id)
     {
         SearchAndCenterView(_view.StrategicIDLayer, id.ToString());
-        StrategicRegionConfig region = ModManager.Mod.Map.StrategicRegions.FirstOrDefault(r => r.Id.AsInt() == id);
+        StrategicRegionConfig region = ModManager.Mod.Map.StrategicRegions.FirstOrDefault(r => r.Id.ToInt() == id);
         MarkEventArg markEventArg = new MarkEventArg
         {
             MarkedRegion = region
@@ -360,7 +360,7 @@ public class StateWorkerPresenter
     {
         var sourceRegion = ModManager.Mod.Map.StrategicRegions.FirstOrDefault(s => s.Id == arg.SourceRegion?.Id);
         var targetRegion = ModManager.Mod.Map.StrategicRegions.FirstOrDefault(s => s.Id == arg.TargetRegion?.Id);
-        var province = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.AsInt() == arg.ProvinceId);
+        var province = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
 
         if (targetRegion == null || province == null)
             return;
@@ -373,17 +373,17 @@ public class StateWorkerPresenter
             $"Province: {arg.ProvinceId}\nRegion: {arg.TargetRegion.Id}");
 
         //_handler.MoveProvinceToStrategicRegion(arg.ProvinceId, sourceRegion, targetRegion);
-        UpdateTextBlockPosition(arg.TargetRegion.Id.AsInt(), _view.CurrentMapState);
+        UpdateTextBlockPosition(arg.TargetRegion.Id.ToInt(), _view.CurrentMapState);
         if (arg.SourceRegion != null)
         {
-            UpdateTextBlockPosition(arg.SourceRegion.Id.AsInt(), _view.CurrentMapState);
+            UpdateTextBlockPosition(arg.SourceRegion.Id.ToInt(), _view.CurrentMapState);
         }
     }
     private void UpdateStateLayer(ProvinceTransferArg arg)
     {
         var sourceState = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id == arg.SourceState?.Id);
         var targetState = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id == arg.TargetState?.Id);
-        var province = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.AsInt() == arg.ProvinceId);
+        var province = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
 
         if (targetState == null || province == null)
             return;
@@ -396,10 +396,10 @@ public class StateWorkerPresenter
             $"Province: {arg.ProvinceId}\nState: {arg.TargetState.Id}");
 
         //_handler.MoveProvinceToState(arg.ProvinceId, sourceState, targetState);
-        UpdateTextBlockPosition(arg.TargetState.Id.HasValue() ? arg.TargetState.Id.AsInt()  : -1, _view.CurrentMapState);
+        UpdateTextBlockPosition(arg.TargetState.Id.HasValue() ? arg.TargetState.Id.ToInt()  : -1, _view.CurrentMapState);
         if (arg.SourceState != null)
         {
-            UpdateTextBlockPosition(arg.SourceState.Id.HasValue() ? arg.SourceState.Id.AsInt() : -1, _view.CurrentMapState);
+            UpdateTextBlockPosition(arg.SourceState.Id.HasValue() ? arg.SourceState.Id.ToInt() : -1, _view.CurrentMapState);
         }
     }
 
@@ -410,7 +410,7 @@ public class StateWorkerPresenter
         if (state == null)
             return;
 
-        var country = GetCountryForState(state.Id.AsInt());
+        var country = GetCountryForState(state.Id.ToInt());
         if (country == null)
             return;
 
@@ -424,14 +424,14 @@ public class StateWorkerPresenter
 
     private void UpdateCountryLayerAfterStateTransfer(StateTransferArg arg)
     {
-        var state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.AsInt() == arg.StateId);
+        var state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == arg.StateId);
         if (state == null)
             return;
 
         var sourceCountry = ModManager.Mod.Map.Countries.FirstOrDefault(c =>
-            c.States.Any(s => s.Id.AsInt() == arg.StateId));
+            c.States.Any(s => s.Id.ToInt() == arg.StateId));
         var targetCountry = ModManager.Mod.Map.Countries.FirstOrDefault(c =>
-            c.Id.AsString() == arg.TargetCountryTag);
+            c.Id.ToString() == arg.TargetCountryTag);
 
         if (targetCountry == null)
             return;
@@ -441,9 +441,9 @@ public class StateWorkerPresenter
 
         foreach (var province in state.Provinces)
         {
-            UpdateProvinceVisual(_view.CountryRenderLayer, province.Id.AsInt(), targetCountry.Color.ToMediaColor() ?? System.Windows.Media.Color.FromArgb(255, 128, 128, 128));
-            UpdateProvinceTooltip(_view.CountryRenderLayer, province.Id.AsInt(),
-                $"Province: {province.Id}\nCountry: {targetCountry.Id.AsString()}");
+            UpdateProvinceVisual(_view.CountryRenderLayer, province.Id.ToInt(), targetCountry.Color.ToMediaColor() ?? System.Windows.Media.Color.FromArgb(255, 128, 128, 128));
+            UpdateProvinceTooltip(_view.CountryRenderLayer, province.Id.ToInt(),
+                $"Province: {province.Id}\nCountry: {targetCountry.Id.ToString()}");
         }
 
     }
@@ -548,11 +548,11 @@ public class StateWorkerPresenter
                 // Исправление 4: Отрисовываем в StrategicRenderLayer
                 DrawProvince(_view.StrategicRenderLayer, province, reg.Color,
                     $"Province: {province.Id}\nStrategic: {reg.Id}");
-                assignedProvinceIds.Add(province.Id.AsInt());
+                assignedProvinceIds.Add(province.Id.ToInt());
             }
         }
 
-        var unassigned = ModManager.Mod.Map.Provinces.Where(p => !assignedProvinceIds.Contains(p.Id.AsInt()));
+        var unassigned = ModManager.Mod.Map.Provinces.Where(p => !assignedProvinceIds.Contains(p.Id.ToInt()));
         foreach (var province in unassigned)
         {
             // Исправление 5: Отрисовываем в правильный слой
@@ -641,7 +641,7 @@ public class StateWorkerPresenter
                 foreach (var province in state.Provinces)
                 {
                     // Сохраняем связь провинция -> страна
-                    provinceToCountry[province.Id.AsInt()] = country;
+                    provinceToCountry[province.Id.ToInt()] = country;
                 }
             }
         }
@@ -649,7 +649,7 @@ public class StateWorkerPresenter
         // Отрисовываем провинции цветом их страны
         foreach (var province in ModManager.Mod.Map.Provinces)
         {
-            if (provinceToCountry.TryGetValue(province.Id.AsInt(), out var country))
+            if (provinceToCountry.TryGetValue(province.Id.ToInt(), out var country))
             {
                 DrawProvince(
                     _view.CountryRenderLayer,
@@ -695,7 +695,7 @@ public class StateWorkerPresenter
 
             if (allProvinces.Count > 0)
             {
-                var textBlocks = CreateTextBlocksUniversal(allProvinces, country.Id.AsString());
+                var textBlocks = CreateTextBlocksUniversal(allProvinces, country.Id.ToString());
                 foreach (var textBlock in textBlocks)
                 {
                     _view.CountryIDLayer.Children.Add(textBlock);
@@ -796,14 +796,14 @@ public class StateWorkerPresenter
         List<ProvinceConfig> provinces = layerType switch
         {
             "COUNTRY" => ModManager.Mod.Map.Countries
-                .FirstOrDefault(c => c.Id.AsString() == entityId.ToString())?
+                .FirstOrDefault(c => c.Id.ToString() == entityId.ToString())?
                 .States.SelectMany(s => s.Provinces)
                 .ToList(),
             "STATE" => ModManager.Mod.Map.States
-                .FirstOrDefault(s => s.Id.AsInt() == entityId)?
+                .FirstOrDefault(s => s.Id.ToInt() == entityId)?
                 .Provinces.ToList(),
             "STRATEGIC" => ModManager.Mod.Map.StrategicRegions
-                .FirstOrDefault(sr => sr.Id.AsInt() == entityId)?
+                .FirstOrDefault(sr => sr.Id.ToInt() == entityId)?
                 .Provinces.ToList(),
             _ => null
         };
@@ -845,7 +845,7 @@ public class StateWorkerPresenter
     private CountryConfig GetCountryForState(int? stateId)
     {
         return ModManager.Mod.Map.Countries?.FirstOrDefault(c =>
-            c.States?.Any(s => s.Id.AsInt() == stateId) == true);
+            c.States?.Any(s => s.Id.ToInt() == stateId) == true);
     }
     #endregion
 

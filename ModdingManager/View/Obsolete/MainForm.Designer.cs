@@ -302,7 +302,6 @@ namespace ModdingManager
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
             Text = "Главное меню";
-            Load += MainForm_Load;
             ResumeLayout(false);
             PerformLayout();
         }

@@ -26,8 +26,6 @@ namespace ModdingManager.Presenter
 
         private void WireUp()
         {
-            // аналог MainForm_Load
-            _view.Loaded += OnLoaded;
 
             // клики 1:1 с WinForms
             _view.LocConvertButton.Click += LocConvertButton_Click;
@@ -264,43 +262,7 @@ namespace ModdingManager.Presenter
                 MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
             }
         }
-        // ====== загрузка и автосохранение путей ======
-
-        private void OnLoaded(object? sender, RoutedEventArgs e)
-        {
-            string relativePath = System.IO.Path.Combine("..", "..", "..", "data", "dir.json");
-            string fullPath = System.IO.Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
-            Logger.LoggingLevel = 3;
-            try
-            {
-                string json = File.ReadAllText(fullPath);
-                var path = JsonSerializer.Deserialize<PathConfig>(json);
-
-                _view.GameDirBox.Text = path?.GamePath ?? string.Empty;
-                _view.DirBox.Text = path?.ModPath ?? string.Empty;
-
-                ModManager.ModDirectory = _view.DirBox.Text;
-                ModManager.GameDirectory = _view.GameDirBox.Text;
-
-                //ModConfig.LoadInstance();
-
-                Logger.AddLog(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")
-                                             + Directory.Exists(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
-                Logger.AddLog(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)
-                                             + Directory.Exists(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
-                Logger.AddLog(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)
-                                             + Directory.Exists(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)));
-                Logger.AddLog(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")
-                                             + Directory.Exists(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
-
-                _isLoaded = true;
-            }
-            catch (Exception ex)
-            {
-                Logger.AddLog($"[MAIN WPF] On load exception: {ex.Message}{ex.StackTrace}");
-            }
-        }
-
+        
         private void DirBoxes_TextChanged(object? sender, TextChangedEventArgs e)
         {
             if (_isLoaded)

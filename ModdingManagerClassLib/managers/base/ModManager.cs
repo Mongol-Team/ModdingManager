@@ -29,7 +29,6 @@ namespace ModdingManager.managers.@base
                 var path = JsonSerializer.Deserialize<PathConfig>(json);
                 ModDirectory = path.ModPath;
                 GameDirectory = path.GamePath;
-                //ModConfig.LoadInstance();
 
                 Logger.AddLog(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")
                                              + Directory.Exists(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));

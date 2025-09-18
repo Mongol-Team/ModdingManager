@@ -16,7 +16,7 @@ public class SuperEventHandler
 
     public void SaveSupereventAudioFile()
     {
-        if (CurrentConfig?.SoundPath == null || string.IsNullOrEmpty(CurrentConfig.Id.AsString())) return;
+        if (CurrentConfig?.SoundPath == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString())) return;
 
         try
         {
@@ -27,7 +27,7 @@ public class SuperEventHandler
             string destinationDirectory = Path.Combine(ModManager.ModDirectory, "sound", "customsound");
             Directory.CreateDirectory(destinationDirectory);
 
-            string destinationPath = Path.Combine(destinationDirectory, $"{CurrentConfig.Id.AsString()}_sound.wav");
+            string destinationPath = Path.Combine(destinationDirectory, $"{CurrentConfig.Id.ToString()}_sound.wav");
             File.Copy(sourcePath, destinationPath, overwrite: true);
         }
         catch (Exception ex)
@@ -38,7 +38,7 @@ public class SuperEventHandler
 
     public void CreateCustomAssetsFiles()
     {
-        if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id.AsString())) return;
+        if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString())) return;
 
         string soundDirectory = Path.Combine(ModManager.ModDirectory, "sound");
         Directory.CreateDirectory(soundDirectory);
@@ -126,7 +126,7 @@ public class SuperEventHandler
     /// </summary>
     public void HandleButtonsImage()
     {
-        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id.AsString())) { MessageBox.Show("GUI not loaded!"); return; }
+        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString())) { MessageBox.Show("GUI not loaded!"); return; }
         var win = CurrentConfig.Gui.Containers.FirstOrDefault();
         if (win == null) { MessageBox.Show("Gui window not found!"); return; }
 
@@ -156,7 +156,7 @@ public class SuperEventHandler
     /// </summary>
     public void SaveSupereventImages()
     {
-        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id.AsString())) return;
+        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString())) return;
         var win = CurrentConfig.Gui.Containers.FirstOrDefault();
         if (win == null) return;
 
@@ -214,7 +214,7 @@ public class SuperEventHandler
 
     public void HandleGFXFile()
     {
-        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id.AsString())) return;
+        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString())) return;
 
         string guiDir = Path.Combine(ModManager.ModDirectory, "interface");
         Directory.CreateDirectory(guiDir);
@@ -267,7 +267,7 @@ public class SuperEventHandler
 
     public void HandleGUIFile()
     {
-        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id.AsString())) return;
+        if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString())) return;
 
         var win = CurrentConfig.Gui.Containers.FirstOrDefault();
         if (win == null) return;
@@ -353,7 +353,7 @@ public class SuperEventHandler
 
     public void HandleLocalizationFiles()
     {
-        if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id.AsString()) || CurrentConfig.Gui == null) return;
+        if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString()) || CurrentConfig.Gui == null) return;
 
         try
         {
@@ -421,7 +421,7 @@ public class SuperEventHandler
 
     public void HandleScriptedGuiFile()
     {
-        if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id.AsString()) || CurrentConfig.Gui == null) return;
+        if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString()) || CurrentConfig.Gui == null) return;
 
         string dir = Path.Combine(ModManager.ModDirectory, "common", "scripted_guis");
         Directory.CreateDirectory(dir);

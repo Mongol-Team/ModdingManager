@@ -93,12 +93,12 @@ namespace ModdingManager.Controls
 
         public void EditItem(TechTreeItemConfig updatedItem)
         {
-            var border = FindElementBorderById(updatedItem.OldId.AsString() ?? updatedItem.Id.AsString());
+            var border = FindElementBorderById(updatedItem.OldId.ToString() ?? updatedItem.Id.ToString());
             if (border == null) return;
 
             if (updatedItem.OldId != null && updatedItem.OldId != updatedItem.Id)
             {
-                UpdateTechId(updatedItem.OldId.AsString(), updatedItem.Id.AsString());
+                UpdateTechId(updatedItem.OldId.ToString(), updatedItem.Id.ToString());
             }
 
             if (border.Child is Canvas innerCanvas && innerCanvas.Children[0] is Image image)
@@ -146,34 +146,34 @@ namespace ModdingManager.Controls
         {
             if (_techTree == null) return;
 
-            foreach (var pair in _techTree.ChildOf)
-            {
-                if (pair.Count == 2)
-                {
-                    var from = FindElementBorderById(pair[0]);
-                    var to = FindElementBorderById(pair[1]);
-                    if (from != null && to != null)
-                    {
-                        DrawConnection(from, to, System.Windows.Media.Brushes.Blue, isMutual: false);
-                    }
-                }
-            }
+            //foreach (var pair in _techTree.ChildOf)
+            //{
+            //    if (pair.Count == 2)
+            //    {
+            //        var from = FindElementBorderById(pair[0]);
+            //        var to = FindElementBorderById(pair[1]);
+            //        if (from != null && to != null)
+            //        {
+            //            DrawConnection(from, to, System.Windows.Media.Brushes.Blue, isMutual: false);
+            //        }
+            //    }
+            //}
 
-            foreach (var group in _techTree.Mutal)
-            {
-                for (int i = 0; i < group.Count; i++)
-                {
-                    for (int j = i + 1; j < group.Count; j++)
-                    {
-                        var a = FindElementBorderById(group[i]);
-                        var b = FindElementBorderById(group[j]);
-                        if (a != null && b != null)
-                        {
-                            DrawConnection(a, b, System.Windows.Media.Brushes.Red, isMutual: true);
-                        }
-                    }
-                }
-            }
+            //foreach (var group in _techTree.Mutal)
+            //{
+            //    for (int i = 0; i < group.Count; i++)
+            //    {
+            //        for (int j = i + 1; j < group.Count; j++)
+            //        {
+            //            var a = FindElementBorderById(group[i]);
+            //            var b = FindElementBorderById(group[j]);
+            //            if (a != null && b != null)
+            //            {
+            //                DrawConnection(a, b, System.Windows.Media.Brushes.Red, isMutual: true);
+            //            }
+            //        }
+            //    }
+            //}
         }
         public Point GetVisualCenter(Border border)
         {
@@ -317,7 +317,7 @@ namespace ModdingManager.Controls
             {
                 Width = CellSize,
                 Height = CellSize,
-                Name = item.Id.AsString(),
+                Name = item.Id.ToString(),
                 BorderBrush = System.Windows.Media.Brushes.Black,
                 BorderThickness = new Thickness(1),
                 Background = System.Windows.Media.Brushes.Transparent,
@@ -389,7 +389,7 @@ namespace ModdingManager.Controls
         private void DeleteElement(Border border)
         {
             TechGrid.Children.Remove(border);
-            var item = _techTree.Items.FirstOrDefault(i => i.Id.AsString() == border.Name);
+            var item = _techTree.Items.FirstOrDefault(i => i.Id.ToString() == border.Name);
             if (item != null)
             {
                 _techTree.Items.Remove(item);
@@ -397,7 +397,7 @@ namespace ModdingManager.Controls
             }
 
             RemoveConnectionsForElement(border);
-            RemoveFromRelations(border.Name);
+            _techTree.RemoveItem(border.Name);
         }
         private void UpdateConnectionsForElement(Border element)
         {
@@ -448,12 +448,7 @@ namespace ModdingManager.Controls
             }
         }
 
-        private void RemoveFromRelations(string elementId)
-        {
-            _techTree.ChildOf = _techTree.ChildOf.Where(p => !p.Contains(elementId)).ToList();
-            _techTree.Mutal = _techTree.Mutal.Select(g => g.Where(name => name != elementId).ToList())
-                .Where(g => g.Count > 1).ToList();
-        }
+       
         #endregion
         #region Helper Methods
         private bool IsCellOccupied(int col, int row, Border ignore = null)
@@ -494,22 +489,7 @@ namespace ModdingManager.Controls
                 }
             }
 
-            foreach (var pair in _techTree.ChildOf)
-            {
-                for (int i = 0; i < pair.Count; i++)
-                {
-                    if (pair[i] == oldId) pair[i] = newId;
-                }
-            }
-
-            foreach (var group in _techTree.Mutal)
-            {
-                for (int i = 0; i < group.Count; i++)
-                {
-                    if (group[i] == oldId) group[i] = newId;
-                }
-            }
-
+            
             var border = FindElementBorderById(oldId);
             if (border != null) border.Name = newId;
         }
@@ -530,22 +510,38 @@ namespace ModdingManager.Controls
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
-            _techTree.ChildOf.Add(new List<string> { markedIds[0], markedIds[1] });
+            var father = _techTree.GetTreeItem(markedIds[0]);
+            var child = _techTree.GetTreeItem(markedIds[1]);
+            if (father == null || child == null)
+            {
+                MessageBox.Show("Выбранные элементы не найдены в дереве технологий", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (child.ChildOf != null && child.ChildOf == null)
+            {
+                MessageBox.Show("У выбранного дочернего элемента уже есть родитель", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            child.ChildOf = father;
             RedrawAllConnections();
         }
 
         public void AddMutualConection()
         {
-            var markedIds = GetMarkedIds();
+            List<string> markedIds = GetMarkedIds();
             if (markedIds.Count < 2)
             {
-                MessageBox.Show("Выберите хотя бы два элемента для создания взаимной связи", "Ошибка",
+                MessageBox.Show("Выберите хотя бы два элемента для создания взаимоисключающей связи", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-
-            _techTree.Mutal.Add(markedIds);
+            List<TechTreeItemConfig> items = new();
+            foreach (var id in markedIds)
+            {
+                items.Add(_techTree.GetTreeItem(id));
+            }
             RedrawAllConnections();
         }
 
@@ -638,7 +634,7 @@ namespace ModdingManager.Controls
             if (element is Border border)
             {
                 string id = border.Name;
-                var item = _techTree.Items.FirstOrDefault(i => i.Id.AsString() == id);
+                var item = _techTree.Items.FirstOrDefault(i => i.Id.ToString() == id);
                 if (item != null)
                 {
                     double left = Canvas.GetLeft(border);
@@ -694,7 +690,7 @@ namespace ModdingManager.Controls
             }
             if (element == null)
                 return;
-            TechTreeItemConfig cfg = _techTree.Items.FirstOrDefault(i => i.Id.AsString() == element.Name);
+            TechTreeItemConfig cfg = _techTree.Items.FirstOrDefault(i => i.Id.ToString() == element.Name);
             var contextMenu = new ContextMenu();
 
             var deleteItem = new MenuItem { Header = "Удалить" };

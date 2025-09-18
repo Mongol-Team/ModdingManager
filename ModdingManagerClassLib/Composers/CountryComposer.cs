@@ -48,12 +48,12 @@ namespace ModdingManagerClassLib.Composers
                 var states = new List<StateConfig>();
                 foreach (var state in techs.Values)
                 {
-                    var stateConfig = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.AsInt() == state);
+                    var stateConfig = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == state);
                     if (stateConfig != null)
                         states.Add(stateConfig);
                 }
                 
-                var countryFlags = new Dictionary<string, Bitmap>();
+                var countryFlags = new Dictionary<IdeologyConfig, Bitmap>();
                 //fima
                 var partyPopularities = new Dictionary<IdeologyConfig, int>();
                 foreach (var var in file.Brackets.FindById("set_popularities").SubVars)
@@ -61,7 +61,7 @@ namespace ModdingManagerClassLib.Composers
                     if (var != null)
                     {
                         string ideologyId = var.Name;
-                        var ideology = ModManager.Mod.Ideologies.FirstOrDefault(i => i.Id.AsString() == ideologyId);
+                        var ideology = ModManager.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == ideologyId);
                         if (ideology != null && int.TryParse(var.Value.ToString(), out int popularity))
                         {
                             partyPopularities[ideology] = popularity;
@@ -89,7 +89,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     if (var != null && int.TryParse(var.Value.ToString(), out int isCore))
                     {
-                        var state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.AsInt() == int.Parse(var.Name));
+                        var state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == int.Parse(var.Name));
                         if (state != null)
                             stateCores[state] = isCore != 0;
                     }
@@ -128,7 +128,7 @@ namespace ModdingManagerClassLib.Composers
                     {
                         case "ruling_party":
                             string ideologyId = politicsvar.Value.ToString();
-                            rulingParty = ModManager.Mod.Ideologies.FirstOrDefault(i => i.Id.AsString() == ideologyId);
+                            rulingParty = ModManager.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == ideologyId);
                             break;
                         case "last_election":
                             if (DateOnly.TryParse(politicsvar.Value.ToString(), out DateOnly dt))

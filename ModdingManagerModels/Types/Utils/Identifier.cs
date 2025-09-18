@@ -13,13 +13,14 @@ namespace ModdingManagerModels.Types.Utils
             RawItendifier = rawItendifier;
         }
         public object RawItendifier { get; set; }
-        public string AsString()
-        {
-            return RawItendifier.ToString();
-        }
-        public int AsInt()
+       
+        public int ToInt()
         {
             return int.Parse(RawItendifier.ToString());
+        }
+        public string ToString()
+        {
+            return RawItendifier.ToString();
         }
         public bool HasValue()
         {

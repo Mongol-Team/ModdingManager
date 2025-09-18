@@ -54,7 +54,7 @@ namespace ModdingManager
 
                 foreach (var regiment in matchingRegiments)
                 {
-                    var item = new ToolStripMenuItem(regiment.Id.AsString())
+                    var item = new ToolStripMenuItem(regiment.Id.ToString())
                     {
                         Tag = regiment,
                         Image = regiment.Icon
@@ -133,7 +133,7 @@ namespace ModdingManager
             UpdtadeConfig();
             var config = CurrentConfig;
 
-            if (string.IsNullOrWhiteSpace(config.Id.AsString()))
+            if (string.IsNullOrWhiteSpace(config.Id.ToString()))
             {
                 MessageBox.Show("Название шаблона обязательно");
                 return;

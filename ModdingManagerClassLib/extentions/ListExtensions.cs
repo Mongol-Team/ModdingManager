@@ -20,6 +20,48 @@
 
             return default;
         }
+        public static bool RemoveById<T>(this List<T> list, string targetId)
+        {
+            if (list == null || string.IsNullOrEmpty(targetId))
+                return false;
+
+            var idProperty = typeof(T).GetProperty("Id");
+            if (idProperty == null)
+                return false;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                var value = idProperty.GetValue(list[i]) as string;
+                if (value == targetId)
+                {
+                    list.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public static bool ReplaceById<T>(this List<T> list, string targetId, T newItem)
+        {
+            if (list == null || string.IsNullOrEmpty(targetId) || newItem == null)
+                return false;
+
+            var idProperty = typeof(T).GetProperty("Id");
+            if (idProperty == null)
+                return false;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                var value = idProperty.GetValue(list[i]) as string;
+                if (value == targetId)
+                {
+                    list[i] = newItem;
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         public static T Random<T>(this List<T> list)
         {

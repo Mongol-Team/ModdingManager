@@ -33,7 +33,7 @@ namespace ModdingManager
         public Identifier Tag
         {
             get => new(TagBox.Text);
-            set => TagBox.Text = value.AsString();
+            set => TagBox.Text = value.ToString();
         }
 
         public string? Name
@@ -185,7 +185,7 @@ namespace ModdingManager
                 StartingIdeasBox.Document.Blocks.Clear();
                 foreach (IdeaConfig cfg in value)
                 { 
-                    StartingIdeasBox.AddLine(cfg.Id.AsString());
+                    StartingIdeasBox.AddLine(cfg.Id.ToString());
                 }
             }
         }
@@ -207,7 +207,7 @@ namespace ModdingManager
                 RecruitingCharactersBox.Document.Blocks.Clear();
                 foreach (CountryCharacterConfig cfg in value)
                 {
-                    RecruitingCharactersBox.AddLine(cfg.Id.AsString());
+                    RecruitingCharactersBox.AddLine(cfg.Id.ToString());
                 }
             }
         }
@@ -262,7 +262,7 @@ namespace ModdingManager
 
                 foreach (var pair in value)
                 {
-                    string ideology = pair.Key.Id.AsString();
+                    string ideology = pair.Key.Id.ToString();
                     ImageSource imageSource = pair.Value.ToImageSource();
 
                     // Создаём контейнер Canvas
@@ -353,7 +353,7 @@ namespace ModdingManager
                     Height = 72,
                     AllowDrop = true
                 };
-                wrap.Name = i.Id.AsString();
+                wrap.Name = i.Id.ToString();
                 // Создаём изображение
                 var img = new System.Windows.Controls.Image
                 {
@@ -416,7 +416,7 @@ namespace ModdingManager
             List<string> strings = new List<string>();
             foreach (var ideo in ModManager.Mod.Ideologies)
             {
-                strings.Add(ideo.Id.AsString());
+                strings.Add(ideo.Id.ToString());
             }
             RullingPartyBox.ItemsSource = strings;
         }

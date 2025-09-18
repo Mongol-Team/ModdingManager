@@ -64,7 +64,7 @@ namespace ModdingManager.Presenters
                 }
 
                 var id = markedIds.First();
-                var item = _view.TechTreeConfig.Items.FirstOrDefault(x => x.Id.AsString() == id);
+                var item = _view.TechTreeConfig.Items.FirstOrDefault(x => x.Id.ToString() == id);
                 if (item == null)
                 {
                     _view.ShowError("Не удалось найти элемент в конфигурации.", "Ошибка");
@@ -211,7 +211,7 @@ namespace ModdingManager.Presenters
         }
         private void FillControlsWithItem(TechTreeItemConfig item)
         {
-            _view.TechId = item.Id.AsString();
+            _view.TechId = item.Id.ToString();
             _view.TechName = item.Name;
             _view.TechDescription = item.Description;
             _view.TechModifCost = item.ModifCost;
