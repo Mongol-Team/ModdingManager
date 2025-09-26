@@ -2,6 +2,7 @@ namespace ModdingManagerModels.Enums
 {
     public enum ScopeTypes
     {
+        any,
         aggressive,
         ai,
         air,

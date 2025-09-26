@@ -1,24 +1,35 @@
 ﻿using ModdingManager.classes.utils;
+using ModdingManagerClassLib.Composers;
 using ModdingManagerClassLib.Debugging;
+using ModdingManagerClassLib.Extentions;
+using ModdingManagerClassLib.Loaders;
+using ModdingManagerClassLib.utils;
 using ModdingManagerModels;
+using ModdingManagerModels.Enums;
 using SixLabors.ImageSharp;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+
 using System.Windows;
 
 namespace ModdingManager.managers.@base
 {
     public class ModManager
     {
-        public static string ModDirectory;
-        public static bool IsDebugRuning;
-        public static string GameDirectory;
-        public static string CurrentLanguage = "russian";
+        public static string ModDirectory { get; 
+            set; } = "";
+        public static bool IsDebugRuning { get;
+            set; }
+        public static string GameDirectory { get; set; } = "";
+        public static string CurrentCountryTag { get; set; } = "ZOV";
+        public static Language CurrentLanguage = Language.russian;
         public static ModConfig Mod = new();
+        public static LocalisationRegistry Localisation = new();
         public ModManager()
         {
-            OnLoaded();
+            LoadInstance();
         }
-        private void OnLoaded()
+        public static void LoadInstance()
         {
             string relativePath = System.IO.Path.Combine("..", "..", "..", "data", "dir.json");
             string fullPath = System.IO.Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
@@ -27,23 +38,41 @@ namespace ModdingManager.managers.@base
             {
                 string json = File.ReadAllText(fullPath);
                 var path = JsonSerializer.Deserialize<PathConfig>(json);
+
                 ModDirectory = path.ModPath;
                 GameDirectory = path.GamePath;
-
-                Logger.AddLog(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")
-                                             + Directory.Exists(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
-                Logger.AddLog(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)
-                                             + Directory.Exists(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage)));
-                Logger.AddLog(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)
-                                             + Directory.Exists(System.IO.Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage)));
-                Logger.AddLog(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")
-                                             + Directory.Exists(System.IO.Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage, "replace")));
-
+                
+                ComposeMod();
             }
             catch (Exception ex)
             {
                 Logger.AddLog($"[MAIN WPF] On load exception: {ex.Message}{ex.StackTrace}");
             }
+        }
+        public static void ComposeMod()
+        {
+            Mod = new ModConfig();
+
+            Mod.Gfxes = GfxLoader.LoadAll();
+            Logger.AddLog($"GFXes Intalized:{Mod.Gfxes.Count}, some rng obj:{Mod.Gfxes.Random().Id.ToString()}");
+            Mod.ModifierDefinitions = ModifierDefComposer.Parse().Cast<ModifierDefinitionConfig>().ToList();
+            Logger.AddLog($"ModDefs Intalized:{Mod.ModifierDefinitions.Count}, some rng obj:{Mod.ModifierDefinitions.Random().Id.ToString()}");
+            Mod.StateCathegories = StateCathegoryComposer.Parse().Cast<StateCathegoryConfig>().ToList();
+            Logger.AddLog($"StateCathegories Intalized:{Mod.StateCathegories.Count}, some rng obj:{Mod.StateCathegories.Random().Id.ToString()}");
+            Mod.Rules = RuleComposer.Parse().Cast<RuleConfig>().ToList();
+            Logger.AddLog($"Rules Intalized:{Mod.Rules.Count}, some rng obj:{Mod.Rules.Random().Id.ToString()}");
+            //Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
+            //Mod.Regiments = RegimentComposer.Parse().Cast<RegimentConfig>().ToList();
+
+            Mod.StaticModifiers = StaticModifierComposer.Parse().Cast<StaticModifierConfig>().ToList();
+            //Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList();
+            Mod.DynamicModifiers = DynamicModifierComposer.Parse().Cast<DynamicModifierConfig>().ToList();
+            //Mod.TechTreeLedgers = TechTreeComposer.Parse().Cast<TechTreeConfig>().ToList();
+            //Mod.Characters = CountryCharacterComposer.Parse().Cast<CountryCharacterConfig>().ToList();
+
+            Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList(); 
+            Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToList();
+            Mod.Map = MapComposer.Parse().FirstOrDefault() as MapConfig;
         }
         public static List<string> LoadCountryFileNames()
         {

@@ -1,10 +1,11 @@
-﻿using System.Drawing;
+﻿using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.Utils;
+using System.Drawing;
 
 namespace ModdingManagerModels.GfxTypes
 {
-    public class CorneredTileSpriteType
+    public class CorneredTileSpriteType : IGfx
     {
-        public string Name { get; set; }              // "GFX_<name>"
         public string TexturePath { get; set; }      // "<path>"
         public int NoOfFrames { get; set; }
         public Point Size { get; set; }                // { x y }
@@ -14,6 +15,8 @@ namespace ModdingManagerModels.GfxTypes
         public bool TilingCenter { get; set; }
         public bool Looping { get; set; }
         public int AnimationRateSpf { get; set; }
+        public Identifier Id { get; set; }
+        public Bitmap? Content { get; set; }
     }
 }
 

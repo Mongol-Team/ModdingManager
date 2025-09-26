@@ -54,6 +54,7 @@ namespace ModdingManagerClassLib.Composers
                 }
                 
                 var countryFlags = new Dictionary<IdeologyConfig, Bitmap>();
+
                 //fima
                 var partyPopularities = new Dictionary<IdeologyConfig, int>();
                 foreach (var var in file.Brackets.FindById("set_popularities").SubVars)

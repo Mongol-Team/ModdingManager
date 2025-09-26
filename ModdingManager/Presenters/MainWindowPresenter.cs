@@ -21,6 +21,7 @@ namespace ModdingManager.Presenter
         public MainWindowPresenter(MainWindow view)
         {
             _view = view ?? throw new ArgumentNullException(nameof(view));
+            ModManager.LoadInstance();
             WireUp();
         }
 
@@ -47,10 +48,15 @@ namespace ModdingManager.Presenter
             // сохранение dir.json при изменении (как в DirBox_TextChanged)
             _view.DirBox.TextChanged += DirBoxes_TextChanged;
             _view.GameDirBox.TextChanged += DirBoxes_TextChanged;
+            LoadConfig();
         }
 
         // ====== перенос обработчиков из MainForm ======
-
+        private void LoadConfig()
+        {
+            _view.DirBox.Text = ModManager.ModDirectory;
+            _view.GameDirBox.Text = ModManager.GameDirectory;
+        }
         private void LocConvertButton_Click(object? sender, RoutedEventArgs e)
         {
             if (HasAnyDir())

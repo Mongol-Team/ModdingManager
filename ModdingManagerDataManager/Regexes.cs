@@ -15,7 +15,7 @@ namespace ModdingManagerDataManager
         // COMPILED CACHES
         // =======================
 
-        private static readonly TimeSpan Timeout = TimeSpan.FromMilliseconds(250);
+        private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(2);
 
         #region Localization
         private static string localizationLanguage = @"(?<=l_)+[A-Za-z_]+(?=:)";

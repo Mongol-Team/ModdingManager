@@ -1,8 +1,11 @@
 ﻿using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
+using ModdingManagerClassLib.Debugging;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+using Pfim;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -12,14 +15,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TeximpNet;
 using TeximpNet.DDS;
-using Pfim;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace ModdingManagerClassLib.Extentions
 {
     public static class BitmapExtensions
     {
-
         public static void SaveAsDDS(this Bitmap image, string fullPath)
         {
             string directory = Path.GetDirectoryName(fullPath);
@@ -49,7 +50,155 @@ namespace ModdingManagerClassLib.Extentions
                 }
             }
         }
+        public static Bitmap LoadFromTGA(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentNullException(nameof(path));
 
+            // Загружаем изображение в ImageSharp как Rgba32
+            using Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>(path);
+
+            int width = image.Width;
+            int height = image.Height;
+            var bmp = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            // Подготовим буфер и скопируем пиксели из ImageSharp
+            int pixelCount = width * height;
+            int bytesCount = pixelCount * 4;
+            byte[] src = new byte[bytesCount]; // в ImageSharp порядок R, G, B, A
+            image.CopyPixelDataTo(src);
+
+            // Преобразуем порядок в B, G, R, A для Format32bppArgb
+            byte[] dst = new byte[bytesCount];
+            for (int s = 0, d = 0; s < bytesCount; s += 4, d += 4)
+            {
+                // src: [R, G, B, A]
+                // dst: [B, G, R, A]
+                dst[d + 0] = src[s + 2]; // B
+                dst[d + 1] = src[s + 1]; // G
+                dst[d + 2] = src[s + 0]; // R
+                dst[d + 3] = src[s + 3]; // A
+            }
+
+            // Копируем байты в Bitmap через LockBits
+            var rect = new System.Drawing.Rectangle(0, 0, width, height);
+            BitmapData bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, bmp.PixelFormat);
+            try
+            {
+                // Если stride == width*4 — прямое копирование,
+                // но stride может быть выровнен, поэтому учитываем его.
+                int stride = Math.Abs(bmpData.Stride);
+                if (stride == width * 4)
+                {
+                    // Прямое копирование всего буфера
+                    Marshal.Copy(dst, 0, bmpData.Scan0, bytesCount);
+                }
+                else
+                {
+                    // Копируем построчно с учётом stride
+                    IntPtr scan = bmpData.Scan0;
+                    int srcOffset = 0;
+                    for (int y = 0; y < height; y++)
+                    {
+                        IntPtr rowPtr = IntPtr.Add(scan, y * bmpData.Stride);
+                        Marshal.Copy(dst, srcOffset, rowPtr, width * 4);
+                        srcOffset += width * 4;
+                    }
+                }
+            }
+            finally
+            {
+                bmp.UnlockBits(bmpData);
+            }
+
+            return bmp;
+        }
+        public static void SaveAsTGA(this Bitmap image, string path)
+        {
+            if (image == null) throw new ArgumentNullException(nameof(image));
+
+            int width = image.Width;
+            int height = image.Height;
+
+            using var img = new Image<Rgba32>(width, height);
+
+            var rect = new System.Drawing.Rectangle(0, 0, width, height);
+            var bmpData = image.LockBits(rect, ImageLockMode.ReadOnly, image.PixelFormat);
+
+            try
+            {
+                int stride = bmpData.Stride;
+                int bytesPerPixel = System.Drawing.Image.GetPixelFormatSize(image.PixelFormat) / 8;
+
+                if (bytesPerPixel < 1)
+                    throw new NotSupportedException($"Unsupported pixel format: {image.PixelFormat}");
+
+                byte[] buffer = new byte[stride * height];
+                Marshal.Copy(bmpData.Scan0, buffer, 0, buffer.Length);
+
+                for (int y = 0; y < height; y++)
+                {
+                    int offset = y * stride;
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        int i = offset + x * bytesPerPixel;
+
+                        byte r, g, b, a;
+
+                        switch (image.PixelFormat)
+                        {
+                            case PixelFormat.Format32bppArgb:
+                            case PixelFormat.Format32bppPArgb:
+                                b = buffer[i + 0];
+                                g = buffer[i + 1];
+                                r = buffer[i + 2];
+                                a = buffer[i + 3];
+                                break;
+
+                            case PixelFormat.Format32bppRgb:
+                                b = buffer[i + 0];
+                                g = buffer[i + 1];
+                                r = buffer[i + 2];
+                                a = 255;
+                                break;
+
+                            case PixelFormat.Format24bppRgb:
+                                b = buffer[i + 0];
+                                g = buffer[i + 1];
+                                r = buffer[i + 2];
+                                a = 255;
+                                break;
+
+                            case PixelFormat.Format8bppIndexed:
+                                var c = image.Palette.Entries[buffer[i]];
+                                r = c.R;
+                                g = c.G;
+                                b = c.B;
+                                a = c.A;
+                                break;
+
+                            default:
+                                throw new NotSupportedException($"Unsupported pixel format: {image.PixelFormat}");
+                        }
+
+                        img[x, y] = new Rgba32(r, g, b, a);
+                    }
+                }
+            }
+            finally
+            {
+                image.UnlockBits(bmpData);
+            }
+
+            var encoder = new TgaEncoder
+            {
+                BitsPerPixel = TgaBitsPerPixel.Pixel32,
+                Compression = TgaCompression.None
+            };
+
+            img.Save(path, encoder);
+        }
         public static ImageSource ToImageSource(this Bitmap bitmap)
         {
             if (bitmap == null)
@@ -114,11 +263,35 @@ namespace ModdingManagerClassLib.Extentions
                 return System.Drawing.Image.FromStream(outStream, true, true);
             }
         }
+        public static Bitmap LoadResource(string pathWithFileName)
+        {
+            if (string.IsNullOrWhiteSpace(pathWithFileName))
+                throw new ArgumentException("Путь к файлу не может быть пустым.", nameof(pathWithFileName));
+
+            if (!File.Exists(pathWithFileName))
+                throw new FileNotFoundException("Файл не найден.", pathWithFileName);
+
+            string ext = Path.GetExtension(pathWithFileName).ToLowerInvariant();
+
+            switch (ext)
+            {
+                case ".dds":
+                    return LoadFromDDS(pathWithFileName);
+
+                case ".tga":
+                    return LoadFromTGA(pathWithFileName);
+
+                default:
+                    throw new NotSupportedException($"Файлы с расширением {ext} не поддерживаются.");
+            }
+        }
         public static Bitmap LoadFromDDS(string path)
         {
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
-                throw new ArgumentException("Invalid or non-existent DDS file path.", nameof(path));
-
+            {
+                Logger.AddLog($"Файл для загрузки DDS картинки не найден: {path}");
+                return null;
+            }
             // 1) Загружаем и декодируем DDS
             using Pfim.IImage dds = Pfim.Pfimage.FromFile(path);
 

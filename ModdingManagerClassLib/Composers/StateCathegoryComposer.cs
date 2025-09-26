@@ -47,7 +47,7 @@ namespace ModdingManagerClassLib.Composers
                     };
                     foreach (Var mod in bracket.SubVars)
                     {
-                        cfg.Modifiers[ModManager.Mod.ModifierDefenitions.FirstOrDefault(m => m.Id.ToString() == mod.Name)] = mod.Value;
+                        cfg.Modifiers[ModManager.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == mod.Name)] = mod.Value;
                     }
                     result.Add(cfg);
                 }

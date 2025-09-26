@@ -6,6 +6,7 @@ using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -156,6 +157,7 @@ namespace ModdingManagerClassLib.Extentions
                 }
             }
         }
+        
         public static void SaveAsTGA(this Image<Rgba32> image, string path)
         {
             var encoder = new TgaEncoder

@@ -5,12 +5,12 @@ using System.Drawing;
 
 namespace ModdingManagerModels.GfxTypes
 {
-    public class ProgressbarType : IConfig, IGfx
+    public class ProgressbarType : IGfx
     {
-        public Identifier Id { get; set; }              // "GFX_<name>"
-        public ConfigLocalisation Localisation { get; set; }
+        public Identifier Id { get; set; }  
         public string TexturePath { get; set; }      // "<path>"
         public string SecondTexturePath { get; set; } 
+        public Bitmap BgContent { get; set; }
         public Bitmap Content { get; set; }
         public Color Color { get; set; }              // { r g b [a] }
         public Color SecondColor { get; set; }    

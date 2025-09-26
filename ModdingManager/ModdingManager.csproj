@@ -40,16 +40,16 @@
 
   <ItemGroup>
 	<ApplicationDefinition Remove="App.xaml" />
-	<None Remove="data\gfx\interface\healer.png" />
-	<None Remove="data\gfx\interface\new_regiment_slot_support.png" />
-	<None Remove="data\gfx\interface\null_item_image.png" />
-	<None Remove="data\gfx\interface\superevent_bg_1.png" />
-	<None Remove="data\gfx\interface\superevent_button_1.png" />
-	<None Remove="data\gfx\interface\technology_available_item_bg.png" />
-	<None Remove="data\gfx\interface\techtree_tabs.png" />
-	<None Remove="data\gfx\interface\techtree_tabs_shadowing.png" />
-	<None Remove="data\gfx\interface\tech_industry_available_item_bg.png" />
-	<None Remove="data\gfx\interface\tiled_plain_bg.png" />
+	<None Remove="data\Gfx\interface\healer.png" />
+	<None Remove="data\Gfx\interface\new_regiment_slot_support.png" />
+	<None Remove="data\Gfx\interface\null_item_image.png" />
+	<None Remove="data\Gfx\interface\superevent_bg_1.png" />
+	<None Remove="data\Gfx\interface\superevent_button_1.png" />
+	<None Remove="data\Gfx\interface\technology_available_item_bg.png" />
+	<None Remove="data\Gfx\interface\techtree_tabs.png" />
+	<None Remove="data\Gfx\interface\techtree_tabs_shadowing.png" />
+	<None Remove="data\Gfx\interface\tech_industry_available_item_bg.png" />
+	<None Remove="data\Gfx\interface\tiled_plain_bg.png" />
 	<None Remove="graphics\color_spectrum.jpg" />
 	<None Remove="graphics\controls\color_spectrum.jpg" />
 	<None Remove="graphics\controls\err.png" />
@@ -57,34 +57,34 @@
 	<ProjectReference Include="..\ModdingManagerClassLib\ModdingManagerClassLib.csproj" />
 	<ProjectReference Include="..\ModdingManagerDataManager\ModdingManagerDataManager.csproj" />
 	<ProjectReference Include="..\ModdingManagerModels\ModdingManagerModels.csproj" />
-	<Resource Include="data\gfx\interface\healer.png">
+	<Resource Include="data\Gfx\interface\healer.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
-	<Resource Include="data\gfx\interface\new_regiment_slot_support.png">
+	<Resource Include="data\Gfx\interface\new_regiment_slot_support.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
-	<Resource Include="data\gfx\interface\null_item_image.png">
+	<Resource Include="data\Gfx\interface\null_item_image.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
-	<Resource Include="data\gfx\interface\superevent_bg_1.png">
+	<Resource Include="data\Gfx\interface\superevent_bg_1.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
-	<Resource Include="data\gfx\interface\superevent_button_1.png">
+	<Resource Include="data\Gfx\interface\superevent_button_1.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
-	<Resource Include="data\gfx\interface\technology_available_item_bg.png">
+	<Resource Include="data\Gfx\interface\technology_available_item_bg.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
-	<Resource Include="data\gfx\interface\techtree_tabs.png">
+	<Resource Include="data\Gfx\interface\techtree_tabs.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
-	<Resource Include="data\gfx\interface\techtree_tabs_shadowing.png">
+	<Resource Include="data\Gfx\interface\techtree_tabs_shadowing.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
-	<Resource Include="data\gfx\interface\tech_industry_available_item_bg.png">
+	<Resource Include="data\Gfx\interface\tech_industry_available_item_bg.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
-	<Resource Include="data\gfx\interface\tiled_plain_bg.png">
+	<Resource Include="data\Gfx\interface\tiled_plain_bg.png">
 	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	</Resource>
 	<Resource Include="graphics\controls\color_spectrum.jpg">

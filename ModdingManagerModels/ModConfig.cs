@@ -1,4 +1,6 @@
 ﻿using ModdingManagerModels;
+using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.ObjectCacheData;
 
 namespace ModdingManager.classes.utils
 {
@@ -12,10 +14,13 @@ namespace ModdingManager.classes.utils
         public List<RegimentConfig> Regiments { get; set; }
         public List<CountryConfig> Countries { get; set; }
         public List<IdeaConfig> Ideas { get; set; }
+        public List<TriggerDefenitionConfig> TriggerDefenitions  { get; set; }
+        public List<Var> Vars { get; set; }
         public List<StaticModifierConfig> StaticModifiers { get; set; }
         public List<OpinionModifierConfig> OpinionModifiers { get; set; }
         public List<DynamicModifierConfig> DynamicModifiers { get; set; }
-        public List<ModifierDefinitionConfig> ModifierDefenitions { get; set; }
+        public List<ModifierDefinitionConfig> ModifierDefinitions { get; set; }
+        public List<IGfx> Gfxes { get; set; }
         public MapConfig Map { get; set; } = new MapConfig();
         public List<TechTreeConfig> TechTreeLedgers { get; set; } = new List<TechTreeConfig>();
         public List<CountryCharacterConfig> Characters { get; set; }

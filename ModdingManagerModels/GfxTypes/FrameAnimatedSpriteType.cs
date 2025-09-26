@@ -5,10 +5,9 @@ using System.Drawing;
 
 namespace ModdingManagerModels.GfxTypes
 {
-    public class FrameAnimatedSpriteType : IConfig, IGfx
+    public class FrameAnimatedSpriteType :  IGfx
     {
-        public Identifier Id { get; set; }                 // "GFX_<name>"
-        public ConfigLocalisation Localisation { get; set; }
+        public Identifier Id { get; set; }
         public string TexturePath { get; set; }          // "<path>"
         public Bitmap Content { get; set; }
         public int NoOfFrames { get; set; }              // <int>
@@ -16,7 +15,7 @@ namespace ModdingManagerModels.GfxTypes
         public int AnimationRateFps { get; set; }       // <int>
         public bool Looping { get; set; }             // <bool>
         public bool PlayOnShow { get; set; }             // <bool>
-        public float PauseOnLoop { get; set; }       
-        public bool AllWaysTransparent { get; set; }    // <bool>
+        public double PauseOnLoop { get; set; }       
+        public bool AllwaysTransparent { get; set; }    // <bool>
     }
 }

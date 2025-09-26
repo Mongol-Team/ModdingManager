@@ -10,10 +10,6 @@ namespace ModdingManager
         [STAThread]
         private static void Main()
         {
-            //// To customize application configuration such as set high DPI settings or default font,
-            //// see https://aka.ms/applicationconfiguration.
-            //ApplicationConfiguration.Initialize();
-            //Application.Run(new MainForm());
             var app = new System.Windows.Application();
             var view = new MainWindow();
             app.Run(view);

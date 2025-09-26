@@ -170,7 +170,7 @@ namespace ModdingManager
                     {
                         continue;
                     }
-                    mods.Add(ModManager.Mod.ModifierDefenitions.FindById(splited[0]), value);
+                    mods.Add(ModManager.Mod.ModifierDefinitions.FindById(splited[0]), value);
                 }
                 return mods;
             }

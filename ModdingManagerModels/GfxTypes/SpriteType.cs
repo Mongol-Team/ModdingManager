@@ -5,10 +5,9 @@ using System.Drawing;
 
 namespace ModdingManagerModels.GfxTypes
 {
-    public class SpriteType : IConfig, IGfx
+    public class SpriteType : IGfx
     {
-        public Identifier Id { get; set; }                // name is the name you have given to the asset.
-        public ConfigLocalisation Localisation { get; set; }
+        public Identifier Id { get; set; }  
         public string TexturePath { get; set; }          // relative path to texture inside /Hearts of Iron IV/
         public int NoOfFrames { get; set; }               // number of frames for multi-frame images
         public string EffectFile { get; set; }            // effect definition from /gfx/FX/*.lua

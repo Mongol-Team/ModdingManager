@@ -66,6 +66,13 @@ namespace ModdingManager.Controls
 
         public void AddItem(TechTreeItemConfig item, int gridX, int gridY)
         {
+            _techTree.GetTreeItem(item.Id.ToString());
+            if (_techTree.GetTreeItem(item.Id.ToString()) != null)
+            {
+                MessageBox.Show("Элемент с таким ID уже существует в дереве технологий.", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             item.GridX = gridX;
             item.GridY = gridY;
             
@@ -83,6 +90,8 @@ namespace ModdingManager.Controls
             TechGrid.Children.Add(element);
             
             ItemAdded?.Invoke(this, item);
+            MessageBox.Show("Элемент успешно добавлен в дерево технологий.", "Успех",
+                MessageBoxButton.OK, MessageBoxImage.Information);  
         }
 
         public void RemoveItem(string itemId)
@@ -144,37 +153,45 @@ namespace ModdingManager.Controls
         }
         private void RedrawAllConnections()
         {
-            if (_techTree == null) return;
+            if (_techTree == null || _techTree.Items == null) return;
 
-            //foreach (var pair in _techTree.ChildOf)
-            //{
-            //    if (pair.Count == 2)
-            //    {
-            //        var from = FindElementBorderById(pair[0]);
-            //        var to = FindElementBorderById(pair[1]);
-            //        if (from != null && to != null)
-            //        {
-            //            DrawConnection(from, to, System.Windows.Media.Brushes.Blue, isMutual: false);
-            //        }
-            //    }
-            //}
+            // Отрисовка односторонних связей (ChildOf)
+            foreach (var item in _techTree.Items)
+            {
+                if (item.ChildOf != null)
+                {
+                    var from = FindElementBorderById(item.ChildOf.Id.ToString());
+                    var to = FindElementBorderById(item.Id.ToString());
+                    if (from != null && to != null)
+                    {
+                        DrawConnection(from, to, System.Windows.Media.Brushes.Blue, isMutual: false);
+                    }
+                }
+            }
 
-            //foreach (var group in _techTree.Mutal)
-            //{
-            //    for (int i = 0; i < group.Count; i++)
-            //    {
-            //        for (int j = i + 1; j < group.Count; j++)
-            //        {
-            //            var a = FindElementBorderById(group[i]);
-            //            var b = FindElementBorderById(group[j]);
-            //            if (a != null && b != null)
-            //            {
-            //                DrawConnection(a, b, System.Windows.Media.Brushes.Red, isMutual: true);
-            //            }
-            //        }
-            //    }
-            //}
+            // Отрисовка взаимных связей (Mutal)
+            foreach (var item in _techTree.Items)
+            {
+                if (item.Mutal != null)
+                {
+                    foreach (var mutualItem in item.Mutal)
+                    {
+                        var a = FindElementBorderById(item.Id.ToString());
+                        var b = FindElementBorderById(mutualItem.Id.ToString());
+
+                        if (a != null && b != null)
+                        {
+                            // Чтобы избежать дублирования, рисуем только если Id текущего меньше
+                            if (string.Compare(item.Id.ToString(), mutualItem.Id.ToString()) < 0)
+                            {
+                                DrawConnection(a, b, System.Windows.Media.Brushes.Red, isMutual: true);
+                            }
+                        }
+                    }
+                }
+            }
         }
+
         public Point GetVisualCenter(Border border)
         {
 
@@ -541,6 +558,10 @@ namespace ModdingManager.Controls
             foreach (var id in markedIds)
             {
                 items.Add(_techTree.GetTreeItem(id));
+            }
+            foreach (var item in items)
+            {
+                item.Mutal = items;
             }
             RedrawAllConnections();
         }

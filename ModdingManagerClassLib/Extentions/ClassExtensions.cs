@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using ModdingManagerClassLib.Composers;
+using System.Reflection;
 
 namespace ModdingManagerClassLib.Extentions
 {
@@ -23,6 +24,22 @@ namespace ModdingManagerClassLib.Extentions
             }
 
             return target;
+        }
+        public static int ToInt<TClass>(this TClass id) where TClass : class
+        {
+            if (id == null)
+                return -1;
+
+            var str = id.ToString();
+
+            return int.TryParse(str, out int result) ? result : -1;
+        }
+        public static double ToDouble<TClass>(this TClass id) where TClass : class
+        {
+            if (id == null)
+                return -1;
+            var str = id.ToString();
+            return double.TryParse(str, out double result) ? result : -1;
         }
     }
 }

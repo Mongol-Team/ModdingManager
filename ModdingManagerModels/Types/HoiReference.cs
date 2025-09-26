@@ -3,5 +3,6 @@
     public class HoiReference
     {
         public string Value { get; set; } = string.Empty;
+        public bool IsCore { get; set; } = false;
     }
 }

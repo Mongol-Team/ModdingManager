@@ -22,8 +22,8 @@ namespace ModdingManagerModels
         public List<string> Enables { get; set; }
         public int Cost { get; set; }
         public int StartYear { get; set; }
-        public TechTreeItemConfig ChildOf { get; set; } = new ();
-        public List<TechTreeConfig> Mutal { get; set; } = new List<TechTreeConfig>();
+        public TechTreeItemConfig ChildOf { get; set; } 
+        public List<TechTreeItemConfig> Mutal { get; set; } 
         public List<string> Allowed { get; set; }
         public List<string> AllowBranch { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }

@@ -25,7 +25,15 @@ namespace ModdingManagerClassLib.Composers
             List<IConfig> res = new List<IConfig>();
             foreach (string defPath in possibleDefPaths)
             {
-                var files = Directory.GetFiles(defPath, "*.txt", SearchOption.AllDirectories).ToList();
+                List<string> files = null;
+                try
+                {
+                    files = Directory.GetFiles(defPath, "*.txt", SearchOption.AllDirectories).ToList();
+                }
+                catch (Exception ex)
+                {
+                    files = new List<string>(); 
+                }
                 if (files.Count == 0)
                     continue;
                 foreach (var file in files)

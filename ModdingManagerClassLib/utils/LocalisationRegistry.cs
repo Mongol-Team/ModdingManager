@@ -1,4 +1,5 @@
-﻿using ModdingManagerClassLib.Debugging;
+﻿using ModdingManager.managers.@base;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.utils.Pathes;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
@@ -16,15 +17,28 @@ namespace ModdingManagerClassLib.utils
         public LocalizationBlock CountryLocalisation { get; private set; }
         public LocalizationBlock StateLocalisation { get; private set; }
         public LocalizationBlock OtherLocalisation { get; private set; }
-
-        public LocalisationRegistry(out List<string> failedFiles, List<StateConfig>? states = null) { failedFiles = LoadLocalisation(states); }
-        public LocalisationRegistry(List<StateConfig>? states = null) { }
+        public List<string> FailedFiles { get; private set; }
+        public LocalisationRegistry() { }
+        public KeyValuePair<string, string> GetLocalisationByKey(string key)
+        {
+            if (VictoryPointsLocalisation.Data.TryGetValue(key, out var val))
+                return new KeyValuePair<string, string>(key,  val);
+            if (IdeologyLocalisation.Data.TryGetValue(key, out val))
+                return new KeyValuePair<string, string>(key, val);
+            if (CountryLocalisation.Data.TryGetValue(key, out val))
+                return new KeyValuePair<string, string>(key, val);
+            if (StateLocalisation.Data.TryGetValue(key, out val))
+                return new KeyValuePair<string, string>(key, val);
+            if (OtherLocalisation.Data.TryGetValue(key, out val))
+                return new KeyValuePair<string, string>(key,  val);
+            return new KeyValuePair<string, string>(key, val);
+        }
 
         /// <summary>
         /// Параллельно загружает все переменные из .yml файлов в AllCache (с учётом приоритетов)
         /// </summary>
         /// 
-        private List<string> LoadLocalisation(List<StateConfig>? states)
+        public void LoadLocalisation()
         {
             string[] searchPaths = new[]
             {
@@ -33,8 +47,6 @@ namespace ModdingManagerClassLib.utils
             };
             var files = Directory.EnumerateFiles(GamePathes.LocalisationPath, "*.yml", SearchOption.AllDirectories).ToList();
             files = files.OrderBy(s => s).ToList();
-
-            // Потокобезопасные накопители по категориям.
             var vpDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var ideologyDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var countryDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -43,7 +55,7 @@ namespace ModdingManagerClassLib.utils
 
             bool IsVictoryPoint(string k) => k.StartsWith("VICTORY_POINTS_", StringComparison.OrdinalIgnoreCase);
             bool IsIdeology(string k) => k.StartsWith("IDEOLOGY_", StringComparison.OrdinalIgnoreCase);
-            bool IsState(string k) => states == null ? k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase) : states.Count(s => s.LocalizationKey == k) != 0;
+            bool IsState(string k) => ModManager.Mod.Map.States == null ? k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase) : ModManager.Mod.Map.States.Count(s => s.LocalizationKey == k) != 0;
             bool IsCountry(string k) => k.Length == 3 && k.All(char.IsLetter);
 
             YmlParser parser = new YmlParser(new TxtPattern());
@@ -55,24 +67,19 @@ namespace ModdingManagerClassLib.utils
                 try
                 {
                     var text = File.ReadAllText(file);
-                    if (file == "C:\\Users\\timpf\\Downloads\\Telegram Desktop\\SME\\SME\\localisation\\russian\\replace\\victory_points_l_russian.yml")
-                        Console.WriteLine("HOI DEV HUESOS");
                     var parsed = (LocalizationFile)parser.Parse(text);
                     if (parsed.Localizations.Count < 1)
                     {
                         failedFiles.Add(file);
                         return;
                     }
-                    // Пробегаем все блоки и все пары ключ/значение внутри файла
                     foreach (var block in parsed.Localizations)
                     {
                         foreach (var kvp in block.Data)
                         {
                             var key = kvp.Key;
                             var val = kvp.Value;
-                            if (file == "C:\\Users\\timpf\\Downloads\\Telegram Desktop\\SME\\SME\\localisation\\russian\\state_names_l_russian.yml")
-                                Console.WriteLine(key + " " + val);
-                            // Определяем целевой словарь
+
                             ConcurrentDictionary<string, string> target =
                                 IsVictoryPoint(key) ? vpDict :
                                 IsIdeology(key) ? ideologyDict :
@@ -80,7 +87,6 @@ namespace ModdingManagerClassLib.utils
                                 IsCountry(key) ? countryDict :
                                                       otherDict;
 
-                            // Политика при коллизиях ключей: ПОСЛЕДНЕЕ значение побеждает.
                             target.AddOrUpdate(key, val, (_, __) => val);
                         }
                     }
@@ -92,7 +98,6 @@ namespace ModdingManagerClassLib.utils
                 }
             });
 
-            // Заполняем итоговые блоки (язык — на твое усмотрение; можно оставить по умолчанию)
             VictoryPointsLocalisation = new LocalizationBlock
             {
                 Data = new Dictionary<string, string>(vpDict, StringComparer.OrdinalIgnoreCase)
@@ -118,7 +123,7 @@ namespace ModdingManagerClassLib.utils
                 Data = new Dictionary<string, string>(otherDict, StringComparer.OrdinalIgnoreCase)
             };
 
-            return failedFiles.ToList();
+            FailedFiles = failedFiles.ToList();
         }
     }
 }

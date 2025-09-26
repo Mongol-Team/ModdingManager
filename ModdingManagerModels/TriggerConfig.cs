@@ -4,10 +4,10 @@ using ModdingManagerModels.Types.Utils;
 
 namespace ModdingManagerModels
 {
-    public class ScriptedTriggerConfig : IConfig
+    public class TriggerConfig : IConfig
     {
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
-        public List<Trigger> Triggers { get; set; } = new List<Trigger>();
+        //public List<Trigger> Triggers { get; set; } = new List<Trigger>();
     }
 }

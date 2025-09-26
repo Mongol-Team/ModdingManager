@@ -1,8 +1,14 @@
 ﻿using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Composers;
 using ModdingManagerClassLib.Extentions;
+using ModdingManagerClassLib.Loaders;
 using ModdingManagerClassLib.Properties;
+using ModdingManagerClassLib.utils;
+using ModdingManagerModels.Interfaces;
+using System.Diagnostics;
 using System.Drawing;
+using static OpenCvSharp.Stitcher;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace ModdingManagerDataManager
 {
@@ -10,8 +16,8 @@ namespace ModdingManagerDataManager
     {
         private static void Main(string[] args)
         {
-            Bitmap bitmap = BitmapExtensions.LoadFromDDS("C:\\Users\\Acer\\Documents\\Paradox Interactive\\Hearts of Iron IV\\mod\\SME\\gfx\\interface\\goals\\annex_bya.dds");
-            BitmapExtensions.SaveAsDDS(bitmap, "E:\\dada\\мем\\syka.dds");
+
+        
         }
     }
 }

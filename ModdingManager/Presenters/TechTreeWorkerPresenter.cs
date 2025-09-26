@@ -44,7 +44,7 @@ namespace ModdingManager.Presenters
             {
                 TechTreeItemConfig item = CreateItemFromControls();
                 _techGrid.AddItem(item, 0,0);
-                _view.ShowMessage("Элемент успешно добавлен!", "Успех");
+                
             }
             catch (Exception ex)
             {
@@ -205,6 +205,8 @@ namespace ModdingManager.Presenters
                 AiWillDo = _view.AiWillDo,
                 Dependencies = _view.Dependencies,
                 Categories = _view.Categories,
+                ChildOf = null,
+                Mutal = null,
                 Image = _view.IsBigImage ? _view.BigTechImage.ToBitmap() : _view.SmallTechImage.ToBitmap()
             };
             return item;
