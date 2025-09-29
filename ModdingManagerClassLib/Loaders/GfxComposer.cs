@@ -8,6 +8,7 @@ using ModdingManagerModels.Types.ObjectCacheData;
 using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Controls;
 
 namespace ModdingManagerClassLib.Loaders
 {
@@ -50,28 +51,39 @@ namespace ModdingManagerClassLib.Loaders
                 {
                     foreach (Bracket spriteBr in defineBr.SubBrackets)
                     {
-                        IGfx gfx = ParseSingleGfx(spriteBr);
+                        IGfx gfx = ParseSingleSpriteGfx(spriteBr);
                         
-                        result.Add(gfx);
+                        result.AddSafe(gfx);
                     }
                 }
                 else if (defineBr.Name == "objectTypes")
                 {
                     foreach (Bracket spriteBr in defineBr.SubBrackets)
                     {
-                        IGfx gfx = ParseSingleGfx(spriteBr);
+                        IGfx gfx = ParseSingleObjGfx(spriteBr);
 
-                        result.Add(gfx);
+                        result.AddSafe(gfx);
                     }
                 }
             }
             return result;
         }
-        public static IGfx? ParseSingleGfx(Bracket gfxBracket)
+        public static IGfx? ParseSingleSpriteGfx(Bracket gfxBracket)
         {
             string brName = gfxBracket.Name.ToLower();
             switch (brName)
             {
+                case "textspritetype":
+                    {
+                        return new TextSpriteType
+                        {
+                            Id = new Identifier(gfxBracket.GetVarString("name")),
+                            TexturePath = gfxBracket.GetVarString("textureFile"),
+                            NoOfFrames = gfxBracket.GetVarInt("noOfFrames"),
+                            EffectFile = gfxBracket.GetVarString("effectFile"),
+                            Content = BitmapExtensions.LoadResourceRealativePath(gfxBracket.GetVarString("textureFile"))
+                        };
+                    }
                 case "spritetype":
                     {
                         string textureFile = gfxBracket.GetVarString("textureFile").Replace("/", "\\");
@@ -87,8 +99,8 @@ namespace ModdingManagerClassLib.Loaders
                             AllwaysTransparent = gfxBracket.GetVarBool("alwaystransparent"),
                             LegacyLazyLoad = gfxBracket.GetVarBool("legacy_lazy_load"),
                             TransparenceCheck = gfxBracket.GetVarBool("transparencecheck"),
-                            Content = File.Exists(modPath) ? BitmapExtensions.LoadResource(modPath)
-                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResource(gamePath) : null
+                            Content = File.Exists(modPath) ? BitmapExtensions.LoadResourceFullPath(modPath)
+                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : null
                         };
                     }
 
@@ -104,8 +116,8 @@ namespace ModdingManagerClassLib.Loaders
                             TexturePath = gfxBracket.GetVarString("textureFile"),
                             NoOfFrames = gfxBracket.GetVarInt("noOfFrames"),
                             AnimationRateFps = gfxBracket.GetVarInt("animation_rate_fps"),
-                            Content = File.Exists(modPath) ? BitmapExtensions.LoadResource(modPath)
-                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResource(gamePath) : null,
+                            Content = File.Exists(modPath) ? BitmapExtensions.LoadResourceFullPath(modPath)
+                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : null,
                             Looping = gfxBracket.GetVarBool("looping"),
                             EffectFile = gfxBracket.GetVarString("effectFile"),
                             AllwaysTransparent = gfxBracket.GetVarBool("alwaystransparent"),
@@ -128,10 +140,10 @@ namespace ModdingManagerClassLib.Loaders
                             Id = new Identifier(gfxBracket.GetVarString("name")),
                             TexturePath = gfxBracket.GetVarString("textureFile1"),
                             SecondTexturePath = gfxBracket.GetVarString("textureFile2"),
-                            Content = File.Exists(modPath1) ? BitmapExtensions.LoadResource(modPath1)
-                                   : File.Exists(gamePath1) ? BitmapExtensions.LoadResource(gamePath1) : null,
-                            BgContent = File.Exists(modPath2) ? BitmapExtensions.LoadResource(modPath2)
-                                     : File.Exists(gamePath2) ? BitmapExtensions.LoadResource(gamePath2) : null,
+                            Content = File.Exists(modPath1) ? BitmapExtensions.LoadResourceFullPath(modPath1)
+                                   : File.Exists(gamePath1) ? BitmapExtensions.LoadResourceFullPath(gamePath1) : null,
+                            BgContent = File.Exists(modPath2) ? BitmapExtensions.LoadResourceFullPath(modPath2)
+                                     : File.Exists(gamePath2) ? BitmapExtensions.LoadResourceFullPath(gamePath2) : null,
                             Size = new Point(
                                 gfxBracket.GetSubBracketVarInt("size", "x"),
                                 gfxBracket.GetSubBracketVarInt("size", "y")),
@@ -156,8 +168,8 @@ namespace ModdingManagerClassLib.Loaders
                             NoOfFrames = gfxBracket.GetVarInt("noOfFrames"),
                             EffectFile = gfxBracket.GetVarString("effectFile"),
                             AllwaysTrancparent = gfxBracket.GetVarBool("alwaystransparent"),
-                            Content = File.Exists(modPath) ? BitmapExtensions.LoadResource(modPath)
-                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResource(gamePath) : null,
+                            Content = File.Exists(modPath) ? BitmapExtensions.LoadResourceFullPath(modPath)
+                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : null,
                             TilingCenter = gfxBracket.GetVarBool("tilingCenter"),
                             Looping = gfxBracket.GetVarBool("looping"),
                             AnimationRateSpf = gfxBracket.GetVarInt("animation_rate_spf"),
@@ -169,7 +181,27 @@ namespace ModdingManagerClassLib.Loaders
                                 gfxBracket.GetSubBracketVarInt("borderSize", "y"))
                         };
                     }
+                case "piecharttype":
+                    {
 
+                        return new PieChartType
+                        {
+                            Id = new Identifier(gfxBracket.GetVarString("name")),
+                            Size = gfxBracket.GetVarInt("size"),
+                            Colors = gfxBracket.Arrays.FirstOrDefault(a => a.Name == "colors")?.Values.Cast<Color>().ToList() ?? new List<Color>()
+                        };
+                    }
+                case "linecharttype":
+                    {
+                        return new LineChartType()
+                        {
+                            Id = new Identifier(gfxBracket.GetVarString("name")),
+                            Size = new Point(
+                                gfxBracket.GetSubBracketVarInt("size", "x"),
+                                gfxBracket.GetSubBracketVarInt("size", "y")),
+                            LineWidth = gfxBracket.GetVarDouble("lineWidth"),
+                        };
+                    }
                 case "maskedshieldtype":
                     {
                         string textureFile1 = gfxBracket.GetVarString("textureFile1").Replace("/", "\\");
@@ -184,19 +216,62 @@ namespace ModdingManagerClassLib.Loaders
                             Id = new Identifier(gfxBracket.GetVarString("name")),
                             TexturePath = gfxBracket.GetVarString("textureFile1"),
                             MaskTexturePath = gfxBracket.GetVarString("textureFile2"),
-                            MaskContent = File.Exists(modPath2) ? BitmapExtensions.LoadResource(modPath2)
-                                       : File.Exists(gamePath2) ? BitmapExtensions.LoadResource(gamePath2) : null,
-                            Content = File.Exists(modPath1) ? BitmapExtensions.LoadResource(modPath1)
-                                    : File.Exists(gamePath1) ? BitmapExtensions.LoadResource(gamePath1) : null,
+                            MaskContent = File.Exists(modPath2) ? BitmapExtensions.LoadResourceFullPath(modPath2)
+                                       : File.Exists(gamePath2) ? BitmapExtensions.LoadResourceFullPath(gamePath2) : null,
+                            Content = File.Exists(modPath1) ? BitmapExtensions.LoadResourceFullPath(modPath1)
+                                    : File.Exists(gamePath1) ? BitmapExtensions.LoadResourceFullPath(gamePath1) : null,
                             EffectFile = gfxBracket.GetVarString("effectFile")
                         };
                     }
+                case "circularprogressbartype":
+                    return new CircularProgressBarType
+                    {
+                        Id = new Identifier(gfxBracket.GetVarString("name")),
+                        Content = BitmapExtensions.LoadResourceRealativePath(gfxBracket.GetVarString("textureFile1")),
+                        EffectPath = gfxBracket.GetVarString("effectFile"),
+                        TexturePath = gfxBracket.GetVarString("textureFile1"),
+                        Size = gfxBracket.GetVarInt("size"),
+                        Rotation = gfxBracket.GetVarInt("rotation"),
+                        Amount = gfxBracket.GetVarInt("amount"),
+                        EffectContent = BitmapExtensions.LoadResourceRealativePath(gfxBracket.GetVarString("effectFile2")),
+                    };
+                default:
+                    return null;
+            }
+
+        }
+        public static IGfx? ParseSingleObjGfx(Bracket gfxBracket)
+        {
+            string brName = gfxBracket.Name.ToLower();
+            switch (brName)
+            {
+                case "arrowtype":
+                    {
+                        string textureFile = gfxBracket.GetVarString("textureFile").Replace("/", "\\");
+                        string modPath = Path.Combine(ModPathes.InterfacePath, textureFile);
+                        string gamePath = Path.Combine(GamePathes.InterfacePath, textureFile);
+
+                        var resarrow = new ArrowType
+                        {
+                            Id = new Identifier(gfxBracket.GetVarString("name")),
+                            TexturePath = gfxBracket.GetVarString("texture"),
+                            EffectPath = gfxBracket.GetVarString("effect"),
+                            SpecularPath = gfxBracket.GetVarString("specular"),
+                            NormalPath = gfxBracket.GetVarString("normal"),
+                           
+                            
+                        };
+                        resarrow.Content = BitmapExtensions.LoadResourceRealativePath(resarrow.TexturePath);
+                        resarrow.NormalContent = BitmapExtensions.LoadResourceRealativePath(resarrow.NormalPath);
+                        resarrow.SpecularContent = BitmapExtensions.LoadResourceRealativePath(resarrow.SpecularPath);
+                        return resarrow;
+                    }
+
 
                 default:
                     return null;
             }
 
         }
-
     }
 }

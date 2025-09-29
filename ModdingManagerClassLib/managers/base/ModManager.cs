@@ -24,7 +24,7 @@ namespace ModdingManager.managers.@base
         public static string CurrentCountryTag { get; set; } = "ZOV";
         public static Language CurrentLanguage = Language.russian;
         public static ModConfig Mod = new();
-        public static LocalisationRegistry Localisation = new();
+        public static LocalisationRegistry Localisation;
         public ModManager()
         {
             LoadInstance();
@@ -52,27 +52,36 @@ namespace ModdingManager.managers.@base
         public static void ComposeMod()
         {
             Mod = new ModConfig();
-
+            Localisation = new LocalisationRegistry();
+            Logger.AddLog($"Localisation Intalized:{Localisation.OtherLocalisation.Data.Count}, some rng obj:{Localisation.VictoryPointsLocalisation.Data.Count}");
             Mod.Gfxes = GfxLoader.LoadAll();
             Logger.AddLog($"GFXes Intalized:{Mod.Gfxes.Count}, some rng obj:{Mod.Gfxes.Random().Id.ToString()}");
             Mod.ModifierDefinitions = ModifierDefComposer.Parse().Cast<ModifierDefinitionConfig>().ToList();
-            Logger.AddLog($"ModDefs Intalized:{Mod.ModifierDefinitions.Count}, some rng obj:{Mod.ModifierDefinitions.Random().Id.ToString()}");
+            Logger.AddLog($"ModDefs Intalized:{Mod.ModifierDefinitions.Count}, some rng obj:{Mod.ModifierDefinitions.Random().Id.ToString()}, has custom mods?:{Mod.ModifierDefinitions.Any(m => m.IsCore == false)}: {Mod.ModifierDefinitions.Where(m => m.IsCore == false).ToList().Random().Id.ToString()}");
             Mod.StateCathegories = StateCathegoryComposer.Parse().Cast<StateCathegoryConfig>().ToList();
             Logger.AddLog($"StateCathegories Intalized:{Mod.StateCathegories.Count}, some rng obj:{Mod.StateCathegories.Random().Id.ToString()}");
             Mod.Rules = RuleComposer.Parse().Cast<RuleConfig>().ToList();
             Logger.AddLog($"Rules Intalized:{Mod.Rules.Count}, some rng obj:{Mod.Rules.Random().Id.ToString()}");
+            Mod.StaticModifiers = StaticModifierComposer.Parse().Cast<StaticModifierConfig>().ToList();
+            Logger.AddLog($"StaticModifiers Intalized:{Mod.StaticModifiers.Count}, some rng obj:{Mod.StaticModifiers.Random().Id.ToString()}");
+            Mod.DynamicModifiers = DynamicModifierComposer.Parse().Cast<DynamicModifierConfig>().ToList();
+            Logger.AddLog($"DynamicModifiers Intalized:{Mod.DynamicModifiers.Count}, some rng obj:{Mod.DynamicModifiers.Random().Id.ToString()}");
+            //Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
+            //Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
+
             //Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
+            //Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
             //Mod.Regiments = RegimentComposer.Parse().Cast<RegimentConfig>().ToList();
 
-            Mod.StaticModifiers = StaticModifierComposer.Parse().Cast<StaticModifierConfig>().ToList();
-            //Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList();
-            Mod.DynamicModifiers = DynamicModifierComposer.Parse().Cast<DynamicModifierConfig>().ToList();
-            //Mod.TechTreeLedgers = TechTreeComposer.Parse().Cast<TechTreeConfig>().ToList();
-            //Mod.Characters = CountryCharacterComposer.Parse().Cast<CountryCharacterConfig>().ToList();
 
-            Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList(); 
-            Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToList();
-            Mod.Map = MapComposer.Parse().FirstOrDefault() as MapConfig;
+            ////Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList();
+
+            ////Mod.TechTreeLedgers = TechTreeComposer.Parse().Cast<TechTreeConfig>().ToList();
+            ////Mod.Characters = CountryCharacterComposer.Parse().Cast<CountryCharacterConfig>().ToList();
+
+
+            //Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToList();
+            //Mod.Map = MapComposer.Parse().FirstOrDefault() as MapConfig;
         }
         public static List<string> LoadCountryFileNames()
         {

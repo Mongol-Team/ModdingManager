@@ -18,7 +18,7 @@ namespace ModdingManagerClassLib.utils
         public LocalizationBlock StateLocalisation { get; private set; }
         public LocalizationBlock OtherLocalisation { get; private set; }
         public List<string> FailedFiles { get; private set; }
-        public LocalisationRegistry() { }
+        public LocalisationRegistry() { LoadLocalisation(); }
         public KeyValuePair<string, string> GetLocalisationByKey(string key)
         {
             if (VictoryPointsLocalisation.Data.TryGetValue(key, out var val))

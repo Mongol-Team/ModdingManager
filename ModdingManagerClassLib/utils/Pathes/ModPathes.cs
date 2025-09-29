@@ -12,7 +12,7 @@ namespace ModdingManagerClassLib.utils.Pathes
         public static readonly string ModifierDefSecondPath = Path.Combine(ModManager.ModDirectory, "documentation", "modifiers_documentation.html");
         public static readonly string IdeasPath = Path.Combine(ModManager.ModDirectory, "common", "ideas");
         public static readonly string InterfacePath = Path.Combine(ModManager.ModDirectory, "interface");
-        public static readonly string StateCathegoryPath = Path.Combine(ModManager.ModDirectory, "common", "state_categories");
+        public static readonly string StateCathegoryPath = Path.Combine(ModManager.ModDirectory, "common", "state_category");
         public static readonly string LocalisationReplacePath = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage.ToString(), "replace");
         public static readonly string LocalisationPath = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage.ToString());
         public static readonly string CountryTagsPath = Path.Combine(ModManager.ModDirectory, "common", "country_tags");

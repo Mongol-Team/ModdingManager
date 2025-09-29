@@ -62,7 +62,11 @@
 
             return false;
         }
-
+        public static void AddSafe<T>(this ICollection<T> collection, T item)
+        {
+            if (collection == null || item == null) return;
+            collection.Add(item);
+        }
         public static T Random<T>(this List<T> list)
         {
             if (list == null || list.Count == 0)

@@ -4,7 +4,9 @@ using ModdingManagerClassLib.utils.Pathes;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
+using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.ObjectCacheData;
+using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,17 +21,29 @@ namespace ModdingManagerClassLib.Composers
         public StateCathegoryComposer() { }
         public static List<IConfig> Parse()
         {
+            List<IConfig> res = new List<IConfig>();
             string[] possiblePaths = {
                 ModPathes.StateCathegoryPath,
                 GamePathes.StateCathegoryPath
             };
             foreach (string path in possiblePaths)
             {
-                if (!File.Exists(path))
+                if (!Directory.Exists(path))
                     continue;
-                return ParseStateCathegoryFile(path).Cast<IConfig>().ToList();
+                string[] files = Directory.GetFiles(path, "*.txt");
+                if (files.Length == 0)
+                    continue;
+                foreach (string file in files)
+                {
+                    res.AddRange(ParseStateCathegoryFile(file).Cast<IConfig>().ToList());
+                }
+                if (res.Count != 0)
+                {
+                    break;
+                }
+                    
             }
-            return new List<IConfig>();
+            return res;
         }
         public static List<StateCathegoryConfig> ParseStateCathegoryFile(string filePath)
         {
@@ -43,11 +57,13 @@ namespace ModdingManagerClassLib.Composers
                     StateCathegoryConfig cfg = new()
                     {
                         Color = bracket.Arrays.FirstOrDefault(a => a.Name == "color").AsColor(),
-                        Id = bracket.Name as string ?? "unknown",
+                        Id = new Identifier(bracket.Name as string) ?? new("unknown"),
+
                     };
                     foreach (Var mod in bracket.SubVars)
                     {
-                        cfg.Modifiers[ModManager.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == mod.Name)] = mod.Value;
+                        ModifierDefinitionConfig? modDef = ModManager.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == mod.Name);
+                        cfg.Modifiers.Add(modDef, mod.Value);
                     }
                     result.Add(cfg);
                 }

@@ -24,37 +24,51 @@ namespace ModdingManagerClassLib.Composers
         public IdeologyComposer() { }
         public static List<IConfig> Parse()
         {
+            List<IConfig> res = new List<IConfig>();
             string[] possiblePaths = {
                 ModPathes.IdeologyPath,
                 GamePathes.IdeologyPath
             };
             foreach (string path in possiblePaths)
             {
+                if (!Directory.Exists(path))
+                    throw new FileNotFoundException($"Dir not found: {path}");
                 List<string> ideologyFiles = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories).ToList();
-                if (!File.Exists(path))
-                    throw new FileNotFoundException($"File not found: {path}");
 
-                string content = File.ReadAllText(path);
-
-                var parser = new TxtParser(new TxtPattern());
-
-                var parsedFile = (HoiFuncFile)parser.Parse(content);
-                if (parsedFile == null)
-                    throw new InvalidOperationException("Failed to parse the ideology file.");
-
-                var ideologiesBracket = parsedFile.Brackets.FirstOrDefault(b => b.Name == "ideologies");
-                if (ideologiesBracket == null)
-                    return new List<IConfig>();
-
-                var configs = new List<IConfig>();
-                foreach (var ideologyBracket in ideologiesBracket.SubBrackets)
+                foreach (string file in ideologyFiles)
                 {
-                    var config = ParseIdeologyConfig(ideologyBracket.Name, ideologyBracket);
-                    if (config != null)
-                        configs.Add(config);
-                }
+                    string content = File.ReadAllText(file);
 
-                return configs;
+                    var parser = new TxtParser(new TxtPattern());
+
+                    var parsedFile = (HoiFuncFile)parser.Parse(content);
+                    if (parsedFile == null)
+                    {
+                        Logger.AddLog("Failed to parse the ideology file:" + file);
+                        continue;
+                    }
+
+                    Bracket ideologiesBracket = parsedFile.Brackets.FirstOrDefault(b => b.Name == "ideologies");
+                    if (ideologiesBracket == null)
+                    {
+                        Logger.AddLog("Failed to search ideologies in file:" + file);
+                        continue;
+                    }
+                        
+
+                    
+                    foreach (var ideologyBracket in ideologiesBracket.SubBrackets)
+                    {
+                        var config = ParseIdeologyConfig(ideologyBracket.Name, ideologyBracket);
+                        if (config != null)
+                            res.Add(config);
+                    }
+                }
+                if (res.Count > 0)
+                {
+                    return res;
+                }
+                
             }
             return new List<IConfig>();
 
@@ -120,8 +134,12 @@ namespace ModdingManagerClassLib.Composers
             {
                 foreach (var varItem in rulesBracket.SubVars)
                 {
-                    var rule = ModManager.Mod.Rules.Where(r => r.Id.ToString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
-
+                    var rule = ModManager.Mod.Rules.Where(r => r.Id.ToString() == varItem.Name).FirstOrDefault();
+                    if (rule == null)
+                    {
+                        Logger.AddLog($"Не удалось найти правило с Id = {varItem.Name}");
+                        continue;
+                    }
                     if (!config.Rules.TryAdd(rule, (bool)varItem.Value))
                     {
                         Logger.AddLog($"Не удалось добавить правило с Id = {(varItem.Value as HoiReference).Value}");

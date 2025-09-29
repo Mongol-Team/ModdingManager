@@ -19,8 +19,8 @@ namespace ModdingManagerClassLib.Composers
         public static List<IConfig> Parse()
         {
             string[] possiblePaths = {
-                ModPathes.StaticModifiersPath,
-                GamePathes.StaticModifiersPath
+                ModPathes.DynamicModifiersPath,
+                GamePathes.DynamicModifiersPath
             };
             List<IConfig> configs = new List<IConfig>();
             foreach (string path in possiblePaths)

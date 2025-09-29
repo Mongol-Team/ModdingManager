@@ -1,4 +1,5 @@
 ﻿using ModdingManager.managers.@base;
+using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerClassLib.utils;
 using ModdingManagerClassLib.utils.Pathes;
@@ -36,8 +37,7 @@ namespace ModdingManagerClassLib.Composers
                 }
                 catch (Exception ex)
                 {
-                    // Можно логировать ex.Message при необходимости
-                    files = new List<string>(); // или files = null;
+                    files = new List<string>();
                 }
                 foreach (string file in files)
                 {
@@ -56,46 +56,68 @@ namespace ModdingManagerClassLib.Composers
         }
         public static RuleConfig ParseSingleRule(Bracket ruleBr)
         {
-            RuleConfig res = new RuleConfig
+            if (ruleBr == null)
             {
-                Id = new Identifier(ruleBr.SubVars.First(v => v.Name == "name").Name) ?? new("Null"),
-                GroupId = ruleBr.SubVars.First(v => v.Name == "group").Name ?? "Null",
-                RequiredDlc = ruleBr.SubVars.First(v => v.Name == "required_dlc").Name ?? "Null",
-                ExcludedDlc = ruleBr.SubVars.First(v => v.Name == "excluded_dlc").Name ?? "Null",
-                Options = new List<BaseConfig>(),
-                Icon = ModManager.Mod.Gfxes.FindById(ruleBr.SubVars.First(v => v.Name == "icon").Value.ToString()) ?? new SpriteType(),
-                Default = new BaseConfig { Id = new("default"), }
-            };
+                return null;
+            }
+            RuleConfig res = new RuleConfig();
+            try
+            {
+               
+                res = new RuleConfig
+                {
+                    Id = new(ruleBr.Name),
+                    GroupId = ruleBr.SubVars.FirstOrDefault(v => v.Name == "group") == null ? "Null" : ruleBr.SubVars.FirstOrDefault(v => v.Name == "group").Value.ToString(),
+                    RequiredDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc") == null ? "Null" : ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc").Value.ToString(),
+                    ExcludedDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc") == null ? "Null" : ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc").Value.ToString(),
+                    Options = new List<BaseConfig>(),
+                    Icon = ruleBr.SubVars.FirstOrDefault(v => v.Name == "icon")?.Value is var val && val != null ? ModManager.Mod.Gfxes.FindById(val.ToString()) ?? new SpriteType() : new SpriteType(),
+                    Default = new BaseConfig()
+                };
+                res.Localisation = new ConfigLocalisation();
+                string locKey = ruleBr.SubVars.FirstOrDefault(v => v.Name == "name") == null ? "Null" : ruleBr.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString();
+                KeyValuePair<string, string> loc = ModManager.Localisation.GetLocalisationByKey(locKey);
+
+                res.Localisation.Data.Add(loc.Key, loc.Value);
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
             foreach(Bracket br in ruleBr.SubBrackets)
             {
+      
                 if (br.Name == "option")
                 {
                     var option = new BaseConfig
                     {
-                        Id = new Identifier(br.SubVars.First(v => v.Name == "name").Value.ToString()) ?? new("Null"),
+                        Id = new Identifier(br.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString()) ?? new("Null"),
+                        Localisation = new ConfigLocalisation()
                     };
-                    ConfigLocalisation configLocalisation = new ConfigLocalisation();
-                    var nameloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.First(v => v.Name == "text").Value.ToString());
-                    var descloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.First(v => v.Name == "desc").Value.ToString());
-                    configLocalisation.Data.Add(nameloc.Key, nameloc.Value);
-                    configLocalisation.Data.Add(descloc.Key, descloc.Value);
-                   
+                    
+                    var nameloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "text").Value.ToString());
+                    var descloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "desc").Value.ToString());
+                    option.Localisation.Data.Add(nameloc.Key, nameloc.Value);
+                    option.Localisation.Data.Add(descloc.Key, descloc.Value);
+                    res.Options.Add(option);
                 }
                 else if (br.Name == "default")
                 {
                     res.Default = new BaseConfig
                     {
                         Id = new Identifier(br.SubVars.First(v => v.Name == "name").Value.ToString()) ?? new("Null"),
+                        Localisation = new ConfigLocalisation()
                     };
-                    ConfigLocalisation configLocalisation = new ConfigLocalisation();
-                    var nameloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.First(v => v.Name == "text").Value.ToString());
-                    var descloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.First(v => v.Name == "desc").Value.ToString());
-                    configLocalisation.Data.Add(nameloc.Key, nameloc.Value);
-                    configLocalisation.Data.Add(descloc.Key, descloc.Value);
-                    res.Default.Localisation = configLocalisation;
+                    
+                    var nameloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "text").Value.ToString());
+                    var descloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "desc").Value.ToString());
+                    res.Default.Localisation.Data.Add(nameloc.Key, nameloc.Value);
+                    res.Default.Localisation.Data.Add(descloc.Key, descloc.Value);
                 }
             }
+            
             return res;
+            
         }
     }
 }

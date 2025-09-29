@@ -9,9 +9,9 @@ namespace ModdingManagerModels.Types.LocalizationData
 {
     public class ConfigLocalisation : ILocalisation
     {
-        public Language Language { get; set; }
-        public Dictionary<string, string> Data { get; set; }
-        public IConfig Source { get; set; }
-        public bool ReplacebleResource { get; set; }
+        public Language Language { get; set; } = Language.english;
+        public Dictionary<string, string> Data { get; set; } = new();
+        public IConfig Source { get; set; } = null;
+        public bool ReplacebleResource { get; set; } = false;
     }
 }

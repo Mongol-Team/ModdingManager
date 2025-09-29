@@ -7,10 +7,8 @@ namespace ModdingManagerModels
     {
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
-        public string NameLocKey { get; set; }
-        public string Description { get; set; }
         public string Tag { get; set; }
-        public string Modifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
         public string RemovalCost { get; set; }
         public string Available { get; set; }
         public string AvailableCivilWar { get; set; }

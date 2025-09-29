@@ -10,7 +10,7 @@ namespace ModdingManagerClassLib.utils.Pathes
         public static readonly string StrategicRegionPath = Path.Combine(ModManager.GameDirectory, "map", "strategicregions");
         public static readonly string ModifierDefFirstPath = Path.Combine(ModManager.GameDirectory, "common", "modifier_definitions");
         public static readonly string ModifierDefSecondPath = Path.Combine(ModManager.GameDirectory, "documentation", "modifiers_documentation.html");
-        public static readonly string StateCathegoryPath = Path.Combine(ModManager.GameDirectory, "common", "state_categories");
+        public static readonly string StateCathegoryPath = Path.Combine(ModManager.GameDirectory, "common", "state_category");
         public static readonly string RegimentsPath = Path.Combine(ModManager.GameDirectory, "common", "units");
         public static readonly string RulesPath = Path.Combine(ModManager.GameDirectory, "common", "game_rules");
         public static readonly string StaticModifiersPath = Path.Combine(ModManager.GameDirectory, "common", "modifiers");

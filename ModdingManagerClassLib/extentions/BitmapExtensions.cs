@@ -1,5 +1,6 @@
 ﻿using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
+using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Debugging;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
@@ -263,14 +264,44 @@ namespace ModdingManagerClassLib.Extentions
                 return System.Drawing.Image.FromStream(outStream, true, true);
             }
         }
-        public static Bitmap LoadResource(string pathWithFileName)
+        public static Bitmap? LoadResourceRealativePath(string relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath))
+                throw new ArgumentException("Относительный путь не может быть пустым.", nameof(relativePath));
+            relativePath = relativePath.Replace("/", "\\");
+            // Комбинируем с директориями
+            string modPath = Path.Combine(ModManager.ModDirectory, relativePath);
+            string gamePath = Path.Combine(ModManager.GameDirectory, relativePath);
+
+            string? fullPath = null;
+
+            if (File.Exists(modPath))
+                fullPath = modPath;
+            else if (File.Exists(gamePath))
+                fullPath = gamePath;
+
+            if (fullPath == null)
+                return null;
+
+            string ext = Path.GetExtension(fullPath).ToLowerInvariant();
+
+            return ext switch
+            {
+                ".dds" => LoadFromDDS(fullPath),
+                ".tga" => LoadFromTGA(fullPath),
+                ".png" => LoadFromPNG(fullPath),
+                _ => throw new NotSupportedException($"Файлы с расширением {ext} не поддерживаются.")
+            };
+        }
+
+        public static Bitmap LoadResourceFullPath(string pathWithFileName)
         {
             if (string.IsNullOrWhiteSpace(pathWithFileName))
                 throw new ArgumentException("Путь к файлу не может быть пустым.", nameof(pathWithFileName));
-
+            pathWithFileName = pathWithFileName.Replace("/", "\\");
             if (!File.Exists(pathWithFileName))
                 throw new FileNotFoundException("Файл не найден.", pathWithFileName);
-
+            
             string ext = Path.GetExtension(pathWithFileName).ToLowerInvariant();
 
             switch (ext)
@@ -280,11 +311,31 @@ namespace ModdingManagerClassLib.Extentions
 
                 case ".tga":
                     return LoadFromTGA(pathWithFileName);
-
+                case ".png":
+                    return LoadFromPNG(pathWithFileName);
                 default:
                     throw new NotSupportedException($"Файлы с расширением {ext} не поддерживаются.");
             }
         }
+        public static Bitmap LoadFromPNG(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException("Путь к файлу не может быть пустым.", nameof(path));
+
+            if (!File.Exists(path))
+                throw new FileNotFoundException("Файл не найден.", path);
+
+            try
+            {
+                using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return new Bitmap(stream);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Не удалось загрузить PNG-файл: {path}", ex);
+            }
+        }
+
         public static Bitmap LoadFromDDS(string path)
         {
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
@@ -292,6 +343,7 @@ namespace ModdingManagerClassLib.Extentions
                 Logger.AddLog($"Файл для загрузки DDS картинки не найден: {path}");
                 return null;
             }
+
             // 1) Загружаем и декодируем DDS
             using Pfim.IImage dds = Pfim.Pfimage.FromFile(path);
 
@@ -310,37 +362,36 @@ namespace ModdingManagerClassLib.Extentions
                 _ => throw new NotSupportedException($"DDS формат {dds.Format} не поддерживается")
             };
 
-            // 3) Создаём Bitmap и копируем данные
+            // 3) Создаём Bitmap и копируем данные построчно
             var bmp = new Bitmap(width, height, sysFmt);
             var rect = new System.Drawing.Rectangle(0, 0, width, height);
             var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, sysFmt);
 
-            // Проверяем, совпадают ли stride
-            if (bmpData.Stride == dds.Stride)
+            try
             {
-                Marshal.Copy(raw, 0, bmpData.Scan0, raw.Length);
-            }
-            else
-            {
-                // Копируем по строкам, если stride отличаются
                 int bytesPerPixel = dds.Format switch
                 {
                     Pfim.ImageFormat.Rgba32 => 4,
                     Pfim.ImageFormat.Rgb24 => 3,
                     _ => 2 // для 16-битных форматов
                 };
+
                 int rowBytes = width * bytesPerPixel;
+
                 for (int y = 0; y < height; y++)
                 {
                     Marshal.Copy(raw, y * dds.Stride, bmpData.Scan0 + y * bmpData.Stride, rowBytes);
                 }
             }
+            finally
+            {
+                bmp.UnlockBits(bmpData);
+            }
 
-            bmp.UnlockBits(bmpData);
             bmp.SetResolution(96, 96);  // DPI по умолчанию для WPF
-
             return bmp;
         }
+
         private static class NativeMethods
         {
             [System.Runtime.InteropServices.DllImport("gdi32.dll")]

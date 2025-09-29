@@ -36,6 +36,7 @@
     <Folder Include="data\configs\techtrees\" />
     <Folder Include="data\configs\templates\" />
     <Folder Include="data\temp\" />
+    <Folder Include="data\ConfigData\" />
   </ItemGroup>
 
   <ItemGroup>

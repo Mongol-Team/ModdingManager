@@ -10,7 +10,7 @@ namespace ModdingManagerClassLib.Extentions
             return gfxBracket.SubVars.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Value?.ToString() ?? defaultValue;
         }
 
-        public static int GetVarInt(this Bracket gfxBracket, string name, int defaultValue = 0)
+        public static int GetVarInt(this Bracket gfxBracket, string name, int defaultValue = -1)
         {
             var val = gfxBracket.SubVars.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Value;
             return val != null ? val.ToInt<object>() : defaultValue;
