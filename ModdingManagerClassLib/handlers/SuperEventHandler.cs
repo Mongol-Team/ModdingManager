@@ -484,14 +484,14 @@ public class SuperEventHandler
         catch (OperationCanceledException)
         {
 
-            Logger.AddLog("[WPF EXEPTION]: Операция отменена пользователем или из-за ошибок покрытия шрифта.");
+            Logger.AddDbgLog("[WPF EXEPTION]: Операция отменена пользователем или из-за ошибок покрытия шрифта.");
         }
         catch (Exception ex)
         {
            
             MessageBox.Show($"Не удалось завершить операцию:\n{ex.Message}",
                         "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            Logger.AddLog($"[WPF EXEPTION]: Не удалось завершить операцию:{ex.Message}");
+            Logger.AddDbgLog($"[WPF EXEPTION]: Не удалось завершить операцию:{ex.Message}");
             
         }
     }

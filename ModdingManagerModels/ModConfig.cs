@@ -15,11 +15,13 @@ namespace ModdingManager.classes.utils
         public List<CountryConfig> Countries { get; set; }
         public List<IdeaConfig> Ideas { get; set; }
         public List<TriggerDefenitionConfig> TriggerDefenitions  { get; set; }
+        public List<IdeaTagConfig> IdeaTags { get; set; }
         public List<Var> Vars { get; set; }
         public List<StaticModifierConfig> StaticModifiers { get; set; }
         public List<OpinionModifierConfig> OpinionModifiers { get; set; }
         public List<DynamicModifierConfig> DynamicModifiers { get; set; }
         public List<ModifierDefinitionConfig> ModifierDefinitions { get; set; }
+        public List<IdeaSlotConfig> IdeaSlots { get; set; }
         public List<IGfx> Gfxes { get; set; }
         public MapConfig Map { get; set; } = new MapConfig();
         public List<TechTreeConfig> TechTreeLedgers { get; set; } = new List<TechTreeConfig>();

@@ -44,6 +44,7 @@ namespace ModdingManagerClassLib.Composers
             }
             return configs;
         }
+       
         public static DynamicModifierConfig ParseSingleModifer(Bracket bracket)
         {
             DynamicModifierConfig cfg = new DynamicModifierConfig();
@@ -91,3 +92,5 @@ namespace ModdingManagerClassLib.Composers
         }
     }
 }
+
+

@@ -11,23 +11,23 @@ namespace ModdingManagerClassLib.Debugging
         {
             //storaged_color = Logger.outline_color;
             Logger.depth++;
-            //Logger.AddLog($"+Scope {caller}", LogLevel.ERROR).Wait();
+            //Logger.AddDbgLog($"+Scope {caller}", LogLevel.ERROR).Wait();
             this.caller = caller;
         }
         public LogScope(string msg, [CallerMemberName] string caller = "")
         {
-            Logger.AddLog(msg, msgType: LogLevel.INFO);
+            Logger.AddDbgLog(msg, msgType: LogLevel.INFO);
             Logger.depth++;
-            //Logger.AddLog($"+Scope {caller}", LogLevel.ERROR).Wait();
+            //Logger.AddDbgLog($"+Scope {caller}", LogLevel.ERROR).Wait();
             this.caller = caller;
         }
         public LogScope(string msg, ConsoleColor color, [CallerMemberName] string caller = "")
         {
             storaged_color = Logger.outline_color;
             Logger.outline_color = color;
-            Logger.AddLog(msg, msgType: LogLevel.INFO).Wait();
+            Logger.AddDbgLog(msg, msgType: LogLevel.INFO).Wait();
             Logger.depth++;
-            //Logger.AddLog($"+Scope {caller}", LogLevel.ERROR).Wait();
+            //Logger.AddDbgLog($"+Scope {caller}", LogLevel.ERROR).Wait();
             this.caller = caller;
         }
 
@@ -40,7 +40,7 @@ namespace ModdingManagerClassLib.Debugging
             }
             else if (storaged_color != null)
                 Logger.outline_color = storaged_color.Value;
-            //Logger.AddLog($"-Scope {caller}", LogLevel.ERROR).Wait();
+            //Logger.AddDbgLog($"-Scope {caller}", LogLevel.ERROR).Wait();
         }
     }
 }

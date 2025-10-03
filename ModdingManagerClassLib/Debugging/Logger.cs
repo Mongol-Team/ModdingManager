@@ -12,8 +12,7 @@ namespace ModdingManagerClassLib.Debugging
     public struct Logger
     {
         private static readonly object _logLock = new object();
-
-        // буфер теперь хранит "сырые" данные
+        public static bool IsDebug = false;
         private class LogEntry
         {
             public string Message { get; set; } = "";
@@ -85,7 +84,7 @@ namespace ModdingManagerClassLib.Debugging
             [CallerLineNumber] int line = 0)
         {
             //await Task.Yield();
-
+          
             if (LoggingLevel >= log_level)
             {
                 string fileShort = System.IO.Path.GetFileName(file);
@@ -142,6 +141,43 @@ namespace ModdingManagerClassLib.Debugging
                 type = "ERR";
             }
             await AddLog(message, color, level, type, caller, file, line);
+
+
+        }
+
+        public static async Task AddDbgLog(
+            string message,
+            LogLevel msgType = LogLevel.INFO,
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string file = "",
+            [CallerLineNumber] int line = 0)
+        {
+            if (!IsDebug)
+            {
+                return;
+            }
+            ConsoleColor color = msgType == LogLevel.ERROR ? ConsoleColor.Red :
+                                 msgType == LogLevel.WARNING ? ConsoleColor.Yellow :
+                                 ConsoleColor.White;
+
+            string type = msgType == LogLevel.ERROR ? "ERR" :
+                          msgType == LogLevel.WARNING ? "WAR" : "INF";
+
+            int level = msgType == LogLevel.ERROR ? 1 :
+                        msgType == LogLevel.WARNING ? 2 : 3;
+            if (message.Contains(WarnSymbol))
+            {
+                color = ConsoleColor.Yellow;
+                type = "WAR";
+            }
+            if (message.Contains(ErrorSymbol))
+            {
+                color = ConsoleColor.Red;
+                type = "ERR";
+            }
+            await AddLog(message, color, level, type, caller, file, line);
+
+
         }
     }
 }

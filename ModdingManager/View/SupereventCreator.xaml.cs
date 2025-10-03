@@ -957,7 +957,7 @@ namespace ModdingManager
         {
             if (sender is System.Windows.Controls.ComboBox combo)
             {
-                Logger.AddLog("SearchableCombo_SelectionChanged");
+                Logger.AddDbgLog("SearchableCombo_SelectionChanged");
                 string comboName = combo.Name;
 
                 string fontName = combo.SelectedItem as string;
@@ -993,7 +993,7 @@ namespace ModdingManager
                             rtb.FontFamily = newFont;
                     }
                 }
-                Logger.AddLog("fin");
+                Logger.AddDbgLog("fin");
             }
         }
 

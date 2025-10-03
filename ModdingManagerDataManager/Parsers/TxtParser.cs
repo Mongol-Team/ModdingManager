@@ -17,8 +17,8 @@ namespace ModdingManagerDataManager.Parsers
             Normalize(ref content);
 
             var (opens, closes) = CountBraces(content, pattern.OpenChar[0], pattern.CloseChar[0]);
-            if (opens > closes) throw new Exception($"Unclosed {pattern.OpenChar}");
-            if (opens < closes) throw new Exception($"Unclosed {pattern.CloseChar}");
+            if (opens > closes) throw new Exception($"Unclosed {pattern.OpenChar}, content:{content}");
+            if (opens < closes) throw new Exception($"Unclosed {pattern.CloseChar}, content:{content}");
 
             HoiFuncFile result = new HoiFuncFile();
             content = Rx.FindBracket.Replace(content, m =>

@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ModdingManagerDataManager\ModdingManagerDataManager.csproj" />
+    <ProjectReference Include="..\ModdingManagerData\ModdingManagerData.csproj" />
     <ProjectReference Include="..\ModdingManagerModels\ModdingManagerModels.csproj" />
   </ItemGroup>
 

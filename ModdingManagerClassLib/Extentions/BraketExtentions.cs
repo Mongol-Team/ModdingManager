@@ -1,15 +1,17 @@
 ﻿using ModdingManagerModels.Types.ObjectCacheData;
+using ModdingManagerModels.Types.Utils;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace ModdingManagerClassLib.Extentions
 {
     public static class BraketExtentions
     {
-        public static string GetVarString(this Bracket gfxBracket, string name, string defaultValue = "Null")
+        public static string GetVarString(this Bracket gfxBracket, string name, string defaultValue = DataDefaultValues.Null)
         {
             return gfxBracket.SubVars.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Value?.ToString() ?? defaultValue;
         }
-
+       
         public static int GetVarInt(this Bracket gfxBracket, string name, int defaultValue = -1)
         {
             var val = gfxBracket.SubVars.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Value;

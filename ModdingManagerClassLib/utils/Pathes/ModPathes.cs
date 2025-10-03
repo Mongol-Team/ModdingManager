@@ -19,7 +19,7 @@ namespace ModdingManagerClassLib.utils.Pathes
         public static readonly string DefinitionPath = Path.Combine(ModManager.ModDirectory, "map", "definition.csv");
         public static readonly string ProvinceImagePath = Path.Combine(ModManager.ModDirectory, "map", "provinces.bmp");
         public static readonly string StrategicRegionPath = Path.Combine(ModManager.ModDirectory, "map", "strategicregions");
-
+        public static readonly string IdeaTagsPath = Path.Combine(ModManager.GameDirectory, "common", "idea_tags");
 
         public static readonly string RegimentsPath = Path.Combine(ModManager.ModDirectory, "common", "units");
         public static readonly string RulesPath = Path.Combine(ModManager.ModDirectory, "common", "game_rules");

@@ -94,7 +94,7 @@ namespace ModdingManagerClassLib.utils
                 }
                 catch (Exception ex)
                 {
-                    Logger.AddLog("Ошибка при загрузке файлов локализации: " + ex.Message);
+                    Logger.AddDbgLog("Ошибка при загрузке файлов локализации: " + ex.Message);
                 }
             });
 

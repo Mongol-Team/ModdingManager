@@ -18,11 +18,15 @@ namespace ModdingManager.managers.@base
     {
         public static string ModDirectory { get; 
             set; } = "";
-        public static bool IsDebugRuning { get;
-            set; }
+        public static bool IsDebugRuning
+        {
+            get;
+            set;
+        } = false;
         public static string GameDirectory { get; set; } = "";
         public static string CurrentCountryTag { get; set; } = "ZOV";
         public static Language CurrentLanguage = Language.russian;
+
         public static ModConfig Mod = new();
         public static LocalisationRegistry Localisation;
         public ModManager()
@@ -34,6 +38,7 @@ namespace ModdingManager.managers.@base
             string relativePath = System.IO.Path.Combine("..", "..", "..", "data", "dir.json");
             string fullPath = System.IO.Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
             Logger.LoggingLevel = 3;
+            Logger.IsDebug = IsDebugRuning;
             try
             {
                 string json = File.ReadAllText(fullPath);
@@ -66,11 +71,18 @@ namespace ModdingManager.managers.@base
             Logger.AddLog($"StaticModifiers Intalized:{Mod.StaticModifiers.Count}, some rng obj:{Mod.StaticModifiers.Random().Id.ToString()}");
             Mod.DynamicModifiers = DynamicModifierComposer.Parse().Cast<DynamicModifierConfig>().ToList();
             Logger.AddLog($"DynamicModifiers Intalized:{Mod.DynamicModifiers.Count}, some rng obj:{Mod.DynamicModifiers.Random().Id.ToString()}");
-            //Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
-            //Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
+            Mod.IdeaSlots = IdeaSlotComposer.Parse().Cast<IdeaSlotConfig>().ToList();
+            Logger.AddLog($"IdeaSlots Intalized:{Mod.IdeaSlots.Count}, some rng obj:{Mod.IdeaSlots.Random().Id.ToString()}");
+            Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
+            Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
+            Mod.IdeaTags = IdeaTagComposer.Parse().Cast<IdeaTagConfig>().ToList();
+            Logger.AddLog($"IdeaTags Intalized:{Mod.IdeaTags.Count}, some rng obj:{Mod.IdeaTags.Random().Id.ToString()}");
 
-            //Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
-            //Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
+            Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
+            Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
+
+            Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
+            Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
             //Mod.Regiments = RegimentComposer.Parse().Cast<RegimentConfig>().ToList();
 
 
@@ -96,7 +108,9 @@ namespace ModdingManager.managers.@base
             var filePaths = System.IO.Directory.GetFiles(countriesDir);
             var fileNamesLines = filePaths.Select(path => Path.GetFileName(path)).ToList();
             return fileNamesLines;
+            
         }
+        
         public static System.Drawing.Color GenerateColorFromId(int id)
         {
             byte r = (byte)((id * 53) % 255);

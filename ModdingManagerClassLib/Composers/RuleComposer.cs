@@ -3,12 +3,14 @@ using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerClassLib.utils;
 using ModdingManagerClassLib.utils.Pathes;
+using ModdingManagerData;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.GfxTypes;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.ObjectCacheData;
+using ModdingManagerModels.Types.TableCacheData;
 using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
@@ -28,6 +30,7 @@ namespace ModdingManagerClassLib.Composers
                 GamePathes.RulesPath
             };
             List<IConfig> configs = new List<IConfig>();
+            configs.AddRange(ParseCoreRules());
             foreach (string path in possiblePaths)
             {
                 List<string> files = null;
@@ -54,6 +57,21 @@ namespace ModdingManagerClassLib.Composers
             }
             return configs;
         }
+        public static List<RuleConfig> ParseCoreRules()
+        {
+            List<RuleConfig> configs = new List<RuleConfig>();
+            HoiTable tbl = new CsvParser(new RulesDataPattern()).Parse(DataLib.RulesCoreDefenitions) as HoiTable;
+            foreach(List<object> row in tbl.Values)
+            {
+                RuleConfig cfg = new()
+                {
+                    Id = new(row[0].ToString())
+                };
+                configs.Add(cfg);
+            }
+           
+            return configs;
+        }
         public static RuleConfig ParseSingleRule(Bracket ruleBr)
         {
             if (ruleBr == null)
@@ -63,19 +81,19 @@ namespace ModdingManagerClassLib.Composers
             RuleConfig res = new RuleConfig();
             try
             {
-               
                 res = new RuleConfig
                 {
                     Id = new(ruleBr.Name),
-                    GroupId = ruleBr.SubVars.FirstOrDefault(v => v.Name == "group") == null ? "Null" : ruleBr.SubVars.FirstOrDefault(v => v.Name == "group").Value.ToString(),
-                    RequiredDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc") == null ? "Null" : ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc").Value.ToString(),
-                    ExcludedDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc") == null ? "Null" : ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc").Value.ToString(),
+                    GroupId = ruleBr.SubVars.FirstOrDefault(v => v.Name == "group") == null ? DataDefaultValues.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "group").Value.ToString(),
+                    RequiredDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc") == null ? DataDefaultValues.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc").Value.ToString(),
+                    ExcludedDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc") == null ? DataDefaultValues.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc").Value.ToString(),
                     Options = new List<BaseConfig>(),
                     Icon = ruleBr.SubVars.FirstOrDefault(v => v.Name == "icon")?.Value is var val && val != null ? ModManager.Mod.Gfxes.FindById(val.ToString()) ?? new SpriteType() : new SpriteType(),
-                    Default = new BaseConfig()
+                    Default = new BaseConfig(),
+                    IsCore = false
                 };
                 res.Localisation = new ConfigLocalisation();
-                string locKey = ruleBr.SubVars.FirstOrDefault(v => v.Name == "name") == null ? "Null" : ruleBr.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString();
+                string locKey = ruleBr.SubVars.FirstOrDefault(v => v.Name == "name") == null ? DataDefaultValues.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString();
                 KeyValuePair<string, string> loc = ModManager.Localisation.GetLocalisationByKey(locKey);
 
                 res.Localisation.Data.Add(loc.Key, loc.Value);
@@ -91,7 +109,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     var option = new BaseConfig
                     {
-                        Id = new Identifier(br.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString()) ?? new("Null"),
+                        Id = new Identifier(br.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString()) ?? new(DataDefaultValues.Null),
                         Localisation = new ConfigLocalisation()
                     };
                     
@@ -105,7 +123,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     res.Default = new BaseConfig
                     {
-                        Id = new Identifier(br.SubVars.First(v => v.Name == "name").Value.ToString()) ?? new("Null"),
+                        Id = new Identifier(br.SubVars.First(v => v.Name == "name").Value.ToString()) ?? new(DataDefaultValues.Null),
                         Localisation = new ConfigLocalisation()
                     };
                     

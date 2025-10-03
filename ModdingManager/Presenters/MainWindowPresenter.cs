@@ -243,7 +243,7 @@ namespace ModdingManager.Presenter
         {
             ModManager.IsDebugRuning = true;
             ConsoleHelper.ShowConsole();
-            Logger.AddLog("Режим отладки активирован");
+            Logger.AddDbgLog("Режим отладки активирован");
             Logger.FlushBuffer();
             try
             {
@@ -251,7 +251,7 @@ namespace ModdingManager.Presenter
             }
             catch (Exception ex)
             {
-                Logger.AddLog($"Поймано исключение: {ex.Message}");
+                Logger.AddDbgLog($"Поймано исключение: {ex.Message}");
             }
         }
 

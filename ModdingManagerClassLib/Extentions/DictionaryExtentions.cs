@@ -8,6 +8,12 @@ namespace ModdingManagerClassLib.Extentions
 {
     public static class DictionaryExtentions
     {
-
+        public static void AddPair<TKey, TValue>(this Dictionary<TKey, TValue> dict, KeyValuePair<TKey, TValue> kvp)
+        {
+            if (!dict.ContainsKey(kvp.Key))
+            {
+                dict.Add(kvp.Key, kvp.Value);
+            }
+        }
     }
 }

@@ -340,7 +340,7 @@ namespace ModdingManagerClassLib.Extentions
         {
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             {
-                Logger.AddLog($"Файл для загрузки DDS картинки не найден: {path}");
+                Logger.AddDbgLog($"Файл для загрузки DDS картинки не найден: {path}");
                 return null;
             }
 

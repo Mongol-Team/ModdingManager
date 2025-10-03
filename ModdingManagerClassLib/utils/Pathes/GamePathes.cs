@@ -19,6 +19,8 @@ namespace ModdingManagerClassLib.utils.Pathes
         public static readonly string CountryTagsPath = Path.Combine(ModManager.GameDirectory, "common", "country_tags");
         public static readonly string CommonCountriesPath = Path.Combine(ModManager.GameDirectory, "common", "countries");
         public static readonly string HistoryCountriesPath = Path.Combine(ModManager.GameDirectory, "history", "countries");
+        public static readonly string IdeaTagsPath = Path.Combine(ModManager.GameDirectory, "common", "idea_tags");
+
         public static readonly string StatesPath = Path.Combine(ModManager.GameDirectory, "history", "states");
         public static readonly string LocalisationPath = Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage.ToString());
         public static readonly string LocalisationReplacePath = Path.Combine(ModManager.GameDirectory, "localisation", ModManager.CurrentLanguage.ToString(), "replace");

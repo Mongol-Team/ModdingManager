@@ -15,6 +15,18 @@ namespace ModdingManagerModels.GfxTypes
         public bool LegacyLazyLoad { get; set; }        // lazy loading flag
         public bool TransparenceCheck { get; set; }       // if alpha channel is used for click bounding
         public Bitmap Content { get; set; }
+        public SpriteType() { }
+        public SpriteType(Bitmap content, string name)
+        {
+            Content = content;
+            TexturePath = "Null";
+            Id = new Identifier(name);
+            NoOfFrames = -1;
+            EffectFile = "Null";
+            AllwaysTransparent = false;
+            LegacyLazyLoad = false;
+            TransparenceCheck = false;
+        }
         //// Animation fields
         ///чо ето за хуйня
         //public string Animationmaskfile;

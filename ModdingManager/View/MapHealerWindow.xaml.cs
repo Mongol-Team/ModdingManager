@@ -30,7 +30,7 @@ namespace ModdingManager
         //        .Where(p => p.Shape != null)
         //        .Select(p => p.Id));
 
-        //    Logger.AddLog("Starting cleanup of non-existing province links...");
+        //    Logger.AddDbgLog("Starting cleanup of non-existing province links...");
 
            
         //    // Process State files
@@ -78,7 +78,7 @@ namespace ModdingManager
         //                if (hasBad)
         //                {
         //                    historyBracket.SubBrackets.Remove(vpBracket);
-        //                    Logger.AddLog($"Removed invalid victory_points bracket from state file: {stateFilePath}");
+        //                    Logger.AddDbgLog($"Removed invalid victory_points bracket from state file: {stateFilePath}");
         //                    statemodified = true;
         //                }
         //            }
@@ -125,7 +125,7 @@ namespace ModdingManager
         //        if (parts.Length > 0 && int.TryParse(parts[0], out int provId) && !existingProvs.Contains(provId))
         //        {
         //            linesToRemove.Add(line);
-        //            Logger.AddLog($"Removed non-existing province {provId} from definition file: {filePath}");
+        //            Logger.AddDbgLog($"Removed non-existing province {provId} from definition file: {filePath}");
         //        }
         //    }
 
@@ -142,14 +142,14 @@ namespace ModdingManager
 
 
         //    mapCache.SaveAllDirtyFiles();
-        //    Logger.AddLog("Cleanup of non-existing province links completed.");
+        //    Logger.AddDbgLog("Cleanup of non-existing province links completed.");
         //}
         //public static void CheckProvincesDefines(ErrorPanel errorPanel)
         //{
         //    var mapCache = ModManager.Mod.MapCache;
         //    if (mapCache == null || mapCache.MapDefinitionCache == null)
         //    {
-        //        Logger.AddLog("MapCache or MapDefinitionCache is not initialized. Cannot perform province defines check.");
+        //        Logger.AddDbgLog("MapCache or MapDefinitionCache is not initialized. Cannot perform province defines check.");
         //        return;
         //    }
 
@@ -292,14 +292,14 @@ namespace ModdingManager
         //    }
 
 
-        //    Logger.AddLog("Province defines check completed.");
+        //    Logger.AddDbgLog("Province defines check completed.");
         //}
         //private static void CheckStateDefines(ErrorPanel errorPanel)
         //{
         //    var mapCache = ModManager.Mod.MapCache;
         //    if (mapCache == null || mapCache.StatesCache.Count == 0)
         //    {
-        //        Logger.AddLog("MapCache or StatesCache is not initialized. Cannot perform state defines check.");
+        //        Logger.AddDbgLog("MapCache or StatesCache is not initialized. Cannot perform state defines check.");
         //        return;
         //    }
 
@@ -507,7 +507,7 @@ namespace ModdingManager
         //        }
         //    }
 
-        //    Logger.AddLog("State defines check completed.");
+        //    Logger.AddDbgLog("State defines check completed.");
         }
 
         private void CheckStateDefines_Click(object sender, RoutedEventArgs e)

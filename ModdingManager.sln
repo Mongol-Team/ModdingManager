@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModdingManagerModels", "Mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModdingManagerDataManager", "ModdingManagerDataManager\ModdingManagerDataManager.csproj", "{A673447A-5199-4B2F-BD7C-83CBB563394B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModdingManagerData", "ModdingManagerData\ModdingManagerData.csproj", "{829A9CF6-0945-4208-891B-AEC23FA6F902}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{A673447A-5199-4B2F-BD7C-83CBB563394B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A673447A-5199-4B2F-BD7C-83CBB563394B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A673447A-5199-4B2F-BD7C-83CBB563394B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{829A9CF6-0945-4208-891B-AEC23FA6F902}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{829A9CF6-0945-4208-891B-AEC23FA6F902}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{829A9CF6-0945-4208-891B-AEC23FA6F902}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{829A9CF6-0945-4208-891B-AEC23FA6F902}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

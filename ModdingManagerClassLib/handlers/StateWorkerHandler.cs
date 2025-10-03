@@ -20,7 +20,7 @@ public class StateWorkerHandler
         if (mat.Empty())
             throw new InvalidOperationException("Не удалось загрузить provinces.bmp");
 
-        Logger.AddLog($"🔍 Начало обработки {ModManager.Mod.Map.Provinces.Count} провинций...");
+        Logger.AddDbgLog($"🔍 Начало обработки {ModManager.Mod.Map.Provinces.Count} провинций...");
 
         int successCount = 0;
         var timer = System.Diagnostics.Stopwatch.StartNew();
@@ -41,7 +41,7 @@ public class StateWorkerHandler
                 int pixelCount = Cv2.CountNonZero(mask);
                 if (pixelCount == 0)
                 {
-                    Logger.AddLog($"⚠️ Провинция {province.Id} не найдена (цвет R:{province.Color.R}, G:{province.Color.G}, B:{province.Color.B})");
+                    Logger.AddDbgLog($"⚠️ Провинция {province.Id} не найдена (цвет R:{province.Color.R}, G:{province.Color.G}, B:{province.Color.B})");
                     return;
                 }
 
@@ -71,7 +71,7 @@ public class StateWorkerHandler
                 var moments = Cv2.Moments(mainContour);
                 if (moments.M00 <= 0.5)
                 {
-                    Logger.AddLog($"⚠️ Провинция {province.Id}: контур слишком мал (площадь {moments.M00})");
+                    Logger.AddDbgLog($"⚠️ Провинция {province.Id}: контур слишком мал (площадь {moments.M00})");
                     return;
                 }
 
@@ -87,15 +87,15 @@ public class StateWorkerHandler
             }
             catch (Exception ex)
             {
-                Logger.AddLog($"🔥 Ошибка при обработке провинции {province.Id}: {ex.Message}");
+                Logger.AddDbgLog($"🔥 Ошибка при обработке провинции {province.Id}: {ex.Message}");
             }
         });
 
         timer.Stop();
-        Logger.AddLog("\n====================================");
-        Logger.AddLog($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
-        Logger.AddLog($"Успешно: {successCount} | Не удалось: {ModManager.Mod.Map.Provinces.Count - successCount}");
-        Logger.AddLog("====================================\n");
+        Logger.AddDbgLog("\n====================================");
+        Logger.AddDbgLog($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
+        Logger.AddDbgLog($"Успешно: {successCount} | Не удалось: {ModManager.Mod.Map.Provinces.Count - successCount}");
+        Logger.AddDbgLog("====================================\n");
 
         return ModManager.Mod.Map.Provinces;
     }
@@ -180,7 +180,7 @@ public class StateWorkerHandler
         //}
         //catch (Exception ex)
         //{
-        //    Logger.AddLog($"Error updating state name: {ex.Message}");
+        //    Logger.AddDbgLog($"Error updating state name: {ex.Message}");
         //}
     }
 
