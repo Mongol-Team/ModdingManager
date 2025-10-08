@@ -48,7 +48,7 @@ namespace ModdingManagerClassLib.Extentions
             }
             return null;
         }
-        
+
         public static TechTreeConfig GetTechTree(this ModConfig mod, string id)
         {
             return mod.TechTreeLedgers.FirstOrDefault(t => t.Id.ToString() == id);

@@ -54,9 +54,9 @@ namespace ModdingManagerClassLib.Composers
                         Logger.AddDbgLog("Failed to search ideologies in file:" + file);
                         continue;
                     }
-                        
 
-                    
+
+
                     foreach (var ideologyBracket in ideologiesBracket.SubBrackets)
                     {
                         var config = ParseIdeologyConfig(ideologyBracket.Name, ideologyBracket);
@@ -68,7 +68,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     return res;
                 }
-                
+
             }
             return new List<IConfig>();
 

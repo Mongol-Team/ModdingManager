@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.LocalizationData;
+﻿using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,5 +13,6 @@ namespace ModdingManagerModels
     {
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
+        public IGfx Gfx { get; set; }
     }
 }

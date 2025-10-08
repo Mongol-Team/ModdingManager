@@ -14,7 +14,7 @@ namespace ModdingManager.classes.utils
         public List<RegimentConfig> Regiments { get; set; }
         public List<CountryConfig> Countries { get; set; }
         public List<IdeaConfig> Ideas { get; set; }
-        public List<TriggerDefenitionConfig> TriggerDefenitions  { get; set; }
+        public List<TriggerDefenitionConfig> TriggerDefenitions { get; set; }
         public List<IdeaTagConfig> IdeaTags { get; set; }
         public List<Var> Vars { get; set; }
         public List<StaticModifierConfig> StaticModifiers { get; set; }
@@ -27,6 +27,6 @@ namespace ModdingManager.classes.utils
         public List<TechTreeConfig> TechTreeLedgers { get; set; } = new List<TechTreeConfig>();
         public List<CountryCharacterConfig> Characters { get; set; }
         public List<IdeologyConfig> Ideologies { get; set; }
-        
+
     }
 }

@@ -27,10 +27,10 @@ namespace ModdingManager.classes.views
         public bool? ElectionsAllowed { get; set; }
         public Dictionary<IdeologyConfig, Bitmap>? CountryFlags { get; set; }
         public Dictionary<IdeologyConfig, int>? PartyPopularities { get; set; }
-        public List<IdeaConfig>? Ideas { get; set; } 
-        public List<CountryCharacterConfig>? Characters { get; set; } 
-        public Dictionary<StateConfig, bool>? States { get; set; } 
-        public ConfigLocalisation? Localisation { get; set; } 
+        public List<IdeaConfig>? Ideas { get; set; }
+        public List<CountryCharacterConfig>? Characters { get; set; }
+        public Dictionary<StateConfig, bool>? States { get; set; }
+        public ConfigLocalisation? Localisation { get; set; }
         // События
         event RoutedEventHandler ApplyClicked;
         event RoutedEventHandler LoadConfigClicked;
@@ -40,6 +40,6 @@ namespace ModdingManager.classes.views
         void ShowMessage(string message);
         void ShowError(string message);
         void ClearFlags();
-        
+
     }
 }

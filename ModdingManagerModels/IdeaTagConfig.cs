@@ -1,4 +1,5 @@
 ﻿using ModdingManagerModels.Enums;
+using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.Utils;
 using System;
@@ -11,6 +12,7 @@ namespace ModdingManagerModels
 {
     public class IdeaTagConfig : IConfig
     {
+        public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public List<IdeaSlotConfig> Slots { get; set; } = new List<IdeaSlotConfig>();

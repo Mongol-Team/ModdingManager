@@ -13,7 +13,7 @@ namespace ModdingManagerModels.GfxTypes
     {
         public Identifier Id { get; set; }
         public string EffectPath { get; set; }
-        public string TexturePath { get; set ; }
+        public string TexturePath { get; set; }
         public Bitmap? Content { get; set; }
         public string NormalPath { get; set; }
         public Bitmap? NormalContent { get; set; }

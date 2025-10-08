@@ -1,0 +1,14 @@
+﻿D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\HoiVarsConverter.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Interfaces\IParsingPattern.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Parsers\CsvParser.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Parsers\ModifierParser.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Parsers\Parser.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Parsers\Patterns\CsvAdjacenciesPattern.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Parsers\Patterns\CsvDefinitionsPattern.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Parsers\Patterns\RulesDataPattern.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Parsers\Patterns\TxtPattern.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Parsers\TxtParser.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Parsers\YmlParser.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Program.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Regexes.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerDataManager\Regexes_generated.cs

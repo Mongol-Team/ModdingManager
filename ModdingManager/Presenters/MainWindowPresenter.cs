@@ -268,7 +268,7 @@ namespace ModdingManager.Presenter
                 MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
             }
         }
-        
+
         private void DirBoxes_TextChanged(object? sender, TextChangedEventArgs e)
         {
             if (_isLoaded)

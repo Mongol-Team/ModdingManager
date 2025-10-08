@@ -1,4 +1,5 @@
 ﻿using ModdingManagerModels.Enums;
+using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.ObectCacheData;
 using ModdingManagerModels.Types.Utils;
@@ -8,6 +9,7 @@ namespace ModdingManagerModels
 {
     public class IdeologyConfig : IConfig
     {
+        public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public string Description { get; set; }

@@ -41,7 +41,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     break;
                 }
-                    
+
             }
             return res;
         }
@@ -67,7 +67,7 @@ namespace ModdingManagerClassLib.Composers
                     }
                     result.Add(cfg);
                 }
-               
+
             }
             return result;
         }

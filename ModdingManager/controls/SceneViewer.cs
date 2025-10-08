@@ -146,7 +146,7 @@ namespace ModdingManager.Controls
                 }
             }
         }
-      
+
         public void SetViewCenter(Point contentCoord)
         {
             if (_content == null)

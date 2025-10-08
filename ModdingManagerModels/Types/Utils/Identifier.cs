@@ -13,7 +13,7 @@ namespace ModdingManagerModels.Types.Utils
             RawItendifier = rawItendifier;
         }
         public object RawItendifier { get; set; }
-       
+
         public int ToInt()
         {
             return int.Parse(RawItendifier.ToString());

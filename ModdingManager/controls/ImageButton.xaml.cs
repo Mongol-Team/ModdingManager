@@ -10,7 +10,7 @@ namespace ModdingManager.Controls
     {
         public ImageButton()
         {
-            InitializeComponent(); 
+            InitializeComponent();
             this.PreviewMouseDown += ImageButton_PreviewMouseDown;
         }
 

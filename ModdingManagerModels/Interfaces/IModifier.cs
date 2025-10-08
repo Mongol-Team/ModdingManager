@@ -10,7 +10,7 @@ namespace ModdingManagerModels.Interfaces
     public interface IModifier
     {
         public Identifier Id { get; set; }
-        
+
 
     }
 }

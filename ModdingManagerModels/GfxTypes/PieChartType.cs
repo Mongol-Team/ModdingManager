@@ -11,6 +11,7 @@ namespace ModdingManagerModels.GfxTypes
 {
     public class PieChartType : IGfx
     {
+        public Bitmap Content { get; set; }
         public Identifier Id { get; set; }
         public int Size { get; set; }
         public List<Color> Colors { get; set; }

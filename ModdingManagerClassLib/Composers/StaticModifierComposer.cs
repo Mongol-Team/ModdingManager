@@ -50,7 +50,7 @@ namespace ModdingManagerClassLib.Composers
             cfg.Modifiers = new Dictionary<ModifierDefinitionConfig, object>();
             foreach (var var in bracket.SubVars)
             {
-                
+
                 var modDef = ModManager.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
                 if (modDef != null)
                 {

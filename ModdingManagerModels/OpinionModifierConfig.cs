@@ -12,6 +12,7 @@ namespace ModdingManagerModels
 {
     public class OpinionModifierConfig : IModifier, IConfig
     {
+        public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public string Name { get; set; }

@@ -50,7 +50,7 @@ namespace ModdingManagerClassLib.Composers
             List<Bracket> ideaBrs = file.Brackets.Where(b => b.Name == "ideas").ToList();
             List<IConfig> res = new List<IConfig>();
             foreach (Bracket ideabr in ideaBrs)
-            { 
+            {
                 foreach (Bracket slotbr in ideabr.SubBrackets)
                 {
                     foreach (Bracket sideabr in slotbr.SubBrackets)
@@ -68,7 +68,7 @@ namespace ModdingManagerClassLib.Composers
             IdeaConfig idea = new IdeaConfig()
             {
                 Id = new Identifier(ideaBr.Name),
-                Localisation = new ConfigLocalisation() { Language = ModManager.CurrentLanguage},
+                Localisation = new ConfigLocalisation() { Language = ModManager.CurrentLanguage },
                 Modifiers = new Dictionary<ModifierDefinitionConfig, object>(),
                 Gfx = DataDefaultValues.NullImage,
                 Tag = DataDefaultValues.Null,
@@ -80,11 +80,13 @@ namespace ModdingManagerClassLib.Composers
                 Cost = DataDefaultValues.NullInt, //+
                 OnAdd = DataDefaultValues.Null, //+
             };
-            string picture = DataDefaultValues.Null;
             foreach (Var var in ideaBr.SubVars)
             {
                 switch (var.Name)
                 {
+                    case "picture":
+                        idea.PictureName = var.Value.ToString();
+                        break;
                     case "cost":
                         var costVar = ideaBr.SubVars.FirstOrDefault(v => v.Name == "cost");
                         if (costVar?.Value != null)
@@ -95,9 +97,7 @@ namespace ModdingManagerClassLib.Composers
                         if (removalVar?.Value != null)
                             idea.RemovalCost = removalVar.Value.ToInt();
                         break;
-                    case "picture":
-                        picture = var.Value.ToString() ?? string.Empty;
-                        break;
+                   
                     case "on_add":
                         var onAddVar = ideaBr.SubVars.FirstOrDefault(v => v.Name == "on_add");
                         if (onAddVar?.Value != null)
@@ -140,18 +140,28 @@ namespace ModdingManagerClassLib.Composers
                             if (config != null)
                             {
                                 idea.Modifiers.TryAdd(config, v.Value);
-                                Logger.AddDbgLog($"idea: {idea.Id.ToString()}, mod:{config.Id.ToString()}");
+                                //Logger.AddDbgLog($"idea: {idea.Id.ToString()}, mod:{config.Id.ToString()}");
                             }
                         }
                         break;
                 }
             }
-            KeyValuePair<string, string> idloc = ModManager.Localisation.GetLocalisationByKey(idea.Id.ToString());
+            string keyname = idea.Id.ToString();
+            KeyValuePair<string, string> idloc = ModManager.Localisation.GetLocalisationByKey(keyname);
             idea.Localisation.Data.AddPair(idloc);
-            KeyValuePair<string, string> descloc = ModManager.Localisation.GetLocalisationByKey($"{idea.Id.ToString()}_desc");
+            KeyValuePair<string, string> descloc = ModManager.Localisation.GetLocalisationByKey(keyname);
             idea.Localisation.Data.AddPair<string, string>(descloc);
-            idea.Gfx = ModManager.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_{picture}") ?? DataDefaultValues.NullImage;
-            
+            IGfx gfx = ModManager.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.PictureName}");
+            if (gfx == null)
+            {
+                Logger.AddDbgLog($"Idea found:{keyname}, but GfX_{keyname} no");
+            }
+            if ( gfx != null)
+            {
+                Logger.AddDbgLog($"Idea found:{keyname}, but GfX_{keyname} yes");
+            }
+            idea.Gfx = gfx ?? DataDefaultValues.NullImage;
+           
             return idea;
         }
     }

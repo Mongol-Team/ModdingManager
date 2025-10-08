@@ -4,9 +4,9 @@ using ModdingManager.managers.@base;
 using ModdingManagerModels.SuperEventModels;
 using ModdingManagerModels.Types;
 using System.Diagnostics;
-using System.Drawing;                             
+using System.Drawing;
 using System.Text;
-using System.Windows;                             
+using System.Windows;
 using ModdingManagerClassLib.Debugging;
 public class SuperEventHandler
 {
@@ -488,11 +488,11 @@ public class SuperEventHandler
         }
         catch (Exception ex)
         {
-           
+
             MessageBox.Show($"Не удалось завершить операцию:\n{ex.Message}",
                         "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             Logger.AddDbgLog($"[WPF EXEPTION]: Не удалось завершить операцию:{ex.Message}");
-            
+
         }
     }
 

@@ -31,7 +31,7 @@ namespace ModdingManagerClassLib.Composers
                 if (Directory.Exists(path))
                 {
                     var files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
-                    
+
                     foreach (var file in files)
                     {
                         try

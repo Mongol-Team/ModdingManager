@@ -9,12 +9,12 @@ namespace ModdingManager
 {
     public partial class TemplateCreator : Form
     {
-        public TemplateConfig CurrentConfig = new ();
+        public TemplateConfig CurrentConfig = new();
         public TemplateCreator()
         {
             InitializeComponent();
         }
-        
+
         private void AddElementEvent(object sender, MouseEventArgs e)
         {
             Panel panel = sender as Panel;
@@ -57,23 +57,23 @@ namespace ModdingManager
                     var item = new ToolStripMenuItem(regiment.Id.ToString())
                     {
                         Tag = regiment,
-                        Image = regiment.Icon
+                        Image = regiment.Gfx.Content
                     };
 
                     item.Click += (s, args) =>
                     {
                         var selected = (RegimentConfig)((ToolStripMenuItem)s).Tag;
 
-                        if (panel.BackgroundImage != null && panel.BackgroundImage != selected.Icon)
+                        if (panel.BackgroundImage != null && panel.BackgroundImage != selected.Gfx)
                         {
                             panel.BackgroundImage.Dispose();
                         }
-                        panel.BackgroundImage = new Bitmap(selected.Icon);
+                        panel.BackgroundImage = new Bitmap(selected.Gfx.Content);
 
                         var regimentItem = new RegimentConfig
                         {
                             Id = selected.Id,
-                            Icon = selected.Icon,
+                            Gfx = selected.Gfx,
                             Categories = selected.Categories,
                             X = x,
                             Y = y
@@ -105,7 +105,7 @@ namespace ModdingManager
 
         private void UpdtadeConfig()
         {
-            CurrentConfig.Id = new(this.NameBox.Text);
+            CurrentConfig.Gfx.Content = new(this.NameBox.Text);
             CurrentConfig.IsLocked = this.IsLocked.Checked;
             CurrentConfig.Namespace = this.GroupNameBox.Text;
             CurrentConfig.AllowTraining = this.CanRecrutingLocked.Checked;

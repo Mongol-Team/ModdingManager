@@ -18,7 +18,7 @@ namespace ModdingManagerClassLib.Extentions
 
         public static IEnumerable<System.Windows.Point> ToWindowsPoints(this IEnumerable<Point> points)
             => points.Select(p => p.ToWindowsPoint());
-        
+
 
     }
 }

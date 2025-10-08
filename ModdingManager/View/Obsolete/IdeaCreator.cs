@@ -227,7 +227,7 @@ namespace ModdingManager
         private void ApplyButton_Click(object sender, EventArgs e)
         {
             if (!(IdBox.Text.Contains(" ")))
-            { 
+            {
                 CreateCountryIdea();
                 GenerateOrUpdateIdeaGFX(IdBox.Text, TagBox.Text);
                 GenerateLocalizationFiles(TagBox.Text, IdBox.Text, NameBox.Text, DescBox.Text);
@@ -339,7 +339,7 @@ namespace ModdingManager
                     return;
                 }
 
-                string countryFile = countryFiles[0]; 
+                string countryFile = countryFiles[0];
                 string fileContent = File.ReadAllText(countryFile, Encoding.UTF8);
 
                 string pattern = @"add_ideas\s*=\s*\{([^}]*)\}";

@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.LocalizationData;
+﻿using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 
@@ -6,6 +7,7 @@ namespace ModdingManagerModels
 {
     public class CountryCharacterConfig : IConfig
     {
+        public IGfx Gfx { get; set; }
         public Identifier Id { get; set; } = new("");
         public ConfigLocalisation Localisation { get; set; }
         public string Name { get; set; } = "";

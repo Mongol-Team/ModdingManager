@@ -1,5 +1,6 @@
 ﻿using ModdingManagerModels.Args;
 using ModdingManagerModels.Enums;
+using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.Utils;
 using System.Drawing;
@@ -11,6 +12,7 @@ namespace ModdingManagerModels
     {
         [JsonIgnore]
         public Identifier Id { get; set; }
+        public IGfx Gfx { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public string Name { get; set; }
         public Color Color { get; set; }

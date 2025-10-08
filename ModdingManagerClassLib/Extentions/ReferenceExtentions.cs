@@ -10,6 +10,6 @@ namespace ModdingManagerClassLib.Extentions
 {
     public static class ReferenceExtentions
     {
-        
+
     }
 }
