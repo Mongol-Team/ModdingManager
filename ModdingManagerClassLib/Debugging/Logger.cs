@@ -84,12 +84,12 @@ namespace ModdingManagerClassLib.Debugging
             [CallerLineNumber] int line = 0)
         {
             //await Task.Yield();
-          
+
             if (LoggingLevel >= log_level)
             {
                 string fileShort = System.IO.Path.GetFileName(file);
 
-               
+
                 var entry = new LogEntry
                 {
                     Message = message,
@@ -124,7 +124,7 @@ namespace ModdingManagerClassLib.Debugging
             ConsoleColor color = msgType == LogLevel.ERROR ? ConsoleColor.Red :
                                  msgType == LogLevel.WARNING ? ConsoleColor.Yellow :
                                  ConsoleColor.White;
-           
+
             string type = msgType == LogLevel.ERROR ? "ERR" :
                           msgType == LogLevel.WARNING ? "WAR" : "INF";
 

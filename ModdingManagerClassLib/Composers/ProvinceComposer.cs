@@ -26,7 +26,7 @@ namespace ModdingManagerClassLib.Composers
             var defFile = csvParser.Parse(ModPathes.DefinitionPath) as HoiTable;
             foreach (var line in defFile.Values)
             {
-               
+
                 try
                 {
                     var province = new ProvinceConfig

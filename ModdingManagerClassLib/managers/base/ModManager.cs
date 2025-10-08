@@ -16,15 +16,18 @@ namespace ModdingManager.managers.@base
 {
     public class ModManager
     {
-        public static string ModDirectory { get; 
-            set; } = "";
+        public static string ModDirectory
+        {
+            get;
+            set;
+        } = "";
         public static bool IsDebugRuning
         {
             get;
             set;
-        } = false;
+        } = true;
+        public static int MaxPercentForParallelUsage { get; set; } = 65;
         public static string GameDirectory { get; set; } = "";
-        public static string CurrentCountryTag { get; set; } = "ZOV";
         public static Language CurrentLanguage = Language.russian;
 
         public static ModConfig Mod = new();
@@ -46,7 +49,7 @@ namespace ModdingManager.managers.@base
 
                 ModDirectory = path.ModPath;
                 GameDirectory = path.GamePath;
-                
+
                 ComposeMod();
             }
             catch (Exception ex)
@@ -78,15 +81,15 @@ namespace ModdingManager.managers.@base
             Mod.IdeaTags = IdeaTagComposer.Parse().Cast<IdeaTagConfig>().ToList();
             Logger.AddLog($"IdeaTags Intalized:{Mod.IdeaTags.Count}, some rng obj:{Mod.IdeaTags.Random().Id.ToString()}");
 
-            Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
-            Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
+            ////Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
+            ////Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
 
-            Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
-            Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
-            //Mod.Regiments = RegimentComposer.Parse().Cast<RegimentConfig>().ToList();
+            ////Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
+            ////Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
+            //////Mod.Regiments = RegimentComposer.Parse().Cast<RegimentConfig>().ToList();
 
 
-            ////Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList();
+            //Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList();
 
             ////Mod.TechTreeLedgers = TechTreeComposer.Parse().Cast<TechTreeConfig>().ToList();
             ////Mod.Characters = CountryCharacterComposer.Parse().Cast<CountryCharacterConfig>().ToList();
@@ -108,9 +111,9 @@ namespace ModdingManager.managers.@base
             var filePaths = System.IO.Directory.GetFiles(countriesDir);
             var fileNamesLines = filePaths.Select(path => Path.GetFileName(path)).ToList();
             return fileNamesLines;
-            
+
         }
-        
+
         public static System.Drawing.Color GenerateColorFromId(int id)
         {
             byte r = (byte)((id * 53) % 255);

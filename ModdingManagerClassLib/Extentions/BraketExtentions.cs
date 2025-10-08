@@ -9,9 +9,10 @@ namespace ModdingManagerClassLib.Extentions
     {
         public static string GetVarString(this Bracket gfxBracket, string name, string defaultValue = DataDefaultValues.Null)
         {
-            return gfxBracket.SubVars.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Value?.ToString() ?? defaultValue;
+            var val = gfxBracket.SubVars.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return val != null ? val.Value.ToString() : defaultValue;
         }
-       
+
         public static int GetVarInt(this Bracket gfxBracket, string name, int defaultValue = -1)
         {
             var val = gfxBracket.SubVars.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase))?.Value;

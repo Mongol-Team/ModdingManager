@@ -75,7 +75,7 @@ namespace ModdingManager.Controls
             }
             item.GridX = gridX;
             item.GridY = gridY;
-            
+
             while (IsCellOccupied(gridX, gridY))
             {
                 gridX++;
@@ -88,10 +88,10 @@ namespace ModdingManager.Controls
             Canvas.SetLeft(element, position.X);
             Canvas.SetTop(element, position.Y);
             TechGrid.Children.Add(element);
-            
+
             ItemAdded?.Invoke(this, item);
             MessageBox.Show("Элемент успешно добавлен в дерево технологий.", "Успех",
-                MessageBoxButton.OK, MessageBoxImage.Information);  
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public void RemoveItem(string itemId)
@@ -112,11 +112,11 @@ namespace ModdingManager.Controls
 
             if (border.Child is Canvas innerCanvas && innerCanvas.Children[0] is Image image)
             {
-                var background = updatedItem.IsBig ? 
+                var background = updatedItem.IsBig ?
                     new BitmapImage(new Uri("pack://application:,,,/data/gfx/interface/technology_available_item_bg.png")) :
                     new BitmapImage(new Uri("pack://application:,,,/data/gfx/interface/tech_industry_available_item_bg.png"));
-                
-                image.Source = ImageExtensions.ToImageSource(updatedItem.Image)
+
+                image.Source = ImageExtensions.ToImageSource(updatedItem.Gfx.Content)
                     .GetCombinedTechImage(background, updatedItem.IsBig ? 1 : 2);
             }
 
@@ -133,14 +133,22 @@ namespace ModdingManager.Controls
 
                 TechGrid.Children.Add(new Line
                 {
-                    X1 = offset, Y1 = 0, X2 = offset, Y2 = GridSize * CellSize,
-                    Stroke = Brushes.LightGray, StrokeThickness = 1
+                    X1 = offset,
+                    Y1 = 0,
+                    X2 = offset,
+                    Y2 = GridSize * CellSize,
+                    Stroke = Brushes.LightGray,
+                    StrokeThickness = 1
                 });
 
                 TechGrid.Children.Add(new Line
                 {
-                    X1 = 0, Y1 = offset, X2 = GridSize * CellSize, Y2 = offset,
-                    Stroke = Brushes.LightGray, StrokeThickness = 1
+                    X1 = 0,
+                    Y1 = offset,
+                    X2 = GridSize * CellSize,
+                    Y2 = offset,
+                    Stroke = Brushes.LightGray,
+                    StrokeThickness = 1
                 });
             }
         }
@@ -312,7 +320,7 @@ namespace ModdingManager.Controls
 
             var image = new System.Windows.Controls.Image
             {
-                Source = item.Image.ToImageSource().GetCombinedTechImage(item.IsBig ? Properties.Resources.technology_available_item_bg.ToImageSource() : Properties.Resources.tech_industry_available_item_bg.ToImageSource(), item.IsBig ? 1 : 2),
+                Source = item.Gfx.Content.ToImageSource().GetCombinedTechImage(item.IsBig ? Properties.Resources.technology_available_item_bg.ToImageSource() : Properties.Resources.tech_industry_available_item_bg.ToImageSource(), item.IsBig ? 1 : 2),
                 Width = imageWidth,
                 Height = imageHeight,
                 IsHitTestVisible = false
@@ -343,7 +351,7 @@ namespace ModdingManager.Controls
                 Child = innerCanvas
             };
 
-        
+
             return border;
         }
 
@@ -465,7 +473,7 @@ namespace ModdingManager.Controls
             }
         }
 
-       
+
         #endregion
         #region Helper Methods
         private bool IsCellOccupied(int col, int row, Border ignore = null)
@@ -506,7 +514,7 @@ namespace ModdingManager.Controls
                 }
             }
 
-            
+
             var border = FindElementBorderById(oldId);
             if (border != null) border.Name = newId;
         }
@@ -675,7 +683,7 @@ namespace ModdingManager.Controls
             {
                 ElementMenuInteractionsEvent(sender, e);
             }
-            else if(e.RightButton == MouseButtonState.Pressed || e.ClickCount < 2)
+            else if (e.RightButton == MouseButtonState.Pressed || e.ClickCount < 2)
             {
                 ElementCaptureEvent(sender, e);
             }

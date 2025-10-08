@@ -3,6 +3,7 @@ using ModdingManager.Intefaces;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerClassLib.handlers;
 using ModdingManagerModels;
+using ModdingManagerModels.GfxTypes;
 using System;
 using System.Linq;
 using System.Windows;
@@ -43,8 +44,8 @@ namespace ModdingManager.Presenters
             try
             {
                 TechTreeItemConfig item = CreateItemFromControls();
-                _techGrid.AddItem(item, 0,0);
-                
+                _techGrid.AddItem(item, 0, 0);
+
             }
             catch (Exception ex)
             {
@@ -186,7 +187,7 @@ namespace ModdingManager.Presenters
             item.AiWillDo = _view.AiWillDo;
             item.Dependencies = _view.Dependencies;
             item.Categories = _view.Categories;
-            item.Image = _view.IsBigImage ? _view.BigTechImage.ToBitmap() : _view.SmallTechImage.ToBitmap();
+            item.Gfx.Content = _view.IsBigImage ? _view.BigTechImage.ToBitmap() : _view.SmallTechImage.ToBitmap();
         }
         private TechTreeItemConfig CreateItemFromControls()
         {
@@ -207,7 +208,7 @@ namespace ModdingManager.Presenters
                 Categories = _view.Categories,
                 ChildOf = null,
                 Mutal = null,
-                Image = _view.IsBigImage ? _view.BigTechImage.ToBitmap() : _view.SmallTechImage.ToBitmap()
+                Gfx = new SpriteType(_view.IsBigImage ? _view.BigTechImage.ToBitmap() : _view.SmallTechImage.ToBitmap(), _view.TechId)
             };
             return item;
         }
@@ -226,13 +227,13 @@ namespace ModdingManager.Presenters
             _view.AiWillDo = item.AiWillDo;
             _view.Dependencies = item.Dependencies;
             _view.Categories = item.Categories;
-            if (item.IsBig && item.Image != null)
+            if (item.IsBig && item.Gfx.Content != null)
             {
-                _view.BigTechImage = item.Image;
+                _view.BigTechImage = item.Gfx.Content;
             }
-            else if (item.Image != null)
+            else if (item.Gfx.Content != null)
             {
-                _view.SmallTechImage = item.Image;
+                _view.SmallTechImage = item.Gfx.Content;
             }
         }
         #endregion

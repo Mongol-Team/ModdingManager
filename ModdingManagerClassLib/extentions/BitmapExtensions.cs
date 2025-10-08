@@ -301,7 +301,7 @@ namespace ModdingManagerClassLib.Extentions
             pathWithFileName = pathWithFileName.Replace("/", "\\");
             if (!File.Exists(pathWithFileName))
                 throw new FileNotFoundException("Файл не найден.", pathWithFileName);
-            
+
             string ext = Path.GetExtension(pathWithFileName).ToLowerInvariant();
 
             switch (ext)
@@ -344,52 +344,150 @@ namespace ModdingManagerClassLib.Extentions
                 return null;
             }
 
-            // 1) Загружаем и декодируем DDS
-            using Pfim.IImage dds = Pfim.Pfimage.FromFile(path);
-
-            int width = dds.Width;
-            int height = dds.Height;
-            byte[] raw = dds.Data;
-
-            // 2) Мапим формат Pfim → System.Drawing.Imaging.PixelFormat
-            PixelFormat sysFmt = dds.Format switch
-            {
-                Pfim.ImageFormat.Rgba32 => PixelFormat.Format32bppArgb,
-                Pfim.ImageFormat.Rgb24 => PixelFormat.Format24bppRgb,
-                Pfim.ImageFormat.R5g5b5 => PixelFormat.Format16bppRgb555,
-                Pfim.ImageFormat.R5g6b5 => PixelFormat.Format16bppRgb565,
-                Pfim.ImageFormat.Rgba16 => PixelFormat.Format16bppArgb1555,
-                _ => throw new NotSupportedException($"DDS формат {dds.Format} не поддерживается")
-            };
-
-            // 3) Создаём Bitmap и копируем данные построчно
-            var bmp = new Bitmap(width, height, sysFmt);
-            var rect = new System.Drawing.Rectangle(0, 0, width, height);
-            var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, sysFmt);
-
             try
             {
-                int bytesPerPixel = dds.Format switch
+                // 1) Загружаем и декодируем DDS
+                using Pfim.IImage dds = Pfim.Pfimage.FromFile(path);
+
+                int width = dds.Width;
+                int height = dds.Height;
+                byte[] raw = dds.Data;
+
+                // 2) Мапим формат Pfim → System.Drawing.Imaging.PixelFormat
+                PixelFormat sysFmt = dds.Format switch
                 {
-                    Pfim.ImageFormat.Rgba32 => 4,
-                    Pfim.ImageFormat.Rgb24 => 3,
-                    _ => 2 // для 16-битных форматов
+                    Pfim.ImageFormat.Rgba32 => PixelFormat.Format32bppArgb,
+                    Pfim.ImageFormat.Rgb24 => PixelFormat.Format24bppRgb,
+                    Pfim.ImageFormat.R5g5b5 => PixelFormat.Format16bppRgb555,
+                    Pfim.ImageFormat.R5g6b5 => PixelFormat.Format16bppRgb565,
+                    Pfim.ImageFormat.Rgba16 => PixelFormat.Format16bppArgb1555,
+                    _ => throw new NotSupportedException($"DDS формат {dds.Format} не поддерживается")
                 };
 
-                int rowBytes = width * bytesPerPixel;
+                // 3) Создаём Bitmap и копируем данные построчно
+                var bmp = new Bitmap(width, height, sysFmt);
+                var rect = new System.Drawing.Rectangle(0, 0, width, height);
+                var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, sysFmt);
 
-                for (int y = 0; y < height; y++)
+                try
                 {
-                    Marshal.Copy(raw, y * dds.Stride, bmpData.Scan0 + y * bmpData.Stride, rowBytes);
-                }
-            }
-            finally
-            {
-                bmp.UnlockBits(bmpData);
-            }
+                    int bytesPerPixel = dds.Format switch
+                    {
+                        Pfim.ImageFormat.Rgba32 => 4,
+                        Pfim.ImageFormat.Rgb24 => 3,
+                        _ => 2 // для 16-битных форматов
+                    };
 
-            bmp.SetResolution(96, 96);  // DPI по умолчанию для WPF
-            return bmp;
+                    int rowBytes = width * bytesPerPixel;
+
+                    for (int y = 0; y < height; y++)
+                    {
+                        Marshal.Copy(raw, y * dds.Stride, bmpData.Scan0 + y * bmpData.Stride, rowBytes);
+                    }
+                }
+                finally
+                {
+                    bmp.UnlockBits(bmpData);
+                }
+
+                bmp.SetResolution(96, 96);  // DPI по умолчанию для WPF
+                return bmp;
+            }
+            catch (Exception ex) when (ex.Message.Contains("FourCC: 63"))
+            {
+                // Fallback для формата Q8W8V8U8 (FourCC 63)
+                using var stream = File.OpenRead(path);
+                var reader = new BinaryReader(stream);
+
+                char[] magicChars = reader.ReadChars(4);
+                string magic = new string(magicChars);
+                if (magic != "DDS ")
+                {
+                    Logger.AddDbgLog($"Invalid DDS magic: {path}");
+                    return null;
+                }
+
+                uint headerSize = reader.ReadUInt32();
+                if (headerSize != 124)
+                {
+                    Logger.AddDbgLog($"Invalid DDS header size: {headerSize}");
+                    return null;
+                }
+
+                reader.ReadUInt32(); // flags
+                int height = (int)reader.ReadUInt32();
+                int width = (int)reader.ReadUInt32();
+                int pitch = (int)reader.ReadUInt32();
+                reader.ReadUInt32(); // depth
+                reader.ReadUInt32(); // mipMapCount
+                reader.ReadBytes(44); // reserved1
+
+                uint pfSize = reader.ReadUInt32();
+                if (pfSize != 32)
+                {
+                    Logger.AddDbgLog($"Invalid pixel format size: {pfSize}");
+                    return null;
+                }
+
+                uint pfFlags = reader.ReadUInt32();
+                uint fourCC = reader.ReadUInt32();
+                uint bitCount = reader.ReadUInt32();
+                uint rMask = reader.ReadUInt32();
+                uint gMask = reader.ReadUInt32();
+                uint bMask = reader.ReadUInt32();
+                uint aMask = reader.ReadUInt32();
+
+                reader.ReadBytes(20); // caps1, caps2, caps3, caps4, reserved2
+
+                if (fourCC != 63 || bitCount != 32 || (pfFlags & 0x4) == 0) // PF_FOURCC
+                {
+                    Logger.AddDbgLog($"Unsupported format in fallback: FourCC {fourCC}, BC:{bitCount} pFlags:{pfFlags & 0x4} at {path}");
+                    return null;
+                }
+
+                // Проверяем стандартные маски для A8R8G8B8
+                if (rMask != 0x00FF0000 || gMask != 0x0000FF00 || bMask != 0x000000FF || aMask != 0xFF000000)
+                {
+                    Logger.AddDbgLog($"Unexpected bit masks in DDS: {path}");
+                    return null;
+                }
+
+                if (pitch == 0)
+                {
+                    pitch = width * 4;
+                }
+
+                byte[] raw = new byte[pitch * height];
+                int bytesRead = stream.Read(raw, 0, raw.Length);
+                if (bytesRead != raw.Length)
+                {
+                    Logger.AddDbgLog($"Incomplete data read in DDS: {path}");
+                    return null;
+                }
+
+                var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+                var rect = new System.Drawing.Rectangle(0, 0, width, height);
+                var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+                try
+                {
+                    int bytesPerPixel = 4;
+                    int rowBytes = width * bytesPerPixel;
+                    int stride = pitch;
+
+                    for (int y = 0; y < height; y++)
+                    {
+                        Marshal.Copy(raw, y * stride, bmpData.Scan0 + y * bmpData.Stride, rowBytes);
+                    }
+                }
+                finally
+                {
+                    bmp.UnlockBits(bmpData);
+                }
+
+                bmp.SetResolution(96, 96);
+                return bmp;
+            }
         }
 
         private static class NativeMethods

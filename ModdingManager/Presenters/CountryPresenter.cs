@@ -8,7 +8,7 @@ public class CountryPresenter
     private readonly ICountryView _view;
     private readonly CountryHandler _handler;
     private CountryConfig _currentConfig = new CountryConfig();
-  
+
     public CountryPresenter(ICountryView view)
     {
         _view = view;

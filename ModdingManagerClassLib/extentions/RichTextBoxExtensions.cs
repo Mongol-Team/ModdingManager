@@ -9,7 +9,7 @@ namespace ModdingManagerClassLib.Extentions
 {
     public static class RichTextBoxExtensions
     {
-        public static string GetTextFromRichTextBox(this System.Windows.Controls.RichTextBox richTextBox) 
+        public static string GetTextFromRichTextBox(this System.Windows.Controls.RichTextBox richTextBox)
         {
             TextRange textRange = new TextRange(richTextBox.Document.ContentStart, richTextBox.Document.ContentEnd);
             return textRange.Text;

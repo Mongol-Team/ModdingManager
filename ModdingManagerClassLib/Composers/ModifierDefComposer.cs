@@ -32,7 +32,7 @@ namespace ModdingManagerClassLib.Composers
                 }
                 catch (Exception ex)
                 {
-                    files = new List<string>(); 
+                    files = new List<string>();
                 }
                 if (files.Count == 0)
                     continue;

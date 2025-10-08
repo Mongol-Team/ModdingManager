@@ -13,5 +13,11 @@ namespace ModdingManager.View
             InitializeComponent();
             var presenter = new MainWindowPresenter(this);
         }
+
+        private void TestingBtn_Click(object sender, RoutedEventArgs e)
+        {
+            TestingWindow tw = new TestingWindow();
+            tw.Show();
+        }
     }
 }

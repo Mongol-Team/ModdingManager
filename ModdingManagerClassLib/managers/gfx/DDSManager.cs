@@ -44,12 +44,12 @@ namespace ModdingManager.classes.managers.gfx
 
             foreach (var item in treeConfig.Items)
             {
-                if (item.Image == null || item.Id == null)
+                if (item.Gfx.Content == null || item.Id == null)
                     continue;
 
                 try
                 {
-                    using (var bmp = item.Image)
+                    using (var bmp = item.Gfx.Content)
                     {
                         bmp.SaveAsDDS(techIconDir, item.Id.ToString(), 64, 64);
                     }

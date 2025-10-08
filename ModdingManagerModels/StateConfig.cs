@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.LocalizationData;
+﻿using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 using System.Text.Json.Serialization;
@@ -7,6 +8,7 @@ namespace ModdingManagerModels
 {
     public class StateConfig : IConfig
     {
+        public IGfx Gfx { get; set; }
         [JsonIgnore]
         public List<ProvinceConfig> Provinces { get; set; }
         [JsonIgnore]

@@ -35,9 +35,9 @@ public class StateWorkerPresenter
         _view.ProvinceTransferRequested += OnProvinceTransferRequested;
         _view.StateTransferRequested += OnStateTransferRequested;
         _view.SearchElement += SearchAction;
-        
+
     }
-   
+
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         var window = _view as Window;
@@ -48,7 +48,7 @@ public class StateWorkerPresenter
             Owner = window,
             Message = "Извлекаем формы провинций с картинки..."
         };
-        loadingWindow.SetProgressBounds(0, 4); 
+        loadingWindow.SetProgressBounds(0, 4);
         loadingWindow.Show();
 
         string modDirectory = ModManager.ModDirectory;
@@ -71,10 +71,10 @@ public class StateWorkerPresenter
         await Dispatcher.Yield();
 
         loadingWindow.Message = "Рисуем стратегические регионы...";
-        DrawStrategicLayer(); 
+        DrawStrategicLayer();
         loadingWindow.Progress = 4;
 
-        loadingWindow.EndLoading(); 
+        loadingWindow.EndLoading();
 
         UpdateLayer("PROVINCE");
     }
@@ -291,7 +291,7 @@ public class StateWorkerPresenter
         _view.CountryLayer.Visibility = Visibility.Collapsed;
         _view.StrategicLayer.Visibility = Visibility.Collapsed;
 
-        
+
         switch (layer)
         {
             case "PROVINCE":
@@ -396,7 +396,7 @@ public class StateWorkerPresenter
             $"Province: {arg.ProvinceId}\nState: {arg.TargetState.Id}");
 
         //_handler.MoveProvinceToState(arg.ProvinceId, sourceState, targetState);
-        UpdateTextBlockPosition(arg.TargetState.Id.HasValue() ? arg.TargetState.Id.ToInt()  : -1, _view.CurrentMapState);
+        UpdateTextBlockPosition(arg.TargetState.Id.HasValue() ? arg.TargetState.Id.ToInt() : -1, _view.CurrentMapState);
         if (arg.SourceState != null)
         {
             UpdateTextBlockPosition(arg.SourceState.Id.HasValue() ? arg.SourceState.Id.ToInt() : -1, _view.CurrentMapState);
@@ -627,7 +627,7 @@ public class StateWorkerPresenter
 
         if (ModManager.Mod.Map?.Countries == null || ModManager.Mod.Map.Provinces == null)
             return;
-        
+
         var provinceToCountry = new Dictionary<int, CountryConfig>();
 
         foreach (var country in ModManager.Mod.Map.Countries)

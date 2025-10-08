@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Types.LocalizationData;
+﻿using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace ModdingManagerModels
         public int PerLevelCost { get; set; }
         public int PerControlledBuildingExtraCost { get; set; }
         public int MaxStateLevel { get; set; }
-        public int MaxProvinceLevel { get; set; }   
+        public int MaxProvinceLevel { get; set; }
         public string Group { get; set; }
         public BuildingConfig ExcludeWith { get; set; }
         public int Helth { get; set; }
@@ -35,6 +36,7 @@ namespace ModdingManagerModels
         public bool AlwaysShown { get; set; }
         public bool HasDestroyedMesh { get; set; }
         public bool Centered { get; set; }
+        public IGfx Gfx { get; set; }
 
     }
 }

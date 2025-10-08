@@ -21,7 +21,7 @@ namespace ModdingManager.Controls
     /// </summary>
     public partial class ErrorPanel : UserControl
     {
-     
+
         // Списки для хранения ошибок
         private List<ErrorBlock> TotalErrors = new List<ErrorBlock>();
         private List<ErrorBlock> WarningErrors = new List<ErrorBlock>();

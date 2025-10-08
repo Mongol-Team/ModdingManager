@@ -12,6 +12,7 @@ namespace ModdingManagerModels
     public class StaticModifierConfig : IModifier, IConfig
     {
         public Identifier Id { get; set; }
+        public IGfx Gfx { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public bool HasAttackerEffect { get; set; }

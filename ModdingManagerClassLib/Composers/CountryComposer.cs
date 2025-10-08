@@ -31,7 +31,7 @@ namespace ModdingManagerClassLib.Composers
             foreach (var fullpath in possibleHistoryPaths)
             {
                 HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(fullpath) as HoiFuncFile;
-                
+
                 Dictionary<TechTreeItemConfig, int> techs = new Dictionary<TechTreeItemConfig, int>();
                 foreach (var var in file.Brackets.FindById("set_technology").SubVars)
                 {
@@ -52,7 +52,7 @@ namespace ModdingManagerClassLib.Composers
                     if (stateConfig != null)
                         states.Add(stateConfig);
                 }
-                
+
                 var countryFlags = new Dictionary<IdeologyConfig, Bitmap>();
 
                 //fima

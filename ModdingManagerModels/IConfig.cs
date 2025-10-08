@@ -4,9 +4,10 @@ using ModdingManagerModels.Types.Utils;
 
 namespace ModdingManagerModels
 {
-    public interface IConfig 
+    public interface IConfig
     {
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
+        public IGfx Gfx { get; set; }
     }
 }

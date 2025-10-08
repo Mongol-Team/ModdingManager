@@ -22,7 +22,7 @@ namespace ModdingManagerClassLib.utils
         public KeyValuePair<string, string> GetLocalisationByKey(string key)
         {
             if (VictoryPointsLocalisation.Data.TryGetValue(key, out var val))
-                return new KeyValuePair<string, string>(key,  val);
+                return new KeyValuePair<string, string>(key, val);
             if (IdeologyLocalisation.Data.TryGetValue(key, out val))
                 return new KeyValuePair<string, string>(key, val);
             if (CountryLocalisation.Data.TryGetValue(key, out val))
@@ -30,7 +30,7 @@ namespace ModdingManagerClassLib.utils
             if (StateLocalisation.Data.TryGetValue(key, out val))
                 return new KeyValuePair<string, string>(key, val);
             if (OtherLocalisation.Data.TryGetValue(key, out val))
-                return new KeyValuePair<string, string>(key,  val);
+                return new KeyValuePair<string, string>(key, val);
             return new KeyValuePair<string, string>(key, val);
         }
 

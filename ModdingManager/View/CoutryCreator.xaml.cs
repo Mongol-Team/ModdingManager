@@ -178,13 +178,13 @@ namespace ModdingManager
                     IdeaConfig cfg = ModManager.Mod.Ideas.FindById(ideo);
                     result.Add(cfg);
                 }
-                return result;  
+                return result;
             }
             set
             {
                 StartingIdeasBox.Document.Blocks.Clear();
                 foreach (IdeaConfig cfg in value)
-                { 
+                {
                     StartingIdeasBox.AddLine(cfg.Id.ToString());
                 }
             }

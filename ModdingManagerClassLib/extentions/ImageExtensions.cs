@@ -102,7 +102,7 @@ namespace ModdingManagerClassLib.Extentions
             }
             return newBitmap;
         }
-       
+
 
         public static void SaveFlagSet(this System.Drawing.Image image, string flagsDir, string countryTag, string ideology)
         {
@@ -157,7 +157,7 @@ namespace ModdingManagerClassLib.Extentions
                 }
             }
         }
-        
+
         public static void SaveAsTGA(this Image<Rgba32> image, string path)
         {
             var encoder = new TgaEncoder

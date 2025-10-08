@@ -1,0 +1,3 @@
+﻿D:\Visual Studio\NewModdingManager\ModdingManagerData\DataLib.cs
+D:\Visual Studio\NewModdingManager\ModdingManagerData\Data\Rules\RulesCoreDefenitions.txt
+D:\Visual Studio\NewModdingManager\ModdingManagerData\Properties\launchSettings.json

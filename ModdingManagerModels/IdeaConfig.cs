@@ -8,9 +8,10 @@ namespace ModdingManagerModels
 {
     public class IdeaConfig : IConfig
     {
-        public Identifier Id { get; set; }
-        public ConfigLocalisation Localisation { get; set; }
         public IGfx Gfx { get; set; }
+        public Identifier Id { get; set; }
+        public string PictureName { get; set;  }
+        public ConfigLocalisation Localisation { get; set; }
         public string Tag { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
         public int RemovalCost { get; set; }

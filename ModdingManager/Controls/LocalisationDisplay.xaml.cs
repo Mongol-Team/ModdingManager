@@ -40,7 +40,7 @@ namespace ModdingManager.Controls
                 _localisation = value;
                 if (value.Data == null || value.Data.Count == 0)
                     BuildDefaultLocData();
-                
+
                 var sb = new StringBuilder();
                 foreach (var line in _localisation.Data)
                     sb.AppendLine($"{line.Key}{Delimiter} {line.Value}");

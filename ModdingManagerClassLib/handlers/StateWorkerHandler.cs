@@ -165,7 +165,7 @@ public class StateWorkerHandler
         //    {
         //        Name = newName,
         //        Value = newValue,
-               
+
         //    };
 
         //    // Обновляем или добавляем переменную в оба файла
@@ -239,146 +239,146 @@ public class StateWorkerHandler
     }
     public void ChangeProvince(ProvinceConfig province)
     {
-      //  string modMapDir = Path.Combine(ModManager.ModDirectory, "map");
-      //  string modDefinitions = Path.Combine(modMapDir, "definition.csv");
-      //  string gameDefinitions = Path.Combine(ModManager.GameDirectory, "map", "definition.csv");
+        //  string modMapDir = Path.Combine(ModManager.ModDirectory, "map");
+        //  string modDefinitions = Path.Combine(modMapDir, "definition.csv");
+        //  string gameDefinitions = Path.Combine(ModManager.GameDirectory, "map", "definition.csv");
 
-      //  if (!File.Exists(modDefinitions))
-      //  {
-      //      if (!Directory.Exists(modMapDir))
-      //          Directory.CreateDirectory(modMapDir);
+        //  if (!File.Exists(modDefinitions))
+        //  {
+        //      if (!Directory.Exists(modMapDir))
+        //          Directory.CreateDirectory(modMapDir);
 
-      //      if (!File.Exists(gameDefinitions))
-      //          throw new FileNotFoundException($"Не найден definition.csv ни в моде, ни в игре: {gameDefinitions}");
+        //      if (!File.Exists(gameDefinitions))
+        //          throw new FileNotFoundException($"Не найден definition.csv ни в моде, ни в игре: {gameDefinitions}");
 
-      //      File.Copy(gameDefinitions, modDefinitions, true);
-      //      ModManager.Mod.MapCache.MapDefinitionCache = new(modDefinitions);
-      //  }
+        //      File.Copy(gameDefinitions, modDefinitions, true);
+        //      ModManager.Mod.MapCache.MapDefinitionCache = new(modDefinitions);
+        //  }
 
-      //  // Работаем через кеш
-      //  var definitionsContent = ModManager.Mod.MapCache.MapDefinitionCache;
-      //  var lines = definitionsContent.DefinitionLines;
+        //  // Работаем через кеш
+        //  var definitionsContent = ModManager.Mod.MapCache.MapDefinitionCache;
+        //  var lines = definitionsContent.DefinitionLines;
 
-      //  int lineIndex = lines.FindIndex(line =>
-      //  {
-      //      var parts = line.Split(';');
-      //      return parts.Length > 0 && int.TryParse(parts[0], out int id) && id == province.Id;
-      //  });
+        //  int lineIndex = lines.FindIndex(line =>
+        //  {
+        //      var parts = line.Split(';');
+        //      return parts.Length > 0 && int.TryParse(parts[0], out int id) && id == province.Id;
+        //  });
 
-      //  string newLine = $"{province.Id};{province.Color.R};{province.Color.G};{province.Color.B};" +
-      //                  $"{province.Type};{(province.IsCoastal ? "true" : "false")};{province.Terrain};{province.ContinentId}";
+        //  string newLine = $"{province.Id};{province.Color.R};{province.Color.G};{province.Color.B};" +
+        //                  $"{province.Type};{(province.IsCoastal ? "true" : "false")};{province.Terrain};{province.ContinentId}";
 
-      //  if (lineIndex >= 0)
-      //  {
-      //      lines[lineIndex] = newLine;
-      //  }
-      //  else
-      //  {
-      //      lines.Add(newLine);
-      //  }
-      //  definitionsContent.Content = string.Join(Environment.NewLine, lines);
-      //  definitionsContent.IsDirty = true;
-      //  definitionsContent.SaveToFile();
-
-
-      //  // 2. Работа с локализацией VictoryPoints (оставляем без изменений, так как это отдельная система)
-      //  string vpKey = $"VICTORY_POINTS_{province.Id}";
-      //  string newLineLoc = $" {vpKey}: \"{province.Name}\"";
-      //  string locFolder = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage);
-      //  string replaceFolder = Path.Combine(locFolder, "replace");
-
-      //  Directory.CreateDirectory(locFolder);
-      //  Directory.CreateDirectory(replaceFolder);
-
-      //  string filePath = Path.Combine(locFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
-      //  string replacePath = Path.Combine(replaceFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
-      //  string header = $"﻿l_{ModManager.CurrentLanguage}:\n";
-
-      //  void EnsureFileHasName(string path, string header)
-      //  {
-      //      if (!File.Exists(path))
-      //          File.WriteAllText(path, header, new UTF8Encoding(true));
-      //  }
-
-      //  void UpdateLineInFile(string path, string key, string line)
-      //  {
-      //      var lines = File.ReadAllLines(path, new UTF8Encoding(true)).ToList();
-      //      bool found = false;
-
-      //      for (int i = 0; i < lines.Count; i++)
-      //      {
-      //          if (lines[i].StartsWith($" {key}:"))
-      //          {
-      //              lines[i] = line;
-      //              found = true;
-      //              break;
-      //          }
-      //      }
-
-      //      if (!found)
-      //          lines.Add(line);
-
-      //      File.WriteAllLines(path, lines, new UTF8Encoding(true));
-      //  }
-
-      //  EnsureFileHasName(filePath, header);
-      //  EnsureFileHasName(replacePath, header);
-
-      //  UpdateLineInFile(filePath, vpKey, newLineLoc);
-      //  UpdateLineInFile(replacePath, vpKey, newLineLoc);
+        //  if (lineIndex >= 0)
+        //  {
+        //      lines[lineIndex] = newLine;
+        //  }
+        //  else
+        //  {
+        //      lines.Add(newLine);
+        //  }
+        //  definitionsContent.Content = string.Join(Environment.NewLine, lines);
+        //  definitionsContent.IsDirty = true;
+        //  definitionsContent.SaveToFile();
 
 
+        //  // 2. Работа с локализацией VictoryPoints (оставляем без изменений, так как это отдельная система)
+        //  string vpKey = $"VICTORY_POINTS_{province.Id}";
+        //  string newLineLoc = $" {vpKey}: \"{province.Name}\"";
+        //  string locFolder = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage);
+        //  string replaceFolder = Path.Combine(locFolder, "replace");
+
+        //  Directory.CreateDirectory(locFolder);
+        //  Directory.CreateDirectory(replaceFolder);
+
+        //  string filePath = Path.Combine(locFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
+        //  string replacePath = Path.Combine(replaceFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
+        //  string header = $"﻿l_{ModManager.CurrentLanguage}:\n";
+
+        //  void EnsureFileHasName(string path, string header)
+        //  {
+        //      if (!File.Exists(path))
+        //          File.WriteAllText(path, header, new UTF8Encoding(true));
+        //  }
+
+        //  void UpdateLineInFile(string path, string key, string line)
+        //  {
+        //      var lines = File.ReadAllLines(path, new UTF8Encoding(true)).ToList();
+        //      bool found = false;
+
+        //      for (int i = 0; i < lines.Count; i++)
+        //      {
+        //          if (lines[i].StartsWith($" {key}:"))
+        //          {
+        //              lines[i] = line;
+        //              found = true;
+        //              break;
+        //          }
+        //      }
+
+        //      if (!found)
+        //          lines.Add(line);
+
+        //      File.WriteAllLines(path, lines, new UTF8Encoding(true));
+        //  }
+
+        //  EnsureFileHasName(filePath, header);
+        //  EnsureFileHasName(replacePath, header);
+
+        //  UpdateLineInFile(filePath, vpKey, newLineLoc);
+        //  UpdateLineInFile(replacePath, vpKey, newLineLoc);
 
 
-      //  // 3. Обновление Victory Points в файлах состояний через кеш
-      //  if (ModManager.Mod.MapCache.ProvinceIndex == null)
-      //  {
-      //      ModManager.Mod.MapCache.BuildProvinceIndex();
-      //  }
 
-      //  if (ModManager.Mod.MapCache.ProvinceIndex.TryGetValue(province.Id, out var stateInfo))
-      //  {
-      //      var (fileKey, stateBracket) = stateInfo;
 
-      //      // Находим или создаем history
-      //      var historyBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Name == "history");
-      //      if (historyBracket == null)
-      //      {
-      //          historyBracket = new Bracket { Name = "history" };
-      //          stateBracket.SubBrackets.Add(historyBracket);
-      //      }
+        //  // 3. Обновление Victory Points в файлах состояний через кеш
+        //  if (ModManager.Mod.MapCache.ProvinceIndex == null)
+        //  {
+        //      ModManager.Mod.MapCache.BuildProvinceIndex();
+        //  }
 
-      //      string vpLine = $"{province.Id} {province.VictoryPoints}";
-      //      var victoryPointsBrackets = historyBracket.SubBrackets.Where(b => b.Name == "victory_points");
-      //      if (victoryPointsBrackets == null || province.VictoryPoints != 0)
-      //      {
-      //          HoiArray victoryPointsArr = new HoiArray { Name = "victory_points" };
-      //          victoryPointsArr.Values.Add(vpLine);
-      //          historyBracket.Arrays.Add(victoryPointsArr);
-      //      }
-      //      else
-      //      {
-      //          HoiArray vpArr = historyBracket.Arrays
-      //.Where(b => b.Values.Any(line => line.ToString().Contains(province.Id.ToString()))).Where(a => a.Name == "victory_points").First();
-      //          if (vpArr != null)
-      //          {
-      //              vpArr.Values.Clear();
-      //              vpArr.Values.Add(vpLine);
+        //  if (ModManager.Mod.MapCache.ProvinceIndex.TryGetValue(province.Id, out var stateInfo))
+        //  {
+        //      var (fileKey, stateBracket) = stateInfo;
 
-      //          }
-      //          else
-      //          {
-      //              HoiArray newVpArr = new HoiArray { Name = "victory_points" };
-      //              newVpArr.Values.Add(vpLine);
-      //              historyBracket.Arrays.Add(newVpArr);
-      //          }
-      //      }
+        //      // Находим или создаем history
+        //      var historyBracket = stateBracket.SubBrackets.FirstOrDefault(b => b.Name == "history");
+        //      if (historyBracket == null)
+        //      {
+        //          historyBracket = new Bracket { Name = "history" };
+        //          stateBracket.SubBrackets.Add(historyBracket);
+        //      }
 
-      //      // Помечаем файл как измененный
-      //      ModManager.Mod.MapCache.MarkStateFileDirty(fileKey);
+        //      string vpLine = $"{province.Id} {province.VictoryPoints}";
+        //      var victoryPointsBrackets = historyBracket.SubBrackets.Where(b => b.Name == "victory_points");
+        //      if (victoryPointsBrackets == null || province.VictoryPoints != 0)
+        //      {
+        //          HoiArray victoryPointsArr = new HoiArray { Name = "victory_points" };
+        //          victoryPointsArr.Values.Add(vpLine);
+        //          historyBracket.Arrays.Add(victoryPointsArr);
+        //      }
+        //      else
+        //      {
+        //          HoiArray vpArr = historyBracket.Arrays
+        //.Where(b => b.Values.Any(line => line.ToString().Contains(province.Id.ToString()))).Where(a => a.Name == "victory_points").First();
+        //          if (vpArr != null)
+        //          {
+        //              vpArr.Values.Clear();
+        //              vpArr.Values.Add(vpLine);
 
-      //      ModManager.Mod.MapCache.SaveDirtyStateFiles();
-      //  }
+        //          }
+        //          else
+        //          {
+        //              HoiArray newVpArr = new HoiArray { Name = "victory_points" };
+        //              newVpArr.Values.Add(vpLine);
+        //              historyBracket.Arrays.Add(newVpArr);
+        //          }
+        //      }
+
+        //      // Помечаем файл как измененный
+        //      ModManager.Mod.MapCache.MarkStateFileDirty(fileKey);
+
+        //      ModManager.Mod.MapCache.SaveDirtyStateFiles();
+        //  }
     }
     public void ChangeStrategicRegions(List<StrategicRegionConfig> regions)
     {

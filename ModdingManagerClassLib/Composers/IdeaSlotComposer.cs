@@ -26,7 +26,7 @@ namespace ModdingManagerClassLib.Composers
             };
 
             List<IConfig> result = new List<IConfig>();
-            foreach(string path in pathes)
+            foreach (string path in pathes)
             {
                 if (Directory.Exists(path))
                 {
@@ -38,7 +38,7 @@ namespace ModdingManagerClassLib.Composers
                         result.AddRange(parsed);
                     }
                 }
-                
+
             }
             return result;
         }
@@ -46,7 +46,7 @@ namespace ModdingManagerClassLib.Composers
         public static List<IConfig> ParseSingleFile(HoiFuncFile file)
         {
             List<IConfig> result = new List<IConfig>();
-            foreach(Bracket br in file.Brackets)
+            foreach (Bracket br in file.Brackets)
             {
                 if (br.Name == "ideas")
                 {
@@ -76,9 +76,10 @@ namespace ModdingManagerClassLib.Composers
                                 if (parsedIdea == null)
                                 {
                                     parsedIdea = IdeaComposer.ParseSingleIdea(idea) as IdeaConfig;
-                                    
+
                                     ModManager.Mod.Ideas.Add(parsedIdea);
-                                };
+                                }
+                                ;
                                 try
                                 {
                                     slotConfig.Ideas.Add(parsedIdea);
@@ -89,10 +90,10 @@ namespace ModdingManagerClassLib.Composers
                                 }
                             }
                             result.Add(slotConfig);
-                            Logger.AddDbgLog($"Idea slot is added {slotConfig}");
+                            //Logger.AddDbgLog($"Idea slot is added {slotConfig}");
 
                         }
-                        Logger.AddDbgLog($"Slot is already exist:{slot.Name}");
+                        //Logger.AddDbgLog($"Slot is already exist:{slot.Name}");
                     }
                 }
             }

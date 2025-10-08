@@ -44,7 +44,7 @@ namespace ModdingManagerClassLib.Composers
             }
             return configs;
         }
-       
+
         public static DynamicModifierConfig ParseSingleModifer(Bracket bracket)
         {
             DynamicModifierConfig cfg = new DynamicModifierConfig();
@@ -54,7 +54,7 @@ namespace ModdingManagerClassLib.Composers
             {
                 if (var.Name == "icon" && var.PossibleCsType == typeof(HoiReference))
                 {
-                    cfg.Icon = ModManager.Mod.Gfxes.FirstOrDefault(gf => gf.Id.ToString() == (var.Value as HoiReference).Value.ToString());
+                    cfg.Gfx = ModManager.Mod.Gfxes.FirstOrDefault(gf => gf.Id.ToString() == (var.Value as HoiReference).Value.ToString());
                 }
                 else if (var.Name == "attacker_modifier" && var.PossibleCsType == typeof(bool))
                 {
@@ -73,7 +73,7 @@ namespace ModdingManagerClassLib.Composers
                         {
                             cfg.Modifiers[modDef] = doubleValue;
                         }
-                        else if(var.Value is HoiReference refVal) 
+                        else if (var.Value is HoiReference refVal)
                         {
                             cfg.Modifiers[modDef] = refVal;
                         }

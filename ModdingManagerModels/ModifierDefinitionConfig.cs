@@ -7,6 +7,7 @@ namespace ModdingManagerModels
 {
     public class ModifierDefinitionConfig : IConfig
     {
+        public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public ModifierDefenitionValueType ValueType { get; set; } = ModifierDefenitionValueType.Number;

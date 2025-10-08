@@ -11,6 +11,7 @@ namespace ModdingManagerModels.GfxTypes
 {
     public class LineChartType : IGfx
     {
+        public Bitmap Content { get; set; }
         public Identifier Id { get; set; }
         public Point Size { get; set; }
         public double LineWidth { get; set; }
