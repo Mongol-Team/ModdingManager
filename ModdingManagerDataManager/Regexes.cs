@@ -93,7 +93,7 @@ namespace ModdingManagerDataManager
 
         // Brackets
 
-        private static string findBracket = @"\w+\s*=\s*\{(?:\s*\}|(?!\s*(\d+\s+){2}\d+\s*\})(?=(?>[^{}=]+|\{(?<d>)|\}(?<-d>))+=)(?>[^{}]+|\{(?<d>)|\}(?<-d>))*\}(?(d)(?!)))";
+        private static string findBracket = @"\w*\s*=\s*\{(?:\s*\}|(?!\s*(\d+\s+){2}\d+\s*\})(?=(?>[^{}=]+|\{(?<d>)|\}(?<-d>))+=)(?>[^{}]+|\{(?<d>)|\}(?<-d>))*\}(?(d)(?!)))";
         public static readonly Regex FindBracket =
             new Regex(findBracket, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline, Timeout);
 
@@ -102,7 +102,7 @@ namespace ModdingManagerDataManager
             new Regex(bracket, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline, Timeout);
 
         //use only for extracted & validated bracket | Name={ ... }
-        private static string bracketName = @"^\w+\s*(?==)";
+        private static string bracketName = @"^\w*(?=\s*=)";
         public static readonly Regex BracketName =
             new Regex(bracketName, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
 
