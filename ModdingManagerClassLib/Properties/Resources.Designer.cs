@@ -65,7 +65,8 @@ namespace ModdingManagerClassLib.Properties {
         /// </summary>
         internal static System.Drawing.Bitmap null_item_image {
             get {
-                object obj = ResourceManager.GetObject("null_item_image", resourceCulture);
+                System.Drawing.Bitmap obj = (System.Drawing.Bitmap)ResourceManager.GetObject("null_item_image", resourceCulture);
+                obj.Tag = "NullImage";
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -8,6 +8,7 @@
         mc:Ignorable="d"
         Title="TestingWindow" Height="450" Width="800">
     <Grid>
+        <Image x:Name="Fimoz" Margin="455,0,0,145"></Image>
         
             <ctrs:ConfigListViewer x:Name="Fima" Loaded="ConfigListViewer_Loaded" Margin="0,0,547,0">
 

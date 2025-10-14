@@ -26,6 +26,7 @@ namespace ModdingManager.managers.@base
             get;
             set;
         } = true;
+       
         public static int MaxPercentForParallelUsage { get; set; } = 65;
         public static string GameDirectory { get; set; } = "";
         public static Language CurrentLanguage = Language.russian;
@@ -41,6 +42,7 @@ namespace ModdingManager.managers.@base
             string relativePath = System.IO.Path.Combine("..", "..", "..", "data", "dir.json");
             string fullPath = System.IO.Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
             Logger.LoggingLevel = 3;
+            Logger.DbgTarget = "IdeaComposer";
             Logger.IsDebug = IsDebugRuning;
             try
             {
@@ -81,10 +83,10 @@ namespace ModdingManager.managers.@base
             Mod.IdeaTags = IdeaTagComposer.Parse().Cast<IdeaTagConfig>().ToList();
             Logger.AddLog($"IdeaTags Intalized:{Mod.IdeaTags.Count}, some rng obj:{Mod.IdeaTags.Random().Id.ToString()}");
 
-            ////Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
-            ////Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
+            Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
+            Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
 
-            ////Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
+
             ////Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
             //////Mod.Regiments = RegimentComposer.Parse().Cast<RegimentConfig>().ToList();
 

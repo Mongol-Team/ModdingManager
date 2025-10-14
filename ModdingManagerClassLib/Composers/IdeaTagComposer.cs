@@ -43,7 +43,7 @@ namespace ModdingManagerClassLib.Composers
                         }
                         catch (Exception ex)
                         {
-                            Logger.AddDbgLog($"[IdeaTagComposer] On parse exception: {ex.Message}{ex.StackTrace}");
+                            Logger.AddDbgLog($"[IdeaTagComposer] On parse exception: {ex.Message}{ex.StackTrace}", "IdeaTagComposer");
                         }
                     }
                 }

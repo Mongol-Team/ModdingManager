@@ -14,7 +14,7 @@ namespace ModdingManagerModels.Types.Utils
         public const string Null = "Null";
         public const string NaN = "NaN";
         public const string None = "None";
-        public static SpriteType NullImage = new SpriteType(Resources.null_item_image, "Null");
+        public static SpriteType NullImage = new SpriteType(Resources.null_item_image, "Null") { };
         public static Bitmap NullImageSource = Resources.null_item_image;
         public const int NullInt = -1;
 

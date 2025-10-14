@@ -66,8 +66,8 @@ namespace ModdingManagerDataManager
         public static bool TryParseHoiReference(string text, out HoiReference result)
         {
             result = null;
-            if (text.Contains("\""))
-                return false;
+            //if (text.Contains("\""))
+            //    return false;
             result = new HoiReference() { Value = text };
             return true;
         }

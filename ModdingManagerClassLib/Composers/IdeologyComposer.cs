@@ -44,14 +44,14 @@ namespace ModdingManagerClassLib.Composers
                     var parsedFile = (HoiFuncFile)parser.Parse(content);
                     if (parsedFile == null)
                     {
-                        Logger.AddDbgLog("Failed to parse the ideology file:" + file);
+                        Logger.AddDbgLog("Failed to parse the ideology file:" + file, "IdeologyComposer");
                         continue;
                     }
 
                     Bracket ideologiesBracket = parsedFile.Brackets.FirstOrDefault(b => b.Name == "ideologies");
                     if (ideologiesBracket == null)
                     {
-                        Logger.AddDbgLog("Failed to search ideologies in file:" + file);
+                        Logger.AddDbgLog("Failed to search ideologies in file:" + file, "IdeologyComposer");
                         continue;
                     }
 
@@ -137,12 +137,12 @@ namespace ModdingManagerClassLib.Composers
                     var rule = ModManager.Mod.Rules.Where(r => r.Id.ToString() == varItem.Name).FirstOrDefault();
                     if (rule == null)
                     {
-                        Logger.AddDbgLog($"Не удалось найти правило с Id = {varItem.Name}");
+                        Logger.AddDbgLog($"Не удалось найти правило с Id = {varItem.Name}", "IdeologyComposer");
                         continue;
                     }
                     if (!config.Rules.TryAdd(rule, (bool)varItem.Value))
                     {
-                        Logger.AddDbgLog($"Не удалось добавить правило с Id = {(varItem.Value as HoiReference).Value}");
+                        Logger.AddDbgLog($"Не удалось добавить правило с Id = {(varItem.Value as HoiReference).Value}", "IdeologyComposer");
                     }
 
                 }
@@ -157,7 +157,7 @@ namespace ModdingManagerClassLib.Composers
                     var mod = ModManager.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
                     {
-                        Logger.AddDbgLog($"Не удалось добавить модифер с Id = {(varItem.Value as HoiReference).Value}");
+                        Logger.AddDbgLog($"Не удалось добавить модифер с Id = {(varItem.Value as HoiReference).Value}", "IdeologyComposer");
                     }
                 }
             }
@@ -171,7 +171,7 @@ namespace ModdingManagerClassLib.Composers
                     var mod = ModManager.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
                     {
-                        Logger.AddDbgLog($"Не удалось добавить модифер для фракции с Id = {(varItem.Value as HoiReference).Value}");
+                        Logger.AddDbgLog($"Не удалось добавить модифер для фракции с Id = {(varItem.Value as HoiReference).Value}", "IdeologyComposer");
                     }
                 }
             }

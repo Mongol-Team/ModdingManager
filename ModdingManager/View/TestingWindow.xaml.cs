@@ -1,4 +1,5 @@
 ﻿using ModdingManager.managers.@base;
+using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
 using System;
 using System.Collections.Generic;
@@ -29,9 +30,12 @@ namespace ModdingManager.View
 
         private void ConfigListViewer_Loaded(object sender, RoutedEventArgs e)
         {
-            Fima.ElemSize = 23;
+            Fima.ElemSize = 60;
             Fima.Orientation = Orientation.Vertical;
             Fima.Source = ModManager.Mod.Ideas.Cast<IConfig>().ToList();
+            var dsfg = BitmapExtensions.LoadFromDDS("C:\\Users\\huiek\\Documents\\Paradox Interactive\\Hearts of Iron IV\\mod\\SME\\gfx\\interface\\ideas\\NIG\\nig_curse_1964_art.dds");
+            var fimzdf = BitmapExtensions.LoadFromDDS("C:\\Users\\huiek\\Documents\\Paradox Interactive\\Hearts of Iron IV\\mod\\SME\\gfx\\interface\\ideas\\NIG\\nig_blood_diamods_art.dds");
+            Fimoz.Source = fimzdf.ToImageSource();
         }
     }
 }

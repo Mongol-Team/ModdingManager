@@ -96,7 +96,6 @@ namespace ModdingManagerClassLib.Extentions
                 }
                 else
                 {
-                    // Копируем построчно с учётом stride
                     IntPtr scan = bmpData.Scan0;
                     int srcOffset = 0;
                     for (int y = 0; y < height; y++)
@@ -346,150 +345,278 @@ namespace ModdingManagerClassLib.Extentions
 
             try
             {
-                // 1) Загружаем и декодируем DDS
-                using Pfim.IImage dds = Pfim.Pfimage.FromFile(path);
-
-                int width = dds.Width;
-                int height = dds.Height;
-                byte[] raw = dds.Data;
-
-                // 2) Мапим формат Pfim → System.Drawing.Imaging.PixelFormat
-                PixelFormat sysFmt = dds.Format switch
+                using (var stream = File.OpenRead(path))
                 {
-                    Pfim.ImageFormat.Rgba32 => PixelFormat.Format32bppArgb,
-                    Pfim.ImageFormat.Rgb24 => PixelFormat.Format24bppRgb,
-                    Pfim.ImageFormat.R5g5b5 => PixelFormat.Format16bppRgb555,
-                    Pfim.ImageFormat.R5g6b5 => PixelFormat.Format16bppRgb565,
-                    Pfim.ImageFormat.Rgba16 => PixelFormat.Format16bppArgb1555,
-                    _ => throw new NotSupportedException($"DDS формат {dds.Format} не поддерживается")
-                };
+                    Logger.AddDbgLog($"Начало загрузки DDS: {path}");
 
-                // 3) Создаём Bitmap и копируем данные построчно
-                var bmp = new Bitmap(width, height, sysFmt);
-                var rect = new System.Drawing.Rectangle(0, 0, width, height);
-                var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, sysFmt);
-
-                try
-                {
-                    int bytesPerPixel = dds.Format switch
+                    // Парсим DDS header для детальной информации о формате
+                    stream.Position = 0;
+                    var reader = new BinaryReader(stream);
+                    string magic = new string(reader.ReadChars(4));
+                    if (magic != "DDS ")
                     {
-                        Pfim.ImageFormat.Rgba32 => 4,
-                        Pfim.ImageFormat.Rgb24 => 3,
-                        _ => 2 // для 16-битных форматов
+                        Logger.AddDbgLog($"Неверная магия DDS: {magic} для {path}. Fallback to PNG.");
+                        return LoadFromPNG(path);
+                    }
+
+                    uint headerSize = reader.ReadUInt32();
+                    if (headerSize != 124)
+                    {
+                        Logger.AddDbgLog($"Неверный размер заголовка DDS: {headerSize} для {path}");
+                        return null;
+                    }
+
+                    uint flags = reader.ReadUInt32();
+                    int height = (int)reader.ReadUInt32();
+                    int width = (int)reader.ReadUInt32();
+                    int pitch = (int)reader.ReadUInt32();
+                    uint depth = reader.ReadUInt32();
+                    uint mipMapCount = reader.ReadUInt32();
+                    reader.ReadBytes(44); // reserved1
+
+                    uint pfSize = reader.ReadUInt32();
+                    if (pfSize != 32)
+                    {
+                        Logger.AddDbgLog($"Неверный размер pixel format: {pfSize} для {path}");
+                        return null;
+                    }
+
+                    uint pfFlags = reader.ReadUInt32();
+                    uint fourCC = reader.ReadUInt32();
+                    uint bitCount = reader.ReadUInt32();
+                    uint rMask = reader.ReadUInt32();
+                    uint gMask = reader.ReadUInt32();
+                    uint bMask = reader.ReadUInt32();
+                    uint aMask = reader.ReadUInt32();
+
+                    // Логируем детальную информацию о заголовке
+                    Logger.AddDbgLog($"DDS header для {path}: FourCC={fourCC}, BitsPerPixel={bitCount}, RedMask={rMask:X}, GreenMask={gMask:X}, BlueMask={bMask:X}, AlphaMask={aMask:X}, Pitch={pitch}, Width={width}, Height={height}, MipMaps={mipMapCount}");
+
+                    byte[] raw;
+                    Pfim.ImageFormat pfimFormat = Pfim.ImageFormat.Rgba32; // По умолчанию для fallback
+                    int stride;
+
+                    if (fourCC == 63)
+                    {
+                        // Специальная обработка для FourCC 63 (Q8W8V8U8 signed)
+                        Logger.AddDbgLog($"Обработка FourCC 63 (Q8W8V8U8) для {path}");
+
+                        reader.ReadBytes(20); // caps1, caps2, caps3, caps4, reserved2
+
+                        if (bitCount != 32 || (pfFlags & 0x4) == 0)
+                        {
+                            Logger.AddDbgLog($"Неподдерживаемый формат в FourCC 63: Bits={bitCount}, Flags={pfFlags & 0x4} для {path}");
+                            return null;
+                        }
+
+                        // Проверяем стандартные маски для A8R8G8B8
+                        if (rMask != 0x00FF0000 || gMask != 0x0000FF00 || bMask != 0x000000FF || aMask != 0xFF000000)
+                        {
+                            Logger.AddDbgLog($"Неожиданные битовые маски в DDS: {path}");
+                            return null;
+                        }
+
+                        if (pitch == 0)
+                        {
+                            pitch = width * 4;
+                        }
+
+                        raw = new byte[pitch * height];
+                        int bytesRead = stream.Read(raw, 0, raw.Length);
+                        if (bytesRead != raw.Length)
+                        {
+                            Logger.AddDbgLog($"Неполное чтение данных в DDS: {path}");
+                            return null;
+                        }
+
+                        stride = pitch;
+
+                        // Remap signed (-128..127) to unsigned (0..255)
+                        byte[] remapped = new byte[raw.Length];
+                        for (int i = 0; i < raw.Length; i++)
+                        {
+                            remapped[i] = (byte)((sbyte)raw[i] + 128);
+                        }
+                        // Принудительно устанавливаем альфа-канал = 255 (opaque)
+                        for (int i = 3; i < remapped.Length; i += 4)
+                        {
+                            remapped[i] = 255;
+                        }
+                        raw = remapped;
+                        Logger.AddDbgLog($"Remapped signed data for {path}");
+                    }
+                    else
+                    {
+                        // Сбрасываем позицию потока для Pfim
+                        stream.Position = 0;
+
+                        using Pfim.IImage dds = Pfim.Dds.Create(stream, new PfimConfig());
+                        if (dds.Width != width || dds.Height != height)
+                        {
+                            Logger.AddDbgLog($"Несоответствие размеров в Pfim и header: Pfim={dds.Width}x{dds.Height}, Header={width}x{height} для {path}");
+                        }
+
+                        raw = dds.Data;
+                        pfimFormat = dds.Format;
+                        stride = dds.Stride;
+
+                        // Логируем формат после декомпрессии Pfim
+                        Logger.AddDbgLog($"Формат после Pfim: {dds.Format}, DataLength={raw.Length}, Stride={dds.Stride} для {path}");
+                    }
+
+                    // Определяем формат после декомпрессии или fallback
+                    PixelFormat sysFmt = pfimFormat switch
+                    {
+                        Pfim.ImageFormat.Rgba32 => PixelFormat.Format32bppArgb,
+                        Pfim.ImageFormat.Rgb24 => PixelFormat.Format24bppRgb,
+                        Pfim.ImageFormat.R5g5b5 => PixelFormat.Format16bppRgb555,
+                        Pfim.ImageFormat.R5g6b5 => PixelFormat.Format16bppRgb565,
+                        Pfim.ImageFormat.Rgba16 => PixelFormat.Format16bppArgb1555,
+                        _ => throw new NotSupportedException($"DDS формат {pfimFormat} не поддерживается")
                     };
 
-                    int rowBytes = width * bytesPerPixel;
-
-                    for (int y = 0; y < height; y++)
+                    // Определяем описание формата
+                    string formatDescription = "Неизвестный";
+                    if ((pfFlags & 0x4) != 0) // DDPF_FOURCC
                     {
-                        Marshal.Copy(raw, y * dds.Stride, bmpData.Scan0 + y * bmpData.Stride, rowBytes);
+                        formatDescription = fourCC switch
+                        {
+                            0x31545844 => "DXT1 (BC1)",
+                            0x33545844 => "DXT3 (BC2)",
+                            0x35545844 => "DXT5 (BC3)",
+                            0x20433142 => "BC1",
+                            0x20433242 => "BC2",
+                            0x20433342 => "BC3",
+                            0x20433442 => "BC4",
+                            0x20433542 => "BC5",
+                            0x20433642 => "BC6H",
+                            0x20433742 => "BC7",
+                            63 => "Q8W8V8U8 (signed quaternion)",
+                            _ => $"Неизвестный FourCC {fourCC}"
+                        };
                     }
-                }
-                finally
-                {
-                    bmp.UnlockBits(bmpData);
-                }
+                    else
+                    {
+                        // Uncompressed форматы на основе масок
+                        if (bitCount == 32 && rMask == 0x00FF0000 && gMask == 0x0000FF00 && bMask == 0x000000FF && aMask == 0xFF000000)
+                        {
+                            formatDescription = "A8R8G8B8 (uncompressed)";
+                        }
+                    }
 
-                bmp.SetResolution(96, 96);  // DPI по умолчанию для WPF
-                return bmp;
+                    Logger.AddDbgLog($"Определённый формат DDS: {formatDescription} для {path}");
+
+                    // Проверяем на normal map
+                    bool isNormalMap = false;
+                    bool forceOpaque = formatDescription.Contains("normal map") || formatDescription.Contains("Q8W8V8U8");
+                    if (formatDescription.Contains("DXT5") || formatDescription.Contains("BC3") || formatDescription.Contains("Q8W8V8U8"))
+                    {
+                        string fileName = Path.GetFileName(path).ToLowerInvariant();
+                        if (fileName.Contains("_n") || fileName.Contains("normal") || fileName.Contains("bump"))
+                        {
+                            isNormalMap = true;
+                            formatDescription += " (normal map by filename)";
+                        }
+                        else if (IsLikelyNormalMap(raw, width, height))
+                        {
+                            isNormalMap = true;
+                            formatDescription += " (normal map by data analysis)";
+                        }
+                    }
+
+                    byte[] dataToCopy = raw;
+                    if (isNormalMap)
+                    {
+                        // Для normal maps в BC3/DXT5: часто X в alpha (R), Y в green (G), reconstruct blue (Z)
+                        Logger.AddDbgLog($"Обработка normal map: reconstruct Z для {path}");
+                        byte[] remapped = new byte[raw.Length];
+                        for (int i = 0; i < raw.Length; i += 4)
+                        {
+                            byte a = raw[i + 3]; // X (red in normal)
+                            byte g = raw[i + 1]; // Y (green)
+                                                 // Z = sqrt(1 - X^2 - Y^2), нормализовать 0-255 в -1..1
+                            float x = (a / 255f * 2f) - 1f;
+                            float y = (g / 255f * 2f) - 1f;
+                            float z = (float)Math.Sqrt(Math.Max(0f, 1f - (x * x + y * y)));
+                            byte b = (byte)((z + 1f) / 2f * 255f);
+
+                            remapped[i + 0] = b; // B = Z (blue)
+                            remapped[i + 1] = g; // G = Y
+                            remapped[i + 2] = a; // R = X
+                            remapped[i + 3] = 255; // A = 255 (opaque)
+                        }
+                        dataToCopy = remapped;
+                    }
+                    else if (forceOpaque)
+                    {
+                        Logger.AddDbgLog($"Принудительная установка альфы в 255 для opaque в {path}");
+                        byte[] remapped = new byte[raw.Length];
+                        Array.Copy(raw, remapped, raw.Length);
+                        for (int i = 3; i < remapped.Length; i += 4)
+                        {
+                            remapped[i] = 255;
+                        }
+                        dataToCopy = remapped;
+                    }
+
+                    var bmp = new Bitmap(width, height, sysFmt);
+                    var rect = new System.Drawing.Rectangle(0, 0, width, height);
+                    var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, sysFmt);
+
+                    try
+                    {
+                        int bytesPerPixel = pfimFormat switch
+                        {
+                            Pfim.ImageFormat.Rgba32 => 4,
+                            Pfim.ImageFormat.Rgb24 => 3,
+                            _ => 2 // для 16-битных форматов
+                        };
+
+                        int rowBytes = width * bytesPerPixel;
+
+                        // Логируем перед копированием
+                        Logger.AddDbgLog($"Копирование данных: BytesPerPixel={bytesPerPixel}, RowBytes={rowBytes}, Stride={stride}, BMP Stride={bmpData.Stride} для {path}");
+
+                        for (int y = 0; y < height; y++)
+                        {
+                            Marshal.Copy(dataToCopy, y * stride, bmpData.Scan0 + y * bmpData.Stride, rowBytes);
+                        }
+                    }
+                    finally
+                    {
+                        bmp.UnlockBits(bmpData);
+                    }
+
+                    bmp.SetResolution(96, 96);  // DPI по умолчанию для WPF
+
+                    // Общее логирование успешной загрузки
+                    Logger.AddDbgLog($"Загружен DDS {path} ({width}x{height}, формат: {formatDescription})");
+
+                    return bmp;
+                }
             }
-            catch (Exception ex) when (ex.Message.Contains("FourCC: 63"))
+            catch (Exception ex)
             {
-                // Fallback для формата Q8W8V8U8 (FourCC 63)
-                using var stream = File.OpenRead(path);
-                var reader = new BinaryReader(stream);
-
-                char[] magicChars = reader.ReadChars(4);
-                string magic = new string(magicChars);
-                if (magic != "DDS ")
-                {
-                    Logger.AddDbgLog($"Invalid DDS magic: {path}");
-                    return null;
-                }
-
-                uint headerSize = reader.ReadUInt32();
-                if (headerSize != 124)
-                {
-                    Logger.AddDbgLog($"Invalid DDS header size: {headerSize}");
-                    return null;
-                }
-
-                reader.ReadUInt32(); // flags
-                int height = (int)reader.ReadUInt32();
-                int width = (int)reader.ReadUInt32();
-                int pitch = (int)reader.ReadUInt32();
-                reader.ReadUInt32(); // depth
-                reader.ReadUInt32(); // mipMapCount
-                reader.ReadBytes(44); // reserved1
-
-                uint pfSize = reader.ReadUInt32();
-                if (pfSize != 32)
-                {
-                    Logger.AddDbgLog($"Invalid pixel format size: {pfSize}");
-                    return null;
-                }
-
-                uint pfFlags = reader.ReadUInt32();
-                uint fourCC = reader.ReadUInt32();
-                uint bitCount = reader.ReadUInt32();
-                uint rMask = reader.ReadUInt32();
-                uint gMask = reader.ReadUInt32();
-                uint bMask = reader.ReadUInt32();
-                uint aMask = reader.ReadUInt32();
-
-                reader.ReadBytes(20); // caps1, caps2, caps3, caps4, reserved2
-
-                if (fourCC != 63 || bitCount != 32 || (pfFlags & 0x4) == 0) // PF_FOURCC
-                {
-                    Logger.AddDbgLog($"Unsupported format in fallback: FourCC {fourCC}, BC:{bitCount} pFlags:{pfFlags & 0x4} at {path}");
-                    return null;
-                }
-
-                // Проверяем стандартные маски для A8R8G8B8
-                if (rMask != 0x00FF0000 || gMask != 0x0000FF00 || bMask != 0x000000FF || aMask != 0xFF000000)
-                {
-                    Logger.AddDbgLog($"Unexpected bit masks in DDS: {path}");
-                    return null;
-                }
-
-                if (pitch == 0)
-                {
-                    pitch = width * 4;
-                }
-
-                byte[] raw = new byte[pitch * height];
-                int bytesRead = stream.Read(raw, 0, raw.Length);
-                if (bytesRead != raw.Length)
-                {
-                    Logger.AddDbgLog($"Incomplete data read in DDS: {path}");
-                    return null;
-                }
-
-                var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-                var rect = new System.Drawing.Rectangle(0, 0, width, height);
-                var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-
-                try
-                {
-                    int bytesPerPixel = 4;
-                    int rowBytes = width * bytesPerPixel;
-                    int stride = pitch;
-
-                    for (int y = 0; y < height; y++)
-                    {
-                        Marshal.Copy(raw, y * stride, bmpData.Scan0 + y * bmpData.Stride, rowBytes);
-                    }
-                }
-                finally
-                {
-                    bmp.UnlockBits(bmpData);
-                }
-
-                bmp.SetResolution(96, 96);
-                return bmp;
+                Logger.AddDbgLog($"Ошибка загрузки DDS: {path}. Ошибка: {ex.Message}, StackTrace: {ex.StackTrace}. Fallback to PNG.");
+                return LoadFromPNG(path);
             }
         }
 
+        private static bool IsLikelyNormalMap(byte[] raw, int width, int height)
+        {
+            if (raw.Length < 4 * width * height) return false;
+            byte sampleR = raw[2];  // Первый пиксель R
+            byte sampleB = raw[0];  // B
+            bool rConstant = true, bConstant = true;
+            for (int i = 0; i < raw.Length; i += 4)
+            {
+                if (raw[i + 2] != sampleR) rConstant = false;
+                if (raw[i + 0] != sampleB) bConstant = false;
+                if (!rConstant && !bConstant) break;
+            }
+            Logger.AddDbgLog($"Normal map check: R constant={rConstant}, B constant={bConstant}");
+            return rConstant && bConstant;  // Если R и B константны — вероятно normal (AG format)
+        }
         private static class NativeMethods
         {
             [System.Runtime.InteropServices.DllImport("gdi32.dll")]

@@ -130,7 +130,10 @@ namespace ModdingManagerDataManager.Parsers
             var parts = content.Split(pattern.AssignChar);
             object? value;
             bool parsingResult = HoiVarsConverter.TryParseAny(parts[1], out value);
-
+            if (parts[1] == "\"GFX_idea_LMM_last_time_of_liberia_lion\"")
+            {
+                var lifon = parts[1];
+            }
             //todo logging for parsing errors
             if (parsingResult)
             {

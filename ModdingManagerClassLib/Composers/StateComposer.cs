@@ -48,7 +48,7 @@ namespace ModdingManagerClassLib.Composers
                     break;
                 else
                 {
-                    Logger.AddDbgLog($"[⚠️] No state files found in mod folder: {folder}");
+                    Logger.AddDbgLog($"[⚠️] No state files found in mod folder: {folder}", "IdeologyComposer");
                 }
             }
 
@@ -60,7 +60,7 @@ namespace ModdingManagerClassLib.Composers
 
             if (!File.Exists(filePath))
             {
-                Logger.AddDbgLog($"Файл не найден: {filePath}");
+                Logger.AddDbgLog($"Файл не найден: {filePath}", "IdeologyComposer");
                 return null;
             }
 
@@ -68,7 +68,7 @@ namespace ModdingManagerClassLib.Composers
 
             if (file == null || file.Brackets.Count == 0)
             {
-                Logger.AddDbgLog($"Не удалось распарсить файл: {filePath}");
+                Logger.AddDbgLog($"Не удалось распарсить файл: {filePath}", "IdeologyComposer");
                 return null;
             }
 
@@ -77,7 +77,7 @@ namespace ModdingManagerClassLib.Composers
             var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
             if (idVar == null || !int.TryParse(idVar.Value.ToString(), out int id))
             {
-                Logger.AddDbgLog($"Не удалось извлечь ID из файла: {filePath}");
+                Logger.AddDbgLog($"Не удалось извлечь ID из файла: {filePath}", "IdeologyComposer");
                 return null;
             }
 

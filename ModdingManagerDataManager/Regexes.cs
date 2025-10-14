@@ -81,10 +81,8 @@ namespace ModdingManagerDataManager
             new Regex(hoiColorContent, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
 
         // Vars
-        private static string findVar = @"\w+\s*=\s*((rgb\s*)?(\"".+\"")|([-\d.]+)|[\w.]+)";
-        public static readonly Regex FindVar =
-            new Regex(findVar, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
-
+        private static string findVar = @"\w+\s*=\s*((rgb\s*)?(\"".+\"")|([-\d.]+)|[\w./]+)";
+        public static readonly Regex FindVar = new Regex(findVar, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
         private static string var = "^" + findVar + "$";
         public static readonly Regex Var =
             new Regex(var, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, Timeout);
@@ -95,7 +93,7 @@ namespace ModdingManagerDataManager
 
         // Brackets
 
-        private static string findBracket = @"(\w+\s*)*=\s*\{(?:\s*\}|(?!\s*(\d+\s+){2}\d+\s*\})(?=(?>[^{}=]+|\{(?<d>)|\}(?<-d>))+=)(?>[^{}]+|\{(?<d>)|\}(?<-d>))*\}(?(d)(?!)))";
+        private static string findBracket = @"\w+\s*=\s*\{(?:\s*\}|(?!\s*(\d+\s+){2}\d+\s*\})(?=(?>[^{}=]+|\{(?<d>)|\}(?<-d>))+=)(?>[^{}]+|\{(?<d>)|\}(?<-d>))*\}(?(d)(?!)))";
         public static readonly Regex FindBracket =
             new Regex(findBracket, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline, Timeout);
 
@@ -104,7 +102,7 @@ namespace ModdingManagerDataManager
             new Regex(bracket, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline, Timeout);
 
         //use only for extracted & validated bracket | Name={ ... }
-        private static string bracketName = @"^(\w+)?\s*(?==)";
+        private static string bracketName = @"^\w+\s*(?==)";
         public static readonly Regex BracketName =
             new Regex(bracketName, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
 

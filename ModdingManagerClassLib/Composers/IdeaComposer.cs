@@ -9,6 +9,7 @@ using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.ObjectCacheData;
 using ModdingManagerModels.Types.Utils;
+using Pfim;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,10 +38,7 @@ namespace ModdingManagerClassLib.Composers
                         result.AddRange(cfgs);
                     }
                 }
-                if (result.Count > 0)
-                {
-                    return result;
-                }
+                
             }
             return result;
         }
@@ -140,27 +138,28 @@ namespace ModdingManagerClassLib.Composers
                             if (config != null)
                             {
                                 idea.Modifiers.TryAdd(config, v.Value);
-                                //Logger.AddDbgLog($"idea: {idea.Id.ToString()}, mod:{config.Id.ToString()}");
+                                Logger.AddDbgLog($"idea: {idea.Id.ToString()}, mod:{config.Id.ToString()}", "IdeaComposer");
                             }
                         }
                         break;
                 }
             }
+            idea.PictureName = idea.PictureName ?? $"GFX_idea_{idea.Id.ToString()}";
             string keyname = idea.Id.ToString();
             KeyValuePair<string, string> idloc = ModManager.Localisation.GetLocalisationByKey(keyname);
             idea.Localisation.Data.AddPair(idloc);
             KeyValuePair<string, string> descloc = ModManager.Localisation.GetLocalisationByKey(keyname);
             idea.Localisation.Data.AddPair<string, string>(descloc);
-            IGfx gfx = ModManager.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.PictureName}");
-            if (gfx == null)
+            var dfg = idea.Id.ToString();
+            var sdgfg = idea.PictureName;
+            IGfx gfx = ModManager.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.PictureName}")
+           ?? ModManager.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.Id.ToString()}") ?? DataDefaultValues.NullImage;
+
+            if (gfx.Id.ToString() == "GFX_idea_AZM_anarchist_economics")
             {
-                Logger.AddDbgLog($"Idea found:{keyname}, but GfX_{keyname} no");
+                float dd = 0;
             }
-            if ( gfx != null)
-            {
-                Logger.AddDbgLog($"Idea found:{keyname}, but GfX_{keyname} yes");
-            }
-            idea.Gfx = gfx ?? DataDefaultValues.NullImage;
+            idea.Gfx = gfx;
            
             return idea;
         }

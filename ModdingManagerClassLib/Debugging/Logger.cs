@@ -36,6 +36,11 @@ namespace ModdingManagerClassLib.Debugging
         public static string WarnSymbol = "⚠️";
         public static string ErrorSymbol = "❌";
 
+        /// <summary>
+        /// Цель для отладочных логов. Если не null, AddDbgLog игнорирует все логи, кроме тех, где dbgSource совпадает с этим значением.
+        /// </summary>
+        public static string DbgTarget { get; set; } = null;
+
         private static bool HasConsole =>
             Console.OpenStandardOutput(1) != Stream.Null;
 
@@ -83,12 +88,9 @@ namespace ModdingManagerClassLib.Debugging
             [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
-            //await Task.Yield();
-
             if (LoggingLevel >= log_level)
             {
                 string fileShort = System.IO.Path.GetFileName(file);
-
 
                 var entry = new LogEntry
                 {
@@ -130,6 +132,7 @@ namespace ModdingManagerClassLib.Debugging
 
             int level = msgType == LogLevel.ERROR ? 1 :
                         msgType == LogLevel.WARNING ? 2 : 3;
+
             if (message.Contains(WarnSymbol))
             {
                 color = ConsoleColor.Yellow;
@@ -141,21 +144,32 @@ namespace ModdingManagerClassLib.Debugging
                 type = "ERR";
             }
             await AddLog(message, color, level, type, caller, file, line);
-
-
         }
 
+        /// <summary>
+        /// Добавляет отладочный лог, но только если IsDebug=true и имя отправителя совпадает с DbgTarget.
+        /// </summary>
         public static async Task AddDbgLog(
-            string message,
-            LogLevel msgType = LogLevel.INFO,
-            [CallerMemberName] string caller = "",
-            [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = 0)
+    string message,
+    string dbgSource = null,  // По умолчанию null, если не передан — игнорируем фильтрацию
+    LogLevel msgType = LogLevel.INFO,
+    [CallerMemberName] string caller = "",
+    [CallerFilePath] string file = "",
+    [CallerLineNumber] int line = 0)
         {
             if (!IsDebug)
             {
                 return;
             }
+            if (dbgSource == null || DbgTarget == null)
+            {
+                return ;
+            }
+            if (dbgSource != DbgTarget)
+            {
+                return;
+            }
+
             ConsoleColor color = msgType == LogLevel.ERROR ? ConsoleColor.Red :
                                  msgType == LogLevel.WARNING ? ConsoleColor.Yellow :
                                  ConsoleColor.White;
@@ -165,6 +179,7 @@ namespace ModdingManagerClassLib.Debugging
 
             int level = msgType == LogLevel.ERROR ? 1 :
                         msgType == LogLevel.WARNING ? 2 : 3;
+
             if (message.Contains(WarnSymbol))
             {
                 color = ConsoleColor.Yellow;
@@ -176,8 +191,6 @@ namespace ModdingManagerClassLib.Debugging
                 type = "ERR";
             }
             await AddLog(message, color, level, type, caller, file, line);
-
-
         }
     }
 }
