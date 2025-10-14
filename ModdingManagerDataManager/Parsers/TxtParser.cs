@@ -71,7 +71,8 @@ namespace ModdingManagerDataManager.Parsers
                 return string.Empty;
             });
 
-
+            if (string.IsNullOrEmpty(result.Name))
+                result.Name = "Null";//todo change to call of DataDefaultValues
 
             MatchCollection vars = Rx.FindVar.Matches(content);
             foreach (Match match in vars)
