@@ -1,4 +1,6 @@
 ﻿using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Settings;
 using ModdingManagerModels;
 using ModdingManagerModels.Types.LocalizationData;
 using System;
@@ -52,13 +54,13 @@ namespace ModdingManager.Controls
         private void BuildDefaultLocData()
         {
             _localisation.Data = new Dictionary<string, string>();
-            _localisation.Data.Add($"l_{ModManager.CurrentLanguage}:", "");
+            _localisation.Data.Add($"l_{ModManagerSettings.Instance.CurrentLanguage}:", "");
             switch (_localisation.Source)
             {
                 case CountryConfig country:
                     _localisation.Data.Add($"{country.Id}_ADJ:", "");
                     _localisation.Data.Add($"{country.Id}:", "");
-                    foreach (IdeologyConfig cfg in ModManager.Mod.Ideologies)
+                    foreach (IdeologyConfig cfg in ModDataStorage.Mod.Ideologies)
                     {
                         _localisation.Data.Add($"{country.Id}_{cfg.Id}_DEF:", "");
                         _localisation.Data.Add($"{country.Id}_{cfg.Id}:", "");

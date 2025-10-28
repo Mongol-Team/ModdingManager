@@ -1,5 +1,6 @@
 ﻿using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerModels;
 using ModdingManagerModels.Args;
@@ -16,11 +17,11 @@ public class StateWorkerHandler
 {
     public List<ProvinceConfig> ComputeProvinceShapes()
     {
-        using var mat = ModManager.Mod.Map.Bitmap.ToMat();
+        using var mat = ModDataStorage.Mod.Map.Bitmap.ToMat();
         if (mat.Empty())
             throw new InvalidOperationException("Не удалось загрузить provinces.bmp");
 
-        Logger.AddDbgLog($"🔍 Начало обработки {ModManager.Mod.Map.Provinces.Count} провинций...");
+        Logger.AddDbgLog($"🔍 Начало обработки {ModDataStorage.Mod.Map.Provinces.Count} провинций...");
 
         int successCount = 0;
         var timer = System.Diagnostics.Stopwatch.StartNew();
@@ -28,7 +29,7 @@ public class StateWorkerHandler
         int maxThreads = Math.Max(1, Environment.ProcessorCount / 3);
         var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxThreads };
 
-        Parallel.ForEach(ModManager.Mod.Map.Provinces, parallelOptions, province =>
+        Parallel.ForEach(ModDataStorage.Mod.Map.Provinces, parallelOptions, province =>
         {
             try
             {
@@ -94,10 +95,10 @@ public class StateWorkerHandler
         timer.Stop();
         Logger.AddDbgLog("\n====================================");
         Logger.AddDbgLog($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
-        Logger.AddDbgLog($"Успешно: {successCount} | Не удалось: {ModManager.Mod.Map.Provinces.Count - successCount}");
+        Logger.AddDbgLog($"Успешно: {successCount} | Не удалось: {ModDataStorage.Mod.Map.Provinces.Count - successCount}");
         Logger.AddDbgLog("====================================\n");
 
-        return ModManager.Mod.Map.Provinces;
+        return ModDataStorage.Mod.Map.Provinces;
     }
 
     public void ChangeState(StateConfig state, string oldName, string newName)
@@ -107,12 +108,12 @@ public class StateWorkerHandler
         //    return;
 
         //// Получаем кеш состояний
-        //var stateCache = ModManager.Mod.MapCache.GetStateFiles();
+        //var stateCache = ModDataStorage.Mod.MapCache.GetStateFiles();
 
         //// Если файл отсутствует в кеше, загружаем его
         //if (!stateCache.TryGetValue(state.FilePath, out var cachedFile))
         //{
-        //    ModManager.Mod.MapCache.AddStateFile(state.FilePath);
+        //    ModDataStorage.Mod.MapCache.AddStateFile(state.FilePath);
         //    if (!stateCache.TryGetValue(state.FilePath, out cachedFile))
         //        return; // Файл не удалось загрузить
         //}
@@ -131,15 +132,15 @@ public class StateWorkerHandler
 
         //UpdateBuildings(stateBracket, state.Buildings);
         //cachedFile.IsDirty = true;
-        //ModManager.Mod.MapCache.MarkStateFileDirty(state.FilePath);
-        //ModManager.Mod.MapCache.SaveDirtyStateFiles();
+        //ModDataStorage.Mod.MapCache.MarkStateFileDirty(state.FilePath);
+        //ModDataStorage.Mod.MapCache.SaveDirtyStateFiles();
     }
 
     private void UpdateStateName(string oldName, string newName, string newValue)
     {
-        //string basePath = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage);
+        //string basePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", ModManagerSettings.CurrentLanguage);
         //string replacePath = Path.Combine(basePath, "replace");
-        //string fileName = $"state_names_l_{ModManager.CurrentLanguage}.yml";
+        //string fileName = $"state_names_l_{ModManagerSettings.CurrentLanguage}.yml";
         //string filePath1 = Path.Combine(basePath, fileName);
         //string filePath2 = Path.Combine(replacePath, fileName);
 
@@ -147,9 +148,9 @@ public class StateWorkerHandler
         //Directory.CreateDirectory(replacePath);
 
         //if (!File.Exists(filePath1))
-        //    File.WriteAllText(filePath1, $"l_{ModManager.CurrentLanguage}:\n");
+        //    File.WriteAllText(filePath1, $"l_{ModManagerSettings.CurrentLanguage}:\n");
         //if (!File.Exists(filePath2))
-        //    File.WriteAllText(filePath2, $"l_{ModManager.CurrentLanguage}:\n");
+        //    File.WriteAllText(filePath2, $"l_{ModManagerSettings.CurrentLanguage}:\n");
 
         //try
         //{
@@ -174,9 +175,9 @@ public class StateWorkerHandler
 
         //    // Обновляем кэш
         //    newVar.AddProperty("sourcePath", filePath1);
-        //    ModManager.Mod.LocCache.StateLocalisation.RemoveAll(v =>
+        //    ModDataStorage.Mod.LocCache.StateLocalisation.RemoveAll(v =>
         //        v.Value.ToString().Trim('"').Equals(oldName, StringComparison.OrdinalIgnoreCase));
-        //    ModManager.Mod.LocCache.StateLocalisation.Add(newVar);
+        //    ModDataStorage.Mod.LocCache.StateLocalisation.Add(newVar);
         //}
         //catch (Exception ex)
         //{
@@ -239,9 +240,9 @@ public class StateWorkerHandler
     }
     public void ChangeProvince(ProvinceConfig province)
     {
-        //  string modMapDir = Path.Combine(ModManager.ModDirectory, "map");
+        //  string modMapDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "map");
         //  string modDefinitions = Path.Combine(modMapDir, "definition.csv");
-        //  string gameDefinitions = Path.Combine(ModManager.GameDirectory, "map", "definition.csv");
+        //  string gameDefinitions = Path.Combine(ModManagerSettings.Instance.GameDirectory, "map", "definition.csv");
 
         //  if (!File.Exists(modDefinitions))
         //  {
@@ -252,11 +253,11 @@ public class StateWorkerHandler
         //          throw new FileNotFoundException($"Не найден definition.csv ни в моде, ни в игре: {gameDefinitions}");
 
         //      File.Copy(gameDefinitions, modDefinitions, true);
-        //      ModManager.Mod.MapCache.MapDefinitionCache = new(modDefinitions);
+        //      ModDataStorage.Mod.MapCache.MapDefinitionCache = new(modDefinitions);
         //  }
 
         //  // Работаем через кеш
-        //  var definitionsContent = ModManager.Mod.MapCache.MapDefinitionCache;
+        //  var definitionsContent = ModDataStorage.Mod.MapCache.MapDefinitionCache;
         //  var lines = definitionsContent.DefinitionLines;
 
         //  int lineIndex = lines.FindIndex(line =>
@@ -284,15 +285,15 @@ public class StateWorkerHandler
         //  // 2. Работа с локализацией VictoryPoints (оставляем без изменений, так как это отдельная система)
         //  string vpKey = $"VICTORY_POINTS_{province.Id}";
         //  string newLineLoc = $" {vpKey}: \"{province.Name}\"";
-        //  string locFolder = Path.Combine(ModManager.ModDirectory, "localisation", ModManager.CurrentLanguage);
+        //  string locFolder = Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", ModManagerSettings.CurrentLanguage);
         //  string replaceFolder = Path.Combine(locFolder, "replace");
 
         //  Directory.CreateDirectory(locFolder);
         //  Directory.CreateDirectory(replaceFolder);
 
-        //  string filePath = Path.Combine(locFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
-        //  string replacePath = Path.Combine(replaceFolder, $"victory_points_l_{ModManager.CurrentLanguage}.yml");
-        //  string header = $"﻿l_{ModManager.CurrentLanguage}:\n";
+        //  string filePath = Path.Combine(locFolder, $"victory_points_l_{ModManagerSettings.CurrentLanguage}.yml");
+        //  string replacePath = Path.Combine(replaceFolder, $"victory_points_l_{ModManagerSettings.CurrentLanguage}.yml");
+        //  string header = $"﻿l_{ModManagerSettings.CurrentLanguage}:\n";
 
         //  void EnsureFileHasName(string path, string header)
         //  {
@@ -331,12 +332,12 @@ public class StateWorkerHandler
 
 
         //  // 3. Обновление Victory Points в файлах состояний через кеш
-        //  if (ModManager.Mod.MapCache.ProvinceIndex == null)
+        //  if (ModDataStorage.Mod.MapCache.ProvinceIndex == null)
         //  {
-        //      ModManager.Mod.MapCache.BuildProvinceIndex();
+        //      ModDataStorage.Mod.MapCache.BuildProvinceIndex();
         //  }
 
-        //  if (ModManager.Mod.MapCache.ProvinceIndex.TryGetValue(province.Id, out var stateInfo))
+        //  if (ModDataStorage.Mod.MapCache.ProvinceIndex.TryGetValue(province.Id, out var stateInfo))
         //  {
         //      var (fileKey, stateBracket) = stateInfo;
 
@@ -375,9 +376,9 @@ public class StateWorkerHandler
         //      }
 
         //      // Помечаем файл как измененный
-        //      ModManager.Mod.MapCache.MarkStateFileDirty(fileKey);
+        //      ModDataStorage.Mod.MapCache.MarkStateFileDirty(fileKey);
 
-        //      ModManager.Mod.MapCache.SaveDirtyStateFiles();
+        //      ModDataStorage.Mod.MapCache.SaveDirtyStateFiles();
         //  }
     }
     public void ChangeStrategicRegions(List<StrategicRegionConfig> regions)

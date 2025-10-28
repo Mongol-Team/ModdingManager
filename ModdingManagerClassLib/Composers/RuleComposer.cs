@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using DDF = ModdingManagerData.DataDefaultValues;
 
 namespace ModdingManagerClassLib.Composers
 {
@@ -84,17 +85,17 @@ namespace ModdingManagerClassLib.Composers
                 res = new RuleConfig
                 {
                     Id = new(ruleBr.Name),
-                    GroupId = ruleBr.SubVars.FirstOrDefault(v => v.Name == "group") == null ? DataDefaultValues.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "group").Value.ToString(),
-                    RequiredDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc") == null ? DataDefaultValues.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc").Value.ToString(),
-                    ExcludedDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc") == null ? DataDefaultValues.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc").Value.ToString(),
+                    GroupId = ruleBr.SubVars.FirstOrDefault(v => v.Name == "group") == null ? DDF.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "group").Value.ToString(),
+                    RequiredDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc") == null ? DDF.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc").Value.ToString(),
+                    ExcludedDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc") == null ? DDF.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc").Value.ToString(),
                     Options = new List<BaseConfig>(),
-                    Gfx = ruleBr.SubVars.FirstOrDefault(v => v.Name == "icon")?.Value is var val && val != null ? ModManager.Mod.Gfxes.FindById(val.ToString()) ?? new SpriteType() : new SpriteType(),
+                    Gfx = ruleBr.SubVars.FirstOrDefault(v => v.Name == "icon")?.Value is var val && val != null ? ModDataStorage.Mod.Gfxes.FindById(val.ToString()) ?? new SpriteType() : new SpriteType(),
                     Default = new BaseConfig(),
                     IsCore = false
                 };
                 res.Localisation = new ConfigLocalisation();
-                string locKey = ruleBr.SubVars.FirstOrDefault(v => v.Name == "name") == null ? DataDefaultValues.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString();
-                KeyValuePair<string, string> loc = ModManager.Localisation.GetLocalisationByKey(locKey);
+                string locKey = ruleBr.SubVars.FirstOrDefault(v => v.Name == "name") == null ? DDF.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString();
+                KeyValuePair<string, string> loc = ModDataStorage.Localisation.GetLocalisationByKey(locKey);
 
                 res.Localisation.Data.Add(loc.Key, loc.Value);
             }
@@ -109,12 +110,12 @@ namespace ModdingManagerClassLib.Composers
                 {
                     var option = new BaseConfig
                     {
-                        Id = new Identifier(br.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString()) ?? new(DataDefaultValues.Null),
+                        Id = new Identifier(br.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString()) ?? new(DDF.Null),
                         Localisation = new ConfigLocalisation()
                     };
 
-                    var nameloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "text").Value.ToString());
-                    var descloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "desc").Value.ToString());
+                    var nameloc = ModDataStorage.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "text").Value.ToString());
+                    var descloc = ModDataStorage.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "desc").Value.ToString());
                     option.Localisation.Data.Add(nameloc.Key, nameloc.Value);
                     option.Localisation.Data.Add(descloc.Key, descloc.Value);
                     res.Options.Add(option);
@@ -123,12 +124,12 @@ namespace ModdingManagerClassLib.Composers
                 {
                     res.Default = new BaseConfig
                     {
-                        Id = new Identifier(br.SubVars.First(v => v.Name == "name").Value.ToString()) ?? new(DataDefaultValues.Null),
+                        Id = new Identifier(br.SubVars.First(v => v.Name == "name").Value.ToString()) ?? new(DDF.Null),
                         Localisation = new ConfigLocalisation()
                     };
 
-                    var nameloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "text").Value.ToString());
-                    var descloc = ModManager.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "desc").Value.ToString());
+                    var nameloc = ModDataStorage.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "text").Value.ToString());
+                    var descloc = ModDataStorage.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "desc").Value.ToString());
                     res.Default.Localisation.Data.Add(nameloc.Key, nameloc.Value);
                     res.Default.Localisation.Data.Add(descloc.Key, descloc.Value);
                 }

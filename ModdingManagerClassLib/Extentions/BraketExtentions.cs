@@ -2,12 +2,12 @@
 using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 using System.Runtime.CompilerServices;
-
+using DDF = ModdingManagerData.DataDefaultValues;
 namespace ModdingManagerClassLib.Extentions
 {
     public static class BraketExtentions
     {
-        public static string GetVarString(this Bracket gfxBracket, string name, string defaultValue = DataDefaultValues.Null)
+        public static string GetVarString(this Bracket gfxBracket, string name, string defaultValue = DDF.Null)
         {
             var val = gfxBracket.SubVars.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             return val != null ? val.Value.ToString() : defaultValue;

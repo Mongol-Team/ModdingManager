@@ -2,7 +2,6 @@
 using ModdingManagerClassLib.Composers;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerClassLib.Loaders;
-using ModdingManagerClassLib.Properties;
 using ModdingManagerClassLib.utils;
 using ModdingManagerModels.Interfaces;
 using System.Diagnostics;

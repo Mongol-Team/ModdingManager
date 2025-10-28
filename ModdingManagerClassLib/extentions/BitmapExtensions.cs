@@ -2,6 +2,7 @@
 using BCnEncoder.Shared;
 using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Debugging;
+using ModdingManagerClassLib.Settings;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using Pfim;
@@ -269,8 +270,8 @@ namespace ModdingManagerClassLib.Extentions
                 throw new ArgumentException("Относительный путь не может быть пустым.", nameof(relativePath));
             relativePath = relativePath.Replace("/", "\\");
             // Комбинируем с директориями
-            string modPath = Path.Combine(ModManager.ModDirectory, relativePath);
-            string gamePath = Path.Combine(ModManager.GameDirectory, relativePath);
+            string modPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, relativePath);
+            string gamePath = Path.Combine(ModManagerSettings.Instance.GameDirectory, relativePath);
 
             string? fullPath = null;
 

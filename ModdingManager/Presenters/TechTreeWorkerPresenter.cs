@@ -175,12 +175,12 @@ namespace ModdingManager.Presenters
         private void UpdateItemFromControls(TechTreeItemConfig item)
         {
             item.Id = new(_view.TechId);
-            item.Name = _view.TechName;
-            item.Description = _view.TechDescription;
             item.ModifCost = _view.TechModifCost;
             item.Cost = _view.TechCost;
             item.StartYear = _view.StartYear;
-            item.Enables = _view.Enables;
+            item.EnableBuildings = null;// to do
+            item.EnableEquipments = null;// to do
+            item.EnableUnits = null;// to do
             item.Allowed = _view.Allowed;
             item.Effects = _view.Effects;
             item.Modifiers = _view.Modifiers;
@@ -194,12 +194,10 @@ namespace ModdingManager.Presenters
             TechTreeItemConfig item = new TechTreeItemConfig
             {
                 Id = new(_view.TechId),
-                Name = _view.TechName,
-                Description = _view.TechDescription,
+                Localisation = _view.Localisation,
                 ModifCost = _view.TechModifCost,
                 Cost = _view.TechCost,
                 StartYear = _view.StartYear,
-                Enables = _view.Enables,
                 Allowed = _view.Allowed,
                 Effects = _view.Effects,
                 Modifiers = _view.Modifiers,
@@ -208,29 +206,28 @@ namespace ModdingManager.Presenters
                 Categories = _view.Categories,
                 ChildOf = null,
                 Mutal = null,
-                Gfx = new SpriteType(_view.IsBigImage ? _view.BigTechImage.ToBitmap() : _view.SmallTechImage.ToBitmap(), _view.TechId)
+                Gfx = new SpriteType(_view.IsBigImage ? _view.BigTechImage.ToBitmap() : _view.SmallTechImage.ToBitmap(), _view.TechId.ToString())
             };
             return item;
         }
         private void FillControlsWithItem(TechTreeItemConfig item)
         {
-            _view.TechId = item.Id.ToString();
-            _view.TechName = item.Name;
-            _view.TechDescription = item.Description;
+            _view.TechId = item.Id;
+            _view.Localisation = item.Localisation;
             _view.TechModifCost = item.ModifCost;
             _view.TechCost = item.Cost;
             _view.StartYear = item.StartYear;
-            _view.Enables = item.Enables;
             _view.Allowed = item.Allowed;
             _view.Effects = item.Effects;
             _view.Modifiers = item.Modifiers;
             _view.AiWillDo = item.AiWillDo;
             _view.Dependencies = item.Dependencies;
             _view.Categories = item.Categories;
-            if (item.IsBig && item.Gfx.Content != null)
+            if ((item.IsBig ?? false) && item.Gfx?.Content != null)
             {
                 _view.BigTechImage = item.Gfx.Content;
             }
+
             else if (item.Gfx.Content != null)
             {
                 _view.SmallTechImage = item.Gfx.Content;

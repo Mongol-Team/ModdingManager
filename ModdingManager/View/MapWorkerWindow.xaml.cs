@@ -2,6 +2,7 @@
 using ModdingManager.classes.views;
 using ModdingManager.Controls;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
 using ModdingManagerModels;
 using ModdingManagerModels.Args;
 using ModdingManagerModels.Types.Utils;
@@ -140,7 +141,7 @@ namespace ModdingManager
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon polygon && polygon.Tag is int provinceId)
             {
-                _draggedProvince = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == provinceId);
+                _draggedProvince = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == provinceId);
                 _dragStartPoint = e.GetPosition(Display);
             }
         }
@@ -162,7 +163,7 @@ namespace ModdingManager
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is int targetProvinceId)
             {
-                var targetProvince = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
+                var targetProvince = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
 
                 switch (CurrentMapLayer)
                 {
@@ -266,7 +267,7 @@ namespace ModdingManager
             switch (CurrentMapLayer)
             {
                 case "STATE":
-                    var state = ModManager.Mod.Map.States
+                    var state = ModDataStorage.Mod.Map.States
                         .FirstOrDefault(s => s.Provinces.Any(p => p.Id.ToInt() == targetProvinceId));
                     if (state != null)
                     {
@@ -275,7 +276,7 @@ namespace ModdingManager
                     break;
 
                 case "PROVINCE":
-                    var province = ModManager.Mod.Map.Provinces
+                    var province = ModDataStorage.Mod.Map.Provinces
                         .FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
                     if (province != null)
                     {
@@ -284,7 +285,7 @@ namespace ModdingManager
                     break;
 
                 case "STRATEGIC":
-                    var region = ModManager.Mod.Map.StrategicRegions
+                    var region = ModDataStorage.Mod.Map.StrategicRegions
                         .FirstOrDefault(r => r.Provinces.Any(p => p.Id.ToInt() == targetProvinceId));
                     if (region != null)
                     {
@@ -293,7 +294,7 @@ namespace ModdingManager
                     break;
 
                 case "COUNTRY":
-                    var country = ModManager.Mod.Map.Countries
+                    var country = ModDataStorage.Mod.Map.Countries
                         .FirstOrDefault(c => c.States.Any(s => s.Provinces.Any(p => p.Id.ToInt() == targetProvinceId)));
                     if (country != null)
                     {
@@ -325,17 +326,17 @@ namespace ModdingManager
 
         private StateConfig GetStateForProvince(Identifier? provinceId)
         {
-            return ModManager.Mod.Map.States?.FirstOrDefault(s =>
+            return ModDataStorage.Mod.Map.States?.FirstOrDefault(s =>
                 s.Provinces?.Any(p => p.Id == provinceId) == true);
         }
         private StrategicRegionConfig GetRegionForProvince(Identifier? provinceId)
         {
-            return ModManager.Mod.Map.StrategicRegions?.FirstOrDefault(s =>
+            return ModDataStorage.Mod.Map.StrategicRegions?.FirstOrDefault(s =>
                 s.Provinces?.Any(p => p.Id == provinceId) == true);
         }
         private CountryConfig GetCountryForState(Identifier? stateId)
         {
-            return ModManager.Mod.Countries?.FirstOrDefault(c =>
+            return ModDataStorage.Mod.Countries?.FirstOrDefault(c =>
                 c.States?.Any(s => s.Id == stateId) == true);
         }
 

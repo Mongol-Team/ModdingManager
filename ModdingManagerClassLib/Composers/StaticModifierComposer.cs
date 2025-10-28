@@ -51,7 +51,7 @@ namespace ModdingManagerClassLib.Composers
             foreach (var var in bracket.SubVars)
             {
 
-                var modDef = ModManager.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
+                var modDef = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
                 if (modDef != null)
                 {
                     if (var.Value is int intValue)

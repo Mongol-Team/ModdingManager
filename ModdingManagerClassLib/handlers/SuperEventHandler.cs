@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows;
 using ModdingManagerClassLib.Debugging;
+using ModdingManagerClassLib.Settings;
 public class SuperEventHandler
 {
     public SupereventConfig CurrentConfig { get; set; }
@@ -24,7 +25,7 @@ public class SuperEventHandler
             if (!sourceUri.IsFile) return;
 
             string sourcePath = sourceUri.LocalPath;
-            string destinationDirectory = Path.Combine(ModManager.ModDirectory, "sound", "customsound");
+            string destinationDirectory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "sound", "customsound");
             Directory.CreateDirectory(destinationDirectory);
 
             string destinationPath = Path.Combine(destinationDirectory, $"{CurrentConfig.Id.ToString()}_sound.wav");
@@ -40,7 +41,7 @@ public class SuperEventHandler
     {
         if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString())) return;
 
-        string soundDirectory = Path.Combine(ModManager.ModDirectory, "sound");
+        string soundDirectory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "sound");
         Directory.CreateDirectory(soundDirectory);
         Directory.CreateDirectory(Path.Combine(soundDirectory, "customsound"));
 
@@ -130,7 +131,7 @@ public class SuperEventHandler
         var win = CurrentConfig.Gui.Containers.FirstOrDefault();
         if (win == null) { MessageBox.Show("Gui window not found!"); return; }
 
-        string dir = Path.Combine(ModManager.ModDirectory, "gfx", "superevent", "button");
+        string dir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "gfx", "superevent", "button");
         Directory.CreateDirectory(dir);
 
         for (int i = 0; i < win.Buttons.Count; i++)
@@ -165,7 +166,7 @@ public class SuperEventHandler
 
         if (img != null && TryGetSpriteSource(img.SpriteType, out string imgSrc))
         {
-            string imageDir = Path.Combine(ModManager.ModDirectory, "gfx", "superevent_pictures");
+            string imageDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "gfx", "superevent_pictures");
             Directory.CreateDirectory(imageDir);
             string outTga = Path.Combine(imageDir, $"superevent_image_{CurrentConfig.Id}.tga");
             SaveAsTGA(imgSrc, outTga);
@@ -173,7 +174,7 @@ public class SuperEventHandler
 
         if (bg != null && TryGetSpriteSource(bg.SpriteType, out string bgSrc))
         {
-            string frameDir = Path.Combine(ModManager.ModDirectory, "gfx", "interface", "superevent");
+            string frameDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "gfx", "interface", "superevent");
             Directory.CreateDirectory(frameDir);
             string outDds = Path.Combine(frameDir, $"superevent_frame_{CurrentConfig.Id}.dds");
             SaveAsDDS(bgSrc, outDds);
@@ -216,7 +217,7 @@ public class SuperEventHandler
     {
         if (CurrentConfig?.Gui == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString())) return;
 
-        string guiDir = Path.Combine(ModManager.ModDirectory, "interface");
+        string guiDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "interface");
         Directory.CreateDirectory(guiDir);
         string filePath = Path.Combine(guiDir, $"SUPEREVENT_{CurrentConfig.Id}_window.gfx");
 
@@ -272,7 +273,7 @@ public class SuperEventHandler
         var win = CurrentConfig.Gui.Containers.FirstOrDefault();
         if (win == null) return;
 
-        string guiDirectory = Path.Combine(ModManager.ModDirectory, "interface");
+        string guiDirectory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "interface");
         Directory.CreateDirectory(guiDirectory);
         string filePath = Path.Combine(guiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_window.gui");
 
@@ -371,7 +372,7 @@ public class SuperEventHandler
         var win = CurrentConfig.Gui.Containers.FirstOrDefault();
         if (win == null) return;
 
-        string locDirectory = Path.Combine(ModManager.ModDirectory, "localisation", language);
+        string locDirectory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", language);
         Directory.CreateDirectory(locDirectory);
 
         string filePath = Path.Combine(locDirectory, $"superevents_l_{language}.yml");
@@ -423,7 +424,7 @@ public class SuperEventHandler
     {
         if (CurrentConfig == null || string.IsNullOrEmpty(CurrentConfig.Id.ToString()) || CurrentConfig.Gui == null) return;
 
-        string dir = Path.Combine(ModManager.ModDirectory, "common", "scripted_guis");
+        string dir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "scripted_guis");
         Directory.CreateDirectory(dir);
         string filePath = Path.Combine(dir, $"SUPEREVENT_{CurrentConfig.Id}_scripted_gui.txt");
 
@@ -461,7 +462,7 @@ public class SuperEventHandler
 
     public void HandleFontFiles()
     {
-        string fontsDirectory = Path.Combine(ModManager.ModDirectory, "gfx", "fonts");
+        string fontsDirectory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "gfx", "fonts");
         Directory.CreateDirectory(fontsDirectory);
 
         var uniqueFonts = FontManager.CollectUniqueFonts(CurrentConfig.Gui);
@@ -500,7 +501,7 @@ public class SuperEventHandler
     {
         if (CurrentConfig?.Gui == null) return;
 
-        string interfaceDirectory = Path.Combine(ModManager.ModDirectory, "interface");
+        string interfaceDirectory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "interface");
         Directory.CreateDirectory(interfaceDirectory);
         string filePath = Path.Combine(interfaceDirectory, "font_definitions.gfx");
 

@@ -4,6 +4,7 @@ using ModdingManager.classes.utils;
 using ModdingManagerModels;
 using System.IO;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
 
 namespace ModdingManager
 {
@@ -176,7 +177,7 @@ namespace ModdingManager
             CharacterCreator form = sender as CharacterCreator;
             ComboBox cmb = (ComboBox)form.Controls["IdeologyBox"];
             List<string> list = new();
-            foreach (IdeologyConfig ideo in ModManager.Mod.Ideologies)
+            foreach (IdeologyConfig ideo in ModDataStorage.Mod.Ideologies)
             {
                 foreach (IdeologyType type in ideo.SubTypes)
                 {

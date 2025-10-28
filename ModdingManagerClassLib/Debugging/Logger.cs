@@ -1,12 +1,36 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Diagnostics;  // Для Debug.WriteLine в fallback і діагностиці
 
 namespace ModdingManagerClassLib.Debugging
 {
-    public enum LogLevel
+    public class LogLevel
     {
-        INFO,
-        ERROR,
-        WARNING,
+        public static readonly LogLevel Info = new LogLevel(3, "INF", ConsoleColor.White);
+        public static readonly LogLevel Warning = new LogLevel(2, "WAR", ConsoleColor.Yellow);
+        public static readonly LogLevel Error = new LogLevel(1, "ERR", ConsoleColor.Red);
+
+        private readonly int _value;
+        private readonly string _typeString;
+        private readonly ConsoleColor _color;
+
+        private LogLevel(int value, string typeString, ConsoleColor color)
+        {
+            _value = value;
+            _typeString = typeString;
+            _color = color;
+        }
+
+        public int GetValue() => _value;
+        public string GetTypeString() => _typeString;
+        public ConsoleColor GetColor() => _color;
+
+        public bool IsError() => this == Error;
+        public bool ShouldLog(int loggingLevel) => _value <= loggingLevel;
     }
 
     public struct Logger
@@ -17,7 +41,7 @@ namespace ModdingManagerClassLib.Debugging
         {
             public string Message { get; set; } = "";
             public ConsoleColor Color { get; set; }
-            public int LogLevel { get; set; }
+            public LogLevel LogLevel { get; set; }
             public string MessageType { get; set; } = "UNK";
             public string Caller { get; set; } = "";
             public string File { get; set; } = "";
@@ -29,7 +53,7 @@ namespace ModdingManagerClassLib.Debugging
 
         private static readonly List<LogEntry> _buffer = new List<LogEntry>();
 
-        public static int LoggingLevel { get; set; } = 0; // 0 - no logging, 1 - only error, 2 - warnings, 3 - all
+        public static int LoggingLevel { get; set; } = 3; // Змінено дефолт на 3 ("all"), щоб логи завжди йшли за замовчуванням
         public static int depth = 0;
         public const ConsoleColor _DEFAULT_OUTLINE_COLOR = ConsoleColor.Cyan;
         public static ConsoleColor outline_color = ConsoleColor.Cyan;
@@ -46,8 +70,6 @@ namespace ModdingManagerClassLib.Debugging
 
         public static void FlushBuffer()
         {
-            if (!HasConsole) return;
-
             lock (_logLock)
             {
                 foreach (var entry in _buffer)
@@ -67,16 +89,34 @@ namespace ModdingManagerClassLib.Debugging
             if (entry.Depth > 0)
                 offset += "->";
 
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"[{time}]");
-            Console.ForegroundColor = outline_color;
-            Console.Write($"{offset}");
-            Console.ForegroundColor = entry.Color;
-            Console.Write($"{entry.Message} ");
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"[{entry.MessageType}][{entry.ThreadId}][{entry.Caller} @ {entry.File}:{entry.Line}]");
-            Console.WriteLine();
-            Console.ResetColor();
+            string logLine = $"[{time}]{offset}{entry.Message} [{entry.MessageType}][{entry.ThreadId}][{entry.Caller} @ {entry.File}:{entry.Line}]";
+
+            if (HasConsole)
+            {
+                try
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write($"[{time}]");
+                    Console.ForegroundColor = outline_color;
+                    Console.Write($"{offset}");
+                    Console.ForegroundColor = entry.Color;
+                    Console.Write($"{entry.Message} ");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write($"[{entry.MessageType}][{entry.ThreadId}][{entry.Caller} @ {entry.File}:{entry.Line}]");
+                    Console.WriteLine();
+                    Console.ResetColor();
+                }
+                catch (IOException ex)
+                {
+                    // Fallback на Debug.WriteLine при помилці
+                    Debug.WriteLine(logLine + " (IOException in console output: " + ex.Message + ")");
+                }
+            }
+            else
+            {
+                // Fallback для non-console apps
+                Debug.WriteLine(logLine);
+            }
         }
 
         public static async Task AddLog(
@@ -88,15 +128,21 @@ namespace ModdingManagerClassLib.Debugging
             [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
+            // Діагностика: вивід перед if, щоб побачити, чому не входить (видно в VS Output window)
+            Debug.WriteLine($"[DIAG] AddLog called: LoggingLevel={LoggingLevel}, log_level={log_level}, shouldLog={LoggingLevel >= log_level}");
+
             if (LoggingLevel >= log_level)
             {
-                string fileShort = System.IO.Path.GetFileName(file);
+                // Діагностика: підтвердження входу в if
+                Debug.WriteLine($"[DIAG] Entering log processing for message: {message}");
+
+                string fileShort = Path.GetFileName(file);
 
                 var entry = new LogEntry
                 {
                     Message = message,
                     Color = color,
-                    LogLevel = log_level,
+                    LogLevel = null,
                     MessageType = message_type,
                     Caller = caller,
                     File = fileShort,
@@ -108,30 +154,29 @@ namespace ModdingManagerClassLib.Debugging
 
                 lock (_logLock)
                 {
-                    if (HasConsole)
-                        PrintToConsole(entry);
-                    else
-                        _buffer.Add(entry);
+                    PrintToConsole(entry);
+                    _buffer.Add(entry);
                 }
+            }
+            else
+            {
+                // Діагностика: чому пропустили
+                Debug.WriteLine($"[DIAG] Skipped log: LoggingLevel {LoggingLevel} < log_level {log_level}");
             }
         }
 
         public static async Task AddLog(
             string message,
-            LogLevel msgType = LogLevel.INFO,
+            LogLevel msgType = null,
             [CallerMemberName] string caller = "",
             [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
-            ConsoleColor color = msgType == LogLevel.ERROR ? ConsoleColor.Red :
-                                 msgType == LogLevel.WARNING ? ConsoleColor.Yellow :
-                                 ConsoleColor.White;
+            msgType ??= LogLevel.Info;
 
-            string type = msgType == LogLevel.ERROR ? "ERR" :
-                          msgType == LogLevel.WARNING ? "WAR" : "INF";
-
-            int level = msgType == LogLevel.ERROR ? 1 :
-                        msgType == LogLevel.WARNING ? 2 : 3;
+            ConsoleColor color = msgType.GetColor();
+            string type = msgType.GetTypeString();
+            int level = msgType.GetValue();
 
             if (message.Contains(WarnSymbol))
             {
@@ -150,35 +195,28 @@ namespace ModdingManagerClassLib.Debugging
         /// Добавляет отладочный лог, но только если IsDebug=true и имя отправителя совпадает с DbgTarget.
         /// </summary>
         public static async Task AddDbgLog(
-    string message,
-    string dbgSource = null,  // По умолчанию null, если не передан — игнорируем фильтрацию
-    LogLevel msgType = LogLevel.INFO,
-    [CallerMemberName] string caller = "",
-    [CallerFilePath] string file = "",
-    [CallerLineNumber] int line = 0)
+            string message,
+            string dbgSource = null,  // По умолчанию null, если не передан - игнорируем фильтрацию
+            LogLevel msgType = null,
+            [CallerMemberName] string caller = "",
+            [CallerFilePath] string file = "",
+            [CallerLineNumber] int line = 0)
         {
             if (!IsDebug)
             {
                 return;
             }
-            if (dbgSource == null || DbgTarget == null)
-            {
-                return ;
-            }
-            if (dbgSource != DbgTarget)
+
+            if (DbgTarget != null && (dbgSource == null || dbgSource != DbgTarget))
             {
                 return;
             }
 
-            ConsoleColor color = msgType == LogLevel.ERROR ? ConsoleColor.Red :
-                                 msgType == LogLevel.WARNING ? ConsoleColor.Yellow :
-                                 ConsoleColor.White;
+            msgType ??= LogLevel.Info;
 
-            string type = msgType == LogLevel.ERROR ? "ERR" :
-                          msgType == LogLevel.WARNING ? "WAR" : "INF";
-
-            int level = msgType == LogLevel.ERROR ? 1 :
-                        msgType == LogLevel.WARNING ? 2 : 3;
+            ConsoleColor color = msgType.GetColor();
+            string type = msgType.GetTypeString();
+            int level = msgType.GetValue();
 
             if (message.Contains(WarnSymbol))
             {
@@ -192,5 +230,6 @@ namespace ModdingManagerClassLib.Debugging
             }
             await AddLog(message, color, level, type, caller, file, line);
         }
+
     }
 }

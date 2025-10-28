@@ -16,6 +16,8 @@ using Polygon = System.Windows.Shapes.Polygon;
 using Rect = System.Windows.Rect;
 using Size = System.Windows.Size;
 using Window = System.Windows.Window;
+using ModdingManagerClassLib.Settings;
+using ModdingManagerClassLib;
 
 public class StateWorkerPresenter
 {
@@ -51,9 +53,9 @@ public class StateWorkerPresenter
         loadingWindow.SetProgressBounds(0, 4);
         loadingWindow.Show();
 
-        string modDirectory = ModManager.ModDirectory;
-        _view.Display.Width = ModManager.Mod.Map.Bitmap.Width;
-        _view.Display.Height = ModManager.Mod.Map.Bitmap.Height;
+        string modDirectory = ModManagerSettings.Instance.ModDirectory;
+        _view.Display.Width = ModDataStorage.Mod.Map.Bitmap.Width;
+        _view.Display.Height = ModDataStorage.Mod.Map.Bitmap.Height;
 
         loadingWindow.Message = "Рисуем провинции...";
         DrawProvinceLayer();
@@ -212,7 +214,7 @@ public class StateWorkerPresenter
     public void SearchProvince(int id)
     {
         SearchAndCenterView(_view.ProvinceIDLayer, id.ToString());
-        ProvinceConfig prov = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == id);
+        ProvinceConfig prov = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == id);
         MarkEventArg markEventArg = new MarkEventArg
         {
             MarkedProvince = prov
@@ -223,7 +225,7 @@ public class StateWorkerPresenter
     public void SearchState(int id)
     {
         SearchAndCenterView(_view.StateIDLayer, id.ToString());
-        StateConfig state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == id);
+        StateConfig state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == id);
         MarkEventArg markEventArg = new MarkEventArg
         {
             MarkedState = state
@@ -233,7 +235,7 @@ public class StateWorkerPresenter
     public void SearchCountry(int id)
     {
         SearchAndCenterView(_view.CountryIDLayer, id.ToString());
-        CountryConfig country = ModManager.Mod.Map.Countries.FirstOrDefault(c => c.Id.ToString() == id.ToString());
+        CountryConfig country = ModDataStorage.Mod.Map.Countries.FirstOrDefault(c => c.Id.ToString() == id.ToString());
         MarkEventArg markEventArg = new MarkEventArg
         {
             MarkedCountry = country
@@ -243,7 +245,7 @@ public class StateWorkerPresenter
     public void SearchStrategicRegion(int id)
     {
         SearchAndCenterView(_view.StrategicIDLayer, id.ToString());
-        StrategicRegionConfig region = ModManager.Mod.Map.StrategicRegions.FirstOrDefault(r => r.Id.ToInt() == id);
+        StrategicRegionConfig region = ModDataStorage.Mod.Map.StrategicRegions.FirstOrDefault(r => r.Id.ToInt() == id);
         MarkEventArg markEventArg = new MarkEventArg
         {
             MarkedRegion = region
@@ -358,9 +360,9 @@ public class StateWorkerPresenter
     }
     private void UpdateRegionLayer(ProvinceTransferArg arg)
     {
-        var sourceRegion = ModManager.Mod.Map.StrategicRegions.FirstOrDefault(s => s.Id == arg.SourceRegion?.Id);
-        var targetRegion = ModManager.Mod.Map.StrategicRegions.FirstOrDefault(s => s.Id == arg.TargetRegion?.Id);
-        var province = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
+        var sourceRegion = ModDataStorage.Mod.Map.StrategicRegions.FirstOrDefault(s => s.Id == arg.SourceRegion?.Id);
+        var targetRegion = ModDataStorage.Mod.Map.StrategicRegions.FirstOrDefault(s => s.Id == arg.TargetRegion?.Id);
+        var province = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
 
         if (targetRegion == null || province == null)
             return;
@@ -381,9 +383,9 @@ public class StateWorkerPresenter
     }
     private void UpdateStateLayer(ProvinceTransferArg arg)
     {
-        var sourceState = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id == arg.SourceState?.Id);
-        var targetState = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id == arg.TargetState?.Id);
-        var province = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
+        var sourceState = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id == arg.SourceState?.Id);
+        var targetState = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id == arg.TargetState?.Id);
+        var province = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
 
         if (targetState == null || province == null)
             return;
@@ -406,7 +408,7 @@ public class StateWorkerPresenter
 
     private void UpdateCountryLayerAfterProvinceTransfer(ProvinceTransferArg arg)
     {
-        var state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id == arg.TargetState?.Id);
+        var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id == arg.TargetState?.Id);
         if (state == null)
             return;
 
@@ -424,13 +426,13 @@ public class StateWorkerPresenter
 
     private void UpdateCountryLayerAfterStateTransfer(StateTransferArg arg)
     {
-        var state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == arg.StateId);
+        var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == arg.StateId);
         if (state == null)
             return;
 
-        var sourceCountry = ModManager.Mod.Map.Countries.FirstOrDefault(c =>
+        var sourceCountry = ModDataStorage.Mod.Map.Countries.FirstOrDefault(c =>
             c.States.Any(s => s.Id.ToInt() == arg.StateId));
-        var targetCountry = ModManager.Mod.Map.Countries.FirstOrDefault(c =>
+        var targetCountry = ModDataStorage.Mod.Map.Countries.FirstOrDefault(c =>
             c.Id.ToString() == arg.TargetCountryTag);
 
         if (targetCountry == null)
@@ -521,16 +523,16 @@ public class StateWorkerPresenter
         _view.StrategicRenderLayer.Children.Clear();
         _view.StrategicIDLayer.Children.Clear();
 
-        if (ModManager.Mod.Map?.StrategicRegions == null || ModManager.Mod.Map.Provinces == null)
+        if (ModDataStorage.Mod.Map?.StrategicRegions == null || ModDataStorage.Mod.Map.Provinces == null)
             return;
 
         var assignedProvinceIds = new HashSet<int>();
 
-        foreach (var reg in ModManager.Mod.Map.StrategicRegions)
+        foreach (var reg in ModDataStorage.Mod.Map.StrategicRegions)
         {
             // Исправление 2: Получаем реальные провинции
             var provincesInRegion = reg.Provinces
-                .Join(ModManager.Mod.Map.Provinces,
+                .Join(ModDataStorage.Mod.Map.Provinces,
                     pr => pr.Id,
                     p => p.Id,
                     (pr, p) => p)
@@ -552,7 +554,7 @@ public class StateWorkerPresenter
             }
         }
 
-        var unassigned = ModManager.Mod.Map.Provinces.Where(p => !assignedProvinceIds.Contains(p.Id.ToInt()));
+        var unassigned = ModDataStorage.Mod.Map.Provinces.Where(p => !assignedProvinceIds.Contains(p.Id.ToInt()));
         foreach (var province in unassigned)
         {
             // Исправление 5: Отрисовываем в правильный слой
@@ -584,12 +586,12 @@ public class StateWorkerPresenter
         _view.StateRenderLayer.Children.Clear();
         _view.StateIDLayer.Children.Clear();
 
-        if (ModManager.Mod.Map?.States == null || ModManager.Mod.Map.Provinces == null)
+        if (ModDataStorage.Mod.Map?.States == null || ModDataStorage.Mod.Map.Provinces == null)
             return;
 
-        foreach (var province in ModManager.Mod.Map.Provinces)
+        foreach (var province in ModDataStorage.Mod.Map.Provinces)
         {
-            var state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Provinces.Any(p => p.Id == province.Id));
+            var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Provinces.Any(p => p.Id == province.Id));
 
             if (state != null)
             {
@@ -601,12 +603,12 @@ public class StateWorkerPresenter
             }
         }
 
-        foreach (var state in ModManager.Mod.Map.States)
+        foreach (var state in ModDataStorage.Mod.Map.States)
         {
             if (state.Provinces.Count == 0)
                 continue;
 
-            var provinces = ModManager.Mod.Map.Provinces
+            var provinces = ModDataStorage.Mod.Map.Provinces
                 .Where(p => state.Provinces.Any(sp => sp.Id == p.Id))
                 .ToList();
 
@@ -625,12 +627,12 @@ public class StateWorkerPresenter
         _view.CountryRenderLayer.Children.Clear();
         _view.CountryIDLayer.Children.Clear();
 
-        if (ModManager.Mod.Map?.Countries == null || ModManager.Mod.Map.Provinces == null)
+        if (ModDataStorage.Mod.Map?.Countries == null || ModDataStorage.Mod.Map.Provinces == null)
             return;
 
         var provinceToCountry = new Dictionary<int, CountryConfig>();
 
-        foreach (var country in ModManager.Mod.Map.Countries)
+        foreach (var country in ModDataStorage.Mod.Map.Countries)
         {
             if (country.States == null) continue;
 
@@ -647,7 +649,7 @@ public class StateWorkerPresenter
         }
 
         // Отрисовываем провинции цветом их страны
-        foreach (var province in ModManager.Mod.Map.Provinces)
+        foreach (var province in ModDataStorage.Mod.Map.Provinces)
         {
             if (provinceToCountry.TryGetValue(province.Id.ToInt(), out var country))
             {
@@ -670,7 +672,7 @@ public class StateWorkerPresenter
         }
 
         // Отрисовываем метки стран
-        foreach (var country in ModManager.Mod.Map.Countries)
+        foreach (var country in ModDataStorage.Mod.Map.Countries)
         {
             // Собираем все провинции страны
             var allProvinces = new List<ProvinceConfig>();
@@ -683,7 +685,7 @@ public class StateWorkerPresenter
                     {
                         foreach (var province in state.Provinces)
                         {
-                            var fullProvince = ModManager.Mod.Map.Provinces.FirstOrDefault(p => p.Id == province.Id);
+                            var fullProvince = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id == province.Id);
                             if (fullProvince != null)
                             {
                                 allProvinces.Add(fullProvince);
@@ -795,14 +797,14 @@ public class StateWorkerPresenter
         // Получаем список провинций для этого entity
         List<ProvinceConfig> provinces = layerType switch
         {
-            "COUNTRY" => ModManager.Mod.Map.Countries
+            "COUNTRY" => ModDataStorage.Mod.Map.Countries
                 .FirstOrDefault(c => c.Id.ToString() == entityId.ToString())?
                 .States.SelectMany(s => s.Provinces)
                 .ToList(),
-            "STATE" => ModManager.Mod.Map.States
+            "STATE" => ModDataStorage.Mod.Map.States
                 .FirstOrDefault(s => s.Id.ToInt() == entityId)?
                 .Provinces.ToList(),
-            "STRATEGIC" => ModManager.Mod.Map.StrategicRegions
+            "STRATEGIC" => ModDataStorage.Mod.Map.StrategicRegions
                 .FirstOrDefault(sr => sr.Id.ToInt() == entityId)?
                 .Provinces.ToList(),
             _ => null
@@ -844,7 +846,7 @@ public class StateWorkerPresenter
     }
     private CountryConfig GetCountryForState(int? stateId)
     {
-        return ModManager.Mod.Map.Countries?.FirstOrDefault(c =>
+        return ModDataStorage.Mod.Map.Countries?.FirstOrDefault(c =>
             c.States?.Any(s => s.Id.ToInt() == stateId) == true);
     }
     #endregion

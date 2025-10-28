@@ -16,15 +16,17 @@ namespace ModdingManagerClassLib.handlers
 
             // Собираем все ID, которые являются чьими-то детьми
             var allChildren = techTree.Items
-                .Where(item => item.ChildOf != null && item.ChildOf.Id != null)
-                .Select(item => item.ChildOf.Id)
+                .Where(item => item.ChildOf != null)
+                .SelectMany(item => item.ChildOf)
+                .Where(c => c.Id != null)
+                .Select(c => c.Id)
                 .ToHashSet();
 
             foreach (var item in techTree.Items)
             {
                 // Проверяем, есть ли у текущего элемента дети
                 bool hasChildren = techTree.Items.Any(child =>
-                    child.ChildOf != null && child.ChildOf.Id == item.Id);
+                    child.ChildOf != null && child.ChildOf.Any(c => c.Id == item.Id));
 
                 // Проверяем, является ли текущий элемент чьим-то ребёнком
                 bool isChild = allChildren.Contains(item.Id);
@@ -38,6 +40,7 @@ namespace ModdingManagerClassLib.handlers
 
             return rootItems;
         }
+
 
 
 

@@ -1,6 +1,9 @@
 ﻿using ModdingManager.Controls;
 using ModdingManagerModels;
+using ModdingManagerModels.Enums;
 using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -30,23 +33,32 @@ namespace ModdingManager.Intefaces
         // Свойства для доступа к данным UI
         TechTreeConfig TechTreeConfig { get; set; }
         TechnologyGrid TechnologyGrid { get; set; }
+
         // Свойства для элементов управления
-        string TechId { get; set; }
-        string TechName { get; set; }
-        string TechDescription { get; set; }
+        Identifier TechId { get; set; }
+        ConfigLocalisation Localisation { get; set; }
         int TechModifCost { get; set; }
         int TechCost { get; set; }
         int StartYear { get; set; }
         string TreeName { get; set; }
-        string TreeOrientation { get; set; }
-        string TreeLedger { get; set; }
-        List<string> Enables { get; set; }
-        List<string> Allowed { get; set; }
-        List<string> Effects { get; set; }
+        TechTreeOrientationType TreeOrientation { get; set; }
+        TechTreeLedgerType TreeLedger { get; set; }
+
+        Dictionary<BuildingConfig, object> EnableBuildings { get; set; }
+        List<EquipmentConfig> EnableEquipments { get; set; }
+        List<RegimentConfig> EnableUnits { get; set; }
+
+
+        string Allowed { get; set; }
+        string AllowBranch { get; set; }
         Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
+        string Effects { get; set; }
         string AiWillDo { get; set; }
-        List<string> Dependencies { get; set; }
-        string Categories { get; set; }
+
+        Dictionary<TechTreeItemConfig, int> Dependencies { get; set; }
+
+        List<TechCategoryConfig> Categories { get; set; }
+
         Image SmallTechImage { get; set; }
         Image BigTechImage { get; set; }
         bool IsBigImage { get; }
@@ -58,4 +70,5 @@ namespace ModdingManager.Intefaces
         void ClearForm();
         void RefreshTechTreeView();
     }
+
 }

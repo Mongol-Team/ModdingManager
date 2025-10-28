@@ -4,6 +4,7 @@ using global::ModdingManager.View;
 using ModdingManager.classes.utils;
 using ModdingManagerClassLib;
 using ModdingManagerClassLib.Debugging;
+using ModdingManagerClassLib.Settings;
 using ModdingManagerModels;
 using System.IO;
 using System.Text.Json;
@@ -20,8 +21,9 @@ namespace ModdingManager.Presenter
 
         public MainWindowPresenter(MainWindow view)
         {
+            ModManagerSettings.Load();
+            ModDataStorage.ComposeMod();
             _view = view ?? throw new ArgumentNullException(nameof(view));
-            ModManager.LoadInstance();
             WireUp();
         }
 
@@ -54,8 +56,8 @@ namespace ModdingManager.Presenter
         // ====== перенос обработчиков из MainForm ======
         private void LoadConfig()
         {
-            _view.DirBox.Text = ModManager.ModDirectory;
-            _view.GameDirBox.Text = ModManager.GameDirectory;
+            _view.DirBox.Text = ModManagerSettings.Instance.ModDirectory;
+            _view.GameDirBox.Text = ModManagerSettings.Instance.GameDirectory;
         }
         private void LocConvertButton_Click(object? sender, RoutedEventArgs e)
         {
@@ -101,8 +103,7 @@ namespace ModdingManager.Presenter
         {
             if (HasAnyDir())
             {
-                ModManager.GameDirectory = _view.GameDirBox.Text;
-                ModManager.ModDirectory = _view.DirBox.Text;
+               
                 var ideaLoc = new IdeaLoc();
                 ideaLoc.Show();
             }
@@ -116,8 +117,7 @@ namespace ModdingManager.Presenter
         {
             if (HasAnyDir())
             {
-                ModManager.GameDirectory = _view.GameDirBox.Text;
-                ModManager.ModDirectory = _view.DirBox.Text;
+                
                 var stateLoc = new StateLoc();
                 stateLoc.Show();
             }
@@ -241,7 +241,6 @@ namespace ModdingManager.Presenter
 
         private void DebugButton_Click(object? sender, RoutedEventArgs e)
         {
-            ModManager.IsDebugRuning = true;
             ConsoleHelper.ShowConsole();
             Logger.AddDbgLog("Режим отладки активирован");
             Logger.FlushBuffer();
@@ -278,14 +277,6 @@ namespace ModdingManager.Presenter
                     string relativePath = System.IO.Path.Combine("..", "..", "..", "data", "dir.json");
                     string fullPath = System.IO.Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
 
-                    var config = new PathConfig
-                    {
-                        GamePath = _view.GameDirBox.Text,
-                        ModPath = _view.DirBox.Text
-                    };
-
-                    var json = JsonSerializer.Serialize(config);
-                    File.WriteAllText(fullPath, json);
                 }
                 else
                 {
@@ -302,8 +293,6 @@ namespace ModdingManager.Presenter
 
         private void UpdateModManager()
         {
-            ModManager.ModDirectory = _view.DirBox.Text;
-            ModManager.GameDirectory = _view.GameDirBox.Text;
         }
     }
 }

@@ -1,4 +1,7 @@
 using ModdingManager.View;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Settings;
+using System.Runtime.InteropServices;
 
 namespace ModdingManager
 {
@@ -7,9 +10,11 @@ namespace ModdingManager
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
+     
         [STAThread]
-        private static void Main()
+        public static void Main()
         {
+           
             var app = new System.Windows.Application();
             var view = new MainWindow();
             app.Run(view);

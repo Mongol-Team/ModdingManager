@@ -26,8 +26,8 @@
             <TextBox x:Name="TechNameBox" HorizontalAlignment="Left" Margin="45,630,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="159" IsReadOnly="False" Focusable="True" IsEnabled="True" Height="23" />
             <Label Content="Ориентация древа технологий" HorizontalAlignment="Left" Margin="30,100,0,0" VerticalAlignment="Top"/>
             <ComboBox x:Name="OrientationBox" HorizontalAlignment="Left" Margin="39,130,0,0" VerticalAlignment="Top" Width="159">
-                <ComboBoxItem Content="vertical"/>
-                <ComboBoxItem Content="horizontal"/>
+                <ComboBoxItem Content="Vertical"/>
+                <ComboBoxItem Content="Horizontal"/>
             </ComboBox>
             <Button x:Name="AddButton" Content="Добавить" HorizontalAlignment="Left" Margin="292,715,0,0" VerticalAlignment="Top" Height="21" Width="81" Click="AddButton_Click"/>
             <Label Content="Картинка технологии" HorizontalAlignment="Left" Margin="132,160,0,0" VerticalAlignment="Top"/>

@@ -1,4 +1,6 @@
 ﻿using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Settings;
 using ModdingManagerModels;
 using System.Data;
 using System.IO;
@@ -42,7 +44,7 @@ namespace ModdingManager
                     return;
                 }
 
-                var matchingRegiments = ModManager.Mod.Regiments
+                var matchingRegiments = ModDataStorage.Mod.Regiments
                     .Where(r => r.Categories != null &&
                         r.Categories.Contains(requiredCategory, StringComparer.OrdinalIgnoreCase) &&
                         (!type.Equals("Brigade", StringComparison.OrdinalIgnoreCase) ||
@@ -145,7 +147,7 @@ namespace ModdingManager
                 return;
             }
 
-            var unitsDir = Path.Combine(ModManager.ModDirectory, "history", "units");
+            var unitsDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "history", "units");
             Directory.CreateDirectory(unitsDir);
 
             var fileName = $"{(config.OOBFileName ?? "division")}_{(config.OOBFileYear)}.txt";

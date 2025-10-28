@@ -22,9 +22,13 @@ namespace ModdingManager.classes.utils
         public List<DynamicModifierConfig> DynamicModifiers { get; set; }
         public List<ModifierDefinitionConfig> ModifierDefinitions { get; set; }
         public List<IdeaSlotConfig> IdeaSlots { get; set; }
+        public List<BuildingConfig> Buildings { get; set; }
         public List<IGfx> Gfxes { get; set; }
+        public List<TechCategoryConfig> TechCategories { get; set; }
+        public List<EquipmentConfig> Equipments { get; set; }
         public MapConfig Map { get; set; } = new MapConfig();
         public List<TechTreeConfig> TechTreeLedgers { get; set; } = new List<TechTreeConfig>();
+        public List<TechTreeItemConfig> TechTreeItems { get; set; }
         public List<CountryCharacterConfig> Characters { get; set; }
         public List<IdeologyConfig> Ideologies { get; set; }
 

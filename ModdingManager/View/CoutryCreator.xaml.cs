@@ -11,6 +11,9 @@ using ModConfig = ModdingManager.classes.utils.ModConfig;
 using ModdingManagerModels.Types.Utils;
 using ModdingManagerModels;
 using ModdingManagerModels.Types.LocalizationData;
+using System.IO;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Settings;
 namespace ModdingManager
 {
     /// <summary>
@@ -74,7 +77,7 @@ namespace ModdingManager
                     var parts = i.Split(':');
                     if (parts.Length == 2 && int.TryParse(parts[1], out int value))
                     {
-                        result[ModManager.Mod.TechTreeLedgers.GetTreeItem(parts[0])] = value;
+                        result[ModDataStorage.Mod.TechTreeLedgers.GetTreeItem(parts[0])] = value;
                     }
 
                 }
@@ -155,7 +158,7 @@ namespace ModdingManager
                     var parts = line.Split(':');
                     if (parts.Length == 2 && int.TryParse(parts[1], out int popularity))
                     {
-                        var ideo = ModManager.Mod.GetIdeology(parts[0]);
+                        var ideo = ModDataStorage.Mod.GetIdeology(parts[0]);
                         result[ideo] = popularity != null ? popularity : 0;
                     }
                 }
@@ -175,7 +178,7 @@ namespace ModdingManager
                 List<IdeaConfig> result = new List<IdeaConfig>();
                 foreach (string ideo in StartingIdeasBox.GetLines())
                 {
-                    IdeaConfig cfg = ModManager.Mod.Ideas.FindById(ideo);
+                    IdeaConfig cfg = ModDataStorage.Mod.Ideas.FindById(ideo);
                     result.Add(cfg);
                 }
                 return result;
@@ -197,7 +200,7 @@ namespace ModdingManager
                 List<CountryCharacterConfig> result = new List<CountryCharacterConfig>();
                 foreach (var line in RecruitingCharactersBox.GetLines())
                 {
-                    CountryCharacterConfig cfg = ModManager.Mod.Characters.FindById(line);
+                    CountryCharacterConfig cfg = ModDataStorage.Mod.Characters.FindById(line);
                     result.Add(cfg);
                 }
                 return result;
@@ -227,7 +230,7 @@ namespace ModdingManager
                     {
                         string boolPart = parts[1];
                         bool isCore = boolPart == "true" || boolPart == "1";
-                        result[ModManager.Mod.GetState(id)] = isCore;
+                        result[ModDataStorage.Mod.GetState(id)] = isCore;
                     }
                 }
 
@@ -250,7 +253,7 @@ namespace ModdingManager
                 foreach (var wrap in CountryFlagsCanvas.Children)
                 {
                     Canvas canvasWrap = wrap as Canvas;
-                    IdeologyConfig ideo = ModManager.Mod.GetIdeology(canvasWrap.Name);
+                    IdeologyConfig ideo = ModDataStorage.Mod.GetIdeology(canvasWrap.Name);
                     var image = (canvasWrap.Children.GetByName(canvasWrap.Name + "Img") as System.Windows.Controls.Image).Source;
                     result[ideo] = image.ToBitmap();
                 }
@@ -344,7 +347,7 @@ namespace ModdingManager
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             List<string> lines = new List<string>();
-            foreach (var i in ModManager.Mod.Ideologies)
+            foreach (var i in ModDataStorage.Mod.Ideologies)
             {
                 // Создаём контейнер Canvas, аналогичный XAML
                 Canvas wrap = new Canvas
@@ -380,9 +383,23 @@ namespace ModdingManager
             }
             PartyPopularitiesBox.SetLines(lines);
 
-            CountryFileNameBox.ItemsSource = ModManager.LoadCountryFileNames();
+            CountryFileNameBox.ItemsSource = LoadCountryFileNames();
         }
+        public static List<string> LoadCountryFileNames()
+        {
+            string countriesDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "country_tags");
 
+            if (!System.IO.Directory.Exists(countriesDir))
+            {
+                System.Windows.MessageBox.Show("Папка 'countries' не найдена!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
+
+            var filePaths = System.IO.Directory.GetFiles(countriesDir);
+            var fileNamesLines = filePaths.Select(path => Path.GetFileName(path)).ToList();
+            return fileNamesLines;
+
+        }
 
         private void TechIconCanvas_Drop(object sender, System.Windows.DragEventArgs e)
         {
@@ -414,7 +431,7 @@ namespace ModdingManager
         private void RullingPartyBox_Loaded(object sender, RoutedEventArgs e)
         {
             List<string> strings = new List<string>();
-            foreach (var ideo in ModManager.Mod.Ideologies)
+            foreach (var ideo in ModDataStorage.Mod.Ideologies)
             {
                 strings.Add(ideo.Id.ToString());
             }

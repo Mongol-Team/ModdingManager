@@ -10,7 +10,7 @@ using ModdingManagerModels.Types.Utils;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Controls;
-
+using DDF = ModdingManagerData.DataDefaultValues;
 namespace ModdingManagerClassLib.Loaders
 {
     public static class GfxLoader
@@ -127,7 +127,7 @@ namespace ModdingManagerClassLib.Loaders
                             LegacyLazyLoad = gfxBracket.GetVarBool("legacy_lazy_load"),
                             TransparenceCheck = gfxBracket.GetVarBool("transparencecheck"),
                             Content = File.Exists(modPath) ? BitmapExtensions.LoadResourceFullPath(modPath)
-                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : DataDefaultValues.NullImageSource
+                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : DDF.NullImageSource
                         };
                         return res;
                     }
@@ -145,7 +145,7 @@ namespace ModdingManagerClassLib.Loaders
                             NoOfFrames = gfxBracket.GetVarInt("noOfFrames"),
                             AnimationRateFps = gfxBracket.GetVarInt("animation_rate_fps"),
                             Content = File.Exists(modPath) ? BitmapExtensions.LoadResourceFullPath(modPath)
-                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : DataDefaultValues.NullImageSource,
+                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : DDF.NullImageSource,
                             Looping = gfxBracket.GetVarBool("looping"),
                             EffectFile = gfxBracket.GetVarString("effectFile"),
                             AllwaysTransparent = gfxBracket.GetVarBool("alwaystransparent"),
@@ -169,9 +169,9 @@ namespace ModdingManagerClassLib.Loaders
                             TexturePath = gfxBracket.GetVarString("textureFile1"),
                             SecondTexturePath = gfxBracket.GetVarString("textureFile2"),
                             Content = File.Exists(modPath1) ? BitmapExtensions.LoadResourceFullPath(modPath1)
-                                   : File.Exists(gamePath1) ? BitmapExtensions.LoadResourceFullPath(gamePath1) : DataDefaultValues.NullImageSource,
+                                   : File.Exists(gamePath1) ? BitmapExtensions.LoadResourceFullPath(gamePath1) : DDF.NullImageSource,
                             BgContent = File.Exists(modPath2) ? BitmapExtensions.LoadResourceFullPath(modPath2)
-                                     : File.Exists(gamePath2) ? BitmapExtensions.LoadResourceFullPath(gamePath2) : DataDefaultValues.NullImageSource,
+                                     : File.Exists(gamePath2) ? BitmapExtensions.LoadResourceFullPath(gamePath2) : DDF.NullImageSource,
                             Size = new Point(
                                 gfxBracket.GetSubBracketVarInt("size", "x"),
                                 gfxBracket.GetSubBracketVarInt("size", "y")),
@@ -197,7 +197,7 @@ namespace ModdingManagerClassLib.Loaders
                             EffectFile = gfxBracket.GetVarString("effectFile"),
                             AllwaysTrancparent = gfxBracket.GetVarBool("alwaystransparent"),
                             Content = File.Exists(modPath) ? BitmapExtensions.LoadResourceFullPath(modPath)
-                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : DataDefaultValues.NullImageSource,
+                                   : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : DDF.NullImageSource,
                             TilingCenter = gfxBracket.GetVarBool("tilingCenter"),
                             Looping = gfxBracket.GetVarBool("looping"),
                             AnimationRateSpf = gfxBracket.GetVarInt("animation_rate_spf"),
@@ -245,9 +245,9 @@ namespace ModdingManagerClassLib.Loaders
                             TexturePath = gfxBracket.GetVarString("textureFile1"),
                             MaskTexturePath = gfxBracket.GetVarString("textureFile2"),
                             MaskContent = File.Exists(modPath2) ? BitmapExtensions.LoadResourceFullPath(modPath2)
-                                       : File.Exists(gamePath2) ? BitmapExtensions.LoadResourceFullPath(gamePath2) : DataDefaultValues.NullImageSource,
+                                       : File.Exists(gamePath2) ? BitmapExtensions.LoadResourceFullPath(gamePath2) : DDF.NullImageSource,
                             Content = File.Exists(modPath1) ? BitmapExtensions.LoadResourceFullPath(modPath1)
-                                    : File.Exists(gamePath1) ? BitmapExtensions.LoadResourceFullPath(gamePath1) : DataDefaultValues.NullImageSource,
+                                    : File.Exists(gamePath1) ? BitmapExtensions.LoadResourceFullPath(gamePath1) : DDF.NullImageSource,
                             EffectFile = gfxBracket.GetVarString("effectFile")
                         };
                     }
@@ -264,7 +264,7 @@ namespace ModdingManagerClassLib.Loaders
                         EffectContent = BitmapExtensions.LoadResourceRealativePath(gfxBracket.GetVarString("effectFile2").Replace("/", "\\")),
                     };
                 default:
-                    return DataDefaultValues.NullImage;
+                    return new SpriteType(DDF.NullImageSource, DDF.Null);
             }
 
         }
@@ -297,7 +297,7 @@ namespace ModdingManagerClassLib.Loaders
 
 
                 default:
-                    return DataDefaultValues.NullImage;
+                    return new SpriteType(DDF.NullImageSource, DDF.Null);
             }
 
         }

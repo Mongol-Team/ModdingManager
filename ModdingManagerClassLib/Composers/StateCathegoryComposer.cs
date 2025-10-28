@@ -62,7 +62,7 @@ namespace ModdingManagerClassLib.Composers
                     };
                     foreach (Var mod in bracket.SubVars)
                     {
-                        ModifierDefinitionConfig? modDef = ModManager.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == mod.Name);
+                        ModifierDefinitionConfig? modDef = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == mod.Name);
                         cfg.Modifiers.Add(modDef, mod.Value);
                     }
                     result.Add(cfg);

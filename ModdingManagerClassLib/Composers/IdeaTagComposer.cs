@@ -96,7 +96,7 @@ namespace ModdingManagerClassLib.Composers
                         }
                         break;
                     case "slot":
-                        IdeaSlotConfig scfg = ModManager.Mod.IdeaSlots.FirstOrDefault(s => s.Id.ToString() == var.Value.ToString());
+                        IdeaSlotConfig scfg = ModDataStorage.Mod.IdeaSlots.FirstOrDefault(s => s.Id.ToString() == var.Value.ToString());
                         if (scfg != null)
                             cfg.Slots.Add(scfg);
                         break;

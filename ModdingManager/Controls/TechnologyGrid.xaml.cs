@@ -102,7 +102,8 @@ namespace ModdingManager.Controls
 
         public void EditItem(TechTreeItemConfig updatedItem)
         {
-            var border = FindElementBorderById(updatedItem.OldId.ToString() ?? updatedItem.Id.ToString());
+            var border = FindElementBorderById(
+                updatedItem.OldId?.ToString() ?? updatedItem.Id.ToString());
             if (border == null) return;
 
             if (updatedItem.OldId != null && updatedItem.OldId != updatedItem.Id)
@@ -112,16 +113,19 @@ namespace ModdingManager.Controls
 
             if (border.Child is Canvas innerCanvas && innerCanvas.Children[0] is Image image)
             {
-                var background = updatedItem.IsBig ?
-                    new BitmapImage(new Uri("pack://application:,,,/data/gfx/interface/technology_available_item_bg.png")) :
-                    new BitmapImage(new Uri("pack://application:,,,/data/gfx/interface/tech_industry_available_item_bg.png"));
+                bool isBig = updatedItem.IsBig ?? false; // безопасное приведение
+
+                var background = isBig
+                    ? new BitmapImage(new Uri("pack://application:,,,/data/gfx/interface/technology_available_item_bg.png"))
+                    : new BitmapImage(new Uri("pack://application:,,,/data/gfx/interface/tech_industry_available_item_bg.png"));
 
                 image.Source = ImageExtensions.ToImageSource(updatedItem.Gfx.Content)
-                    .GetCombinedTechImage(background, updatedItem.IsBig ? 1 : 2);
+                    .GetCombinedTechImage(background, isBig ? 1 : 2);
             }
 
             ItemEdited?.Invoke(this, updatedItem);
         }
+
         #endregion
 
         #region Private Methods
@@ -168,14 +172,18 @@ namespace ModdingManager.Controls
             {
                 if (item.ChildOf != null)
                 {
-                    var from = FindElementBorderById(item.ChildOf.Id.ToString());
-                    var to = FindElementBorderById(item.Id.ToString());
-                    if (from != null && to != null)
+                    foreach (var parent in item.ChildOf)
                     {
-                        DrawConnection(from, to, System.Windows.Media.Brushes.Blue, isMutual: false);
+                        var from = FindElementBorderById(parent.Id.ToString());
+                        var to = FindElementBorderById(item.Id.ToString());
+                        if (from != null && to != null)
+                        {
+                            DrawConnection(from, to, System.Windows.Media.Brushes.Blue, isMutual: false);
+                        }
                     }
                 }
             }
+
 
             // Отрисовка взаимных связей (Mutal)
             foreach (var item in _techTree.Items)
@@ -315,16 +323,22 @@ namespace ModdingManager.Controls
 
         private UIElement CreateTechElement(TechTreeItemConfig item)
         {
-            double imageWidth = item.IsBig ? 183 : 62;
-            double imageHeight = item.IsBig ? 84 : 62;
+            bool isBig = item.IsBig ?? false;
+            double imageWidth = isBig ? 183 : 62;
+            double imageHeight = isBig ? 84 : 62;
 
             var image = new System.Windows.Controls.Image
             {
-                Source = item.Gfx.Content.ToImageSource().GetCombinedTechImage(item.IsBig ? Properties.Resources.technology_available_item_bg.ToImageSource() : Properties.Resources.tech_industry_available_item_bg.ToImageSource(), item.IsBig ? 1 : 2),
+                Source = item.Gfx.Content.ToImageSource().GetCombinedTechImage(
+                    isBig
+                        ? Properties.Resources.technology_available_item_bg.ToImageSource()
+                        : Properties.Resources.tech_industry_available_item_bg.ToImageSource(),
+                    isBig ? 1 : 2),
                 Width = imageWidth,
                 Height = imageHeight,
                 IsHitTestVisible = false
             };
+
 
 
             Canvas innerCanvas = new Canvas
@@ -510,14 +524,20 @@ namespace ModdingManager.Controls
             {
                 if (item.Dependencies != null)
                 {
-                    item.Dependencies = item.Dependencies.Select(d => d == oldId ? newId : d).ToList();
+                    item.Dependencies = item.Dependencies
+                        .Select(d => d.Key.Id == new Identifier(oldId)
+                            ? new KeyValuePair<TechTreeItemConfig, int>(
+                                new TechTreeItemConfig { Id = new Identifier(newId) }, d.Value)
+                            : d)
+                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 }
             }
-
 
             var border = FindElementBorderById(oldId);
             if (border != null) border.Name = newId;
         }
+
+
         public List<string> GetMarkedIds()
         {
             return _markedElements
@@ -535,23 +555,37 @@ namespace ModdingManager.Controls
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+
             var father = _techTree.GetTreeItem(markedIds[0]);
             var child = _techTree.GetTreeItem(markedIds[1]);
+
             if (father == null || child == null)
             {
                 MessageBox.Show("Выбранные элементы не найдены в дереве технологий", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            if (child.ChildOf != null && child.ChildOf == null)
+
+            // Инициализируем список, если он пуст
+            if (child.ChildOf == null)
             {
-                MessageBox.Show("У выбранного дочернего элемента уже есть родитель", "Ошибка",
+                child.ChildOf = new List<TechTreeItemConfig>();
+            }
+
+            // Проверка: уже есть такой родитель?
+            if (child.ChildOf.Any(p => p.Id == father.Id))
+            {
+                MessageBox.Show("У выбранного дочернего элемента уже есть такой родитель", "Ошибка",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            child.ChildOf = father;
+
+            // Добавляем связь
+            child.ChildOf.Add(father);
+
             RedrawAllConnections();
         }
+
 
         public void AddMutualConection()
         {

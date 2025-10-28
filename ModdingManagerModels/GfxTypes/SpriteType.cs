@@ -1,4 +1,5 @@
-﻿using ModdingManagerModels.Interfaces;
+﻿using ModdingManagerData;
+using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.Utils;
 using System.Drawing;
@@ -19,27 +20,14 @@ namespace ModdingManagerModels.GfxTypes
         public SpriteType(Bitmap content, string name)
         {
             Content = content;
-            TexturePath = "Null";
+            TexturePath = DataDefaultValues.Null;
             Id = new Identifier(name);
             NoOfFrames = -1;
-            EffectFile = "Null";
+            EffectFile = DataDefaultValues.Null;
             AllwaysTransparent = false;
             LegacyLazyLoad = false;
             TransparenceCheck = false;
         }
-        //// Animation fields
-        ///чо ето за хуйня
-        //public string Animationmaskfile;
-        //public string animationtexturefile;
-        //public float animationrotation;      // default -90 clockwise
-        //public bool animationlooping;
-        //public float animationtime;          // duration in seconds
-        //public float animationdelay;         // delay in seconds
-        //public string animationblendmode;    // add, multiply, overlay
-        //public string animationtype;         // scrolling, rotating, pulsing
-        //public Point animationrotationoffset;
-        //public float animationtexturescale;
-        //public int animationframes;
     }
 
 }

@@ -25,8 +25,8 @@ namespace ModdingManager
         }
         public static void DeleteAllNonExistingProvLinks()
         {
-            //    var mapCache = ModManager.Mod.MapCache;
-            //    var existingProvs = new HashSet<int>(ModManager.Instance.Map.Provinces
+            //    var mapCache = ModDataStorage.Mod.MapCache;
+            //    var existingProvs = new HashSet<int>(ModManagerSettings.Instance.Map.Provinces
             //        .Where(p => p.Shape != null)
             //        .Select(p => p.Id));
 
@@ -114,8 +114,8 @@ namespace ModdingManager
             //    }
 
 
-            //    string filePath = ModManager.Mod.MapCache.MapDefinitionCache.FilePath;
-            //    DefinitionCachedFile defFile = ModManager.Mod.MapCache.MapDefinitionCache;
+            //    string filePath = ModDataStorage.Mod.MapCache.MapDefinitionCache.FilePath;
+            //    DefinitionCachedFile defFile = ModDataStorage.Mod.MapCache.MapDefinitionCache;
             //    bool modified = false;
 
             //    var linesToRemove = new List<string>();
@@ -146,15 +146,15 @@ namespace ModdingManager
             //}
             //public static void CheckProvincesDefines(ErrorPanel errorPanel)
             //{
-            //    var mapCache = ModManager.Mod.MapCache;
+            //    var mapCache = ModDataStorage.Mod.MapCache;
             //    if (mapCache == null || mapCache.MapDefinitionCache == null)
             //    {
             //        Logger.AddDbgLog("MapCache or MapDefinitionCache is not initialized. Cannot perform province defines check.");
             //        return;
             //    }
 
-            //    var lines = ModManager.Mod.MapCache.MapDefinitionCache.DefinitionLines;
-            //    var filePath = ModManager.Mod.MapCache.MapDefinitionCache.FilePath;
+            //    var lines = ModDataStorage.Mod.MapCache.MapDefinitionCache.DefinitionLines;
+            //    var filePath = ModDataStorage.Mod.MapCache.MapDefinitionCache.FilePath;
             //    if (lines.Count == 0)
             //    {
             //        return;
@@ -296,14 +296,14 @@ namespace ModdingManager
             //}
             //private static void CheckStateDefines(ErrorPanel errorPanel)
             //{
-            //    var mapCache = ModManager.Mod.MapCache;
+            //    var mapCache = ModDataStorage.Mod.MapCache;
             //    if (mapCache == null || mapCache.StatesCache.Count == 0)
             //    {
             //        Logger.AddDbgLog("MapCache or StatesCache is not initialized. Cannot perform state defines check.");
             //        return;
             //    }
 
-            //    var existingProvs = new HashSet<int>(ModManager.Mod.Map.Provinces
+            //    var existingProvs = new HashSet<int>(ModDataStorage.Mod.Map.Provinces
             //        .Where(p => p.Shape != null)
             //        .Select(p => p.Id));
             //    var provinceToFile = new Dictionary<int, string>();

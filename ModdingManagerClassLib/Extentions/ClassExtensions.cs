@@ -34,6 +34,16 @@ namespace ModdingManagerClassLib.Extentions
 
             return int.TryParse(str, out int result) ? result : -1;
         }
+        public static bool ToBool<TClass>(this TClass input) where TClass : class
+        {
+            if (input == null)
+                return false;
+
+            var str = input.ToString();
+
+            return bool.TryParse(str, out bool result) && result;
+        }
+
         public static double ToDouble<TClass>(this TClass id) where TClass : class
         {
             if (id == null)

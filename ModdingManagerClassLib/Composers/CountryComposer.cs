@@ -38,7 +38,7 @@ namespace ModdingManagerClassLib.Composers
                     if (var != null)
                     {
                         string techId = var.Name.Substring(4);
-                        var techItem = ModManager.Mod.TechTreeLedgers.GetTreeItem(techId);
+                        var techItem = ModDataStorage.Mod.TechTreeLedgers.GetTreeItem(techId);
                         if (techItem != null && int.TryParse(var.Value.ToString(), out int level))
                         {
                             techs[techItem] = level;
@@ -48,7 +48,7 @@ namespace ModdingManagerClassLib.Composers
                 var states = new List<StateConfig>();
                 foreach (var state in techs.Values)
                 {
-                    var stateConfig = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == state);
+                    var stateConfig = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == state);
                     if (stateConfig != null)
                         states.Add(stateConfig);
                 }
@@ -62,7 +62,7 @@ namespace ModdingManagerClassLib.Composers
                     if (var != null)
                     {
                         string ideologyId = var.Name;
-                        var ideology = ModManager.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == ideologyId);
+                        var ideology = ModDataStorage.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == ideologyId);
                         if (ideology != null && int.TryParse(var.Value.ToString(), out int popularity))
                         {
                             partyPopularities[ideology] = popularity;
@@ -74,7 +74,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     if (var != null)
                     {
-                        ideas.Add(ModManager.Mod.Ideas.FindById(var.Name));
+                        ideas.Add(ModDataStorage.Mod.Ideas.FindById(var.Name));
                     }
                 }
                 var characters = new List<CountryCharacterConfig>();
@@ -82,7 +82,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     if (var != null)
                     {
-                        characters.Add(ModManager.Mod.Characters.FindById(var.Name));
+                        characters.Add(ModDataStorage.Mod.Characters.FindById(var.Name));
                     }
                 }
                 var stateCores = new Dictionary<StateConfig, bool>();
@@ -90,7 +90,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     if (var != null && int.TryParse(var.Value.ToString(), out int isCore))
                     {
-                        var state = ModManager.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == int.Parse(var.Name));
+                        var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == int.Parse(var.Name));
                         if (state != null)
                             stateCores[state] = isCore != 0;
                     }
@@ -129,7 +129,7 @@ namespace ModdingManagerClassLib.Composers
                     {
                         case "ruling_party":
                             string ideologyId = politicsvar.Value.ToString();
-                            rulingParty = ModManager.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == ideologyId);
+                            rulingParty = ModDataStorage.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == ideologyId);
                             break;
                         case "last_election":
                             if (DateOnly.TryParse(politicsvar.Value.ToString(), out DateOnly dt))

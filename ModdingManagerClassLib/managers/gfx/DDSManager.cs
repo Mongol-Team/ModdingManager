@@ -4,6 +4,7 @@ using ModdingManagerModels;
 using Pfim;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using ModdingManagerClassLib.Settings;
 namespace ModdingManager.classes.managers.gfx
 {
     public static class DDSManager
@@ -39,7 +40,7 @@ namespace ModdingManager.classes.managers.gfx
         public static void SaveAllTechIconsAsDDS(TechTreeConfig treeConfig)
         {
 
-            string techIconDir = Path.Combine(ModManager.ModDirectory, "gfx", "interface", "technologies");
+            string techIconDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "gfx", "interface", "technologies");
             Directory.CreateDirectory(techIconDir);
 
             foreach (var item in treeConfig.Items)

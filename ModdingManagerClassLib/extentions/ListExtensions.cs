@@ -67,6 +67,12 @@
             if (collection == null || item == null) return;
             collection.Add(item);
         }
+        public static void AddSafe<TKey, TValue>(this ICollection<KeyValuePair<TKey, TValue>> collection, KeyValuePair<TKey, TValue> item)
+        {
+            if (collection == null || item.Key == null) return;
+            collection.Add(item);
+        }
+
         public static T Random<T>(this List<T> list)
         {
             if (list == null || list.Count == 0)

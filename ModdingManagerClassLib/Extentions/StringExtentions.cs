@@ -7,8 +7,7 @@ namespace ModdingManagerClassLib.Extentions
         public static List<string> ParseQuotedStrings(this string line)
         {
             var results = new List<string>();
-
-            // Регулярное выражение для поиска строк в кавычках с учётом экранирования
+            
             var pattern = @"(?<!\\)([""'])(.*?)(?<!\\)\1";
 
             foreach (Match match in Regex.Matches(line, pattern))

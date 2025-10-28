@@ -229,7 +229,6 @@ namespace ModdingManager.Controls
                 {
                     continue;
                 }
-
                 var text = config.Id.ToString();
 
                 // Calculate text width at initial font size
@@ -354,13 +353,58 @@ namespace ModdingManager.Controls
                 };
                 stack.Children.Add(textBlock);
 
+                var type = config.GetType();
+                var properties = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                    .Where(p => !typeof(System.Collections.IEnumerable).IsAssignableFrom(p.PropertyType) || p.PropertyType == typeof(string))
+                    .ToList();
+
+                var tooltipBuilder = new System.Text.StringBuilder();
+                tooltipBuilder.AppendLine($"Type: {type.Name}");
+                tooltipBuilder.AppendLine("Fields:");
+
+                foreach (var prop in properties)
+                {
+                    var value = prop.GetValue(config);
+                    if (value == null)
+                    {
+                        tooltipBuilder.AppendLine($"{prop.Name}: null");
+                        continue;
+                    }
+
+                    var propType = prop.PropertyType;
+                    if (propType.IsPrimitive || propType == typeof(string) || propType == typeof(decimal) || propType == typeof(DateTime) || propType == typeof(DateTimeOffset))
+                    {
+                        tooltipBuilder.AppendLine($"{prop.Name}: {value}");
+                    }
+                    else
+                    {
+                        tooltipBuilder.AppendLine($"{prop.Name}: {propType.Name} {{");
+
+                        var subProperties = propType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                            .Where(sp => !typeof(System.Collections.IEnumerable).IsAssignableFrom(sp.PropertyType) || sp.PropertyType == typeof(string))
+                            .ToList();
+
+                        foreach (var subProp in subProperties)
+                        {
+                            var subValue = subProp.GetValue(value);
+                            tooltipBuilder.AppendLine($"  {subProp.Name}: {subValue?.ToString() ?? "null"}");
+                        }
+
+                        tooltipBuilder.AppendLine("}");
+                    }
+                }
+
+                var tooltipText = tooltipBuilder.ToString();
+
+                // Then proceed with button creation, adding button.ToolTip = tooltipText;
                 var button = new Button
                 {
                     Content = stack,
                     Width = maxContainerWidth,
                     Padding = new Thickness(0),
                     Background = Brushes.Transparent,
-                    BorderThickness = new Thickness(0)
+                    BorderThickness = new Thickness(0),
+                    ToolTip = tooltipText
                 };
 
                 button.Click += (sender, e) =>

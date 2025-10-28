@@ -13,5 +13,6 @@ namespace ModdingManagerModels.Types.LocalizationData
         public Dictionary<string, string> Data { get; set; } = new();
         public IConfig Source { get; set; } = null;
         public bool ReplacebleResource { get; set; } = false;
+        public bool IsConfigLocNull { get; set; } = false;
     }
 }

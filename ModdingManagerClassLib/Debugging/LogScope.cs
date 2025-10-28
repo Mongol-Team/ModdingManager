@@ -16,7 +16,7 @@ namespace ModdingManagerClassLib.Debugging
         }
         public LogScope(string msg, [CallerMemberName] string caller = "")
         {
-            Logger.AddDbgLog(msg, "LogScope", msgType: LogLevel.INFO);
+            Logger.AddDbgLog(msg, "LogScope", msgType: LogLevel.Info);
             Logger.depth++;
             //Logger.AddDbgLog($"+Scope {caller}", LogLevel.ERROR).Wait();
             this.caller = caller;
@@ -25,7 +25,7 @@ namespace ModdingManagerClassLib.Debugging
         {
             storaged_color = Logger.outline_color;
             Logger.outline_color = color;
-            Logger.AddDbgLog(msg, "LogScope", msgType: LogLevel.INFO).Wait();
+            Logger.AddDbgLog(msg, "LogScope", msgType: LogLevel.Info).Wait();
             Logger.depth++;
             //Logger.AddDbgLog($"+Scope {caller}", LogLevel.ERROR).Wait();
             this.caller = caller;

@@ -6,6 +6,10 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using ModdingManagerModels.Types.Utils;
+using DDF = ModdingManagerData.DataDefaultValues;
+using ModdingManagerClassLib.Settings;
+
 namespace ModdingManager.classes.managers.gfx
 {
     public static class ImageManager
@@ -34,8 +38,8 @@ namespace ModdingManager.classes.managers.gfx
         {
             var directoriesToSearch = new[]
             {
-                ModManager.GameDirectory,
-                ModManager.ModDirectory
+                ModManagerSettings.Instance.GameDirectory,
+                ModManagerSettings.Instance.ModDirectory
             };
 
             foreach (var dir in directoriesToSearch)
@@ -75,7 +79,7 @@ namespace ModdingManager.classes.managers.gfx
                 }
             }
 
-            return ModdingManagerClassLib.Properties.Resources.null_item_image;
+            return DDF.NullImageSource;
         }
 
 

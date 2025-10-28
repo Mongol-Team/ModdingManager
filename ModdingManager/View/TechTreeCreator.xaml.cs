@@ -2,9 +2,13 @@
 using ModdingManager.Intefaces;
 using ModdingManager.managers.@base;
 using ModdingManager.Presenters;
+using ModdingManagerClassLib;
 using ModdingManagerClassLib.Extentions;
 using ModdingManagerModels;
+using ModdingManagerModels.Enums;
 using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.LocalizationData;
+using ModdingManagerModels.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,22 +75,15 @@ namespace ModdingManager
                 }
             }
         }
-        public string TechId
+        public Identifier TechId
         {
-            get => TechIdBox.Text;
-            set => TechIdBox.Text = value;
+            get => new(TechIdBox.Text);
+            set => TechIdBox.Text = value.ToString();
         }
 
-        public string TechName
+        public ConfigLocalisation Localisation
         {
-            get => TechNameBox.Text;
-            set => TechNameBox.Text = value;
-        }
-
-        public string TechDescription
-        {
-            get => TechDescBox.Text;
-            set => TechDescBox.Text = value;
+            get => throw new NotImplementedException(); set => throw new NotImplementedException();
         }
 
         public int TechModifCost
@@ -113,14 +110,24 @@ namespace ModdingManager
             set => TechTreeNameBox.Text = value;
         }
 
-        public string TreeOrientation
+        public TechTreeOrientationType TreeOrientation
         {
-            get => (OrientationBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+            get
+            {
+                if (OrientationBox.SelectedItem is ComboBoxItem item &&
+                    Enum.TryParse<TechTreeOrientationType>(item.Content.ToString(), out var result))
+                {
+                    return result;
+                }
+
+                return default;
+            }
             set
             {
                 foreach (ComboBoxItem item in OrientationBox.Items)
                 {
-                    if (item.Content.ToString() == value)
+                    if (Enum.TryParse<TechTreeOrientationType>(item.Content.ToString(), out var parsed) &&
+                        parsed.Equals(value))
                     {
                         OrientationBox.SelectedItem = item;
                         break;
@@ -129,28 +136,32 @@ namespace ModdingManager
             }
         }
 
-        public string TreeLedger
+
+        public TechTreeLedgerType TreeLedger
         {
-            get => TreeLedgerBox.Text;
-            set => TreeLedgerBox.Text = value;
+            get
+            {
+                if (Enum.TryParse(TreeLedgerBox.Text, out TechTreeLedgerType result))
+                    return result;
+                else
+                    return default; 
+            }
+            set => TreeLedgerBox.Text = value.ToString();
         }
 
-        public List<string> Enables
+
+
+
+        public string Allowed
         {
-            get => GetRichTextBoxLines(EnablesBox);
-            set => SetRichTextBoxLines(EnablesBox, value);
+            get => AllowedBox.GetRichTextBoxText();
+            set => AllowedBox.SetRichTextBoxText(value);
         }
 
-        public List<string> Allowed
+        public string Effects
         {
-            get => GetRichTextBoxLines(AllowedBox);
-            set => SetRichTextBoxLines(AllowedBox, value);
-        }
-
-        public List<string> Effects
-        {
-            get => GetRichTextBoxLines(EffectBox);
-            set => SetRichTextBoxLines(EffectBox, value);
+            get => EffectBox.GetRichTextBoxText();
+            set => EffectBox.SetRichTextBoxText(value);
         }
 
         public Dictionary<ModifierDefinitionConfig, object> Modifiers
@@ -170,7 +181,7 @@ namespace ModdingManager
                     {
                         continue;
                     }
-                    mods.Add(ModManager.Mod.ModifierDefinitions.FindById(splited[0]), value);
+                    mods.Add(ModDataStorage.Mod.ModifierDefinitions.FindById(splited[0]), value);
                 }
                 return mods;
             }
@@ -185,27 +196,58 @@ namespace ModdingManager
 
         public string AiWillDo
         {
-            get => GetRichTextBoxText(AiWillDoBox);
+            get => AiWillDoBox.GetRichTextBoxText();
+            set => AiWillDoBox.SetRichTextBoxText(value);
+            
+        }
+
+        public Dictionary<TechTreeItemConfig, int> Dependencies
+        {
+            get
+            {
+                Dictionary<TechTreeItemConfig, int> deps = new Dictionary<TechTreeItemConfig, int>();
+                List<string> raw = DependenciesBox.GetRichTextBoxLines();
+                raw.ForEach(line =>
+                {
+                    string[] splited = line.Split(':');
+                    if (splited.Length != 2)
+                    {
+                        return;
+                    }
+                    int.TryParse(splited[1], out int value);
+                    var tech = TechGrid.GetTree().Items.FindById(splited[0]);
+                    if (tech == null || value == 0)
+                    {
+                        return;
+                    }
+                    deps.Add(tech, value);
+                });
+                return deps;
+            }
             set
             {
-                AiWillDoBox.Document.Blocks.Clear();
-                AiWillDoBox.AppendText(value);
+                foreach (var kvp in value)
+                {
+                    DependenciesBox.AddLine($"{kvp.Key.Id.ToString()}:{kvp.Value}");
+                }
             }
         }
-
-        public List<string> Dependencies
+        public List<TechCategoryConfig> Categories
         {
-            get => GetRichTextBoxLines(DependenciesBox);
-            set => SetRichTextBoxLines(DependenciesBox, value);
-        }
-
-        public string Categories
-        {
-            get => GetRichTextBoxText(CathegoryModdifierBox);
+            get 
+            {
+                return ModDataStorage.Mod.TechCategories
+                .Where(cat => CathegoryModdifierBox.GetRichTextBoxLines()
+                    .Any(line => cat.Id.ToString() == line))
+                .ToList();
+            }
             set
             {
                 CathegoryModdifierBox.Document.Blocks.Clear();
-                CathegoryModdifierBox.AppendText(value);
+                foreach (var cat in value)
+                {
+                    CathegoryModdifierBox.AddLine(cat.Id.ToString());
+                }
             }
         }
 
@@ -222,6 +264,11 @@ namespace ModdingManager
         }
 
         public bool IsBigImage => BigOverlayImage.Source != null;
+
+        public Dictionary<BuildingConfig, object> EnableBuildings { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<EquipmentConfig> EnableEquipments { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<RegimentConfig> EnableUnits { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string AllowBranch { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public void ShowMessage(string message, string title)
         {
@@ -244,19 +291,16 @@ namespace ModdingManager
 
         public void ClearForm()
         {
-            TechId = string.Empty;
-            TechName = string.Empty;
-            TechDescription = string.Empty;
+            TechId = new(string.Empty);
             TechModifCost = 0;
             TechCost = 0;
             StartYear = 0;
-            Enables = new List<string>();
-            Allowed = new List<string>();
-            Effects = new List<string>();
+            Allowed = string.Empty;
+            Effects = string.Empty;
             Modifiers = new Dictionary<ModifierDefinitionConfig, object>();
             AiWillDo = string.Empty;
-            Dependencies = new List<string>();
-            Categories = string.Empty;
+            Dependencies = new Dictionary<TechTreeItemConfig, int>();
+            Categories = new();
             SmallTechImage = null;
             BigTechImage = null;
         }
@@ -378,48 +422,6 @@ namespace ModdingManager
 
         #endregion
 
-        #region Вспомогательные методы
-
-        private List<string> GetRichTextBoxLines(RichTextBox richTextBox)
-        {
-            var lines = new List<string>();
-            var textRange = new TextRange(richTextBox.Document.ContentStart, richTextBox.Document.ContentEnd);
-            string text = textRange.Text;
-
-            using (StringReader reader = new StringReader(text))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (!string.IsNullOrWhiteSpace(line))
-                        lines.Add(line.Trim());
-                }
-            }
-
-            return lines;
-        }
-
-        private void SetRichTextBoxLines(RichTextBox richTextBox, List<string> lines)
-        {
-            richTextBox.Document.Blocks.Clear();
-            if (lines == null || lines.Count == 0) return;
-
-            var paragraph = new Paragraph();
-            foreach (string line in lines)
-            {
-                paragraph.Inlines.Add(new Run(line));
-                paragraph.Inlines.Add(new LineBreak());
-            }
-
-            richTextBox.Document.Blocks.Add(paragraph);
-        }
-
-        private string GetRichTextBoxText(RichTextBox richTextBox)
-        {
-            var textRange = new TextRange(richTextBox.Document.ContentStart, richTextBox.Document.ContentEnd);
-            return textRange.Text.Trim();
-        }
-
-        #endregion
+        
     }
 }

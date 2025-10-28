@@ -6,7 +6,9 @@ using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.LochalizationData;
+using ModdingManagerModels.Types.Utils;
 using System.Collections.Concurrent;
+using DDF = ModdingManagerData.DataDefaultValues;
 
 namespace ModdingManagerClassLib.utils
 {
@@ -31,7 +33,7 @@ namespace ModdingManagerClassLib.utils
                 return new KeyValuePair<string, string>(key, val);
             if (OtherLocalisation.Data.TryGetValue(key, out val))
                 return new KeyValuePair<string, string>(key, val);
-            return new KeyValuePair<string, string>(key, val);
+            return new KeyValuePair<string, string>(DDF.Null, DDF.Null);
         }
 
         /// <summary>
@@ -55,7 +57,7 @@ namespace ModdingManagerClassLib.utils
 
             bool IsVictoryPoint(string k) => k.StartsWith("VICTORY_POINTS_", StringComparison.OrdinalIgnoreCase);
             bool IsIdeology(string k) => k.StartsWith("IDEOLOGY_", StringComparison.OrdinalIgnoreCase);
-            bool IsState(string k) => ModManager.Mod.Map.States == null ? k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase) : ModManager.Mod.Map.States.Count(s => s.LocalizationKey == k) != 0;
+            bool IsState(string k) => ModDataStorage.Mod.Map.States == null ? k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase) : ModDataStorage.Mod.Map.States.Count(s => s.LocalizationKey == k) != 0;
             bool IsCountry(string k) => k.Length == 3 && k.All(char.IsLetter);
 
             YmlParser parser = new YmlParser(new TxtPattern());

@@ -54,7 +54,7 @@ namespace ModdingManagerClassLib.Composers
             {
                 if (var.Name == "icon" && var.PossibleCsType == typeof(HoiReference))
                 {
-                    cfg.Gfx = ModManager.Mod.Gfxes.FirstOrDefault(gf => gf.Id.ToString() == (var.Value as HoiReference).Value.ToString());
+                    cfg.Gfx = ModDataStorage.Mod.Gfxes.FirstOrDefault(gf => gf.Id.ToString() == (var.Value as HoiReference).Value.ToString());
                 }
                 else if (var.Name == "attacker_modifier" && var.PossibleCsType == typeof(bool))
                 {
@@ -62,7 +62,7 @@ namespace ModdingManagerClassLib.Composers
                 }
                 else
                 {
-                    var modDef = ModManager.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
+                    var modDef = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
                     if (modDef != null)
                     {
                         if (var.Value is int intValue)

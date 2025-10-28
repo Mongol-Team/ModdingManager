@@ -52,7 +52,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     foreach (Bracket slot in br.SubBrackets)
                     {
-                        IdeaSlotConfig slotConfig = ModManager.Mod.IdeaSlots.FindById(slot.Name);
+                        IdeaSlotConfig slotConfig = ModDataStorage.Mod.IdeaSlots.FindById(slot.Name);
                         if (slotConfig == null)
                         {
                             Var isLaw = slot.SubVars.FirstOrDefault(b => b.Name == "law");
@@ -71,13 +71,13 @@ namespace ModdingManagerClassLib.Composers
 
                             foreach (Bracket idea in slot.SubBrackets)
                             {
-                                IdeaConfig parsedIdea = ModManager.Mod.Ideas.FindById(idea.Name);
-                                ModManager.Mod.Ideas = new();
+                                IdeaConfig parsedIdea = ModDataStorage.Mod.Ideas.FindById(idea.Name);
+                                ModDataStorage.Mod.Ideas = new();
                                 if (parsedIdea == null)
                                 {
                                     parsedIdea = IdeaComposer.ParseSingleIdea(idea) as IdeaConfig;
 
-                                    ModManager.Mod.Ideas.Add(parsedIdea);
+                                    ModDataStorage.Mod.Ideas.Add(parsedIdea);
                                 }
                                 ;
                                 try

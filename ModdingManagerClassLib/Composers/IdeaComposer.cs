@@ -1,10 +1,13 @@
 ﻿using ModdingManager.managers.@base;
 using ModdingManagerClassLib.Debugging;
 using ModdingManagerClassLib.Extentions;
+using ModdingManagerClassLib.Settings;
 using ModdingManagerClassLib.utils.Pathes;
+using ModdingManagerData;
 using ModdingManagerDataManager.Parsers;
 using ModdingManagerDataManager.Parsers.Patterns;
 using ModdingManagerModels;
+using ModdingManagerModels.GfxTypes;
 using ModdingManagerModels.Interfaces;
 using ModdingManagerModels.Types.LocalizationData;
 using ModdingManagerModels.Types.ObjectCacheData;
@@ -15,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DDF = ModdingManagerData.DataDefaultValues;
 
 namespace ModdingManagerClassLib.Composers
 {
@@ -66,17 +70,17 @@ namespace ModdingManagerClassLib.Composers
             IdeaConfig idea = new IdeaConfig()
             {
                 Id = new Identifier(ideaBr.Name),
-                Localisation = new ConfigLocalisation() { Language = ModManager.CurrentLanguage },
+                Localisation = new ConfigLocalisation() { Language = ModManagerSettings.Instance.CurrentLanguage },
                 Modifiers = new Dictionary<ModifierDefinitionConfig, object>(),
-                Gfx = DataDefaultValues.NullImage,
-                Tag = DataDefaultValues.Null,
-                RemovalCost = DataDefaultValues.NullInt, //+
-                Available = DataDefaultValues.Null, //+
-                AvailableCivilWar = DataDefaultValues.Null, //+
-                Allowed = DataDefaultValues.Null, //+
-                AllowedToRemove = DataDefaultValues.Null, //+
-                Cost = DataDefaultValues.NullInt, //+
-                OnAdd = DataDefaultValues.Null, //+
+                Gfx = new SpriteType(DDF.NullImageSource, DDF.Null),
+                Tag = DDF.Null,
+                RemovalCost = DDF.NullInt, //+
+                Available = DDF.Null, //+
+                AvailableCivilWar = DDF.Null, //+
+                Allowed = DDF.Null, //+
+                AllowedToRemove = DDF.Null, //+
+                Cost = DDF.NullInt, //+
+                OnAdd = DDF.Null, //+
             };
             foreach (Var var in ideaBr.SubVars)
             {
@@ -134,7 +138,7 @@ namespace ModdingManagerClassLib.Composers
                         foreach (Var v in br.SubVars)
                         {
                             string name = v.Name;
-                            ModifierDefinitionConfig config = ModManager.Mod.ModifierDefinitions.FirstOrDefault(md => md.Id.ToString() == name);
+                            ModifierDefinitionConfig config = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(md => md.Id.ToString() == name);
                             if (config != null)
                             {
                                 idea.Modifiers.TryAdd(config, v.Value);
@@ -146,14 +150,14 @@ namespace ModdingManagerClassLib.Composers
             }
             idea.PictureName = idea.PictureName ?? $"GFX_idea_{idea.Id.ToString()}";
             string keyname = idea.Id.ToString();
-            KeyValuePair<string, string> idloc = ModManager.Localisation.GetLocalisationByKey(keyname);
+            KeyValuePair<string, string> idloc = ModDataStorage.Localisation.GetLocalisationByKey(keyname);
             idea.Localisation.Data.AddPair(idloc);
-            KeyValuePair<string, string> descloc = ModManager.Localisation.GetLocalisationByKey(keyname);
+            KeyValuePair<string, string> descloc = ModDataStorage.Localisation.GetLocalisationByKey(keyname);
             idea.Localisation.Data.AddPair<string, string>(descloc);
             var dfg = idea.Id.ToString();
             var sdgfg = idea.PictureName;
-            IGfx gfx = ModManager.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.PictureName}")
-           ?? ModManager.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.Id.ToString()}") ?? DataDefaultValues.NullImage;
+            IGfx gfx = ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.PictureName}")
+           ?? ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.Id.ToString()}") ?? new SpriteType(DDF.NullImageSource, DDF.Null);
 
             if (gfx.Id.ToString() == "GFX_idea_AZM_anarchist_economics")
             {
