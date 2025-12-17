@@ -18,6 +18,5 @@ namespace ModdingManagerData
         public static readonly Bitmap NullImageSource = ModdingManagerData.Properties.Resources.null_item_image;
         public static readonly Bitmap ItemWithNoGfxImage = ModdingManagerData.Properties.Resources.item_with_no_gfx_image;
         public const int NullInt = -1;
-
     }
 }

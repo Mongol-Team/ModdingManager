@@ -45,8 +45,11 @@ namespace ModdingManagerClassLib
             Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
             Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
 
-            //Mod.TechTreeLedgers = TechTreeComposer.Parse().Cast<TechTreeConfig>().ToList();
-            //Mod.Characters = CountryCharacterComposer.Parse().Cast<CountryCharacterConfig>().ToList();
+            Mod.TechTreeLedgers = TechnologyComposer.Parse().Cast<TechTreeConfig>().ToList();
+            Logger.AddLog($"TechTreeLedgers Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
+
+            Mod.Characters = CharacterComposer.Parse().Cast<CountryCharacterConfig>().ToList();
+            Logger.AddLog($"Characters Intalized:{Mod.Ideologies.Count}, some rng obj:{Mod.Ideologies.Random().Id.ToString()}");
 
             //Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
             //Mod.Regiments = RegimentComposer.Parse().Cast<RegimentConfig>().ToList();

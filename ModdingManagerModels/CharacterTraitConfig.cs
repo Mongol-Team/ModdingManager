@@ -1,0 +1,52 @@
+﻿using ModdingManagerModels.Enums;
+using ModdingManagerModels.Interfaces;
+using ModdingManagerModels.Types.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ModdingManagerModels
+{
+    public class CharacterTraitConfig : IConfig
+    {
+        public Identifier Id { get; set; }
+        public Types.LocalizationData.ConfigLocalisation Localisation { get; set; }
+        public IGfx Gfx { get; set; }
+        public List<CharacterType> CharacterTypes { get; set; } = new List<CharacterType>();
+        public TraitType TraitType { get; set; }
+        public bool ShowInCombat { get; set; }
+        public string Allowed { get; set; } //todo: implement trigger handling
+        public string AiWillDo { get; set; } //todo: implement ai will do type handling, check https://hoi4.paradoxwikis.com/AI_modding#AI_will_do
+        public IdeaSlotConfig CharacterSlot { get; set; }
+        public CharacterTraitConfig SpecialistAdvisorTrait { get; set; }
+        public CharacterTraitConfig ExpertAdvisorTrait { get; set; }
+        public CharacterTraitConfig GeniusAdvisorTrait { get; set; }
+        public List<RegimentConfig> UnitType { get; set; }
+        public string UnitTrigger { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
+        public Dictionary<ModifierDefinitionConfig, object> NonSharedModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
+        public Dictionary<ModifierDefinitionConfig, object> CorpsCommanderModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
+        public Dictionary<ModifierDefinitionConfig, object> FieldMarshalModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
+        public Dictionary<ModifierDefinitionConfig, object> SubUnitModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
+        public List<CharacterSkillType> SkillTypes { get; set; } = new List<CharacterSkillType>();
+        public List<CharacterSkillType> SkillTypesFactors { get; set; } = new List<CharacterSkillType>();
+        //todo: implement abilities https://hoi4.paradoxwikis.com/Character_modding#skill
+        //todo: implement effects
+        public string OnAdd { get; set; }
+        public string OnRemove { get; set; }
+        public string DailyEffect { get; set; }
+        public List<CharacterTraitConfig> MutuallyExclusives { get; set; }
+        public List<CharacterTraitConfig> Parents { get; set; }
+        public int NumParentsRequired { get; set; }
+        public int GuiRow { get; set; }
+        public int GuiColumn { get; set; }
+        public string Prerequisites { get; set; } //triggers
+        public double Cost { get; set; }
+        public string GainXp { get; set; } //triggers
+        public string GainXpLeader { get; set; } //triggers
+        public double GainXpOnSpotting { get; set; }
+        public string TraitXpFactor { get; set; } //triggers
+    }
+}

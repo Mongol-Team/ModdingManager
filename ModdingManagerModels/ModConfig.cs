@@ -31,6 +31,6 @@ namespace ModdingManager.classes.utils
         public List<TechTreeItemConfig> TechTreeItems { get; set; }
         public List<CountryCharacterConfig> Characters { get; set; }
         public List<IdeologyConfig> Ideologies { get; set; }
-
+        public List<CharacterTraitConfig> CharacterTraits { get; set; }
     }
 }

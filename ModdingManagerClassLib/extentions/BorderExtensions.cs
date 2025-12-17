@@ -15,7 +15,5 @@ namespace ModdingManagerClassLib.Extentions
             }
             return null;
         }
-
-
     }
 }

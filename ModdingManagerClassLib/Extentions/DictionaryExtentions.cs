@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModdingManagerData;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,16 @@ namespace ModdingManagerClassLib.Extentions
             {
                 dict.Add(kvp.Key, kvp.Value);
             }
+        }
+
+        public static TValue GetValueSafe<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key)
+        {
+            if (dict.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+
+            return (TValue)(object)DataDefaultValues.Null;
         }
     }
 }

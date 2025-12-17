@@ -82,5 +82,19 @@
             return list[index];
         }
 
+        public static List<string> ToListString<T>(this List<T> list)
+        {
+            if (list == null || list.Count == 0)
+                return new List<string>();
+
+            var result = new List<string>(list.Count);
+            foreach (var item in list)
+            {
+                result.Add(item?.ToString() ?? string.Empty);
+            }
+            return result;
+
+
+        }
     }
 }

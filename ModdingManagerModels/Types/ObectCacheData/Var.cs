@@ -5,19 +5,12 @@ namespace ModdingManagerModels.Types.ObjectCacheData
 {
     public class Var
     {
-        public string Name { get; }
+        public string Name { get; set; }
 
-        public object? Value { get; }
+        public object? Value { get; set; }
 
-        public Type? PossibleCsType { get; }
-        public bool IsCore { get; }
+        public Type? PossibleCsType { get; set; }
+        public bool IsCore { get; set; }
 
-        public Var(string name, object? value, Type? possibleCsType = null, bool isCore = false)
-        {
-            Name = name ?? string.Empty;
-            Value = value ?? DDF.Null;
-            PossibleCsType = possibleCsType;
-            IsCore = isCore;
-        }
     }
 }

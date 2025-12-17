@@ -1,4 +1,6 @@
 ﻿using ModdingManagerClassLib.Composers;
+using ModdingManagerData;
+using System.Drawing;
 using System.Reflection;
 
 namespace ModdingManagerClassLib.Extentions
@@ -50,6 +52,43 @@ namespace ModdingManagerClassLib.Extentions
                 return -1;
             var str = id.ToString();
             return double.TryParse(str, out double result) ? result : -1;
+        }
+
+        public static bool IsUndefined<TClass>(this TClass input) where TClass : class
+        {
+            if (input == null)
+                return true;
+
+            switch (input)
+            {
+                case string s:
+                    return s == DataDefaultValues.Null
+                        || s == DataDefaultValues.NaN
+                        || s == DataDefaultValues.None;
+
+                case int i:
+                    return i == DataDefaultValues.NullInt;
+
+                case double d:
+                    return double.IsNaN(d) || d == DataDefaultValues.NullInt;
+
+                case bool b:
+                    // для bool можно считать "undefined" только false?
+                    return !b;
+
+                case KeyValuePair<string, string> kvp:
+                    return kvp.Equals(DataDefaultValues.NullLocalistion);
+
+                case Bitmap bmp:
+                    return bmp == DataDefaultValues.NullImageSource
+                        || bmp == DataDefaultValues.ItemWithNoGfxImage;
+                case null:
+                    return true;
+
+                default:
+                    // для остальных типов — считаем undefined только если ToString совпадает с "Null"
+                    return input.ToString() == DataDefaultValues.Null;
+            }
         }
     }
 }

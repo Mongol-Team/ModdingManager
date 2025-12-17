@@ -28,7 +28,7 @@ namespace ModdingManagerClassLib.utils.Pathes
         public static readonly string LocalisationReplacePath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "localisation", ModManagerSettings.Instance.CurrentLanguage.ToString(), "replace");
         public static readonly string DefinitionPath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "map", "definition.csv");
         public static readonly string ProvinceImagePath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "map", "provinces.bmp");
-
+        public static readonly string CommonCharacterPath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "common", "characters");
         public static readonly string TechTreePath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "common", "technologies");
         public static readonly string TechDefPath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "common", "technology_tags");
     }

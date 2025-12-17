@@ -16,17 +16,43 @@ namespace ModdingManagerClassLib.Composers
         public CountryComposer() { }
         public static List<IConfig> Parse()
         {
-            throw new NotImplementedException();
+            List<IConfig> configs = new List<IConfig>();
+            string[] possibleHistoryPathes =
+            {
+                ModPathes.HistoryCountriesPath,
+                GamePathes.HistoryCountriesPath
+            };
+            string[] possibleTagPathes =
+            {
+                ModPathes.CountryTagsPath,
+                GamePathes.CountryTagsPath
+            };
+            foreach (string path in possibleTagPathes)
+            {
+                string[] files = Directory.GetFiles(path);
+                foreach (string file in files)
+                {
+                    string[] lines = File.ReadAllLines(file);
+                    foreach (string line in lines)
+                    {
+                        string tag = line.Split('=')[0].Trim();
+                        string countryFilePath = line.Split('=')[1].Trim();
+                        CountryConfig countryConfig = ParseCountryConfig(tag, countryFilePath);
+                        configs.Add(countryConfig);
+                    }
+                }
+            }
+            return configs;
         }
         public static CountryConfig ParseCountryConfig(string tag, string path)
         {
             string[] possibleHistoryPaths = {
-               Path.Combine(ModPathes.HistoryCountriesPath, path),
-               Path.Combine(GamePathes.HistoryCountriesPath, path)
+               Path.Combine(ModPathes.RootPath, path),
+               Path.Combine(GamePathes.RootPath, path)
             };
             string[] possibleCommonPaths = {
-               Path.Combine(ModPathes.CommonCountriesPath, path),
-               Path.Combine(GamePathes.CommonCountriesPath, path)
+               Path.Combine(ModPathes.RootPath, path),
+               Path.Combine(GamePathes.RootPath, path)
             };
             foreach (var fullpath in possibleHistoryPaths)
             {

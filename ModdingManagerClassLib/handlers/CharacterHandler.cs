@@ -108,7 +108,7 @@ namespace ModdingManager.classes.handlers
                 string enFilePath = Path.Combine(enLocPath, $"{CurrentConfig.Tag}_characters_l_english.yml");
 
                 string ruEntries = GenerateLocalizationEntries(
-                    CurrentConfig.Id.ToString(), CurrentConfig.Name, CurrentConfig.Description,
+                    CurrentConfig.Id.ToString(), CurrentConfig.Localisation.Data.GetValueSafe(CurrentConfig.Id.ToString()), CurrentConfig.Localisation.Data.GetValueSafe($"{CurrentConfig.Id.ToString()}_desc"),
                     CurrentConfig.Types.Contains("country_leader"), false);
 
                 string enEntries = GenerateLocalizationEntries(
@@ -165,8 +165,8 @@ namespace ModdingManager.classes.handlers
         }
         public void SaveCharacterPortraits()
         {
-            var bigIcon = CurrentConfig.BigImage;
-            var smallIcon = CurrentConfig.SmallImage;
+            var bigIcon = CurrentConfig.Gfx.Content;
+            var smallIcon = CurrentConfig.Gfx.Content;
             try
             {
                 if (bigIcon == null && smallIcon == null)

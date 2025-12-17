@@ -28,7 +28,7 @@ namespace ModdingManagerClassLib.utils.Pathes
         public static readonly string StaticModifiersPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "modifiers");
         public static readonly string OpinionModifiersPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "opinion_modifiers");
         public static readonly string DynamicModifiersPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "dynamic_modifiers");
-
+        public static readonly string CommonCharacterPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "characters");
         public static readonly string TechTreePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "technologies");
         public static readonly string TechDefPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "technology_tags");
     }
