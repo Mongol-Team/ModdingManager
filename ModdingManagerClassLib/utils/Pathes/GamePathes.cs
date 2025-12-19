@@ -31,5 +31,7 @@ namespace ModdingManagerClassLib.utils.Pathes
         public static readonly string CommonCharacterPath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "common", "characters");
         public static readonly string TechTreePath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "common", "technologies");
         public static readonly string TechDefPath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "common", "technology_tags");
+
+        public static readonly string TraitsPath = Path.Combine(ModManagerSettings.Instance.GameDirectory, "common", "country_leader");
     }
 }

@@ -1,10 +1,11 @@
-﻿using ModdingManagerClassLib.Extentions;
-using ModdingManager.managers.@base;
+﻿using ModdingManager.managers.@base;
+using ModdingManagerClassLib.Extentions;
+using ModdingManagerClassLib.Settings;
 using ModdingManagerModels;
+using ModdingManagerModels.SubModels;
 using System.Text;
 using System.Windows;
 using MessageBox = System.Windows.MessageBox;
-using ModdingManagerClassLib.Settings;
 
 namespace ModdingManager.classes.handlers
 {
@@ -109,11 +110,11 @@ namespace ModdingManager.classes.handlers
 
                 string ruEntries = GenerateLocalizationEntries(
                     CurrentConfig.Id.ToString(), CurrentConfig.Localisation.Data.GetValueSafe(CurrentConfig.Id.ToString()), CurrentConfig.Localisation.Data.GetValueSafe($"{CurrentConfig.Id.ToString()}_desc"),
-                    CurrentConfig.Types.Contains("country_leader"), false);
+                    CurrentConfig.Types.Any(t => t.GetType() == typeof(CountryLeaderCharacterType)), false);
 
                 string enEntries = GenerateLocalizationEntries(
                     CurrentConfig.Id.ToString(), "", "",
-                    CurrentConfig.Types.Contains("country_leader"), true);
+                   CurrentConfig.Types.Any(t => t.GetType() == typeof(CountryLeaderCharacterType)), true);
 
                 ProcessLocalizationFile(ruFilePath, "l_russian", ruEntries);
                 ProcessLocalizationFile(enFilePath, "l_english", enEntries);
@@ -217,101 +218,101 @@ namespace ModdingManager.classes.handlers
                 content.AppendLine("\t\t\t}");
                 content.AppendLine("\t\t}");
 
-                if (CurrentConfig.Types.Contains("advisor"))
+                if (CurrentConfig.Types.Any(t => t.GetType() == typeof(CountryLeaderCharacterType)))
                 {
-                    string slot = !string.IsNullOrEmpty(CurrentConfig.AdvisorSlot)
-                        ? CurrentConfig.AdvisorSlot
-                        : "high_command";
+                    //string slot = !string.IsNullOrEmpty(CurrentConfig.AdvisorSlot)
+                    //    ? CurrentConfig.AdvisorSlot
+                    //    : "high_command";
 
-                    content.AppendLine("\t\tadvisor = {");
-                    content.AppendLine($"\t\t\tslot = {slot}");
-                    content.AppendLine($"\t\t\tidea_token = {CurrentConfig.Id}");
-                    content.AppendLine("\t\t\tledger = army");
-                    content.AppendLine("\t\t\tallowed = {");
-                    content.AppendLine($"\t\t\t\toriginal_tag = {CurrentConfig.Tag}");
-                    content.AppendLine("\t\t\t}");
-                    content.AppendLine("\t\t\ttraits = {");
-                    foreach (var trait in CurrentConfig.Traits)
-                    {
-                        content.AppendLine($"\t\t\t\t{trait}");
-                    }
-                    content.AppendLine("\t\t\t}");
-                    content.AppendLine($"\t\t\tcost = {CurrentConfig.AdvisorCost}");
-                    content.AppendLine("\t\t\tai_will_do = {");
-                    content.AppendLine($"\t\t\t\tfactor = {CurrentConfig.AiWillDo}");
-                    content.AppendLine("\t\t\t}");
-                    content.AppendLine("\t\t}");
+                    //content.AppendLine("\t\tadvisor = {");
+                    //content.AppendLine($"\t\t\tslot = {slot}");
+                    //content.AppendLine($"\t\t\tidea_token = {CurrentConfig.Id}");
+                    //content.AppendLine("\t\t\tledger = army");
+                    //content.AppendLine("\t\t\tallowed = {");
+                    //content.AppendLine($"\t\t\t\toriginal_tag = {CurrentConfig.Tag}");
+                    //content.AppendLine("\t\t\t}");
+                    //content.AppendLine("\t\t\ttraits = {");
+                    //foreach (var trait in CurrentConfig.Traits)
+                    //{
+                    //    content.AppendLine($"\t\t\t\t{trait}");
+                    //}
+                    //content.AppendLine("\t\t\t}");
+                    //content.AppendLine($"\t\t\tcost = {CurrentConfig.AdvisorCost}");
+                    //content.AppendLine("\t\t\tai_will_do = {");
+                    //content.AppendLine($"\t\t\t\tfactor = {CurrentConfig.AiWillDo}");
+                    //content.AppendLine("\t\t\t}");
+                    //content.AppendLine("\t\t}");
                 }
 
                 string[] militaryTypes = { "navy_leader", "field_marshal", "corps_commander" };
-                var militaryType = CurrentConfig.Types.FirstOrDefault(t => militaryTypes.Contains(t));
+                var militaryType = CurrentConfig.Types.FirstOrDefault(t => militaryTypes.Any(t => t.GetType() == typeof(CountryLeaderCharacterType)));
 
                 if (militaryType != null)
                 {
-                    content.AppendLine($"\t\t{militaryType} = {{");
-                    content.AppendLine("\t\t\ttraits = {");
-                    foreach (var trait in CurrentConfig.Traits)
-                    {
-                        content.AppendLine($"\t\t\t\t{trait}");
-                    }
-                    content.AppendLine("\t\t\t}");
-                    content.AppendLine($"\t\t\tskill = {CurrentConfig.Skill}");
-                    content.AppendLine($"\t\t\tattack_skill = {CurrentConfig.Attack}");
-                    content.AppendLine($"\t\t\tdefense_skill = {CurrentConfig.Defense}");
+                    //    content.AppendLine($"\t\t{militaryType} = {{");
+                    //    content.AppendLine("\t\t\ttraits = {");
+                    //    foreach (var trait in CurrentConfig.Traits)
+                    //    {
+                    //        content.AppendLine($"\t\t\t\t{trait}");
+                    //    }
+                    //    content.AppendLine("\t\t\t}");
+                    //    content.AppendLine($"\t\t\tskill = {CurrentConfig.Skill}");
+                    //    content.AppendLine($"\t\t\tattack_skill = {CurrentConfig.Attack}");
+                    //    content.AppendLine($"\t\t\tdefense_skill = {CurrentConfig.Defense}");
 
-                    if (militaryType == "navy_leader")
-                    {
-                        content.AppendLine($"\t\t\tmaneuvering_skill = {CurrentConfig.Speed}");
-                        content.AppendLine($"\t\t\tcoordination_skill = {CurrentConfig.Supply}");
-                    }
-                    else
-                    {
-                        content.AppendLine($"\t\t\tplanning_skill = {CurrentConfig.Speed}");
-                        content.AppendLine($"\t\t\tlogistics_skill = {CurrentConfig.Supply}");
-                    }
+                    //    if (militaryType == "navy_leader")
+                    //    {
+                    //        content.AppendLine($"\t\t\tmaneuvering_skill = {CurrentConfig.Speed}");
+                    //        content.AppendLine($"\t\t\tcoordination_skill = {CurrentConfig.Supply}");
+                    //    }
+                    //    else
+                    //    {
+                    //        content.AppendLine($"\t\t\tplanning_skill = {CurrentConfig.Speed}");
+                    //        content.AppendLine($"\t\t\tlogistics_skill = {CurrentConfig.Supply}");
+                    //    }
 
-                    content.AppendLine($"\t\t\tlegacy_id = {CurrentConfig.Id}");
-                    content.AppendLine("\t\t}");
+                    //    content.AppendLine($"\t\t\tlegacy_id = {CurrentConfig.Id}");
+                    //    content.AppendLine("\t\t}");
                 }
-                if (CurrentConfig.Types.Contains("country_leader"))
-                {
-                    content.AppendLine("\t\tcountry_leader = {");
-                    if (!string.IsNullOrEmpty(CurrentConfig.Expire))
-                    {
-                        content.AppendLine($"\t\t\texpire = \"{CurrentConfig.Expire}\"");
-                    }
-                    content.AppendLine($"\t\t\tideology = \"{CurrentConfig.Ideology}\"");
-                    content.AppendLine("\t\t\ttraits = {");
-                    foreach (var trait in CurrentConfig.Traits)
-                    {
-                        content.AppendLine($"\t\t\t\t{trait}");
-                    }
-                    content.AppendLine("\t\t\t}");
-                    content.AppendLine($"\t\t\tdesc = {CurrentConfig.Id}_desc");
-                    content.AppendLine("\t\t}");
-                }
+                //if (CurrentConfig.Types.Contains("country_leader"))
+                //{
+                //    content.AppendLine("\t\tcountry_leader = {");
+                //    if (!string.IsNullOrEmpty(CurrentConfig.Expire))
+                //    {
+                //        content.AppendLine($"\t\t\texpire = \"{CurrentConfig.Expire}\"");
+                //    }
+                //    content.AppendLine($"\t\t\tideology = \"{CurrentConfig.Ideology}\"");
+                //    content.AppendLine("\t\t\ttraits = {");
+                //    foreach (var trait in CurrentConfig.Traits)
+                //    {
+                //        content.AppendLine($"\t\t\t\t{trait}");
+                //    }
+                //    content.AppendLine("\t\t\t}");
+                //    content.AppendLine($"\t\t\tdesc = {CurrentConfig.Id}_desc");
+                //    content.AppendLine("\t\t}");
+                //}
 
-                content.AppendLine("\t}");
+                //content.AppendLine("\t}");
 
-                // Запись в файл
-                string finalContent;
-                if (File.Exists(filePath))
-                {
-                    string existingContent = File.ReadAllText(filePath);
-                    if (existingContent.TrimEnd().EndsWith("}"))
-                    {
-                        existingContent = existingContent.TrimEnd()[..^1];
-                    }
-                    finalContent = $"{existingContent}\n{content}\n}}";
-                }
-                else
-                {
-                    finalContent = $"characters = {{\n{content}\n}}";
-                }
+                //// Запись в файл
+                //string finalContent;
+                //if (File.Exists(filePath))
+                //{
+                //    string existingContent = File.ReadAllText(filePath);
+                //    if (existingContent.TrimEnd().EndsWith("}"))
+                //    {
+                //        existingContent = existingContent.TrimEnd()[..^1];
+                //    }
+                //    finalContent = $"{existingContent}\n{content}\n}}";
+                //}
+                //else
+                //{
+                //    finalContent = $"characters = {{\n{content}\n}}";
+                //}
 
-                File.WriteAllText(filePath, finalContent, new UTF8Encoding(false));
-                MessageBox.Show("Файл персонажа успешно создан/обновлен!", "Успех",
-                              MessageBoxButton.OK, MessageBoxImage.Information);
+                //File.WriteAllText(filePath, finalContent, new UTF8Encoding(false));
+                //MessageBox.Show("Файл персонажа успешно создан/обновлен!", "Успех",
+                //              MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {

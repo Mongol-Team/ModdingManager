@@ -57,11 +57,12 @@ namespace ModdingManagerClassLib.utils
 
             bool IsVictoryPoint(string k) => k.StartsWith("VICTORY_POINTS_", StringComparison.OrdinalIgnoreCase);
             bool IsIdeology(string k) => k.StartsWith("IDEOLOGY_", StringComparison.OrdinalIgnoreCase);
-            bool IsState(string k) => ModDataStorage.Mod.Map.States == null ? k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase) : ModDataStorage.Mod.Map.States.Count(s => s.LocalizationKey == k) != 0;
+            bool IsState(string k) => k.StartsWith("STATE_", StringComparison.OrdinalIgnoreCase);
             bool IsCountry(string k) => k.Length == 3 && k.All(char.IsLetter);
-
-            YmlParser parser = new YmlParser(new TxtPattern());
-
+            //todo: refactor cathegory functions for parallel use
+            var parser = new ThreadLocal<YmlParser>(
+                () => new YmlParser(new TxtPattern())
+            );
             var failedFiles = new ConcurrentBag<string>();
 
             Parallel.ForEach(files, file =>
@@ -69,7 +70,7 @@ namespace ModdingManagerClassLib.utils
                 try
                 {
                     var text = File.ReadAllText(file);
-                    var parsed = (LocalizationFile)parser.Parse(text);
+                    var parsed = (LocalizationFile)parser.Value.Parse(text);
                     if (parsed.Localizations.Count < 1)
                     {
                         failedFiles.Add(file);
@@ -90,6 +91,8 @@ namespace ModdingManagerClassLib.utils
                                                       otherDict;
 
                             target.AddOrUpdate(key, val, (_, __) => val);
+
+
                         }
                     }
 

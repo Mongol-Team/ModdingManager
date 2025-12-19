@@ -6,31 +6,29 @@ namespace ModdingManager.classes.utils
 {
     public class ModConfig
     {
-        public ModConfig() { }
-        private static ModConfig _instance = new();
-        public static ModConfig Instance => _instance ??= new ModConfig();
-        public List<RuleConfig> Rules { get; set; }
-        public List<StateCathegoryConfig> StateCathegories { get; set; }
-        public List<RegimentConfig> Regiments { get; set; }
-        public List<CountryConfig> Countries { get; set; }
-        public List<IdeaConfig> Ideas { get; set; }
-        public List<TriggerDefenitionConfig> TriggerDefenitions { get; set; }
-        public List<IdeaTagConfig> IdeaTags { get; set; }
-        public List<Var> Vars { get; set; }
-        public List<StaticModifierConfig> StaticModifiers { get; set; }
-        public List<OpinionModifierConfig> OpinionModifiers { get; set; }
-        public List<DynamicModifierConfig> DynamicModifiers { get; set; }
-        public List<ModifierDefinitionConfig> ModifierDefinitions { get; set; }
-        public List<IdeaSlotConfig> IdeaSlots { get; set; }
-        public List<BuildingConfig> Buildings { get; set; }
-        public List<IGfx> Gfxes { get; set; }
-        public List<TechCategoryConfig> TechCategories { get; set; }
-        public List<EquipmentConfig> Equipments { get; set; }
-        public MapConfig Map { get; set; } = new MapConfig();
-        public List<TechTreeConfig> TechTreeLedgers { get; set; } = new List<TechTreeConfig>();
-        public List<TechTreeItemConfig> TechTreeItems { get; set; }
-        public List<CountryCharacterConfig> Characters { get; set; }
-        public List<IdeologyConfig> Ideologies { get; set; }
-        public List<CharacterTraitConfig> CharacterTraits { get; set; }
+        public List<RuleConfig> Rules { get; set; } = new();
+        public List<StateCathegoryConfig> StateCathegories { get; set; } = new();
+        public List<RegimentConfig> Regiments { get; set; } = new();
+        public List<CountryConfig> Countries { get; set; } = new();
+        public List<IdeaConfig> Ideas { get; set; } = new();
+        public List<TriggerDefenitionConfig> TriggerDefenitions { get; set; } = new();
+        public List<IdeaTagConfig> IdeaTags { get; set; } = new();
+        public List<Var> Vars { get; set; } = new();
+        public List<StaticModifierConfig> StaticModifiers { get; set; } = new();
+        public List<OpinionModifierConfig> OpinionModifiers { get; set; } = new();
+        public List<DynamicModifierConfig> DynamicModifiers { get; set; } = new();
+        public List<ModifierDefinitionConfig> ModifierDefinitions { get; set; } = new();
+        public List<IdeaSlotConfig> IdeaSlots { get; set; } = new();
+        public List<BuildingConfig> Buildings { get; set; } = new();
+        public List<IGfx> Gfxes { get; set; } = new();
+        public List<TechCategoryConfig> TechCategories { get; set; } = new();
+        public List<EquipmentConfig> Equipments { get; set; } = new();
+        public MapConfig Map { get; set; } = new();
+        public List<TechTreeConfig> TechTreeLedgers { get; set; } = new();
+        public List<TechTreeItemConfig> TechTreeItems { get; set; } = new();
+        public List<CountryCharacterConfig> Characters { get; set; } = new();
+        public List<IdeologyConfig> Ideologies { get; set; } = new();
+        public List<CharacterTraitConfig> CharacterTraits { get; set; } = new();
     }
+
 }

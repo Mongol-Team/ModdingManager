@@ -26,12 +26,13 @@ namespace ModdingManagerModels
         public List<RegimentConfig> UnitType { get; set; }
         public string UnitTrigger { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
+        public Dictionary<ModifierDefinitionConfig, object> ArmyComanderModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
         public Dictionary<ModifierDefinitionConfig, object> NonSharedModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
         public Dictionary<ModifierDefinitionConfig, object> CorpsCommanderModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
         public Dictionary<ModifierDefinitionConfig, object> FieldMarshalModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
         public Dictionary<ModifierDefinitionConfig, object> SubUnitModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
-        public List<CharacterSkillType> SkillTypes { get; set; } = new List<CharacterSkillType>();
-        public List<CharacterSkillType> SkillTypesFactors { get; set; } = new List<CharacterSkillType>();
+        public Dictionary<CharacterSkillType, int> SkillTypes { get; set; } = [];
+        public Dictionary<CharacterSkillType, double> SkillTypesFactors { get; set; } = [];
         //todo: implement abilities https://hoi4.paradoxwikis.com/Character_modding#skill
         //todo: implement effects
         public string OnAdd { get; set; }
@@ -42,6 +43,7 @@ namespace ModdingManagerModels
         public int NumParentsRequired { get; set; }
         public int GuiRow { get; set; }
         public int GuiColumn { get; set; }
+        public bool Random { get; set; }
         public string Prerequisites { get; set; } //triggers
         public double Cost { get; set; }
         public string GainXp { get; set; } //triggers

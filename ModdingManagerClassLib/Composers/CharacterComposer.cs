@@ -32,20 +32,34 @@ namespace ModdingManagerClassLib.Composers
             string[] possiblePathes =
             {
                 ModPathes.CommonCharacterPath,
-                GamePathes.CommonCharacterPath
+                GamePathes.TraitsPath
             };
             foreach (string path in possiblePathes)
             {
                 string[] files = Directory.GetFiles(path);
-
+                foreach (string file in files)
+                {
+                    if (File.Exists(file))
+                    {
+                        string fileContent = File.ReadAllText(file);
+                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
+                        List<CountryCharacterConfig> charConfigs = ParseFile(hoiFuncFile);
+                        foreach (CountryCharacterConfig charConfig in charConfigs)
+                        {
+                            if (!configs.Any(c => c.Id == charConfig.Id))
+                            {
+                                configs.Add(charConfig);
+                            }
+                        }
+                    }
+                }
             }
             return configs;
         }
 
-        public static List<CountryCharacterConfig> ParseFile(string path)
+        public static List<CountryCharacterConfig> ParseFile(HoiFuncFile funcFile)
         {
             List<CountryCharacterConfig> configs = new List<CountryCharacterConfig>();
-            HoiFuncFile funcFile = new TxtParser(new TxtPattern()).Parse(path) as HoiFuncFile;
             foreach (Bracket bracket in funcFile.Brackets.Where(b => b.Name == "characters"))
             {
                 foreach (Bracket br in bracket.SubBrackets)
@@ -76,6 +90,7 @@ namespace ModdingManagerClassLib.Composers
                         break;
                 }
             }
+            //todo: instance branches implementation https://hoi4.paradoxwikis.com/Character_modding#Instances
             foreach (Bracket br in charBr.SubBrackets)
             {
                 switch (br.Name)
@@ -147,7 +162,7 @@ namespace ModdingManagerClassLib.Composers
                         cfg.Types.AddSafe(corps);
                         break;
                     case "field_marshal":
-                        FieldMarshalCharacterType field = (FieldMarshalCharacterType)CreateCharacterType("corps_commander", br);
+                        FieldMarshalCharacterType field = (FieldMarshalCharacterType)CreateCharacterType("field_marshal", br);
                         CharaterCommanderData fieldData = ParseCommanderData(br);
                         field.Skill = fieldData.Skill;
                         field.Attack = fieldData.Attack;
@@ -157,7 +172,7 @@ namespace ModdingManagerClassLib.Composers
                         cfg.Types.AddSafe(field);
                         break;
                     case "navy_leader":
-                        NavalLeaderCharacterType naval = (NavalLeaderCharacterType)CreateCharacterType("corps_commander", br);
+                        NavalLeaderCharacterType naval = (NavalLeaderCharacterType)CreateCharacterType("navy_leader", br);
                         CharaterCommanderData navalData = ParseCommanderData(br);
                         naval.Skill = navalData.Skill;
                         naval.Attack = navalData.Attack;

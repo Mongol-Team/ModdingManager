@@ -21,21 +21,21 @@ namespace ModdingManager
         {
             CurrentConfig.Tag = TagBox.Text;
             CurrentConfig.Id = new(IdBox.Text);
-            CurrentConfig.Name = NameBox.Text;
-            CurrentConfig.Expire = ExpireTimePicker.Value.ToString("yyyy.MM.dd");
-            CurrentConfig.Attack = TryParseOrDefault(AtkBox.Text, 0);
-            CurrentConfig.Defense = TryParseOrDefault(DefBox.Text, 0);
-            CurrentConfig.Supply = TryParseOrDefault(SupplyBox.Text, 0);
-            CurrentConfig.Speed = TryParseOrDefault(SpdBox.Text, 0);
-            CurrentConfig.Skill = TryParseOrDefault(SkillBox.Text, 0);
-            CurrentConfig.AdvisorCost = TryParseOrDefault(AdvisorCost.Text, 0);
-            CurrentConfig.Types = CharTypesBox.GetLines();
-            CurrentConfig.Traits = PercBox.GetLines();
-            CurrentConfig.Description = DescBox.Text;
-            CurrentConfig.AiWillDo = AiDoBox.Text;
-            CurrentConfig.Ideology = IdeologyBox.Text;
-            CurrentConfig.BigImage = BigIconPanel.BackgroundImage;
-            CurrentConfig.SmallImage = SmalIconPanel.BackgroundImage;
+            //CurrentConfig.Name = NameBox.Text;
+            //CurrentConfig.Expire = ExpireTimePicker.Value.ToString("yyyy.MM.dd");
+            //CurrentConfig.Attack = TryParseOrDefault(AtkBox.Text, 0);
+            //CurrentConfig.Defense = TryParseOrDefault(DefBox.Text, 0);
+            //CurrentConfig.Supply = TryParseOrDefault(SupplyBox.Text, 0);
+            //CurrentConfig.Speed = TryParseOrDefault(SpdBox.Text, 0);
+            //CurrentConfig.Skill = TryParseOrDefault(SkillBox.Text, 0);
+            //CurrentConfig.AdvisorCost = TryParseOrDefault(AdvisorCost.Text, 0);
+            //CurrentConfig.Types = CharTypesBox.GetLines();
+            //CurrentConfig.Traits = PercBox.GetLines();
+            //CurrentConfig.Description = DescBox.Text;
+            //CurrentConfig.AiWillDo = AiDoBox.Text;
+            //CurrentConfig.Ideology = IdeologyBox.Text;
+            //CurrentConfig.BigImage = BigIconPanel.BackgroundImage;
+            //CurrentConfig.SmallImage = SmalIconPanel.BackgroundImage;
             HandlerIncetance = new CharacterHandler() { CurrentConfig = CurrentConfig };
         }
 

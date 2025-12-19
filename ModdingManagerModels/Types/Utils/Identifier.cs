@@ -48,6 +48,31 @@ namespace ModdingManagerModels.Types.Utils
                 return string.Compare(thisStr, otherStr, StringComparison.Ordinal);
             }
         }
+        public override bool Equals(object? obj)
+        {
+            if (obj is Identifier other)
+            {
+                return CompareTo(other) == 0;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return RawItendifier?.GetHashCode() ?? 0;
+        }
+
+        public static bool operator ==(Identifier? left, Identifier? right)
+        {
+            if (ReferenceEquals(left, right)) return true;
+            if (left is null || right is null) return false;
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Identifier? left, Identifier? right)
+        {
+            return !(left == right);
+        }
 
     }
 }
