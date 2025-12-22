@@ -5,8 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
   <ItemGroup>
-	<EmbeddedResource Include="Data\Rules\RulesCoreDefenitions.txt" />
+    <EmbeddedResource Include="Data\Text\BaisicUnitGroupsDefenitions.txt" />
+  </ItemGroup>
+  <ItemGroup>
+	<EmbeddedResource Include="Data\Text\RulesCoreDefenitions.txt" />
 	
   </ItemGroup>
 

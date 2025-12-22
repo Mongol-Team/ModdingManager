@@ -7,8 +7,8 @@ namespace ModdingManagerModels
     public class TemplateConfig : IConfig
     {
         public IGfx Gfx { get; set; }
-        public List<RegimentConfig>? SupportItems { get; set; } = new List<RegimentConfig>();
-        public List<RegimentConfig> BrigadeItems { get; set; } = new List<RegimentConfig>();
+        public List<SubUnitConfig>? SupportItems { get; set; } = new List<SubUnitConfig>();
+        public List<SubUnitConfig> BrigadeItems { get; set; } = new List<SubUnitConfig>();
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public bool? IsLocked { get; set; }

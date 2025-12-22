@@ -19,7 +19,7 @@ namespace ModdingManagerModels
         public List<TechCategoryConfig> Categories { get; set; }//+
         public Dictionary<BuildingConfig, object> EnableBuildings { get; set; }//+
         public List<EquipmentConfig> EnableEquipments { get; set; }//+
-        public List<RegimentConfig> EnableUnits { get; set; }//+
+        public List<SubUnitConfig> EnableUnits { get; set; }//+
         public int Cost { get; set; }//+
         public int StartYear { get; set; }//+
         public List<TechTreeItemConfig> ChildOf { get; set; }//+

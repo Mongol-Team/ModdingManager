@@ -43,7 +43,7 @@ namespace ModdingManagerClassLib.Composers
                     {
                         string fileContent = File.ReadAllText(file);
                         HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
-                        List<CountryCharacterConfig> charConfigs = ParseFile(hoiFuncFile);
+                        List<CountryCharacterConfig> charConfigs = ParseFile(hoiFuncFile).Cast<CountryCharacterConfig>().ToList();
                         foreach (CountryCharacterConfig charConfig in charConfigs)
                         {
                             if (!configs.Any(c => c.Id == charConfig.Id))
@@ -57,14 +57,14 @@ namespace ModdingManagerClassLib.Composers
             return configs;
         }
 
-        public static List<CountryCharacterConfig> ParseFile(HoiFuncFile funcFile)
+        public static IEnumerable<IConfig> ParseFile(HoiFuncFile funcFile)
         {
             List<CountryCharacterConfig> configs = new List<CountryCharacterConfig>();
             foreach (Bracket bracket in funcFile.Brackets.Where(b => b.Name == "characters"))
             {
                 foreach (Bracket br in bracket.SubBrackets)
                 {
-                    CountryCharacterConfig cfg = ParseCharacter(br);
+                    CountryCharacterConfig cfg = (CountryCharacterConfig)ParseObject(br);
                     configs.AddSafe(cfg);
                 }
             }
@@ -72,7 +72,7 @@ namespace ModdingManagerClassLib.Composers
             return configs;
         }
 
-        public static CountryCharacterConfig ParseCharacter(Bracket charBr)
+        public static IConfig ParseObject(Bracket charBr)
         {
             CountryCharacterConfig cfg = new CountryCharacterConfig();
             cfg.Id = new Identifier(charBr.Name);

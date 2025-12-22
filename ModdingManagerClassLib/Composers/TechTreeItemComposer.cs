@@ -256,7 +256,7 @@ namespace ModdingManagerClassLib.Composers
                             }
                             foreach (object val in arr.Values)
                             {
-                                RegimentConfig reg = ModDataStorage.Mod.Regiments.FirstOrDefault(e => e.Id.ToString() == val.ToString());
+                                SubUnitConfig reg = ModDataStorage.Mod.Regiments.FirstOrDefault(e => e.Id.ToString() == val.ToString());
                                 if (reg == null)
                                 {
                                     Logger.AddDbgLog($"[Warning] Regiment {reg.Id.ToString()} is undefiend.");

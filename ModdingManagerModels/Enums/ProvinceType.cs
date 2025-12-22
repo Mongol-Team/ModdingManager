@@ -2,8 +2,8 @@
 {
     public enum ProvinceType
     {
-        land,
-        lake,
-        sea
+        Land,
+        Lake,
+        Sea
     }
 }

@@ -8,7 +8,7 @@ namespace ModdingManager.classes.utils
     {
         public List<RuleConfig> Rules { get; set; } = new();
         public List<StateCathegoryConfig> StateCathegories { get; set; } = new();
-        public List<RegimentConfig> Regiments { get; set; } = new();
+        public List<SubUnitConfig> Regiments { get; set; } = new();
         public List<CountryConfig> Countries { get; set; } = new();
         public List<IdeaConfig> Ideas { get; set; } = new();
         public List<TriggerDefenitionConfig> TriggerDefenitions { get; set; } = new();
@@ -29,6 +29,7 @@ namespace ModdingManager.classes.utils
         public List<CountryCharacterConfig> Characters { get; set; } = new();
         public List<IdeologyConfig> Ideologies { get; set; } = new();
         public List<CharacterTraitConfig> CharacterTraits { get; set; } = new();
+        public List<SubUnitGroupConfig> SubUnitGroups { get; set; } = new();
+        public List<SubUnitCategoryConfig> SubUnitChategories { get; set; } = new();
     }
-
 }

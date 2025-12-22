@@ -41,7 +41,7 @@ namespace ModdingManagerClassLib.Composers
                 //});
                 foreach (var file in files)
                 {
-                    var stateConfig = ParseStateConfig(file);
+                    var stateConfig = ParseFile(file);
                     result.Add(stateConfig);
                 }
 
@@ -56,7 +56,7 @@ namespace ModdingManagerClassLib.Composers
             watch.Stop();
             return result.ToList();
         }
-        public static StateConfig ParseStateConfig(string filePath)
+        public static StateConfig ParseFile(string filePath)
         {
 
             if (!File.Exists(filePath))

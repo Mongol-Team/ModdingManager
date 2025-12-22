@@ -78,7 +78,7 @@ namespace ModdingManager.Controls
                 case ProvinceConfig province:
                     _localisation.Data.Add($"VICTORY_POINTS_{province.Id}:", "");
                     break;
-                case RegimentConfig regim:
+                case SubUnitConfig regim:
                     _localisation.Data.Add($"{regim.Id}:", "");
                     break;
                 case IConfig genericConfig:

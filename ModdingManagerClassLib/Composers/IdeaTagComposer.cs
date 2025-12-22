@@ -62,7 +62,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     foreach (var subbracket in bracket.SubBrackets)
                     {
-                        IdeaTagConfig cfg = ParseSingleTag(subbracket) as IdeaTagConfig;
+                        IdeaTagConfig cfg = ParseObject(subbracket) as IdeaTagConfig;
                         res.Add(cfg);
                     }
                 }
@@ -70,7 +70,7 @@ namespace ModdingManagerClassLib.Composers
             return res;
         }
 
-        public static IConfig ParseSingleTag(Bracket br)
+        public static IConfig ParseObject(Bracket br)
         {
             IdeaTagConfig cfg = new IdeaTagConfig();
             cfg.Id = new(br.Name);

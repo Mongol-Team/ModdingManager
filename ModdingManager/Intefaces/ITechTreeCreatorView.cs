@@ -46,7 +46,7 @@ namespace ModdingManager.Intefaces
 
         Dictionary<BuildingConfig, object> EnableBuildings { get; set; }
         List<EquipmentConfig> EnableEquipments { get; set; }
-        List<RegimentConfig> EnableUnits { get; set; }
+        List<SubUnitConfig> EnableUnits { get; set; }
 
 
         string Allowed { get; set; }

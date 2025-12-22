@@ -56,7 +56,7 @@ namespace ModdingManagerClassLib.Composers
                 {
                     foreach (Bracket traitBracket in bracket.SubBrackets)
                     {
-                        CharacterTraitConfig traitConfig = ParseTraitConfig(traitBracket);
+                        CharacterTraitConfig traitConfig = (CharacterTraitConfig)ParseObject(traitBracket);
                         traitConfigs.Add(traitConfig);
                     }
                 }
@@ -68,7 +68,7 @@ namespace ModdingManagerClassLib.Composers
 
             return traitConfigs;
         }
-        public static CharacterTraitConfig ParseTraitConfig(Bracket bracket)
+        public static IConfig ParseObject(Bracket bracket)
         {
             CharacterTraitConfig characterTrait = new CharacterTraitConfig();
             characterTrait.Id = new(bracket.Name);
@@ -181,7 +181,7 @@ namespace ModdingManagerClassLib.Composers
                                 Logger.AddLog($"Unknown var found: {var.Name} when unit_type parsing {bracket.Name}.");
                                 continue;
                             } 
-                            RegimentConfig regiment = ModDataStorage.Mod.Regiments.FirstOrDefault(r => r.Id.ToString() == var.Value.ToString());
+                            SubUnitConfig regiment = ModDataStorage.Mod.Regiments.FirstOrDefault(r => r.Id.ToString() == var.Value.ToString());
                             if (regiment != null)
                             {
                                 characterTrait.UnitType.Add(regiment);

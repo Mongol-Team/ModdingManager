@@ -15,7 +15,7 @@ namespace ModdingManagerDataManager.Parsers.Patterns
         public string AssignChar => throw new NotImplementedException();
 
         public IReadOnlyList<Type> Types =>
-        [typeof(int), typeof(Color), typeof(ProvinceType), typeof(bool), typeof(ProvinceBiome), typeof(int)];
+        [typeof(int), typeof(Color), typeof(ProvinceType), typeof(bool), typeof(ProvinceTerrain), typeof(int)];
 
         public string Separator => ";";
     }

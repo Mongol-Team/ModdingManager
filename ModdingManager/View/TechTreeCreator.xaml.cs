@@ -267,7 +267,7 @@ namespace ModdingManager
 
         public Dictionary<BuildingConfig, object> EnableBuildings { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public List<EquipmentConfig> EnableEquipments { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public List<RegimentConfig> EnableUnits { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<SubUnitConfig> EnableUnits { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string AllowBranch { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public void ShowMessage(string message, string title)

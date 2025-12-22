@@ -4,18 +4,44 @@ namespace ModdingManagerData
 {
     public static class DataLib
     {
-        public static readonly string RulesCoreDefenitions = "Null";
-
+        public static readonly string RulesCoreDefenitions;
+        public static readonly string BaisicUnitGroupsDefenitions;
         static DataLib()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            var names = Assembly.GetExecutingAssembly().GetManifestResourceNames();
-            using Stream? stream = assembly.GetManifestResourceStream("ModdingManagerData.Data.Rules.RulesCoreDefenitions.txt");
-            if (stream == null)
-                throw new InvalidOperationException("Не найден embedded ресурс RulesCoreDefenitions.txt");
+            var resources = assembly.GetManifestResourceNames();
+
+            foreach (var resourceName in resources)
+            {
+                if (!resourceName.StartsWith("ModdingManagerData.Data.Text.", StringComparison.Ordinal))
+                    continue;
+
+                if (!resourceName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var fileName = resourceName.Substring(
+                    "ModdingManagerData.Data.Text.".Length
+                );
+
+                switch (fileName)
+                {
+                    case "RulesCoreDefenitions.txt":
+                        RulesCoreDefenitions = ReadResource(assembly, resourceName);
+                        break;
+                    case "BaisicUnitGroupsDefenitions.txt":
+                        BaisicUnitGroupsDefenitions = ReadResource(assembly, resourceName);
+                        break;
+                }
+            }
+        }
+
+        private static string ReadResource(Assembly assembly, string resourceName)
+        {
+            using var stream = assembly.GetManifestResourceStream(resourceName)
+                ?? throw new InvalidOperationException($"Не удалось открыть ресурс {resourceName}");
 
             using var reader = new StreamReader(stream);
-            RulesCoreDefenitions = reader.ReadToEnd();
+            return reader.ReadToEnd();
         }
     }
 }

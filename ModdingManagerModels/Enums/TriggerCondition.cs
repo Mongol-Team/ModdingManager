@@ -2,11 +2,10 @@
 {
     public enum TriggerCondition
     {
-        less,
-        lessOrEqual,
-        greater,
-        greaterOrEqual,
-        equal
-
+        Less,
+        LessOrEqual,
+        Greater,
+        GreaterOrEqual,
+        Equal
     }
 }

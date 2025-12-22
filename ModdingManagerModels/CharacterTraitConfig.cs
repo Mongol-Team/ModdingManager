@@ -23,7 +23,7 @@ namespace ModdingManagerModels
         public CharacterTraitConfig SpecialistAdvisorTrait { get; set; }
         public CharacterTraitConfig ExpertAdvisorTrait { get; set; }
         public CharacterTraitConfig GeniusAdvisorTrait { get; set; }
-        public List<RegimentConfig> UnitType { get; set; }
+        public List<SubUnitConfig> UnitType { get; set; }
         public string UnitTrigger { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();
         public Dictionary<ModifierDefinitionConfig, object> ArmyComanderModifiers { get; set; } = new Dictionary<ModifierDefinitionConfig, object>();

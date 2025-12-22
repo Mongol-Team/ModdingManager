@@ -2,7 +2,7 @@
 {
     public enum AdjacencyType
     {
-        sea,
-        impassable
+        Sea,
+        Impassable
     }
 }

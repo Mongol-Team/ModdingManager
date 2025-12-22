@@ -39,7 +39,7 @@ namespace ModdingManagerClassLib.Composers
                         ContinentId = (int)line[5],
                     };
 
-                    if (province.Type == ProvinceType.sea)
+                    if (province.Type == ProvinceType.Sea)
                         seaProvinces.Add(province);
                     else
                         otherProvinces.Add(province);
