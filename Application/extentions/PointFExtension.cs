@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Point = System.Drawing.Point;
 
-namespace ModdingManagerClassLib.Extentions
+namespace Application.Extentions
 {
     public static class PointFExtension
     {

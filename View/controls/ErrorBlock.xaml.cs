@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 using MessageBox = System.Windows.MessageBox;
 using UserControl = System.Windows.Controls.UserControl;
 
-namespace ModdingManager.Controls
+namespace ViewControls
 {
     /// <summary>
     /// Логика взаимодействия для ErrorBlock.xaml

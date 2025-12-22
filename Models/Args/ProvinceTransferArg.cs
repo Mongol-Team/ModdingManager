@@ -1,6 +1,6 @@
-﻿using ModdingManagerModels;
+﻿using Models;
 
-namespace ModdingManagerModels.Args
+namespace Models.Args
 {
     public class ProvinceTransferArg
     {

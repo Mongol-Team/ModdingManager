@@ -1,7 +1,7 @@
-﻿using ModdingManager.Presenter;
+﻿using ViewPresenters;
 using System.Windows;
 
-namespace ModdingManager.View
+namespace View
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

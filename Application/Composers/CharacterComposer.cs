@@ -1,20 +1,20 @@
 ﻿using Microsoft.Win32.SafeHandles;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.Settings;
-using ModdingManagerClassLib.utils.Pathes;
-using ModdingManagerData;
-using ModdingManagerData.Data;
+using Application.Extentions;
+using Application.Settings;
+using Application.utils.Pathes;
+using Data;
+using Data.Data;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.GfxTypes;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.SubModels;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.ObectCacheData;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
+using Models;
+using Models.Enums;
+using Models.GfxTypes;
+using Models.Interfaces;
+using Models.SubModels;
+using Models.Types.LocalizationData;
+using Models.Types.ObectCacheData;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using Pfim;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class CharacterComposer : IComposer
     {

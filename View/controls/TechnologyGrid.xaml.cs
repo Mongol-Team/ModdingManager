@@ -1,6 +1,6 @@
-﻿using ModdingManagerClassLib.Extentions;
-using ModdingManagerModels;
-using ModdingManagerModels.Types.Utils;
+﻿using Application.Extentions;
+using Models;
+using Models.Types.Utils;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -18,7 +18,7 @@ using Point = System.Windows.Point;
 using UserControl = System.Windows.Controls.UserControl;
 using View.Properties;
 
-namespace ModdingManager.Controls
+namespace ViewControls
 {
     public partial class TechnologyGrid : UserControl
     {

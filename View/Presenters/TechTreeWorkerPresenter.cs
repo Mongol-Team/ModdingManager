@@ -1,14 +1,14 @@
-﻿using ModdingManager.Controls;
-using ModdingManager.Intefaces;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.handlers;
-using ModdingManagerModels;
-using ModdingManagerModels.GfxTypes;
+﻿using ViewControls;
+using ViewInterfaces;
+using Application.Extentions;
+using Application.handlers;
+using Models;
+using Models.GfxTypes;
 using System;
 using System.Linq;
 using System.Windows;
 
-namespace ModdingManager.Presenters
+namespace ViewPresenters
 {
     public class TechTreeWorkerPresenter
     {

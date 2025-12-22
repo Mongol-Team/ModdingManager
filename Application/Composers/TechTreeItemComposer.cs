@@ -1,15 +1,15 @@
-﻿using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.utils.Pathes;
-using ModdingManagerModels;
-using ModdingManagerModels.Types.ObectCacheData;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
+﻿using Application.Debugging;
+using Application.Extentions;
+using Application.utils.Pathes;
+using Models;
+using Models.Types.ObectCacheData;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
 
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class TechTreeItemComposer : IComposer
     {

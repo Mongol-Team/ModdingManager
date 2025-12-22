@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ModdingManagerData.Properties {
+namespace Data.Properties {
     using System;
     
     

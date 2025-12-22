@@ -1,5 +1,5 @@
-﻿using ModdingManagerModels.Args;
-using ModdingManagerModels.Types.ObjectCacheData;
+﻿using Models.Args;
+using Models.Types.ObjectCacheData;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -11,7 +11,7 @@ using Label = System.Windows.Controls.Label;
 using Size = System.Windows.Size;
 using TextBox = System.Windows.Controls.TextBox;
 
-namespace ModdingManager.Controls
+namespace ViewControls
 {
     public class ClassViewer : StackPanel
     {

@@ -1,6 +1,6 @@
-﻿using ModdingManagerModels.Interfaces;
+﻿using Models.Interfaces;
 
-namespace ModdingManagerModels.Types.HtmlFilesData
+namespace Models.Types.HtmlFilesData
 {
     public class ModifierDefinitionFile : IHoiData
     {

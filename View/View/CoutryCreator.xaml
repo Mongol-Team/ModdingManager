@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ModdingManager"
-        xmlns:controls="clr-namespace:ModdingManager.Controls" x:Class="ModdingManager.WPFCountryCreator"
+        xmlns:local="clr-namespace:View"
+        xmlns:controls="clr-namespace:ViewControls" x:Class="View.WPFCountryCreator"
         mc:Ignorable="d"
         Title="WPFCoutryCreator" Height="590" Width="800" Loaded="Window_Loaded">
     <Grid>

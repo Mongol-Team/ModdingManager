@@ -1,14 +1,14 @@
-﻿using ModdingManagerClassLib.Extentions;
+﻿using Application.Extentions;
 using ModdingManager.managers.@base;
-using ModdingManagerModels.Args;
+using Models.Args;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using ModdingManagerModels.Types.Utils;
-using DDF = ModdingManagerData.DataDefaultValues;
-using ModdingManagerClassLib.Settings;
+using Models.Types.Utils;
+using DDF = Data.DataDefaultValues;
+using Application.Settings;
 
 namespace ModdingManager.classes.managers.gfx
 {

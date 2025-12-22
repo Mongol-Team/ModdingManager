@@ -1,18 +1,18 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Settings;
-using ModdingManagerClassLib.utils.Pathes;
+using Application.Debugging;
+using Application.Settings;
+using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Types;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
+using Models;
+using Models.Types;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class StateComposer : IComposer
     {

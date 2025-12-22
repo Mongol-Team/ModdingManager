@@ -7,7 +7,7 @@ using Cursors = System.Windows.Input.Cursors;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 
-namespace ModdingManager.Controls
+namespace ViewControls
 {
     public class SceneViewer : ScrollViewer
     {

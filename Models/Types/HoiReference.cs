@@ -1,4 +1,4 @@
-﻿namespace ModdingManagerModels.Types
+﻿namespace Models.Types
 {
     public class HoiReference
     {

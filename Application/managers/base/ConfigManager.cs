@@ -1,7 +1,7 @@
 ﻿//OTM
 //namespace ModdingManager.classes.managers.@base
 //{
-//    using global::ModdingManagerClassLib.Extentions
+//    using global::Application.Extentions
 //    using global::ModdingManager.classes.utils;
 //    using System;
 //    using System.Collections.Generic;

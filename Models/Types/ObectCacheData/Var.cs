@@ -1,7 +1,4 @@
-﻿using ModdingManagerModels.Types.Utils;
-using DDF = ModdingManagerData.DataDefaultValues;
-
-namespace ModdingManagerModels.Types.ObjectCacheData
+﻿namespace Models.Types.ObjectCacheData
 {
     public class Var
     {

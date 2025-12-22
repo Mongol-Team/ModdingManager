@@ -1,10 +1,10 @@
-﻿using ModdingManagerModels;
-using ModdingManagerModels.Args;
+﻿using Models;
+using Models.Args;
 using OpenCvSharp;
 using System.Drawing;
 using Point = System.Drawing.Point;
 
-namespace ModdingManagerClassLib.Extentions
+namespace Application.Extentions
 {
     public static class MatExtentions
     {

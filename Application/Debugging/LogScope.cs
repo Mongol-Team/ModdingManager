@@ -1,7 +1,7 @@
 ﻿
 using System.Runtime.CompilerServices;
 
-namespace ModdingManagerClassLib.Debugging
+namespace Application.Debugging
 {
     public class LogScope : IDisposable
     {

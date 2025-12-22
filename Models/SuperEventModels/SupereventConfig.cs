@@ -1,9 +1,9 @@
-﻿using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.Utils;
-using static ModdingManagerModels.SuperEventModels.SuperEventGuiElements;
+﻿using Models.Interfaces;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
+using static Models.SuperEventModels.SuperEventGuiElements;
 
-namespace ModdingManagerModels.SuperEventModels
+namespace Models.SuperEventModels
 {
     public class SupereventConfig : IConfig
     {

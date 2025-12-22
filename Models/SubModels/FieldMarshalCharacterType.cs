@@ -1,12 +1,12 @@
-﻿using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.Utils;
+﻿using Models.Interfaces;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManagerModels.SubModels
+namespace Models.SubModels
 {
     public class FieldMarshalCharacterType : ICharacterType
     {

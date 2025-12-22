@@ -4,7 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using UserControl = System.Windows.Controls.UserControl;
 
-namespace ModdingManager.Controls
+namespace ViewControls
 {
     public partial class ImageButton : UserControl
     {

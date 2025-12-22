@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManagerModels.Types.Utils
+namespace Models.Types.Utils
 {
     public class Identifier : IComparable<Identifier>
     {

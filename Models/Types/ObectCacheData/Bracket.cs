@@ -1,7 +1,7 @@
-﻿using ModdingManagerModels.Types.ObectCacheData;
+﻿using Models.Types.ObectCacheData;
 using System.Text;
 
-namespace ModdingManagerModels.Types.ObjectCacheData
+namespace Models.Types.ObjectCacheData
 {
     public class Bracket
     {

@@ -1,4 +1,4 @@
-﻿namespace ModdingManagerModels.Types.ObectCacheData
+﻿namespace Models.Types.ObectCacheData
 {
     public class HoiArray
     {

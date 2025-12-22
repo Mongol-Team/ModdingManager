@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace ModdingManagerModels.Types
+namespace Models.Types
 {
     public class FontSignature
     {

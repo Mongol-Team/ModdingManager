@@ -1,8 +1,8 @@
-﻿using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerModels;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.Utils;
+﻿using Application.Debugging;
+using Application.Extentions;
+using Models;
+using Models.Interfaces;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,7 +20,7 @@ using SystemFonts = System.Windows.SystemFonts;
 using TextBox = System.Windows.Controls.TextBox;
 using UserControl = System.Windows.Controls.UserControl;
 
-namespace ModdingManager.Controls
+namespace ViewControls
 {
     public class ConfigItemEventArgs : RoutedEventArgs
     {

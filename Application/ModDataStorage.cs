@@ -1,17 +1,12 @@
-﻿using ModdingManager.classes.utils;
-using ModdingManagerClassLib.Composers;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.Loaders;
-using ModdingManagerClassLib.utils;
-using ModdingManagerModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application.Composers;
+using Application.Debugging;
+using Application.Extentions;
+using Application.Loaders;
+using Application.utils;
+using ModdingManager.classes.utils;
+using Models;
 
-namespace ModdingManagerClassLib
+namespace Application
 {
     public static class ModDataStorage
     {

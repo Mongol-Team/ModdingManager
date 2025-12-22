@@ -1,4 +1,4 @@
-﻿namespace ModdingManagerClassLib.Extentions
+﻿namespace Application.Extentions
 {
     public static class CharExtensions
     {

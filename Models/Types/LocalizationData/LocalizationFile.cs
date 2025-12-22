@@ -1,7 +1,7 @@
-﻿using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.LocalizationData;
+﻿using Models.Interfaces;
+using Models.Types.LocalizationData;
 
-namespace ModdingManagerModels.Types.LochalizationData
+namespace Models.Types.LochalizationData
 {
     public class LocalizationFile : IHoiData
     {

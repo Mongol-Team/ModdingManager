@@ -1,7 +1,7 @@
 ﻿using RawDataWorker.Interfaces;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.TableCacheData;
+using Models.Enums;
+using Models.Interfaces;
+using Models.Types.TableCacheData;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using Rx = RawDataWorker.Regexes;

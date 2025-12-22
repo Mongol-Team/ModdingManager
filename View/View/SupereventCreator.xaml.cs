@@ -1,9 +1,9 @@
-﻿using ModdingManager.Controls;
-using ModdingManagerClassLib;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
+﻿using ViewControls;
+using Application;
+using Application.Debugging;
+using Application.Extentions;
 
-using ModdingManagerModels.SuperEventModels;
+using Models.SuperEventModels;
 using NAudio.Wave;
 using System.IO;
 using System.Windows;
@@ -19,7 +19,7 @@ using RichTextBox = System.Windows.Controls.RichTextBox;
 using TextBox = System.Windows.Controls.TextBox;
 using View.Properties;
 
-namespace ModdingManager
+namespace View
 {
     public partial class SupereventCreator : Window
     {

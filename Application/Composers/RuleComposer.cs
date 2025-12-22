@@ -1,26 +1,26 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.utils;
-using ModdingManagerClassLib.utils.Pathes;
-using ModdingManagerData;
+using Application.Debugging;
+using Application.Extentions;
+using Application.utils;
+using Application.utils.Pathes;
+using Data;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.GfxTypes;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.TableCacheData;
-using ModdingManagerModels.Types.Utils;
+using Models;
+using Models.GfxTypes;
+using Models.Types.LocalizationData;
+using Models.Types.ObjectCacheData;
+using Models.Types.TableCacheData;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using DDF = ModdingManagerData.DataDefaultValues;
+using DDF = Data.DataDefaultValues;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class RuleComposer : IComposer
     {

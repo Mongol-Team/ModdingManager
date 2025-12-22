@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;  // Для Debug.WriteLine в fallback і діагностиці
 
-namespace ModdingManagerClassLib.Debugging
+namespace Application.Debugging
 {
     public class LogLevel
     {

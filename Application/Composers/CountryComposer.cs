@@ -1,15 +1,15 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.utils.Pathes;
+using Application.Extentions;
+using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
+using Models;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using System.Drawing;
 using static OpenCvSharp.FileStorage;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class CountryComposer : IComposer
     {

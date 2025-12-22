@@ -1,9 +1,9 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Composers;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.Loaders;
-using ModdingManagerClassLib.utils;
-using ModdingManagerModels.Interfaces;
+using Application.Composers;
+using Application.Extentions;
+using Application.Loaders;
+using Application.utils;
+using Models.Interfaces;
 using System.Diagnostics;
 using System.Drawing;
 using static OpenCvSharp.Stitcher;

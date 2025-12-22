@@ -1,12 +1,12 @@
-﻿using ModdingManagerModels.Args;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.Utils;
+﻿using Models.Args;
+using Models.Enums;
+using Models.Interfaces;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
 using System.Drawing;
 using System.Text.Json.Serialization;
 
-namespace ModdingManagerModels
+namespace Models
 {
     public class ProvinceConfig : IConfig
     {

@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ModdingManager"
+        xmlns:local="clr-namespace:View"
     
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:controls="clr-namespace:ModdingManager.Controls" x:Class="ModdingManager.IdeologyCreator"
+        xmlns:controls="clr-namespace:ViewControls" x:Class="View.IdeologyCreator"
         mc:Ignorable="d"
         Title="IdeologyCreator" Height="450" Width="900">
     <Grid Margin="0,0,0,0" >

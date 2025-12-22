@@ -1,8 +1,8 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.Settings;
-using ModdingManagerModels;
-using ModdingManagerModels.SubModels;
+using Application.Extentions;
+using Application.Settings;
+using Models;
+using Models.SubModels;
 using System.Text;
 using System.Windows;
 using MessageBox = System.Windows.MessageBox;

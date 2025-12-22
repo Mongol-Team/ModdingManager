@@ -1,19 +1,19 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.utils.Pathes;
+using Application.Debugging;
+using Application.Extentions;
+using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.ObjectCacheData;
+using Models;
+using Models.Types.LocalizationData;
+using Models.Types.ObjectCacheData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class IdeaSlotComposer : IComposer
     {

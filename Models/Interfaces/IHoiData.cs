@@ -1,4 +1,4 @@
-﻿namespace ModdingManagerModels.Interfaces
+﻿namespace Models.Interfaces
 {
     public interface IHoiData
     {

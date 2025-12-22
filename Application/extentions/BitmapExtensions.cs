@@ -1,8 +1,8 @@
 ﻿using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Settings;
+using Application.Debugging;
+using Application.Settings;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using Pfim;
@@ -19,7 +19,7 @@ using TeximpNet;
 using TeximpNet.DDS;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
-namespace ModdingManagerClassLib.Extentions
+namespace Application.Extentions
 {
     public static class BitmapExtensions
     {

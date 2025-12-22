@@ -1,8 +1,8 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.Settings;
-using ModdingManagerModels;
-using ModdingManagerModels.Types.LocalizationData;
+using Application.Extentions;
+using Application.Settings;
+using Models;
+using Models.Types.LocalizationData;
 using System.Globalization;
 using System.Text;
 using System.Windows;

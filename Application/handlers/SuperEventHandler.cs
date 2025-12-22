@@ -1,14 +1,14 @@
-﻿using ModdingManagerClassLib.Extentions;
+﻿using Application.Extentions;
 using ModdingManager.classes.utils.fonts;
 using ModdingManager.managers.@base;
-using ModdingManagerModels.SuperEventModels;
-using ModdingManagerModels.Types;
+using Models.SuperEventModels;
+using Models.Types;
 using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Settings;
+using Application.Debugging;
+using Application.Settings;
 public class SuperEventHandler
 {
     public SupereventConfig CurrentConfig { get; set; }

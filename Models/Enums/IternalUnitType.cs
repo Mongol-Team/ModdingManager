@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ModdingManagerModels.Enums
+namespace Models.Enums
 {
     public enum IternalUnitType
     {

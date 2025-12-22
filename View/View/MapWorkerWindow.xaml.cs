@@ -1,12 +1,10 @@
-﻿using ModdingManager.classes.utils;
-using ModdingManager.classes.views;
-using ModdingManager.Controls;
-using ModdingManager.managers.@base;
-using ModdingManagerClassLib;
-using ModdingManagerModels;
-using ModdingManagerModels.Args;
-using ModdingManagerModels.Types.Utils;
-using OpenCvSharp.Features2D;
+﻿using Application;
+using ViewControls;
+using ViewInterfaces;
+using ViewPresenters;
+using Models;
+using Models.Args;
+using Models.Types.Utils;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,7 +14,7 @@ using Cursors = System.Windows.Input.Cursors;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
 
-namespace ModdingManager
+namespace View
 {
     public partial class MapWorkerWindow : Window, IStateWorkerView
     {
@@ -344,7 +342,7 @@ namespace ModdingManager
         #region Events
         private void HealerButton_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            MapHealerWindow healerWindow = new MapHealerWindow();
+            MapHealerWindow healerWindow = new();
             healerWindow.Show();
         }
         private void DraggingProvinceEvent(object sender, System.Windows.Input.MouseEventArgs e)

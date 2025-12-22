@@ -1,24 +1,11 @@
-﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application;
+using Application.Debugging;
+using Application.Extentions;
+using Models;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Orientation = System.Windows.Controls.Orientation;
 
-namespace ModdingManager.View
+namespace View
 {
     /// <summary>
     /// Логика взаимодействия для TestingWindow.xaml

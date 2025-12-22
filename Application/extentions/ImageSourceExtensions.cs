@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-namespace ModdingManagerClassLib.Extentions
+namespace Application.Extentions
 {
     public static class ImageSourceExtensions
     {

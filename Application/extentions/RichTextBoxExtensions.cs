@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Documents;
-namespace ModdingManagerClassLib.Extentions
+namespace Application.Extentions
 {
     public static class RichTextBoxExtensions
     {

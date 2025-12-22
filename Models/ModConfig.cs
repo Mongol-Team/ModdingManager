@@ -1,6 +1,6 @@
-﻿using ModdingManagerModels;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.ObjectCacheData;
+﻿using Models;
+using Models.Interfaces;
+using Models.Types.ObjectCacheData;
 
 namespace ModdingManager.classes.utils
 {

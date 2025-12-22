@@ -1,12 +1,12 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.utils.Pathes;
+using Application.Extentions;
+using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
+using Models;
+using Models.Interfaces;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class StateCathegoryComposer : IComposer
     {

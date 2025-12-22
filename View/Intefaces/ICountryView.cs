@@ -1,10 +1,10 @@
-﻿using ModdingManagerModels;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.Utils;
+﻿using Models;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
 using System.Windows;
 using System.Windows.Media;
 
-namespace ModdingManager.classes.views
+namespace ViewInterfaces
 {
     public interface ICountryView
     {

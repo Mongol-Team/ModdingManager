@@ -1,9 +1,9 @@
-﻿using ModdingManagerModels.Enums;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.Utils;
+﻿using Models.Enums;
+using Models.Interfaces;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
 
-namespace ModdingManagerModels
+namespace Models
 {
     public class TechTreeConfig : IConfig
     {

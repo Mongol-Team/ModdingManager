@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace ModdingManagerModels.Args
+namespace Models.Args
 
 {
     public class ImageSourceArg

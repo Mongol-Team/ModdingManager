@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManagerClassLib.Utils.Pathes
+namespace Application.Utils.Pathes
 {
     public static class ProgramPathes
     {

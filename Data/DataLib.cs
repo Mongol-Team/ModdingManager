@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace ModdingManagerData
+namespace Data
 {
     public static class DataLib
     {
@@ -13,14 +13,14 @@ namespace ModdingManagerData
 
             foreach (var resourceName in resources)
             {
-                if (!resourceName.StartsWith("ModdingManagerData.Data.Text.", StringComparison.Ordinal))
+                if (!resourceName.StartsWith("Data.Data.Text.", StringComparison.Ordinal))
                     continue;
 
                 if (!resourceName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 var fileName = resourceName.Substring(
-                    "ModdingManagerData.Data.Text.".Length
+                    "Data.Data.Text.".Length
                 );
 
                 switch (fileName)

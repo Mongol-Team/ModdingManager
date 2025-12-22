@@ -1,18 +1,12 @@
-﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.utils.Pathes;
+﻿using Application.utils.Pathes;
+using Models;
+using Models.Types;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Types;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class DynamicModifierComposer : IComposer
     {
@@ -22,7 +16,7 @@ namespace ModdingManagerClassLib.Composers
                 ModPathes.DynamicModifiersPath,
                 GamePathes.DynamicModifiersPath
             };
-            List<IConfig> configs = new List<IConfig>();
+            List<IConfig> configs = new();
             foreach (string path in possiblePaths)
             {
                 if (Directory.Exists(path))
@@ -47,7 +41,7 @@ namespace ModdingManagerClassLib.Composers
 
         public static DynamicModifierConfig ParseSingleModifer(Bracket bracket)
         {
-            DynamicModifierConfig cfg = new DynamicModifierConfig();
+            DynamicModifierConfig cfg = new();
             cfg.Id = new Identifier(bracket.Name);
             cfg.Modifiers = new Dictionary<ModifierDefinitionConfig, object>();
             foreach (var var in bracket.SubVars)

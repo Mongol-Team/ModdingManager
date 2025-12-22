@@ -1,12 +1,11 @@
-﻿using ModdingManagerData;
-using ModdingManagerModels.GfxTypes;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.SubModels;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.Utils;
-using System.Drawing;
+﻿using Data;
+using Models.GfxTypes;
+using Models.Interfaces;
+using Models.SubModels;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
 
-namespace ModdingManagerModels
+namespace Models
 {
     public class CountryCharacterConfig : IConfig
     {
@@ -17,6 +16,6 @@ namespace ModdingManagerModels
         public List<ICharacterType> Types { get; set; } = [];
         public string Tag { get; set; } = DataDefaultValues.Null;
         public string AiWillDo { get; set; } = DataDefaultValues.Null;
-        
+
     }
 }

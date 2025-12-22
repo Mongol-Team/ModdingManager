@@ -1,5 +1,5 @@
 ﻿using RawDataWorker.Interfaces;
-using ModdingManagerModels.Enums;
+using Models.Enums;
 using System.Drawing;
 
 namespace RawDataWorker.Parsers.Patterns

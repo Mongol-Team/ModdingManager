@@ -1,4 +1,4 @@
-﻿using ModdingManagerModels.Args;
+﻿using Models.Args;
 using System.Windows;
 
 namespace ModdingManager.classes.metadata

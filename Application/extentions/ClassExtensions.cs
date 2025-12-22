@@ -1,9 +1,9 @@
-﻿using ModdingManagerClassLib.Composers;
-using ModdingManagerData;
+﻿using Application.Composers;
+using Data;
 using System.Drawing;
 using System.Reflection;
 
-namespace ModdingManagerClassLib.Extentions
+namespace Application.Extentions
 {
     public static class ClassExtensions
     {

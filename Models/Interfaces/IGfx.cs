@@ -1,7 +1,7 @@
-﻿using ModdingManagerModels.Types.Utils;
+﻿using Models.Types.Utils;
 using System.Drawing;
 
-namespace ModdingManagerModels.Interfaces
+namespace Models.Interfaces
 {
     public interface IGfx
     {

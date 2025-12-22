@@ -1,9 +1,9 @@
-﻿using ModdingManager.Controls;
-using ModdingManagerModels.Args;
+﻿using ViewControls;
+using Models.Args;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ModdingManager.classes.views
+namespace ViewInterfaces
 {
     public interface IStateWorkerView
     {

@@ -1,6 +1,6 @@
-﻿using ModdingManagerModels.Interfaces;
+﻿using Models.Interfaces;
 
-namespace ModdingManagerModels.Types.TableCacheData
+namespace Models.Types.TableCacheData
 {
     public class HoiTable : IHoiData, IHoiTable
     {

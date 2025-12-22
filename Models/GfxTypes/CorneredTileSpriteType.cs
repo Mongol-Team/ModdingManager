@@ -1,8 +1,8 @@
-﻿using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.Utils;
+﻿using Models.Interfaces;
+using Models.Types.Utils;
 using System.Drawing;
 
-namespace ModdingManagerModels.GfxTypes
+namespace Models.GfxTypes
 {
     public class CorneredTileSpriteType : IGfx
     {

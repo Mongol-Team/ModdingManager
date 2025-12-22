@@ -1,7 +1,7 @@
-﻿using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.ObectCacheData;
+﻿using Models.Interfaces;
+using Models.Types.ObectCacheData;
 
-namespace ModdingManagerModels.Types.ObjectCacheData
+namespace Models.Types.ObjectCacheData
 {
     public class HoiFuncFile : IHoiData
     {

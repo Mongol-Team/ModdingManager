@@ -1,7 +1,7 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Settings;
+using Application.Settings;
 
-namespace ModdingManagerClassLib.utils.Pathes
+namespace Application.utils.Pathes
 {
     public static class GamePathes
     {

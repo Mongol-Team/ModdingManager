@@ -1,18 +1,18 @@
-﻿using ModdingManagerClassLib.utils.Pathes;
+﻿using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.GfxTypes;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.ObectCacheData;
-using ModdingManagerModels.Types.ObjectCacheData;
+using Models;
+using Models.GfxTypes;
+using Models.Interfaces;
+using Models.Types.ObectCacheData;
+using Models.Types.ObjectCacheData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DDF = ModdingManagerData.DataDefaultValues;
-namespace ModdingManagerClassLib.Composers
+using DDF = Data.DataDefaultValues;
+namespace Application.Composers
 {
     public class TechCategoryComposer : IComposer
     {

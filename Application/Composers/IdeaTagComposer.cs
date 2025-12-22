@@ -1,11 +1,11 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.utils.Pathes;
+using Application.Debugging;
+using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Types.ObjectCacheData;
+using Models;
+using Models.Enums;
+using Models.Types.ObjectCacheData;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Typography.OpenFont.CFF;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class IdeaTagComposer : IComposer
     {

@@ -1,8 +1,8 @@
 ﻿using ModdingManager.classes.utils;
-using ModdingManagerModels;
-using ModdingManagerModels.Interfaces;
+using Models;
+using Models.Interfaces;
 
-namespace ModdingManagerClassLib.Extentions
+namespace Application.Extentions
 {
     public static class ConfigExtension
     {

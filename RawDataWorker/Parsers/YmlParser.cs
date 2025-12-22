@@ -1,8 +1,8 @@
 ﻿using RawDataWorker.Interfaces;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.LochalizationData;
+using Models.Enums;
+using Models.Interfaces;
+using Models.Types.LocalizationData;
+using Models.Types.LochalizationData;
 using System.Text.RegularExpressions;
 using Rx = RawDataWorker.Regexes;
 

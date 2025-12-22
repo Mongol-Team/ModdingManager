@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace ModdingManagerModels
+namespace Models
 {
     public class IdeologyType
     {

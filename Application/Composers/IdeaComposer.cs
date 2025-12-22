@@ -1,32 +1,24 @@
-﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.Settings;
-using ModdingManagerClassLib.utils.Pathes;
-using ModdingManagerData;
+﻿using Application.Debugging;
+using Application.Extentions;
+using Application.Settings;
+using Application.utils.Pathes;
+using Models;
+using Models.GfxTypes;
+using Models.Interfaces;
+using Models.Types.LocalizationData;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.GfxTypes;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
-using Pfim;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DDF = ModdingManagerData.DataDefaultValues;
+using DDF = Data.DataDefaultValues;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     internal class IdeaComposer : IComposer
     {
         public static List<IConfig> Parse()
         {
-            List<IConfig> result = new List<IConfig>();
+            List<IConfig> result = new();
             string[] possiblePathes = {
                 ModPathes.IdeasPath,
                 GamePathes.IdeasPath,
@@ -42,7 +34,7 @@ namespace ModdingManagerClassLib.Composers
                         result.AddRange(cfgs);
                     }
                 }
-                
+
             }
             return result;
         }
@@ -50,7 +42,7 @@ namespace ModdingManagerClassLib.Composers
         {
             HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(path) as HoiFuncFile;
             List<Bracket> ideaBrs = file.Brackets.Where(b => b.Name == "ideas").ToList();
-            List<IConfig> res = new List<IConfig>();
+            List<IConfig> res = new();
             foreach (Bracket ideabr in ideaBrs)
             {
                 foreach (Bracket slotbr in ideabr.SubBrackets)
@@ -67,7 +59,7 @@ namespace ModdingManagerClassLib.Composers
         }
         public static IConfig ParseSingleIdea(Bracket ideaBr)
         {
-            IdeaConfig idea = new IdeaConfig()
+            IdeaConfig idea = new()
             {
                 Id = new Identifier(ideaBr.Name),
                 Localisation = new ConfigLocalisation() { Language = ModManagerSettings.Instance.CurrentLanguage },
@@ -99,7 +91,7 @@ namespace ModdingManagerClassLib.Composers
                         if (removalVar?.Value != null)
                             idea.RemovalCost = removalVar.Value.ToInt();
                         break;
-                   
+
                     case "on_add":
                         var onAddVar = ideaBr.SubVars.FirstOrDefault(v => v.Name == "on_add");
                         if (onAddVar?.Value != null)
@@ -164,7 +156,7 @@ namespace ModdingManagerClassLib.Composers
                 float dd = 0;
             }
             idea.Gfx = gfx;
-           
+
             return idea;
         }
     }

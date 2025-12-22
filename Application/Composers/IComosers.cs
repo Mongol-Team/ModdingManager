@@ -1,12 +1,12 @@
-﻿using ModdingManagerModels;
-using ModdingManagerModels.Types.ObjectCacheData;
+﻿using Models;
+using Models.Types.ObjectCacheData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public interface IComposer
     {

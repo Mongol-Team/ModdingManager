@@ -1,4 +1,4 @@
-﻿using ModdingManagerModels.Types;
+﻿using Models.Types;
 using System.Drawing;
 using System.Globalization;
 

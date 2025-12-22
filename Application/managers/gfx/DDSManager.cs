@@ -1,10 +1,10 @@
-﻿using ModdingManagerClassLib.Extentions;
+﻿using Application.Extentions;
 using ModdingManager.managers.@base;
-using ModdingManagerModels;
+using Models;
 using Pfim;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using ModdingManagerClassLib.Settings;
+using Application.Settings;
 namespace ModdingManager.classes.managers.gfx
 {
     public static class DDSManager

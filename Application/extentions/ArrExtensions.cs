@@ -1,8 +1,6 @@
-﻿using CommunityToolkit.HighPerformance.Helpers;
-using ModdingManagerModels.Types.ObectCacheData;
-using System.Windows.Documents;
+﻿using Models.Types.ObectCacheData;
 
-namespace ModdingManagerClassLib.Extentions
+namespace Application.Extentions
 {
     public static class ArrExtensions
     {

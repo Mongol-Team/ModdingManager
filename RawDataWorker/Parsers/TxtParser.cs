@@ -1,7 +1,7 @@
 ﻿using RawDataWorker.Interfaces;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.ObectCacheData;
-using ModdingManagerModels.Types.ObjectCacheData;
+using Models.Interfaces;
+using Models.Types.ObectCacheData;
+using Models.Types.ObjectCacheData;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Rx = RawDataWorker.Regexes;

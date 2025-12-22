@@ -1,17 +1,17 @@
-﻿using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerClassLib.utils.Pathes;
+﻿using Application.Debugging;
+using Application.Extentions;
+using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels.GfxTypes;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
+using Models.GfxTypes;
+using Models.Interfaces;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Controls;
-using DDF = ModdingManagerData.DataDefaultValues;
-namespace ModdingManagerClassLib.Loaders
+using DDF = Data.DataDefaultValues;
+namespace Application.Loaders
 {
     public static class GfxLoader
     {

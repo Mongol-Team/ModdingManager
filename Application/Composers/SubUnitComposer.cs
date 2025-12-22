@@ -1,12 +1,12 @@
-﻿using ModdingManagerClassLib.utils.Pathes;
+﻿using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Types;
-using ModdingManagerModels.Types.ObectCacheData;
-using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
+using Models;
+using Models.Enums;
+using Models.Types;
+using Models.Types.ObectCacheData;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class SubUnitComposer : IComposer
     {

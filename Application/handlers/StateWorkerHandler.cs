@@ -1,11 +1,11 @@
 ﻿using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
-using ModdingManagerClassLib;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerModels;
-using ModdingManagerModels.Args;
-using ModdingManagerModels.Types.ObectCacheData;
-using ModdingManagerModels.Types.ObjectCacheData;
+using Application;
+using Application.Debugging;
+using Models;
+using Models.Args;
+using Models.Types.ObectCacheData;
+using Models.Types.ObjectCacheData;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System.Globalization;

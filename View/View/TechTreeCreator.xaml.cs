@@ -1,39 +1,28 @@
-﻿using ModdingManager.Controls;
-using ModdingManager.Intefaces;
-using ModdingManager.managers.@base;
-using ModdingManager.Presenters;
-using ModdingManagerClassLib;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerModels;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.Utils;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using Application;
+using Application.Extentions;
+using Models;
+using Models.Enums;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Brushes = System.Windows.Media.Brushes;
+using ViewControls;
+using ViewInterfaces;
+using ViewPresenters;
 using DataFormats = System.Windows.DataFormats;
 using DragEventArgs = System.Windows.DragEventArgs;
 using MessageBox = System.Windows.MessageBox;
-using RichTextBox = System.Windows.Controls.RichTextBox;
 
-namespace ModdingManager
+namespace View
 {
     public partial class TechTreeCreator : Window, ITechTreeCreatorView
     {
         public TechTreeCreator()
         {
             InitializeComponent();
-            TechTreeWorkerPresenter presenter = new TechTreeWorkerPresenter(this);
+            TechTreeWorkerPresenter presenter = new(this);
         }
 
         #region Реализация интерфейса ITechTreeCreatorView
@@ -144,7 +133,7 @@ namespace ModdingManager
                 if (Enum.TryParse(TreeLedgerBox.Text, out TechTreeLedgerType result))
                     return result;
                 else
-                    return default; 
+                    return default;
             }
             set => TreeLedgerBox.Text = value.ToString();
         }
@@ -168,7 +157,7 @@ namespace ModdingManager
         {
             get
             {
-                Dictionary<ModifierDefinitionConfig, object> mods = new Dictionary<ModifierDefinitionConfig, object>();
+                Dictionary<ModifierDefinitionConfig, object> mods = new();
                 foreach (string modstr in ModdifierBox.GetLines())
                 {
                     string[] splited = modstr.Split(':');
@@ -176,8 +165,7 @@ namespace ModdingManager
                     {
                         continue;
                     }
-                    double.TryParse(splited[1], out double value);
-                    if (value == null || value == 0)
+                    if (!double.TryParse(splited[1], out double value))
                     {
                         continue;
                     }
@@ -198,14 +186,14 @@ namespace ModdingManager
         {
             get => AiWillDoBox.GetRichTextBoxText();
             set => AiWillDoBox.SetRichTextBoxText(value);
-            
+
         }
 
         public Dictionary<TechTreeItemConfig, int> Dependencies
         {
             get
             {
-                Dictionary<TechTreeItemConfig, int> deps = new Dictionary<TechTreeItemConfig, int>();
+                Dictionary<TechTreeItemConfig, int> deps = new();
                 List<string> raw = DependenciesBox.GetRichTextBoxLines();
                 raw.ForEach(line =>
                 {
@@ -234,7 +222,7 @@ namespace ModdingManager
         }
         public List<TechCategoryConfig> Categories
         {
-            get 
+            get
             {
                 return ModDataStorage.Mod.TechCategories
                 .Where(cat => CathegoryModdifierBox.GetRichTextBoxLines()
@@ -367,7 +355,7 @@ namespace ModdingManager
                 if (files.Length > 0)
                 {
                     string filePath = files[0];
-                    BitmapImage bitmap = new BitmapImage(new Uri(filePath));
+                    BitmapImage bitmap = new(new Uri(filePath));
 
                     if (sender == SmallTechIconCanvas)
                     {
@@ -393,7 +381,7 @@ namespace ModdingManager
 
                     try
                     {
-                        BitmapImage original = new BitmapImage(new Uri(imagePath));
+                        BitmapImage original = new(new Uri(imagePath));
 
                         var resizedFirst = original.ResizeToBitmap(25, 25);
                         TabFolderFirstImage.Source = resizedFirst;
@@ -422,6 +410,6 @@ namespace ModdingManager
 
         #endregion
 
-        
+
     }
 }

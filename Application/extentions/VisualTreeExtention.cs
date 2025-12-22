@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
-namespace ModdingManagerClassLib.Extentions
+namespace Application.Extentions
 {
 
     public static class VisualTreeExtensions

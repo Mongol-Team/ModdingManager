@@ -1,18 +1,12 @@
-﻿
-using global::ModdingManager.managers.@base;
-using global::ModdingManager.View;
-using ModdingManager.classes.utils;
-using ModdingManagerClassLib;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.Settings;
-using ModdingManagerModels;
-using System.IO;
-using System.Text.Json;
+﻿using Application;
+using Application.Debugging;
+using Application.Settings;
+using global::View;
 using System.Windows;
 using System.Windows.Controls;
 using MessageBox = System.Windows.MessageBox;
 
-namespace ModdingManager.Presenter
+namespace ViewPresenters
 {
     public sealed class MainWindowPresenter
     {

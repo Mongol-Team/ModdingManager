@@ -1,21 +1,18 @@
-﻿using ModdingManagerClassLib.Extentions;
-using ModdingManager.classes.views;
-using ModdingManager.managers.@base;
-using System.Diagnostics;
+﻿using Application;
+using Application.Extentions;
+using Application.Settings;
+using Models;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using ViewInterfaces;
+using ViewPresenters;
 using Label = System.Windows.Controls.Label;
-using ModConfig = ModdingManager.classes.utils.ModConfig;
-using ModdingManagerModels.Types.Utils;
-using ModdingManagerModels;
-using ModdingManagerModels.Types.LocalizationData;
-using System.IO;
-using ModdingManagerClassLib;
-using ModdingManagerClassLib.Settings;
-using View.Properties;
-namespace ModdingManager
+namespace View
 {
     /// <summary>
     /// Логика взаимодействия для WPFCoutryCreator.xaml
@@ -176,7 +173,7 @@ namespace ModdingManager
         {
             get
             {
-                List<IdeaConfig> result = new List<IdeaConfig>();
+                List<IdeaConfig> result = new();
                 foreach (string ideo in StartingIdeasBox.GetLines())
                 {
                     IdeaConfig cfg = ModDataStorage.Mod.Ideas.FindById(ideo);
@@ -198,7 +195,7 @@ namespace ModdingManager
         {
             get
             {
-                List<CountryCharacterConfig> result = new List<CountryCharacterConfig>();
+                List<CountryCharacterConfig> result = new();
                 foreach (var line in RecruitingCharactersBox.GetLines())
                 {
                     CountryCharacterConfig cfg = ModDataStorage.Mod.Characters.FindById(line);
@@ -230,7 +227,7 @@ namespace ModdingManager
                         int.TryParse(parts[0], out int id))
                     {
                         string boolPart = parts[1];
-                        bool isCore = boolPart == "true" || boolPart == "1";
+                        bool isCore = boolPart is "true" or "1";
                         result[ModDataStorage.Mod.GetState(id)] = isCore;
                     }
                 }
@@ -250,7 +247,7 @@ namespace ModdingManager
         {
             get
             {
-                Dictionary<IdeologyConfig, Bitmap> result = new Dictionary<IdeologyConfig, Bitmap>();
+                Dictionary<IdeologyConfig, Bitmap> result = new();
                 foreach (var wrap in CountryFlagsCanvas.Children)
                 {
                     Canvas canvasWrap = wrap as Canvas;
@@ -270,7 +267,7 @@ namespace ModdingManager
                     ImageSource imageSource = pair.Value.ToImageSource();
 
                     // Создаём контейнер Canvas
-                    Canvas wrap = new Canvas
+                    Canvas wrap = new()
                     {
                         Width = 245,
                         Height = 72,
@@ -347,11 +344,11 @@ namespace ModdingManager
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            List<string> lines = new List<string>();
+            List<string> lines = new();
             foreach (var i in ModDataStorage.Mod.Ideologies)
             {
                 // Создаём контейнер Canvas, аналогичный XAML
-                Canvas wrap = new Canvas
+                Canvas wrap = new()
                 {
                     Width = 245,
                     Height = 72,
@@ -414,7 +411,7 @@ namespace ModdingManager
 
                     try
                     {
-                        BitmapImage original = new BitmapImage(new Uri(imagePath));
+                        BitmapImage original = new(new Uri(imagePath));
                         string name = current.Name + "Img";
                         int targetWidth = 82;
                         int targetHeight = 52;
@@ -431,7 +428,7 @@ namespace ModdingManager
         }
         private void RullingPartyBox_Loaded(object sender, RoutedEventArgs e)
         {
-            List<string> strings = new List<string>();
+            List<string> strings = new();
             foreach (var ideo in ModDataStorage.Mod.Ideologies)
             {
                 strings.Add(ideo.Id.ToString());

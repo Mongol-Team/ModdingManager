@@ -1,5 +1,5 @@
 ﻿using RawDataWorker.Interfaces;
-using ModdingManagerModels.Interfaces;
+using Models.Interfaces;
 
 namespace RawDataWorker.Parsers
 {

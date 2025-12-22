@@ -1,9 +1,9 @@
-﻿using ModdingManagerModels.Types.ObjectCacheData;
-using ModdingManagerModels.Types.Utils;
+﻿using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using System.Drawing;
 using System.Runtime.CompilerServices;
-using DDF = ModdingManagerData.DataDefaultValues;
-namespace ModdingManagerClassLib.Extentions
+using DDF = Data.DataDefaultValues;
+namespace Application.Extentions
 {
     public static class BraketExtentions
     {

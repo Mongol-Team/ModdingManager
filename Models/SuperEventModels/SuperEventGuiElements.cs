@@ -1,6 +1,6 @@
-﻿using ModdingManagerModels.Types;
+﻿using Models.Types;
 
-namespace ModdingManagerModels.SuperEventModels
+namespace Models.SuperEventModels
 {
     public class SuperEventGuiElements
     {

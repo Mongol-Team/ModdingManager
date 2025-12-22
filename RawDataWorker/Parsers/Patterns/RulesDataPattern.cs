@@ -1,6 +1,6 @@
 ﻿using RawDataWorker.Interfaces;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Types;
+using Models.Enums;
+using Models.Types;
 using System.Drawing;
 
 namespace RawDataWorker.Parsers.Patterns

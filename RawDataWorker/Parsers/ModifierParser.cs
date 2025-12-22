@@ -1,10 +1,10 @@
 ﻿using HtmlAgilityPack;
 using RawDataWorker.Parsers;
-using ModdingManagerModels;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.HtmlFilesData;
-using ModdingManagerModels.Types.Utils;
+using Models;
+using Models.Enums;
+using Models.Interfaces;
+using Models.Types.HtmlFilesData;
+using Models.Types.Utils;
 using System.Text.RegularExpressions;
 
 public class ModifierParser : Parser

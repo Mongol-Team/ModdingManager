@@ -31,7 +31,7 @@
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>ModdingManagerData.Properties</CustomToolNamespace>
+      <CustomToolNamespace>Data.Properties</CustomToolNamespace>
     </EmbeddedResource>
   </ItemGroup>
 

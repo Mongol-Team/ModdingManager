@@ -1,6 +1,6 @@
 ﻿using HarfBuzzSharp;
-using ModdingManagerClassLib.Extentions;
-using ModdingManagerModels.Types;
+using Application.Extentions;
+using Models.Types;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
@@ -12,7 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
-using static ModdingManagerModels.SuperEventModels.SuperEventGuiElements;
+using static Models.SuperEventModels.SuperEventGuiElements;
 using HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment;
 using SystemFonts = SixLabors.Fonts.SystemFonts;
 using VerticalAlignment = SixLabors.Fonts.VerticalAlignment;

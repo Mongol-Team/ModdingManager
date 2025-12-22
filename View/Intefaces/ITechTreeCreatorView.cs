@@ -1,15 +1,15 @@
-﻿using ModdingManager.Controls;
-using ModdingManagerModels;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.Utils;
+﻿using ViewControls;
+using Models;
+using Models.Enums;
+using Models.Interfaces;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows;
 
-namespace ModdingManager.Intefaces
+namespace ViewInterfaces
 {
     public interface ITechTreeCreatorView
     {

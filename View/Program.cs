@@ -1,6 +1,6 @@
-using ModdingManager.View;
-using ModdingManagerClassLib;
-using ModdingManagerClassLib.Settings;
+using View;
+using Application;
+using Application.Settings;
 using System.Runtime.InteropServices;
 
 namespace ModdingManager

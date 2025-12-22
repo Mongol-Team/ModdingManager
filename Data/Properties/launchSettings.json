@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "ModdingManagerData": {
+    "Data": {
       "commandName": "Project"
     },
     "Container (Dockerfile)": {

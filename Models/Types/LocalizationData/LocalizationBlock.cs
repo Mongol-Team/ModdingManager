@@ -1,6 +1,6 @@
-﻿using ModdingManagerModels.Enums;
+﻿using Models.Enums;
 
-namespace ModdingManagerModels.Types.LocalizationData
+namespace Models.Types.LocalizationData
 {
     public class LocalizationBlock : ILocalisation
     {

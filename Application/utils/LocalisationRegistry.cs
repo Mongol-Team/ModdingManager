@@ -1,16 +1,16 @@
 ﻿using ModdingManager.managers.@base;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.utils.Pathes;
+using Application.Debugging;
+using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Types.LocalizationData;
-using ModdingManagerModels.Types.LochalizationData;
-using ModdingManagerModels.Types.Utils;
+using Models;
+using Models.Types.LocalizationData;
+using Models.Types.LochalizationData;
+using Models.Types.Utils;
 using System.Collections.Concurrent;
-using DDF = ModdingManagerData.DataDefaultValues;
+using DDF = Data.DataDefaultValues;
 
-namespace ModdingManagerClassLib.utils
+namespace Application.utils
 {
     public class LocalisationRegistry
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System;
 using System.Runtime.InteropServices;
 
-namespace ModdingManagerClassLib.Debugging
+namespace Application.Debugging
 {
 
     public static class ConsoleHelper

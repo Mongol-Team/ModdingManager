@@ -1,4 +1,4 @@
-namespace ModdingManagerModels.Enums
+namespace Models.Enums
 {
     public enum TimeUnit
     {

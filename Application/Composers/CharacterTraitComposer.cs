@@ -1,18 +1,18 @@
-﻿using ModdingManagerClassLib.Debugging;
-using ModdingManagerClassLib.utils.Pathes;
+﻿using Application.Debugging;
+using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using ModdingManagerModels;
-using ModdingManagerModels.Enums;
-using ModdingManagerModels.Types.ObectCacheData;
-using ModdingManagerModels.Types.ObjectCacheData;
+using Models;
+using Models.Enums;
+using Models.Types.ObectCacheData;
+using Models.Types.ObjectCacheData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModdingManagerClassLib.Composers
+namespace Application.Composers
 {
     public class CharacterTraitComposer : IComposer
     {

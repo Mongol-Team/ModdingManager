@@ -1,6 +1,6 @@
 ﻿using ModdingManager.classes.utils;
-using ModdingManagerClassLib.Utils.Pathes;
-using ModdingManagerModels.Enums;
+using Application.Utils.Pathes;
+using Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace ModdingManagerClassLib.Settings
+namespace Application.Settings
 {
     public class ModManagerSettings
     {

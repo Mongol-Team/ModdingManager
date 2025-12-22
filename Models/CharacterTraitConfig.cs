@@ -1,13 +1,8 @@
-﻿using ModdingManagerModels.Enums;
-using ModdingManagerModels.Interfaces;
-using ModdingManagerModels.Types.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Models.Enums;
+using Models.Interfaces;
+using Models.Types.Utils;
 
-namespace ModdingManagerModels
+namespace Models
 {
     public class CharacterTraitConfig : IConfig
     {

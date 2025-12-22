@@ -1,13 +1,6 @@
-﻿
-using ModdingManager.Controls;
-using ModdingManager.classes.utils;
-using ModdingManagerClassLib;
-using ModdingManagerClassLib.Debugging;
-using ModdingManagerModels.Types.ObjectCacheData;
-using System.Windows;
-using ModdingManager.managers.@base;
+﻿using System.Windows;
 
-namespace ModdingManager
+namespace View
 {
     /// <summary>
     /// Логика взаимодействия для MapHealerWindow.xaml
