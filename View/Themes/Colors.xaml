@@ -1,0 +1,76 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Background Colors -->
+    <SolidColorBrush x:Key="BackgroundApp" Color="#000000"/>
+    <SolidColorBrush x:Key="BackgroundBody" Color="#0A0A0A"/>
+    <SolidColorBrush x:Key="BackgroundPage" Color="#151515"/>
+    <SolidColorBrush x:Key="BackgroundModal" Color="#0A0A0A"/>
+    <SolidColorBrush x:Key="BackgroundCard" Color="#1F1F1F"/>
+    
+    <!-- Text Colors -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="TextSecondary" Color="#EAEAEA"/>
+    <SolidColorBrush x:Key="TextTertiary" Color="#999999"/>
+    <SolidColorBrush x:Key="TextLowContrast" Color="#FFFFFF" Opacity="0.60"/>
+    
+    <!-- Accent Colors -->
+    <SolidColorBrush x:Key="Error" Color="#FF3B30"/>
+    <SolidColorBrush x:Key="ErrorFocus" Color="#FF453A"/>
+    <SolidColorBrush x:Key="Link" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="LinkHover" Color="#409CFF"/>
+    <SolidColorBrush x:Key="LinkActive" Color="#0070E0"/>
+    <SolidColorBrush x:Key="LikeActive" Color="#ff3b5c"/>
+    <SolidColorBrush x:Key="LikeHover" Color="#ff1744"/>
+    <SolidColorBrush x:Key="Success" Color="#4CAF50"/>
+    
+    <!-- Button Colors - Dark Theme -->
+    <SolidColorBrush x:Key="ButtonDarkBackground" Color="#1F1F1F"/>
+    <SolidColorBrush x:Key="ButtonDarkBackgroundHover" Color="#1F1F1F"/>
+    <SolidColorBrush x:Key="ButtonDarkBackgroundPressed" Color="#272727"/>
+    <SolidColorBrush x:Key="ButtonDarkText" Color="#EAEAEA"/>
+    <SolidColorBrush x:Key="ButtonDarkTextHover" Color="#C8C8C8"/>
+    <SolidColorBrush x:Key="ButtonDarkSelectedBackground" Color="#FFFFFF" Opacity="0.8"/>
+    <SolidColorBrush x:Key="ButtonDarkSelectedText" Color="#1F1F1F"/>
+    
+    <!-- Button Colors - Light Theme -->
+    <SolidColorBrush x:Key="ButtonLightBackground" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ButtonLightBackgroundHover" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ButtonLightBackgroundPressed" Color="#D8D8D8"/>
+    <SolidColorBrush x:Key="ButtonLightText" Color="#1F1F1F"/>
+    <SolidColorBrush x:Key="ButtonLightTextHover" Color="#4C4C4C"/>
+    
+    <!-- Button Disabled -->
+    <SolidColorBrush x:Key="ButtonDisabledBackground" Color="#AEAEAE"/>
+    <SolidColorBrush x:Key="ButtonDisabledText" Color="#6A6A6A"/>
+    
+    <!-- Input Colors -->
+    <SolidColorBrush x:Key="InputBackground" Color="#1F1F1F"/>
+    <SolidColorBrush x:Key="InputText" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="InputPlaceholder" Color="#6A6A6A"/>
+    <SolidColorBrush x:Key="InputBorder" Color="#2C2C2E"/>
+    <SolidColorBrush x:Key="InputBorderFocus" Color="#3A3A3C"/>
+    <SolidColorBrush x:Key="InputBorderHover" Color="#2C2C2E"/>
+    <SolidColorBrush x:Key="InputIcon" Color="#EAEAEA"/>
+    <SolidColorBrush x:Key="InputDisabledBackground" Color="#0D0D0D"/>
+    <SolidColorBrush x:Key="InputDisabledText" Color="#4A4A4A"/>
+    
+    <!-- Additional Colors -->
+    <SolidColorBrush x:Key="NavButtonBackground" Color="#FFFFFF" Opacity="0.2"/>
+    <SolidColorBrush x:Key="NavButtonBackgroundHover" Color="#FFFFFF" Opacity="0.3"/>
+    <SolidColorBrush x:Key="CardPlaceholderBackground" Color="#FFFFFF" Opacity="0.3"/>
+    <SolidColorBrush x:Key="TabBarBackground" Color="#1F1F1F"/>
+    <SolidColorBrush x:Key="TabBarActiveBackground" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BackdropModal" Color="#000000" Opacity="0.40"/>
+    <SolidColorBrush x:Key="ScrollbarTrack" Color="#FFFFFF" Opacity="0.05"/>
+    <SolidColorBrush x:Key="ScrollbarThumb" Color="#FFFFFF" Opacity="0.2"/>
+    <SolidColorBrush x:Key="ScrollbarThumbHover" Color="#FFFFFF" Opacity="0.3"/>
+    <SolidColorBrush x:Key="ScrollbarThin" Color="#333333"/>
+    
+    <!-- Folder Card Layers -->
+    <SolidColorBrush x:Key="FolderLayer1" Color="#969696"/>
+    <SolidColorBrush x:Key="FolderLayer2" Color="#B4B4B4"/>
+    <SolidColorBrush x:Key="FolderLayer3" Color="#D9D9D9"/>
+
+</ResourceDictionary>
+

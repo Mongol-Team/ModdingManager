@@ -17,7 +17,7 @@ using System.Windows.Threading;
 using FontFamily = System.Windows.Media.FontFamily;
 using RichTextBox = System.Windows.Controls.RichTextBox;
 using TextBox = System.Windows.Controls.TextBox;
-using View.Properties;
+using Data.Properties;
 
 namespace View
 {
@@ -815,7 +815,7 @@ namespace View
                 Stretch = Stretch.Fill,
                 Tag = "OptionElement",
                 Source = Imaging.CreateBitmapSourceFromHBitmap(
-                    global::View.Properties.Resources.null_item_image.GetHbitmap(),
+                    Data.Properties.Resources.null_item_image.GetHbitmap(),
                     IntPtr.Zero,
                     Int32Rect.Empty,
                     BitmapSizeOptions.FromEmptyOptions()

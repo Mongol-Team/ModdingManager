@@ -4,6 +4,7 @@ using Application.Settings;
 using global::View;
 using System.Windows;
 using System.Windows.Controls;
+using ViewControls;
 using MessageBox = System.Windows.MessageBox;
 
 namespace ViewPresenters
@@ -12,19 +13,17 @@ namespace ViewPresenters
     {
         private readonly MainWindow _view;
         private bool _isLoaded = false;
+        private bool _isApplicationInitialized = false;
 
         public MainWindowPresenter(MainWindow view)
         {
-            ModManagerSettings.Load();
-            ModDataStorage.ComposeMod();
             _view = view ?? throw new ArgumentNullException(nameof(view));
             WireUp();
+            _view.Loaded += OnWindowLoaded;
         }
 
         private void WireUp()
         {
-
-            // клики 1:1 с WinForms
             _view.LocConvertButton.Click += LocConvertButton_Click;
             _view.StateManagerBtn.Click += Statebutton_Click;
             _view.LocTechButton.Click += LocTechButton_Click;
@@ -41,13 +40,57 @@ namespace ViewPresenters
             _view.DebugButton.Click += DebugButton_Click;
             _view.IdeologyCreatorBtn.Click += IdeologyCreatorBtn_Click;
 
-            // сохранение dir.json при изменении (как в DirBox_TextChanged)
             _view.DirBox.TextChanged += DirBoxes_TextChanged;
             _view.GameDirBox.TextChanged += DirBoxes_TextChanged;
-            LoadConfig();
         }
 
-        // ====== перенос обработчиков из MainForm ======
+        private async void OnWindowLoaded(object? sender, RoutedEventArgs e)
+        {
+            if (_isLoaded) return;
+            _isLoaded = true;
+
+            await InitializeApplicationAsync();
+        }
+
+        private async System.Threading.Tasks.Task InitializeApplicationAsync()
+        {
+            var loadingWindow = new LoadingWindow
+            {
+                Owner = _view,
+                Message = "Загрузка настроек..."
+            };
+            loadingWindow.SetProgressBounds(0, 2);
+            loadingWindow.Show();
+
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    loadingWindow.Message = "Загрузка настроек...";
+                });
+                ModManagerSettings.Load();
+            });
+
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                loadingWindow.Progress = 1;
+                loadingWindow.Message = "Инициализация данных приложения...";
+                LoadConfig();
+            });
+
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                ModDataStorage.ComposeMod();
+            });
+
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                loadingWindow.Progress = 2;
+                loadingWindow.EndLoading();
+                _isApplicationInitialized = true;
+            });
+        }
+
         private void LoadConfig()
         {
             _view.DirBox.Text = ModManagerSettings.Instance.ModDirectory;
@@ -277,6 +320,11 @@ namespace ViewPresenters
 
         private void UpdateModManager()
         {
+            if (!_isApplicationInitialized)
+            {
+                MessageBox.Show("Приложение еще не инициализировано. Пожалуйста, подождите.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
         }
     }
 }

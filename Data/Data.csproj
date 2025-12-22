@@ -7,11 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Data\Text\BaisicUnitGroupsDefenitions.txt" />
-  </ItemGroup>
-  <ItemGroup>
-	<EmbeddedResource Include="Data\Text\RulesCoreDefenitions.txt" />
-	
+    <EmbeddedResource Include="Embedded\Text\BaisicUnitGroupsDefenitions.txt" />
+    <EmbeddedResource Include="Embedded\Text\RulesCoreDefenitions.txt" />
   </ItemGroup>
 
   <ItemGroup>

@@ -30,87 +30,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="data\configs\characters\" />
-    <Folder Include="data\configs\ideas\" />
-    <Folder Include="data\configs\modifiers\" />
-    <Folder Include="data\configs\techtrees\" />
-    <Folder Include="data\configs\templates\" />
-    <Folder Include="data\temp\" />
-  </ItemGroup>
-
-  <ItemGroup>
-	<ApplicationDefinition Remove="App.xaml" />
-	<None Remove="data\Gfx\interface\healer.png" />
-	<None Remove="data\Gfx\interface\new_regiment_slot_support.png" />
-	<None Remove="data\Gfx\interface\null_item_image.png" />
-	<None Remove="data\Gfx\interface\superevent_bg_1.png" />
-	<None Remove="data\Gfx\interface\superevent_button_1.png" />
-	<None Remove="data\Gfx\interface\technology_available_item_bg.png" />
-	<None Remove="data\Gfx\interface\techtree_tabs.png" />
-	<None Remove="data\Gfx\interface\techtree_tabs_shadowing.png" />
-	<None Remove="data\Gfx\interface\tech_industry_available_item_bg.png" />
-	<None Remove="data\Gfx\interface\tiled_plain_bg.png" />
-	<None Remove="graphics\color_spectrum.jpg" />
-	<None Remove="graphics\controls\color_spectrum.jpg" />
-	<None Remove="graphics\controls\err.png" />
-	<None Remove="graphics\controls\warn.png" />
 	<ProjectReference Include="..\Application\Application.csproj" />
 	<ProjectReference Include="..\RawDataWorker\RawDataWorker.csproj" />
 	<ProjectReference Include="..\Models\Models.csproj" />
-	<Resource Include="data\Gfx\interface\healer.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="data\Gfx\interface\new_regiment_slot_support.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="data\Gfx\interface\null_item_image.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="data\Gfx\interface\superevent_bg_1.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="data\Gfx\interface\superevent_button_1.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="data\Gfx\interface\technology_available_item_bg.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="data\Gfx\interface\techtree_tabs.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="data\Gfx\interface\techtree_tabs_shadowing.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="data\Gfx\interface\tech_industry_available_item_bg.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="data\Gfx\interface\tiled_plain_bg.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="graphics\controls\color_spectrum.jpg">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="graphics\controls\err.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-	<Resource Include="graphics\controls\warn.png">
-	  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	</Resource>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
+	<ProjectReference Include="..\Data\Data.csproj" />
     <Compile Update="View\TechTreeCreator.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

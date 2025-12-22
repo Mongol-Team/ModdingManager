@@ -1,4 +1,4 @@
-﻿using View.Properties;
+﻿using Data.Properties;
 
 namespace ModdingManager
 {

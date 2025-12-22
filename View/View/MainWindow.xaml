@@ -5,9 +5,10 @@
         Width="963" Height="694"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        WindowStyle="SingleBorderWindow">
+        WindowStyle="SingleBorderWindow"
+        Background="#000000">
     <!--Icon="pack://application:,,,/Assets/app.ico"-->
-    <Grid Margin="0">
+    <Grid Margin="0" Background="#000000">
         <!-- Сетка примерно повторяет координаты WinForms -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -39,53 +40,57 @@
         <!-- Кнопки ряд 0 -->
         <Button x:Name="LocConvertButton" Grid.Row="0" Grid.Column="0" Margin="44,16,44,8"
                 Content="Локализация по дерву фокусов"
-                Background="#FF00C000" Foreground="White" />
+                Style="{StaticResource ButtonDark}"/>
         <Button x:Name="StateManagerBtn" Grid.Row="0" Grid.Column="1" Margin="44,16,44,8"
                 Content="Работа со картой"
-                Background="#FF00C0C0" Foreground="Black" />
+                Style="{StaticResource ButtonLight}"/>
         <Button x:Name="CountryCrtButton" Grid.Row="0" Grid.Column="2" Margin="44,16,44,8"
                 Content="Создатель стран"
-                Background="#FF00C000" Foreground="White" />
+                Style="{StaticResource ButtonDark}"/>
 
         <!-- Кнопки ряд 1 -->
         <Button x:Name="LocTechButton" Grid.Row="1" Grid.Column="0" Margin="44,8"
-                Content="Локализация по файлу технологии" />
+                Content="Локализация по файлу технологии"
+                Style="{StaticResource ButtonDark}"/>
         <Button x:Name="ModButton" Grid.Row="1" Grid.Column="1" Margin="44,8"
-                Content="Создатель снаряжения" />
+                Content="Создатель снаряжения"
+                Style="{StaticResource ButtonDark}"/>
         <Button x:Name="CharCreator" Grid.Row="1" Grid.Column="2" Margin="44,8"
                 Content="Создатель персонажей"
-                Background="#FF00C000" Foreground="White" />
+                Style="{StaticResource ButtonDark}"/>
 
         <!-- Кнопки ряд 2 -->
         <Button x:Name="LocStateButton" Grid.Row="2" Grid.Column="0" Margin="44,8"
                 Content="Локализация по файлу стейта"
-                Background="#FF00C000" Foreground="White" />
+                Style="{StaticResource ButtonDark}"/>
         <Button x:Name="TechButton" Grid.Row="2" Grid.Column="1" Margin="44,8"
                 Content="Создатель технологий"
-                Background="#FF00C0C0" Foreground="Black" />
+                Style="{StaticResource ButtonLight}"/>
         <Button x:Name="IdeaCreatorButton" Grid.Row="2" Grid.Column="2" Margin="44,8"
                 Content="Создатель идей"
-                Background="#FF00C000" Foreground="White" />
+                Style="{StaticResource ButtonDark}"/>
 
         <!-- Кнопки ряд 3 -->
         <Button x:Name="LocIdeaButton" Grid.Row="3" Grid.Column="0" Margin="44,8"
                 Content="Локализация для идей"
-                Background="#FF00C000" Foreground="White" />
+                Style="{StaticResource ButtonDark}"/>
         <Button x:Name="FlagCrtButton" Grid.Row="3" Grid.Column="1" Margin="44,8"
                 Content="Создатель флагов"
-                Background="#FFFFC000" Foreground="Black" />
+                Style="{StaticResource ButtonLight}"/>
         <Button x:Name="TemplateCreatorBtn" Grid.Row="3" Grid.Column="2" Margin="44,8"
-                Content="Создатель шаблонов юнитов" />
+                Content="Создатель шаблонов юнитов"
+                Style="{StaticResource ButtonDark}"/>
 
         <!-- Кнопки ряд 4 -->
         <Button x:Name="SuperEventCreatorButton" Grid.Row="4" Grid.Column="0" Margin="44,8"
                 Content="Создатель суперивентов"
-                Background="#FF00C0C0" Foreground="Black" />
+                Style="{StaticResource ButtonLight}"/>
         <Button x:Name="IdeologyCreatorBtn" Grid.Row="4" Grid.Column="1" Margin="44,8"
-                Content="Создатель идеологий" />
+                Content="Создатель идеологий"
+                Style="{StaticResource ButtonDark}"/>
         <Button x:Name="OOBCreatorBtn" Grid.Row="4" Grid.Column="2" Margin="44,8"
                 Content="Создатель стартовых юнитов"
-                Background="#FF00C0C0" Foreground="Black" />
+                Style="{StaticResource ButtonLight}"/>
 
         <!-- Нижняя панель ввода директорий -->
         <Grid Grid.Row="6" Grid.ColumnSpan="3" Margin="24,8,24,4">
@@ -95,12 +100,13 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox x:Name="DirBox" Grid.Column="0" Margin="0,4,12,4" Height="32"
-                     VerticalContentAlignment="Center" />
-            <Label Grid.Column="1" VerticalAlignment="Center" Content="Дирректория мода" />
+            <TextBox x:Name="DirBox" Grid.Column="0" Margin="0,4,12,4"
+                     Style="{StaticResource TextBoxDark}"/>
+            <Label Grid.Column="1" VerticalAlignment="Center" Content="Дирректория мода"
+                   Style="{StaticResource TextLabel}"/>
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" >
                 <Button x:Name="DebugButton" Width="131" Height="37" Margin="16,0,0,0"
-                        Content="Debug" Background="#FF404040" Foreground="White"/>
+                        Content="Debug" Style="{StaticResource ButtonDarkSmall}"/>
             </StackPanel>
         </Grid>
 
@@ -111,11 +117,13 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox x:Name="GameDirBox" Grid.Column="0" Margin="0,0,12,0" Height="32"
-                     VerticalContentAlignment="Center" />
-            <Label Grid.Column="1" VerticalAlignment="Center" Content="Дирректория игры" />
+            <TextBox x:Name="GameDirBox" Grid.Column="0" Margin="0,0,12,0"
+                     Style="{StaticResource TextBoxDark}"/>
+            <Label Grid.Column="1" VerticalAlignment="Center" Content="Дирректория игры"
+                   Style="{StaticResource TextLabel}"/>
             <Button x:Name="TestingBtn" Grid.Column="2" Width="131" Height="33"
-                    Content="писюн ф6" Margin="16,0,0,0" Click="TestingBtn_Click"/>
+                    Content="писюн ф6" Margin="16,0,0,0" Click="TestingBtn_Click"
+                    Style="{StaticResource ButtonDarkSmall}"/>
         </Grid>
     </Grid>
 </Window>

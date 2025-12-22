@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.Extentions;
 using Application.Settings;
+using Data.Properties;
 using Models;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
@@ -365,7 +366,7 @@ namespace View
                 Canvas.SetLeft(img, 10);
                 Canvas.SetTop(img, 10);
 
-                img.Source = global::View.Properties.Resources.null_item_image.ToImageSource();
+                img.Source = Data.Properties.Resources.null_item_image.ToImageSource();
                 // Создаём подпись
                 var name = new Label
                 {

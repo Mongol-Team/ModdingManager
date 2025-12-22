@@ -16,7 +16,7 @@ using MessageBox = System.Windows.MessageBox;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 using UserControl = System.Windows.Controls.UserControl;
-using View.Properties;
+using Data.Properties;
 
 namespace ViewControls
 {
@@ -332,8 +332,8 @@ namespace ViewControls
             {
                 Source = item.Gfx.Content.ToImageSource().GetCombinedTechImage(
                     isBig
-                        ? global::View.Properties.Resources.technology_available_item_bg.ToImageSource()
-                        : global::View.Properties.Resources.tech_industry_available_item_bg.ToImageSource(),
+                        ? Data.Properties.Resources.technology_available_item_bg.ToImageSource()
+                        : Data.Properties.Resources.tech_industry_available_item_bg.ToImageSource(),
                     isBig ? 1 : 2),
                 Width = imageWidth,
                 Height = imageHeight,

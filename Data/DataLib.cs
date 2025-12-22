@@ -13,14 +13,14 @@ namespace Data
 
             foreach (var resourceName in resources)
             {
-                if (!resourceName.StartsWith("Data.Data.Text.", StringComparison.Ordinal))
+                if (!resourceName.StartsWith("Data.Embedded.Text.", StringComparison.Ordinal))
                     continue;
 
                 if (!resourceName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 var fileName = resourceName.Substring(
-                    "Data.Data.Text.".Length
+                    "Data.Embedded.Text.".Length
                 );
 
                 switch (fileName)
