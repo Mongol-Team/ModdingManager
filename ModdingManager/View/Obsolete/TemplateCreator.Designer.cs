@@ -1,4 +1,6 @@
-﻿namespace ModdingManager
+﻿using View.Properties;
+
+namespace ModdingManager
 {
     partial class TemplateCreator
     {

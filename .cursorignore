@@ -1,0 +1,48 @@
+# ===== Visual Studio (any depth) =====
+**/.vs/**
+**/*.suo
+**/*.user
+**/*.userosscache
+**/*.sln.docstates
+
+# ===== Build results (any depth) =====
+**/bin/**
+**/obj/**
+**/out/**
+**/build/**
+
+# ===== Logs =====
+**/*.log
+
+# ===== OS files =====
+**/.DS_Store
+**/Thumbs.db
+**/ehthumbs.db
+**/Desktop.ini
+
+# ===== IDEs =====
+**/.idea/**
+**/.vscode/**
+**/*.code-workspace
+
+# ===== NuGet =====
+**/packages/**
+**/*.nupkg
+**/*.snupkg
+
+# ===== Node / Frontend =====
+**/node_modules/**
+**/dist/**
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# ===== Python =====
+**/__pycache__/**
+**/*.py[cod]
+**/.venv/**
+**/env/**
+
+# ===== Cursor specific =====
+**/.cursor/**
+**/.cursor-cache/**
