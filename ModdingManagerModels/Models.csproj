@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ModdingManagerData\ModdingManagerData.csproj" />
+    <ProjectReference Include="..\ModdingManagerData\Data.csproj" />
   </ItemGroup>
 
 </Project>
