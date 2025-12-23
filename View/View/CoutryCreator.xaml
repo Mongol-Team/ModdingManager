@@ -4,10 +4,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:View"
-        xmlns:controls="clr-namespace:ViewControls" x:Class="View.WPFCountryCreator"
+        xmlns:controls="clr-namespace:ViewControls"
+        x:Class="View.WPFCountryCreator"
         mc:Ignorable="d"
-        Title="WPFCoutryCreator" Height="590" Width="800" Loaded="Window_Loaded">
-    <Grid>
+        Title="WPFCoutryCreator" Height="590" Width="800" Loaded="Window_Loaded"
+        ResizeMode="CanResize"
+        Style="{StaticResource WindowDark}">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <controls:WindowTitleBar Grid.Row="0"/>
+        
+        <Grid Grid.Row="1">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Orientation="Horizontal" Margin="10">
                 <!-- Колонка 1 -->
@@ -120,6 +131,6 @@
                 
             </StackPanel>
         </ScrollViewer>
-
+        </Grid>
     </Grid>
 </Window>

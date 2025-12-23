@@ -39,9 +39,6 @@ namespace ViewPresenters
             _view.SuperEventCreatorButton.Click += SuperEventCreatorButton_Click;
             _view.DebugButton.Click += DebugButton_Click;
             _view.IdeologyCreatorBtn.Click += IdeologyCreatorBtn_Click;
-
-            _view.DirBox.TextChanged += DirBoxes_TextChanged;
-            _view.GameDirBox.TextChanged += DirBoxes_TextChanged;
         }
 
         private async void OnWindowLoaded(object? sender, RoutedEventArgs e)
@@ -93,8 +90,6 @@ namespace ViewPresenters
 
         private void LoadConfig()
         {
-            _view.DirBox.Text = ModManagerSettings.Instance.ModDirectory;
-            _view.GameDirBox.Text = ModManagerSettings.Instance.GameDirectory;
         }
         private void LocConvertButton_Click(object? sender, RoutedEventArgs e)
         {
@@ -295,28 +290,11 @@ namespace ViewPresenters
             }
         }
 
-        private void DirBoxes_TextChanged(object? sender, TextChangedEventArgs e)
-        {
-            if (_isLoaded)
-            {
-                if (!(string.IsNullOrEmpty(_view.GameDirBox.Text) || string.IsNullOrEmpty(_view.DirBox.Text)))
-                {
-                    string relativePath = System.IO.Path.Combine("..", "..", "..", "data", "dir.json");
-                    string fullPath = System.IO.Path.GetFullPath(relativePath, AppDomain.CurrentDomain.BaseDirectory);
-
-                }
-                else
-                {
-                    MessageBox.Show("Укажите обе директории.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        // ====== утилиты ======
-
-        // сохраняю исходную логику: проверка была через ИЛИ (||)
         private bool HasAnyDir()
-            => !string.IsNullOrEmpty(_view.DirBox.Text) || !string.IsNullOrEmpty(_view.GameDirBox.Text);
+        {
+            var settings = ModManagerSettings.Instance;
+            return !string.IsNullOrEmpty(settings?.ModDirectory) || !string.IsNullOrEmpty(settings?.GameDirectory);
+        }
 
         private void UpdateModManager()
         {

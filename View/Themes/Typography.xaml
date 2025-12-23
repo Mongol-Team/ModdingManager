@@ -2,8 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <FontFamily x:Key="FontFamilyBase">Roboto, Segoe UI</FontFamily>
-    <FontFamily x:Key="FontFamilyAccent">Philosopher, Georgia</FontFamily>
+    <FontFamily x:Key="FontFamilyBase">Segoe UI, Roboto</FontFamily>
+    <FontFamily x:Key="FontFamilyAccent">Segoe UI, Roboto</FontFamily>
+    <FontFamily x:Key="FontFamilyMono">Consolas, Courier New</FontFamily>
     
     <sys:Double x:Key="FontSizeLargeTitle">32</sys:Double>
     <sys:Double x:Key="FontSizePageTitle">24</sys:Double>

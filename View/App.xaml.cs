@@ -1,4 +1,6 @@
 using Application.Settings;
+using System.IO;
+using System.Windows;
 
 namespace View
 {
@@ -10,27 +12,27 @@ namespace View
             
             ModManagerSettings.Load();
             
-            var settingsWindow = new SettingsWindow();
-            settingsWindow.LoadSettings(
-                ModManagerSettings.Instance?.GameDirectory ?? string.Empty,
-                ModManagerSettings.Instance?.ModDirectory ?? string.Empty);
+            var gameDirectory = ModManagerSettings.Instance?.GameDirectory ?? string.Empty;
             
+            if (string.IsNullOrWhiteSpace(gameDirectory) || !Directory.Exists(gameDirectory))
+            {
+                System.Windows.MessageBox.Show(
+                    "Директория игры не найдена. Пожалуйста, настройте путь к игре через меню 'Настройки' -> 'Путь к игре'.",
+                    "Игра не найдена",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+            
+            var settingsWindow = new SettingsWindow();
             settingsWindow.ShowDialog();
             
-            if (settingsWindow.SettingsSaved)
+            if (settingsWindow.DialogResult == true && !string.IsNullOrEmpty(settingsWindow.SelectedProjectPath))
             {
-                var gameDir = settingsWindow.GetGameDirectory();
-                var modDir = settingsWindow.GetModDirectory();
-                
-                ModManagerSettings.Save(modDir, gameDir);
-                
-                var mainWindow = new MainWindow();
-                mainWindow.Show();
+                ModManagerSettings.Save(settingsWindow.SelectedProjectPath, gameDirectory);
             }
-            else
-            {
-                Shutdown();
-            }
+            
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
         }
     }
 }

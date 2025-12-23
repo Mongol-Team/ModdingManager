@@ -7,12 +7,22 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:View"
         mc:Ignorable="d"
-        Title="MapWorkerWindow" Height="650" Width="1200">
-    <Grid>
-        <controls:SceneViewer x:Name="DisplayScrollViewer"
+        Title="MapWorkerWindow" Height="650" Width="1200"
+        ResizeMode="CanResize"
+        Style="{StaticResource WindowDark}">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <controls:WindowTitleBar Grid.Row="0"/>
+        
+        <Grid Grid.Row="1">
+            <controls:SceneViewer x:Name="DisplayScrollViewer"
               VerticalScrollBarVisibility="Auto"
               HorizontalScrollBarVisibility="Auto" Margin="0,90,263,0" >
-            <Canvas x:Name="DisplayView" Background="White" Height="539" MouseDown="Display_MouseDown" MouseMove="Display_MouseMove" MouseUp="Display_MouseUp" MouseLeftButtonDown="OnDoubleClick" >
+            <Canvas x:Name="DisplayView" Background="{StaticResource BackgroundElement}" Height="539" MouseDown="Display_MouseDown" MouseMove="Display_MouseMove" MouseUp="Display_MouseUp" MouseLeftButtonDown="OnDoubleClick" >
                 <Canvas Name="ProvinceLayerCanvas" MouseMove="DraggingProvinceEvent">
                     <Canvas Name="ProvRenderCanv" Background="Transparent">
                     </Canvas>
@@ -68,6 +78,6 @@
                 <StackPanel x:Name="MenuPanel"/>
             </ScrollViewer>
         </StackPanel>
-
+        </Grid>
     </Grid>
 </Window>

@@ -4,12 +4,22 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:View"
-    
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:controls="clr-namespace:ViewControls" x:Class="View.IdeologyCreator"
+        xmlns:controls="clr-namespace:ViewControls"
+        x:Class="View.IdeologyCreator"
         mc:Ignorable="d"
-        Title="IdeologyCreator" Height="450" Width="900">
-    <Grid Margin="0,0,0,0" >
+        Title="IdeologyCreator" Height="450" Width="900"
+        ResizeMode="CanResize"
+        Style="{StaticResource WindowDark}">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <controls:WindowTitleBar Grid.Row="0"/>
+        
+        <Grid Grid.Row="1" Margin="0,0,0,0">
         <StackPanel Margin="226,20,524,20">
 
             <TextBlock Height="40" Width="151">
@@ -100,5 +110,6 @@
                 <FlowDocument/>
             </RichTextBox>
         </StackPanel>
+        </Grid>
     </Grid>
 </Window>

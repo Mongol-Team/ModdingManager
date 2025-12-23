@@ -1,99 +1,90 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
+using Application.Settings;
 
 namespace View
 {
     public partial class SettingsWindow : Window
     {
-        public bool SettingsSaved { get; private set; } = false;
+        public string SelectedProjectPath { get; private set; } = string.Empty;
 
         public SettingsWindow()
         {
             InitializeComponent();
+            LoadRecentProjects();
         }
 
-        public void LoadSettings(string gameDirectory, string modDirectory)
+        private void LoadRecentProjects()
         {
-            GameDirBox.Text = gameDirectory ?? string.Empty;
-            ModDirBox.Text = modDirectory ?? string.Empty;
+            if (ModManagerSettings.Instance?.RecentProjects != null)
+            {
+                ProjectsListBox.ItemsSource = ModManagerSettings.Instance.RecentProjects
+                    .Where(p => Directory.Exists(p))
+                    .ToList();
+            }
         }
 
-        public string GetGameDirectory() => GameDirBox.Text;
-        public string GetModDirectory() => ModDirBox.Text;
+        private void ProjectsListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (ProjectsListBox.SelectedItem != null)
+            {
+                SelectedProjectPath = ProjectsListBox.SelectedItem.ToString();
+            }
+        }
 
-        private void BrowseGameButton_Click(object sender, RoutedEventArgs e)
+        private void ProjectsListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (ProjectsListBox.SelectedItem != null)
+            {
+                SelectedProjectPath = ProjectsListBox.SelectedItem.ToString();
+                DialogResult = true;
+                Close();
+            }
+        }
+
+        private void OpenProjectButton_Click(object sender, RoutedEventArgs e)
         {
             using (var dialog = new FolderBrowserDialog())
             {
-                dialog.Description = "Выберите директорию игры";
+                dialog.Description = "Выберите директорию проекта мода";
                 dialog.ShowNewFolderButton = false;
-                if (!string.IsNullOrEmpty(GameDirBox.Text))
-                {
-                    dialog.SelectedPath = GameDirBox.Text;
-                }
 
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    GameDirBox.Text = dialog.SelectedPath;
+                    var projectPath = dialog.SelectedPath;
+                    ModManagerSettings.AddRecentProject(projectPath);
+                    SelectedProjectPath = projectPath;
+                    DialogResult = true;
+                    Close();
                 }
             }
         }
 
-        private void BrowseModButton_Click(object sender, RoutedEventArgs e)
+        private void RemoveButton_Click(object sender, RoutedEventArgs e)
         {
-            using (var dialog = new FolderBrowserDialog())
+            if (ProjectsListBox.SelectedItem != null)
             {
-                dialog.Description = "Выберите директорию мода";
-                dialog.ShowNewFolderButton = true;
+                var selectedPath = ProjectsListBox.SelectedItem.ToString();
+                var recentProjects = ModManagerSettings.Instance?.RecentProjects?.ToList() ?? new List<string>();
+                recentProjects.Remove(selectedPath);
                 
-                if (!string.IsNullOrEmpty(ModDirBox.Text))
-                {
-                    dialog.SelectedPath = ModDirBox.Text;
-                }
-                else if (!string.IsNullOrEmpty(GameDirBox.Text))
-                {
-                    var modsPath = System.IO.Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                        "Paradox Interactive",
-                        "Hearts of Iron IV",
-                        "mod");
-                    if (System.IO.Directory.Exists(modsPath))
-                    {
-                        dialog.SelectedPath = modsPath;
-                    }
-                    else
-                    {
-                        dialog.SelectedPath = GameDirBox.Text;
-                    }
-                }
-
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    ModDirBox.Text = dialog.SelectedPath;
-                }
+                typeof(ModManagerSettings).GetProperty(nameof(ModManagerSettings.RecentProjects))
+                    ?.SetValue(ModManagerSettings.Instance, recentProjects);
+                ModManagerSettings.Save(
+                    ModManagerSettings.Instance?.ModDirectory ?? string.Empty,
+                    ModManagerSettings.Instance?.GameDirectory ?? string.Empty);
+                
+                LoadRecentProjects();
             }
         }
 
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(GameDirBox.Text) || string.IsNullOrWhiteSpace(ModDirBox.Text))
-            {
-                System.Windows.MessageBox.Show(
-                    "Пожалуйста, укажите обе директории.",
-                    "Ошибка",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                return;
-            }
-
-            SettingsSaved = true;
-            Close();
-        }
-
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
-        {
-            SettingsSaved = false;
+            DialogResult = false;
             Close();
         }
     }

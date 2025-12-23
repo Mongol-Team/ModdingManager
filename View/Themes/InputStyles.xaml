@@ -6,11 +6,19 @@
         <Setter Property="Foreground" Value="{StaticResource InputText}"/>
         <Setter Property="BorderBrush" Value="{StaticResource InputBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="10,16"/>
-        <Setter Property="Height" Value="52"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="MinHeight" Value="22"/>
         <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource InputBorderHover}"/>
+            </Trigger>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource InputBorderFocus}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
     
     <Style x:Key="TextBoxDarkError" TargetType="TextBox" BasedOn="{StaticResource TextBoxDark}">
@@ -20,6 +28,18 @@
                 <Setter Property="BorderBrush" Value="{StaticResource ErrorFocus}"/>
             </Trigger>
         </Style.Triggers>
+    </Style>
+    
+    <Style x:Key="ComboBoxDark" TargetType="ComboBox">
+        <Setter Property="Background" Value="{StaticResource InputBackground}"/>
+        <Setter Property="Foreground" Value="{StaticResource InputText}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource InputBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="MinHeight" Value="22"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
 </ResourceDictionary>

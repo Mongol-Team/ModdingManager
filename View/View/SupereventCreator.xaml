@@ -7,19 +7,26 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:cntrls ="clr-namespace:ViewControls"
         mc:Ignorable="d"
-        Title="Создатель суперивентов" Height="650" Width="900">
-    <Grid>
-        <!-- Разделение на две колонки -->
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*" />
-            <!-- Левая часть: Canvas -->
-            <ColumnDefinition Width="1.2*" />
-            <!-- Правая часть: Панель управления -->
-        </Grid.ColumnDefinitions>
+        xmlns:controls="clr-namespace:ViewControls"
+        Title="Создатель суперивентов" Height="650" Width="900"
+        ResizeMode="CanResize"
+        Style="{StaticResource WindowDark}">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <controls:WindowTitleBar Grid.Row="0"/>
+        
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="1.2*" />
+            </Grid.ColumnDefinitions>
 
-        <!-- Левая колонка: прокручиваемый Canvas -->
         <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <Canvas x:Name="MainCanvas" Background="LightGray" ClipToBounds="True">
+            <Canvas x:Name="MainCanvas" Background="{StaticResource BackgroundElement}" ClipToBounds="True">
 
                 <Image x:Name="SupereventFrame"
                Source="pack://application:,,,/data/gfx/interface/superevent_bg_1.png"
@@ -73,6 +80,6 @@
             <Button Name ="UpdateConfigButton" Content="Обновить" Width="100" Background="#FF49DDDD" Click="UpdateConfigButton_Click" Margin="0,10,0,0"/>
             <Button x:Name ="DoneConfigButton" Content="Готово" Width="100" Background="#FFACBE60" Click="DoneConfigButton_Click"/>
         </StackPanel>
-
+        </Grid>
     </Grid>
 </Window>

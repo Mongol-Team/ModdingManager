@@ -6,8 +6,8 @@
              xmlns:local="clr-namespace:ViewControls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <TextBox x:Name="LocalisationTextBlock">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <TextBox x:Name="LocalisationTextBlock" Style="{StaticResource TextBoxDark}">
         </TextBox>
     </Grid>
 </UserControl>

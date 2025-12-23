@@ -1,44 +1,50 @@
 ﻿<Window x:Class="View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:ViewControls"
         Title="Главное меню"
         Width="963" Height="694"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize"
-        WindowStyle="SingleBorderWindow"
-        Background="#000000">
-    <!--Icon="pack://application:,,,/Assets/app.ico"-->
-    <Grid Margin="0" Background="#000000">
-        <!-- Сетка примерно повторяет координаты WinForms -->
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <!-- левый столбец -->
-            <ColumnDefinition Width="*" />
-            <!-- центр -->
-            <ColumnDefinition Width="*" />
-            <!-- правый столбец -->
-        </Grid.ColumnDefinitions>
+        ResizeMode="CanResize"
+        Style="{StaticResource WindowDark}">
+    <Grid Margin="0" Background="{StaticResource BackgroundApp}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="80"/>
-            <!-- 0 -->
-            <RowDefinition Height="80"/>
-            <!-- 1 -->
-            <RowDefinition Height="80"/>
-            <!-- 2 -->
-            <RowDefinition Height="80"/>
-            <!-- 3 -->
-            <RowDefinition Height="80"/>
-            <!-- 4 -->
-            <RowDefinition Height="*" />
-            <!-- 5 заполнитель -->
-            <RowDefinition Height="80"/>
-            <!-- 6 нижние поля/кнопки -->
-            <RowDefinition Height="50"/>
-            <!-- 7 нижние подписи -->
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0" Background="{StaticResource BackgroundSidebar}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <Menu Grid.Column="0" Background="Transparent" Foreground="{StaticResource TextPrimary}">
+                <MenuItem Header="Настройки">
+                    <MenuItem Header="Путь к игре" Click="GameDirectoryMenuItem_Click"/>
+                </MenuItem>
+            </Menu>
+            
+            <controls:WindowTitleBar Grid.Column="1" HorizontalAlignment="Right"/>
+        </Grid>
+        
+        <Grid Grid.Row="1" Margin="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80"/>
+                <RowDefinition Height="80"/>
+                <RowDefinition Height="80"/>
+                <RowDefinition Height="80"/>
+                <RowDefinition Height="80"/>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="80"/>
+            </Grid.RowDefinitions>
 
-        <!-- Кнопки ряд 0 -->
-        <Button x:Name="LocConvertButton" Grid.Row="0" Grid.Column="0" Margin="44,16,44,8"
+            <Button x:Name="LocConvertButton" Grid.Row="0" Grid.Column="0" Margin="44,16,44,8"
                 Content="Локализация по дерву фокусов"
                 Style="{StaticResource ButtonDark}"/>
         <Button x:Name="StateManagerBtn" Grid.Row="0" Grid.Column="1" Margin="44,16,44,8"
@@ -92,38 +98,14 @@
                 Content="Создатель стартовых юнитов"
                 Style="{StaticResource ButtonLight}"/>
 
-        <!-- Нижняя панель ввода директорий -->
-        <Grid Grid.Row="6" Grid.ColumnSpan="3" Margin="24,8,24,4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="5*"/>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBox x:Name="DirBox" Grid.Column="0" Margin="0,4,12,4"
-                     Style="{StaticResource TextBoxDark}"/>
-            <Label Grid.Column="1" VerticalAlignment="Center" Content="Дирректория мода"
-                   Style="{StaticResource TextLabel}"/>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" >
-                <Button x:Name="DebugButton" Width="131" Height="37" Margin="16,0,0,0"
+            <StackPanel Grid.Row="6" Grid.ColumnSpan="3" Orientation="Horizontal" 
+                        HorizontalAlignment="Right" Margin="24,8,24,16">
+                <Button x:Name="DebugButton" Width="131" Height="37"
                         Content="Debug" Style="{StaticResource ButtonDarkSmall}"/>
+                <Button x:Name="TestingBtn" Width="131" Height="37" Margin="12,0,0,0"
+                        Content="писюн ф6" Click="TestingBtn_Click"
+                        Style="{StaticResource ButtonDarkSmall}"/>
             </StackPanel>
-        </Grid>
-
-        <Grid Grid.Row="7" Grid.ColumnSpan="3" Margin="24,0,24,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="5*"/>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBox x:Name="GameDirBox" Grid.Column="0" Margin="0,0,12,0"
-                     Style="{StaticResource TextBoxDark}"/>
-            <Label Grid.Column="1" VerticalAlignment="Center" Content="Дирректория игры"
-                   Style="{StaticResource TextLabel}"/>
-            <Button x:Name="TestingBtn" Grid.Column="2" Width="131" Height="33"
-                    Content="писюн ф6" Margin="16,0,0,0" Click="TestingBtn_Click"
-                    Style="{StaticResource ButtonDarkSmall}"/>
         </Grid>
     </Grid>
 </Window>

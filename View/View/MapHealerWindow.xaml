@@ -6,8 +6,18 @@
         xmlns:local="clr-namespace:View"
         xmlns:controls="clr-namespace:ViewControls"
         mc:Ignorable="d"
-        Title="MapHealerWindow" Height="450" Width="800">
-    <Grid>
+        Title="MapHealerWindow" Height="450" Width="800"
+        ResizeMode="CanResize"
+        Style="{StaticResource WindowDark}">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <controls:WindowTitleBar Grid.Row="0"/>
+        
+        <Grid Grid.Row="1">
         <Button Name ="DelNoExistingProvButton"  HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="66" Width="170" Click="DelNoExistingProvButton_Click">
             <TextBlock TextWrapping="Wrap" TextAlignment="Center">
                 <Run Text=" Удалить упопинания не "/>
@@ -39,5 +49,6 @@
         <Button x:Name ="FFFF"  HorizontalAlignment="Left" Margin="10,294,0,0" VerticalAlignment="Top" Height="66" Width="170" Click="CheckRegionDefinesButton_Click">
             <TextBlock TextWrapping="Wrap" TextAlignment="Center"><Run Text="Проверить регионы"/><LineBreak/><Run Text="на целостность"/></TextBlock>
         </Button>
+        </Grid>
     </Grid>
 </Window>

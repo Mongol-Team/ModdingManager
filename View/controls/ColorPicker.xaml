@@ -6,13 +6,12 @@
              xmlns:local="clr-namespace:ViewControls"
              mc:Ignorable="d" Width="285" Height="160">
     <Grid>
-        <Grid Background="White" PreviewMouseDown="OnPopupContentMouseDown">
+        <Grid Background="{StaticResource BackgroundCard}" PreviewMouseDown="OnPopupContentMouseDown">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Спектр выбора цвета -->
             <Canvas Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <Image x:Name="PART_ColorImage"
                        Source="/graphics/controls/color_spectrum.jpg"
@@ -25,26 +24,23 @@
                          Visibility="Collapsed"/>
             </Canvas>
 
-
-            <!-- Поля ввода RGB -->
-            <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Background="White">
+            <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Background="{StaticResource BackgroundCard}">
                 <StackPanel Orientation="Horizontal" Margin="0,5">
-                    <TextBlock Text="R:" Width="20"/>
-                    <TextBox x:Name="PART_R" Width="50" TextChanged="Rgb_TextChanged"/>
+                    <TextBlock Text="R:" Width="20" Foreground="{StaticResource TextPrimary}"/>
+                    <TextBox x:Name="PART_R" Width="50" Style="{StaticResource TextBoxDark}" TextChanged="Rgb_TextChanged"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,5">
-                    <TextBlock Text="G:" Width="20"/>
-                    <TextBox x:Name="PART_G" Width="50" TextChanged="Rgb_TextChanged"/>
+                    <TextBlock Text="G:" Width="20" Foreground="{StaticResource TextPrimary}"/>
+                    <TextBox x:Name="PART_G" Width="50" Style="{StaticResource TextBoxDark}" TextChanged="Rgb_TextChanged"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,5">
-                    <TextBlock Text="B:" Width="20"/>
-                    <TextBox x:Name="PART_B" Width="50" TextChanged="Rgb_TextChanged"/>
+                    <TextBlock Text="B:" Width="20" Foreground="{StaticResource TextPrimary}"/>
+                    <TextBox x:Name="PART_B" Width="50" Style="{StaticResource TextBoxDark}" TextChanged="Rgb_TextChanged"/>
                 </StackPanel>
 
-                <!-- Отображение выбранного цвета -->
                 <Border x:Name="PART_ColorPreview"
                     Width="71" Height="30"
-                    BorderBrush="Black" BorderThickness="1" Margin="0,10,0,0"/>
+                    BorderBrush="{StaticResource BorderColor}" BorderThickness="1" Margin="0,10,0,0"/>
             </StackPanel>
         </Grid>
     </Grid>

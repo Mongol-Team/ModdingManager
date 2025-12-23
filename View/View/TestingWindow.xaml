@@ -5,13 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:View"
         xmlns:ctrs="clr-namespace:ViewControls"
+        xmlns:controls="clr-namespace:ViewControls"
         mc:Ignorable="d"
-        Title="TestingWindow" Height="450" Width="800">
-    <Grid>
+        Title="TestingWindow" Height="450" Width="800"
+        ResizeMode="CanResize"
+        Style="{StaticResource WindowDark}">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <controls:WindowTitleBar Grid.Row="0"/>
+        
+        <Grid Grid.Row="1">
         <Image x:Name="Fimoz" Margin="455,0,0,145"></Image>
         
             <ctrs:ConfigListViewer x:Name="Fima" Loaded="ConfigListViewer_Loaded" Margin="0,0,547,0">
 
             </ctrs:ConfigListViewer>
+        </Grid>
     </Grid>
 </Window>

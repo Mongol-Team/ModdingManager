@@ -5,28 +5,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ViewControls"
              mc:Ignorable="d">
-    <Grid Background="White">
+    <Grid Background="{StaticResource BackgroundCard}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Основная область ошибок -->
-        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1" Margin="0,0,0,5">
+        <Border Grid.Row="0" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" Margin="0,0,0,5">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="ErrorDisplayPnl" />
+                <StackPanel x:Name="ErrorDisplayPnl" Background="{StaticResource BackgroundCard}"/>
             </ScrollViewer>
         </Border>
 
-        <!-- Панель счетчиков -->
         <Grid Grid.Row="1" Height="55">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Critical Panel -->
-            <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" Margin="0,0,1,0">
+            <Border Grid.Column="0" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" Margin="0,0,1,0">
                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -48,12 +45,12 @@
                            Margin="10,0,0,0"
                            Padding="5,0"
                            MinWidth="40"
-                           HorizontalContentAlignment="Center"/>
+                           HorizontalContentAlignment="Center"
+                           Foreground="{StaticResource TextPrimary}"/>
                 </Grid>
             </Border>
 
-            <!-- Warn Panel -->
-            <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1" Margin="1,0,0,0">
+            <Border Grid.Column="1" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" Margin="1,0,0,0">
                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -75,7 +72,8 @@
                            Margin="10,0,0,0"
                            Padding="5,0"
                            MinWidth="40"
-                           HorizontalContentAlignment="Center"/>
+                           HorizontalContentAlignment="Center"
+                           Foreground="{StaticResource TextPrimary}"/>
                 </Grid>
             </Border>
         </Grid>

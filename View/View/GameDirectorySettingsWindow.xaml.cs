@@ -1,0 +1,74 @@
+using System;
+using System.IO;
+using System.Windows;
+using System.Windows.Forms;
+using Application.Settings;
+
+namespace View
+{
+    public partial class GameDirectorySettingsWindow : Window
+    {
+        public GameDirectorySettingsWindow()
+        {
+            InitializeComponent();
+            LoadSettings();
+        }
+
+        private void LoadSettings()
+        {
+            GameDirBox.Text = ModManagerSettings.Instance?.GameDirectory ?? string.Empty;
+        }
+
+        private void BrowseGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "Выберите директорию игры";
+                dialog.ShowNewFolderButton = false;
+                if (!string.IsNullOrEmpty(GameDirBox.Text))
+                {
+                    dialog.SelectedPath = GameDirBox.Text;
+                }
+
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    GameDirBox.Text = dialog.SelectedPath;
+                }
+            }
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(GameDirBox.Text))
+            {
+                System.Windows.MessageBox.Show(
+                    "Пожалуйста, укажите директорию игры.",
+                    "Ошибка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!Directory.Exists(GameDirBox.Text))
+            {
+                System.Windows.MessageBox.Show(
+                    "Указанная директория не существует.",
+                    "Ошибка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            ModManagerSettings.SaveGameDirectory(GameDirBox.Text);
+            DialogResult = true;
+            Close();
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+    }
+}
+

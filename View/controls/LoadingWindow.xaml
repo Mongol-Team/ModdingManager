@@ -8,9 +8,10 @@
         d:DesignHeight="110" d:DesignWidth="200"
         WindowStyle="ToolWindow" ResizeMode="NoResize" 
         WindowStartupLocation="CenterOwner" SizeToContent="WidthAndHeight"
-        Title="Загрузка..." ShowInTaskbar="False" Topmost="True">
-    <StackPanel Margin="20">
-        <TextBlock x:Name="ProgressMessageBox" Text="" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+        Title="Загрузка..." ShowInTaskbar="False" Topmost="True"
+        Style="{StaticResource WindowDark}">
+    <StackPanel Margin="20" Background="{StaticResource BackgroundApp}">
+        <TextBlock x:Name="ProgressMessageBox" Text="" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,10" Foreground="{StaticResource TextPrimary}"/>
         <ProgressBar x:Name="LoadingProgressBar" Width="200" Height="20" Minimum="0" Maximum="4"/>
     </StackPanel>
 </Window>
