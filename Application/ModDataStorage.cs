@@ -48,16 +48,19 @@ public static class ModDataStorage
         Logger.AddLog($"Characters Intalized:{Mod.Characters.Count}, some rng obj:{Mod.Characters.Random().Id.ToString()}");
 
 
-        //Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
-        //Mod.Regiments = RegimentComposer.Parse().Cast<RegimentConfig>().ToList();
+        Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{Mod.Ideas.Random().Id.ToString()}");
+        Mod.SubUnits = SubUnitComposer.Parse().Cast<SubUnitConfig>().ToList();
+
+        Logger.AddLog($"OpinionMods Intalized:{Mod.OpinionModifiers.Count}, some rng obj:{Mod.OpinionModifiers.Random().Id.ToString()}");
+        Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList();
 
 
-        //Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList();
 
+        Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToList();
+        Logger.AddLog($"Countries Intalized:{Mod.Countries.Count}, some rng obj:{Mod.Countries.Random().Id.ToString()}");
+        Mod.Map = MapComposer.Parse().FirstOrDefault() as MapConfig;
+        Logger.AddLog($"Map Intalized: Provinces:{Mod.Map.Provinces.Count}, some rng obj:{Mod.Map.Provinces.Random().Id.ToString()}");
 
-
-        //Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToList();
-        //Mod.Map = MapComposer.Parse().FirstOrDefault() as MapConfig;
     }
 }
 

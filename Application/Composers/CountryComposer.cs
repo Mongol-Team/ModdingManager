@@ -71,13 +71,8 @@ namespace Application.Composers
                         }
                     }
                 }
-                var states = new List<StateConfig>();
-                foreach (var state in techs.Values)
-                {
-                    var stateConfig = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == state);
-                    if (stateConfig != null)
-                        states.Add(stateConfig);
-                }
+                List<StateConfig> states = new List<StateConfig>();
+                
 
                 var countryFlags = new Dictionary<IdeologyConfig, Bitmap>();
 

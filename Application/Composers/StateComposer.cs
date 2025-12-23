@@ -10,7 +10,11 @@ using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Application.Extentions;
 using System.Linq;
+using Models.Types.ObectCacheData;
+using Data;
+using Models.GfxTypes;
 
 namespace Application.Composers
 {
@@ -92,11 +96,52 @@ namespace Application.Composers
                 .Where(p => provinceIds.Contains(p.Id.ToInt()))
                 .ToList();
 
+            Bracket historyBra = stateBracket.SubBrackets.FirstOrDefault(v => v.Name == "history");
+            string ownerTag = historyBra.SubVars.FirstOrDefault(v => v.Name == "owner")?.Value as string;
+            List<string> cores = historyBra.SubVars
+                .Where(a => a.Name == "add_core")
+                .Select(a => a.Value)
+                .ToList().ToListString();
+            Dictionary<int, int> victoryPoints = new Dictionary<int, int>();
+            foreach (HoiArray hoiArray in historyBra.Arrays.Where(a => a.Name == "victory_points"))
+            {
+                if (hoiArray.Values.Count == 2)
+                {
+                    victoryPoints[hoiArray.Values[0].ToInt()] = hoiArray.Values[1].ToInt();
+                }
+                else
+                {
+                    Logger.AddDbgLog($"Неверный формат victory_points в штате {id} в файле {filePath}", "StateComposer");
+                    //todo: handle healing
+                }
+            }
+            Dictionary<BuildingConfig, int> buildings = new Dictionary<BuildingConfig, int>();
+            foreach (Bracket buildingBr in stateBracket.SubBrackets.Where(b => b.Name == "buildings"))
+            {
+                foreach (Var buildingVar in buildingBr.SubVars)
+                {
+                    var buildingConfig = ModDataStorage.Mod.Buildings.FirstOrDefault(b => b.Id.ToString() == buildingVar.Name);
+                    if (buildingConfig != null)
+                    {
+                        buildings[buildingConfig] = buildingVar.Value.ToInt();
+                    }
+                    else
+                    {
+                        Logger.AddDbgLog($"Неизвестное здание {buildingVar.Name} в штате {id} в файле {filePath}", "StateComposer");
+                        //todo: handle healing
+                    }
+                }
+            }
             return new StateConfig
             {
                 Id = new Identifier(id),
+                Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
                 Provinces = matchedProvinces,
+                OwnerTag = ownerTag,
+                CoresTag = cores,
                 FilePath = file.FilePath,
+                VictoryPoints = victoryPoints,
+                Buildings = buildings,
                 Color = ModManager.GenerateColorFromId(id),
                 Manpower = stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower")?.Value as int? ?? 0,
                 LocalSupply = stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supply")?.Value as double? ?? 0.0,

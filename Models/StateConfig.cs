@@ -21,6 +21,9 @@ namespace Models
         public StateCathegoryConfig Cathegory { get; set; }
         public int? Manpower { get; set; }
         public double? LocalSupply { get; set; }
+        public string? OwnerTag { get; set; }
+        public List<string> CoresTag { get; set; }
+        public Dictionary<int, int> VictoryPoints { get; set; }
         public Dictionary<BuildingConfig, int> Buildings { get; set; }
 
     }
