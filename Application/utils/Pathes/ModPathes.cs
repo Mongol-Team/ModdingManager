@@ -33,6 +33,7 @@ namespace Application.utils.Pathes
         public static readonly string TechTreePath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "common", "technologies");
         public static readonly string TechDefPath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "common", "technology_tags");
 
+        public static readonly string BuildingPath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "common", "buildings");
         public static readonly string TraitsPath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "common", "country_leader");
     }
 }

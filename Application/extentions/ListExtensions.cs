@@ -81,6 +81,14 @@
             int index = _random.Next(list.Count);
             return list[index];
         }
+        public static void AddSafe<TKey, TValue>(
+            this ICollection<KeyValuePair<TKey, TValue>> collection,
+            TKey key,
+            TValue value)
+        {
+            if (collection == null || key == null) return;
+            collection.Add(new KeyValuePair<TKey, TValue>(key, value));
+        }
 
         public static List<string> ToListString<T>(this List<T> list)
         {

@@ -1,23 +1,25 @@
-﻿using ModdingManager.classes.utils;
-using ModdingManager.managers.@base;
-using Application.Debugging;
+﻿using Application.Debugging;
 using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
+using Data;
+using ModdingManager.classes.utils;
+using ModdingManager.managers.@base;
 using Models;
 using Models.Enums;
+using Models.GfxTypes;
 using Models.Types;
+using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Models.GfxTypes;
-using Data;
 
 namespace Application.Composers
 {
@@ -68,7 +70,7 @@ namespace Application.Composers
                 }
                 if (res.Count > 0)
                 {
-                    ParseIdeologyModifiers(res.OfType<ModifierDefinitionConfig>().ToList());
+                    PaseDynamicModifierDefenitions(res.OfType<ModifierDefinitionConfig>().ToList());
                     return res;
                 }
 
@@ -233,7 +235,7 @@ namespace Application.Composers
             return config;
         }
 
-        public static void ParseIdeologyModifiers(List<ModifierDefinitionConfig> defs)
+        public static void PaseDynamicModifierDefenitions(List<ModifierDefinitionConfig> defs)
         {
             foreach(var ideology in defs)
             {
@@ -245,10 +247,26 @@ namespace Application.Composers
                 dynDriftMod.ScopeType = ScopeTypes.Country;
                 dynDriftMod.ColorType = ModifierDefenitionColorType.Good;
                 dynDriftMod.Precision = 2;
+                dynDriftMod.FilePath = DataDefaultValues.ItemCreatedDynamically;
                 dynDriftMod.Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx);
                 ModDataStorage.Mod.ModifierDefinitions.Add(dynDriftMod);
-                return;
+                dynDriftMod.Localisation = new ConfigLocalisation()
+                {
+                    Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                };
+                dynDriftMod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(dynDriftMod.Id.ToString()));
 
+                ModifierDefinitionConfig dynAcceptanceMod = dynDriftMod;
+              
+                dynAcceptanceMod.Id = new Identifier($"{ideology.Id}_acceptance");
+                dynAcceptanceMod.Localisation = new ConfigLocalisation()
+                {
+                    Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                };
+                dynAcceptanceMod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(dynAcceptanceMod.Id.ToString()));
+
+                ModDataStorage.Mod.ModifierDefinitions.Add(dynAcceptanceMod);
+                return;
             }
         }
     }

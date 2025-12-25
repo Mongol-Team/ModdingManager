@@ -17,6 +17,8 @@ using System.Windows.Input;
 using Application.Settings;
 using Application.Extentions;
 using Application.Debugging;
+using Models.GfxTypes;
+using Models.Types.LocalizationData;
 
 namespace Application.Composers
 {
@@ -224,6 +226,40 @@ namespace Application.Composers
             }
 
             return config;
+        }
+
+        public static void PaseDynamicModifierDefenitions(List<IConfig> configs)
+        {
+            foreach (SubUnitConfig config in configs.OfType<SubUnitConfig>())
+            {
+                if (config.Id != null)
+                {
+                    ModifierDefinitionConfig trainingMod = new ModifierDefinitionConfig()
+                    {
+                        Id = new Identifier($"experience_gain_{config.Id}_training_factor"),
+                        Cathegory = ModifierDefinitionCathegoryType.Army,
+                        ColorType = ModifierDefenitionColorType.Good,
+                        ScopeType = ScopeTypes.Country,
+                        ValueType = ModifierDefenitionValueType.Percent,
+                        Precision = 2,
+                        IsCore = true,
+                        FilePath = Data.DataDefaultValues.ItemCreatedDynamically,
+                        Gfx = new SpriteType(Data.DataDefaultValues.ItemWithNoGfxImage, Data.DataDefaultValues.ItemWithNoGfx),
+
+                    };
+
+                    trainingMod.Localisation = new ConfigLocalisation()
+                    {
+                        Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                    };
+                    trainingMod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(trainingMod.Id.ToString()));
+                    
+                    ModifierDefinitionConfig combatMod = trainingMod;
+                    combatMod.Id = new($"experience_gain_{ config.Id }_combat_factor");
+                    ModDataStorage.Mod.ModifierDefinitions.Add(combatMod);
+                    ModDataStorage.Mod.ModifierDefinitions.Add(trainingMod);
+                }
+            }
         }
     }
 }

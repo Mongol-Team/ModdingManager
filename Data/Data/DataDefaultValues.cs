@@ -7,6 +7,7 @@ namespace Data
         public const string Null = "Null";
         public const string NaN = "NaN";
         public const string ItemWithNoGfx = "ItemWithNoGfx";
+        public const string ItemCreatedDynamically = "ItemCreatedDynamically";
         public static readonly KeyValuePair<string, string> NullLocalistion = new(Null, Null);
         public const string None = "None";
         public static readonly Bitmap NullImageSource = Properties.Resources.null_item_image;
