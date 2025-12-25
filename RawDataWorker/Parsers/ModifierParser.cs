@@ -81,7 +81,7 @@ public class ModifierParser : Parser
                 var cfg = new ModifierDefinitionConfig
                 {
                     Id = new Identifier(key),
-                    ScopeType = modifierToScope.TryGetValue(key, out var st) ? st : ScopeTypes.country
+                    ScopeType = modifierToScope.TryGetValue(key, out var st) ? st : ScopeTypes.Country
                 };
 
                 var ul = h3.SelectSingleNode("following-sibling::ul[1]");

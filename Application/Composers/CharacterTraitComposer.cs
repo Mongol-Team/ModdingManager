@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Application.Extentions;
 
 namespace Application.Composers
 {
@@ -71,12 +72,17 @@ namespace Application.Composers
         public static IConfig ParseObject(Bracket bracket)
         {
             CharacterTraitConfig characterTrait = new CharacterTraitConfig();
+
             characterTrait.Id = new(bracket.Name);
             foreach (Var var in bracket.SubVars)
             {
                 switch (var.Name)
                 {
                     case "random":
+                        characterTrait.Random = var.Value.ToString().ToLower() == "yes" ? true : false;
+                        break;
+                    case "sprite":
+                        characterTrait.Sprite = var.Value.ToInt();
                         break;
                     case "trait_type":
                         Enum.TryParse<TraitType>(var.Value?.ToString(), out var traitType);
@@ -181,7 +187,7 @@ namespace Application.Composers
                                 Logger.AddLog($"Unknown var found: {var.Name} when unit_type parsing {bracket.Name}.");
                                 continue;
                             } 
-                            SubUnitConfig regiment = ModDataStorage.Mod.Regiments.FirstOrDefault(r => r.Id.ToString() == var.Value.ToString());
+                            SubUnitConfig regiment = ModDataStorage.Mod.SubUnits.FirstOrDefault(r => r.Id.ToString() == var.Value.ToString());
                             if (regiment != null)
                             {
                                 characterTrait.UnitType.Add(regiment);

@@ -15,7 +15,7 @@ namespace ViewPresenters
 
         public MainWindowPresenter(MainWindow view)
         {
-            ModManagerSettings.Load();
+            ModdingManagerSettings.Load();
             ModDataStorage.ComposeMod();
             _view = view ?? throw new ArgumentNullException(nameof(view));
             WireUp();
@@ -50,8 +50,8 @@ namespace ViewPresenters
         // ====== перенос обработчиков из MainForm ======
         private void LoadConfig()
         {
-            _view.DirBox.Text = ModManagerSettings.Instance.ModDirectory;
-            _view.GameDirBox.Text = ModManagerSettings.Instance.GameDirectory;
+            _view.DirBox.Text = ModdingManagerSettings.Instance.ModDirectory;
+            _view.GameDirBox.Text = ModdingManagerSettings.Instance.GameDirectory;
         }
         private void LocConvertButton_Click(object? sender, RoutedEventArgs e)
         {

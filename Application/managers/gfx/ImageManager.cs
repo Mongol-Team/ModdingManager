@@ -38,8 +38,8 @@ namespace ModdingManager.classes.managers.gfx
         {
             var directoriesToSearch = new[]
             {
-                ModManagerSettings.Instance.GameDirectory,
-                ModManagerSettings.Instance.ModDirectory
+                ModdingManagerSettings.Instance.GameDirectory,
+                ModdingManagerSettings.Instance.ModDirectory
             };
 
             foreach (var dir in directoriesToSearch)

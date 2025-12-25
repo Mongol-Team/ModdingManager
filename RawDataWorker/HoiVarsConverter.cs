@@ -22,6 +22,8 @@ namespace RawDataWorker
             {
                 case "yes": case "true": { result = true; return true; }
                 case "no": case "false": { result = false; return true; }
+                case "YES": case "TRUE": { result = true; return true; }
+                case "NO": case "FALSE": { result = false; return true; }
                 default: { result = default; return false; }
             }
         }

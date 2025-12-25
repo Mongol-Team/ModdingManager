@@ -7,7 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\Text\OtherModifierDefenitions.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Data\Text\BaisicUnitGroupsDefenitions.txt" />
+    <EmbeddedResource Include="Data\Text\OtherModifierDefenitions.txt" />
   </ItemGroup>
   <ItemGroup>
 	<EmbeddedResource Include="Data\Text\RulesCoreDefenitions.txt" />

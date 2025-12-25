@@ -249,7 +249,7 @@ namespace Application.Composers
                             }
                             foreach (object val in arr.Values)
                             {
-                                SubUnitConfig reg = ModDataStorage.Mod.Regiments.FirstOrDefault(e => e.Id.ToString() == val.ToString());
+                                SubUnitConfig reg = ModDataStorage.Mod.SubUnits.FirstOrDefault(e => e.Id.ToString() == val.ToString());
                                 if (reg == null)
                                 {
                                     Logger.AddDbgLog($"[Warning] Regiment {reg.Id.ToString()} is undefiend.");

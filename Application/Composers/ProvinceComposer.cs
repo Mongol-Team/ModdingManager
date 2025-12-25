@@ -23,12 +23,21 @@ namespace Application.Composers
             List<IConfig> seaProvinces = new List<IConfig>();
             List<IConfig> otherProvinces = new List<IConfig>();
             CsvParser csvParser = new CsvParser(new CsvDefinitionsPattern());
-            var defFile = csvParser.Parse(ModPathes.DefinitionPath) as HoiTable;
+            HoiTable defFile = csvParser.Parse(ModPathes.DefinitionPath) as HoiTable;
             foreach (var line in defFile.Values)
             {
 
                 try
                 {
+                    if (line.Count < 6)
+                    {
+                        continue;
+                    }
+                        
+                    if ((int)line[0] == 0)
+                    {
+                        
+                    }
                     var province = new ProvinceConfig
                     {
                         Id = new Identifier((int)line[0]),

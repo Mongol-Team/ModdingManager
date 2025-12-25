@@ -18,7 +18,7 @@ namespace ModdingManager.classes.utils
         public List<OpinionModifierConfig> OpinionModifiers { get; set; } = new();
         public List<DynamicModifierConfig> DynamicModifiers { get; set; } = new();
         public List<ModifierDefinitionConfig> ModifierDefinitions { get; set; } = new();
-        public List<IdeaSlotConfig> IdeaSlots { get; set; } = new();
+        public List<IdeaGroupConfig> IdeaSlots { get; set; } = new();
         public List<BuildingConfig> Buildings { get; set; } = new();
         public List<IGfx> Gfxes { get; set; } = new();
         public List<TechCategoryConfig> TechCategories { get; set; } = new();

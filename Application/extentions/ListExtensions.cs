@@ -76,7 +76,7 @@
         public static T Random<T>(this List<T> list)
         {
             if (list == null || list.Count == 0)
-                throw new InvalidOperationException("Список пуст или null.");
+                throw new InvalidOperationException($"Список пуст или null - {list.GetType()}.");
             Random _random = new Random();
             int index = _random.Next(list.Count);
             return list[index];

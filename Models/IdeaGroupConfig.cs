@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Models
 {
-    public class IdeaSlotConfig : IConfig
+    public class IdeaGroupConfig : IConfig
     {
         public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }

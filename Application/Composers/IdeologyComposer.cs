@@ -16,6 +16,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Models.GfxTypes;
+using Data;
 
 namespace Application.Composers
 {
@@ -66,6 +68,7 @@ namespace Application.Composers
                 }
                 if (res.Count > 0)
                 {
+                    ParseIdeologyModifiers(res.OfType<ModifierDefinitionConfig>().ToList());
                     return res;
                 }
 
@@ -228,6 +231,25 @@ namespace Application.Composers
             }
 
             return config;
+        }
+
+        public static void ParseIdeologyModifiers(List<ModifierDefinitionConfig> defs)
+        {
+            foreach(var ideology in defs)
+            {
+                ModifierDefinitionConfig dynDriftMod = new();
+                dynDriftMod.Id = new Identifier($"{ideology.Id}_drift");
+                dynDriftMod.IsCore = true;
+                dynDriftMod.Cathegory = ModifierDefinitionCathegoryType.Country;
+                dynDriftMod.ValueType = ModifierDefenitionValueType.Number;
+                dynDriftMod.ScopeType = ScopeTypes.Country;
+                dynDriftMod.ColorType = ModifierDefenitionColorType.Good;
+                dynDriftMod.Precision = 2;
+                dynDriftMod.Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx);
+                ModDataStorage.Mod.ModifierDefinitions.Add(dynDriftMod);
+                return;
+
+            }
         }
     }
 }

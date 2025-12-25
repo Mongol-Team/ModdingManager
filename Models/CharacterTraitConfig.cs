@@ -7,6 +7,7 @@ namespace Models
     public class CharacterTraitConfig : IConfig
     {
         public Identifier Id { get; set; }
+        public int Sprite { get; set; }
         public Types.LocalizationData.ConfigLocalisation Localisation { get; set; }
         public IGfx Gfx { get; set; }
         public List<CharacterType> CharacterTypes { get; set; } = new List<CharacterType>();
@@ -14,7 +15,7 @@ namespace Models
         public bool ShowInCombat { get; set; }
         public string Allowed { get; set; } //todo: implement trigger handling
         public string AiWillDo { get; set; } //todo: implement ai will do type handling, check https://hoi4.paradoxwikis.com/AI_modding#AI_will_do
-        public IdeaSlotConfig CharacterSlot { get; set; }
+        public IdeaGroupConfig CharacterSlot { get; set; }
         public CharacterTraitConfig SpecialistAdvisorTrait { get; set; }
         public CharacterTraitConfig ExpertAdvisorTrait { get; set; }
         public CharacterTraitConfig GeniusAdvisorTrait { get; set; }

@@ -187,7 +187,7 @@ namespace Application.Composers
             }
             cfg.Localisation = new ConfigLocalisation()
             {
-                Language = ModManagerSettings.Instance.CurrentLanguage,
+                Language = ModdingManagerSettings.Instance.CurrentLanguage,
                 Source = cfg,
                 Data = new Dictionary<string, string>()
             };

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Application.Composers
 {
-    public class IdeaSlotComposer : IComposer
+    public class IdeaGroupComposer : IComposer
     {
         public static List<IConfig> Parse()
         {
@@ -52,13 +52,13 @@ namespace Application.Composers
                 {
                     foreach (Bracket slot in br.SubBrackets)
                     {
-                        IdeaSlotConfig slotConfig = ModDataStorage.Mod.IdeaSlots.FindById(slot.Name);
+                        IdeaGroupConfig slotConfig = ModDataStorage.Mod.IdeaSlots.FindById(slot.Name);
                         if (slotConfig == null)
                         {
                             Var isLaw = slot.SubVars.FirstOrDefault(b => b.Name == "law");
                             Var useListView = slot.SubVars.FirstOrDefault(b => b.Name == "use_list_view");
                             Var designer = slot.SubVars.FirstOrDefault(b => b.Name == "designer");
-                            slotConfig = new IdeaSlotConfig()
+                            slotConfig = new IdeaGroupConfig()
                             {
                                 Id = slot?.Name != null ? new(slot.Name) : throw new ArgumentNullException(nameof(slot.Name)),
                                 IsLaw = isLaw != null ? (isLaw.Value as bool?) ?? false : false,

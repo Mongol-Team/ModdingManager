@@ -14,6 +14,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Application.Settings;
+using Application.Extentions;
+using Application.Debugging;
 
 namespace Application.Composers
 {
@@ -58,7 +61,7 @@ namespace Application.Composers
                 SubUnitConfig config = new SubUnitConfig();
                 foreach (Bracket unitbr in bracket.SubBrackets)
                 {
-                    ParseObject(unitbr);
+                    config = ParseObject(unitbr);
                 }
                 configs.Add(config);
             }
@@ -100,10 +103,35 @@ namespace Application.Composers
                         }
                         break;
                     case "group":
-                        var group = ModDataStorage.Mod.SubUnitGroups.FirstOrDefault(g => g.Id.ToString() == var.Value as string);
+                        var group = ModDataStorage.Mod.SubUnitGroups.FirstOrDefault(g => g.Id.ToString() == var.Value.ToString());
                         if (group != null)
                         {
                             config.Group = group;
+                        }
+                        else
+                        {
+                            try 
+                            {
+                                SubUnitGroupConfig newGroup = new SubUnitGroupConfig();
+                                newGroup.Id = new Identifier(var.Value.ToString());
+                                newGroup.Gfx = ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_group_{newGroup.Id.ToString()}_name");
+                                Dictionary<string, string> nameData = new Dictionary<string, string>();
+                                nameData.AddPair(ModDataStorage.Localisation.GetLocalisationByKey($"group_{newGroup.Id.ToString()}_title"));
+                                newGroup.Localisation = new()
+                                {
+                                    Source = newGroup,
+                                    Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                                    Data = nameData,
+                                    IsConfigLocNull = false,
+                                    ReplacebleResource = false,
+                                };
+                                ModDataStorage.Mod.SubUnitGroups.Add(newGroup);
+                                config.Group = newGroup;
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.AddDbgLog($"Failed to create new SubUnitGroup {var.Value as string} for SubUnit {config.Id.ToString()}: {ex.Message}", "SubUnitComposer");
+                            }
                         }
                         break;
                     case "ai_priority":
@@ -163,6 +191,7 @@ namespace Application.Composers
                         break;
                 }
             }
+
             foreach (HoiArray arr in bracket.Arrays)
             {
                 switch (arr.Name)
@@ -193,6 +222,7 @@ namespace Application.Composers
 
                 }
             }
+
             return config;
         }
     }

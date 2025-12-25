@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Application.Settings
 {
-    public class ModManagerSettings
+    public class ModdingManagerSettings
     {
         [JsonInclude]
         public string ModDirectory { get; private set; }
@@ -26,12 +26,12 @@ namespace Application.Settings
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public Language CurrentLanguage { get; private set; }
 
-        public static ModManagerSettings Instance { get; private set; }
+        public static ModdingManagerSettings Instance { get; private set; }
 
         public static void Load()
         {
             var json = File.ReadAllText(ProgramPathes.ConfigFilePath);
-            Instance = JsonSerializer.Deserialize<ModManagerSettings>(json);
+            Instance = JsonSerializer.Deserialize<ModdingManagerSettings>(json);
         }
     }
 }

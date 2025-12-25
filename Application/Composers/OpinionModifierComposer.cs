@@ -36,7 +36,7 @@ namespace Application.Composers
                         List<IConfig> fileConfigs = ParseFile(hoiFuncFile);
                         foreach (IConfig config in fileConfigs)
                         {
-                            if (!configs.Any(c => c.Id == config.Id))
+                            if (!configs.Any(c => c.Id.ToString() == config.Id.ToString()))
                             {
                                 configs.Add(config);
                             }
@@ -53,7 +53,10 @@ namespace Application.Composers
             List<IConfig> configs = new List<IConfig>();
             foreach (Bracket br in hoiFuncFile.Brackets.Where(b => b.Name == "opinion_modifiers"))
             {
-                configs.AddSafe(ParseObject(br));
+                foreach (Bracket opinBr in br.SubBrackets)
+                {
+                    configs.AddSafe(ParseObject(opinBr));
+                }
             }
             return configs;
         }
@@ -82,13 +85,13 @@ namespace Application.Composers
                         config.Decay = item.ToInt();
                         break;
                     case "days":
-                        config.RemovalTime.Add(TimeUnit.Day, item.ToInt());
+                        config.RemovalTime.SumToKey(TimeUnit.Day, item.ToInt());
                         break;
                     case "months":
-                        config.RemovalTime.Add(TimeUnit.Day, item.ToInt() * 30);
+                        config.RemovalTime.SumToKey(TimeUnit.Day, item.ToInt() * 30);
                         break;
                     case "years":
-                        config.RemovalTime.Add(TimeUnit.Day, item.ToInt() * 365);
+                        config.RemovalTime.SumToKey(TimeUnit.Day, item.ToInt() * 365);
                         break;
                     case "min_trust":
                         config.MinTrust = item.ToInt();

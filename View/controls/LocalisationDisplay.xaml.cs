@@ -40,7 +40,7 @@ namespace ViewControls
         private void BuildDefaultLocData()
         {
             _localisation.Data = new Dictionary<string, string>();
-            _localisation.Data.Add($"l_{ModManagerSettings.Instance.CurrentLanguage}:", "");
+            _localisation.Data.Add($"l_{ModdingManagerSettings.Instance.CurrentLanguage}:", "");
             switch (_localisation.Source)
             {
                 case CountryConfig country:
