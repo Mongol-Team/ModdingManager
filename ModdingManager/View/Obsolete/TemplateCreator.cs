@@ -1,4 +1,6 @@
 ﻿using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
+using ModdingManagerClassLib.Settings;
 using ModdingManagerModels;
 using System.Data;
 using System.IO;
@@ -9,12 +11,12 @@ namespace ModdingManager
 {
     public partial class TemplateCreator : Form
     {
-        public TemplateConfig CurrentConfig = new ();
+        public TemplateConfig CurrentConfig = new();
         public TemplateCreator()
         {
             InitializeComponent();
         }
-        
+
         private void AddElementEvent(object sender, MouseEventArgs e)
         {
             Panel panel = sender as Panel;
@@ -42,57 +44,57 @@ namespace ModdingManager
                     return;
                 }
 
-                var matchingRegiments = ModConfig.Instance.Regiments
-                    .Where(r => r.Categories != null &&
-                        r.Categories.Contains(requiredCategory, StringComparer.OrdinalIgnoreCase) &&
-                        (!type.Equals("Brigade", StringComparison.OrdinalIgnoreCase) ||
-                         !r.Categories.Contains("category_support_battalions", StringComparer.OrdinalIgnoreCase)))
-                    .OrderBy(r => r.Name);
+                //var matchingRegiments = ModDataStorage.Mod.Regiments
+                //    .Where(r => r.Categories != null &&
+                //        r.Categories.Contains(requiredCategory, StringComparer.OrdinalIgnoreCase) &&
+                //        (!type.Equals("Brigade", StringComparison.OrdinalIgnoreCase) ||
+                //         !r.Categories.Contains("category_support_battalions", StringComparer.OrdinalIgnoreCase)))
+                //    .OrderBy(r => r.Id);
 
 
                 ContextMenuStrip menu = new ContextMenuStrip();
 
-                foreach (var regiment in matchingRegiments)
-                {
-                    var item = new ToolStripMenuItem(regiment.Name)
-                    {
-                        Tag = regiment,
-                        Image = regiment.Icon
-                    };
+                //foreach (var regiment in matchingRegiments)
+                //{
+                //    var item = new ToolStripMenuItem(regiment.Id.ToString())
+                //    {
+                //        Tag = regiment,
+                //        Image = regiment.Gfx.Content
+                //    };
 
-                    item.Click += (s, args) =>
-                    {
-                        var selected = (RegimentConfig)((ToolStripMenuItem)s).Tag;
+                //    item.Click += (s, args) =>
+                //    {
+                //        var selected = (SubUnitConfig)((ToolStripMenuItem)s).Tag;
 
-                        if (panel.BackgroundImage != null && panel.BackgroundImage != selected.Icon)
-                        {
-                            panel.BackgroundImage.Dispose();
-                        }
-                        panel.BackgroundImage = new Bitmap(selected.Icon);
+                //        if (panel.BackgroundImage != null && panel.BackgroundImage != selected.Gfx)
+                //        {
+                //            panel.BackgroundImage.Dispose();
+                //        }
+                //        panel.BackgroundImage = new Bitmap(selected.Gfx.Content);
 
-                        var regimentItem = new RegimentConfig
-                        {
-                            Name = selected.Name,
-                            Icon = selected.Icon,
-                            Categories = selected.Categories,
-                            X = x,
-                            Y = y
-                        };
+                //        var regimentItem = new SubUnitConfig
+                //        {
+                //            Id = selected.Id,
+                //            Gfx = selected.Gfx,
+                //            Categories = selected.Categories,
+                //            X = x,
+                //            Y = y
+                //        };
 
-                        if (type.Equals("Support", StringComparison.OrdinalIgnoreCase))
-                        {
-                            CurrentConfig.SupportItems.RemoveAll(r => r.X == x && r.Y == y); // Удаляем предыдущие на этих координатах
-                            CurrentConfig.SupportItems.Add(regimentItem);
-                        }
-                        else if (type.Equals("Brigade", StringComparison.OrdinalIgnoreCase))
-                        {
-                            CurrentConfig.BrigadeItems.RemoveAll(r => r.X == x && r.Y == y);
-                            CurrentConfig.BrigadeItems.Add(regimentItem);
-                        }
-                    };
+                //        if (type.Equals("Support", StringComparison.OrdinalIgnoreCase))
+                //        {
+                //            CurrentConfig.SupportItems.RemoveAll(r => r.X == x && r.Y == y); // Удаляем предыдущие на этих координатах
+                //            CurrentConfig.SupportItems.Add(regimentItem);
+                //        }
+                //        else if (type.Equals("Brigade", StringComparison.OrdinalIgnoreCase))
+                //        {
+                //            CurrentConfig.BrigadeItems.RemoveAll(r => r.X == x && r.Y == y);
+                //            CurrentConfig.BrigadeItems.Add(regimentItem);
+                //        }
+                //    };
 
-                    menu.Items.Add(item);
-                }
+                //    menu.Items.Add(item);
+                //}
 
                 if (menu.Items.Count == 0)
                 {
@@ -105,7 +107,7 @@ namespace ModdingManager
 
         private void UpdtadeConfig()
         {
-            CurrentConfig.Name = this.NameBox.Text;
+            CurrentConfig.Gfx.Content = new(this.NameBox.Text);
             CurrentConfig.IsLocked = this.IsLocked.Checked;
             CurrentConfig.Namespace = this.GroupNameBox.Text;
             CurrentConfig.AllowTraining = this.CanRecrutingLocked.Checked;
@@ -133,7 +135,7 @@ namespace ModdingManager
             UpdtadeConfig();
             var config = CurrentConfig;
 
-            if (string.IsNullOrWhiteSpace(config.Name))
+            if (string.IsNullOrWhiteSpace(config.Id.ToString()))
             {
                 MessageBox.Show("Название шаблона обязательно");
                 return;
@@ -145,7 +147,7 @@ namespace ModdingManager
                 return;
             }
 
-            var unitsDir = Path.Combine(ModManager.ModDirectory, "history", "units");
+            var unitsDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "history", "units");
             Directory.CreateDirectory(unitsDir);
 
             var fileName = $"{(config.OOBFileName ?? "division")}_{(config.OOBFileYear)}.txt";
@@ -153,7 +155,7 @@ namespace ModdingManager
 
             var content = new StringBuilder();
             content.AppendLine("division_template = {");
-            content.AppendLine($"    name = \"{config.Name}\"");
+            content.AppendLine($"    name = \"{config.Id}\"");
 
             if (!string.IsNullOrWhiteSpace(config.Namespace))
                 content.AppendLine($"    division_names_group = \"{config.Namespace}\"");
@@ -179,7 +181,7 @@ namespace ModdingManager
             content.AppendLine("    regiments = {");
             foreach (var regiment in config.BrigadeItems)
             {
-                content.AppendLine($"        {regiment.Name} = {{ x = {regiment.X} y = {regiment.Y} }}");
+                content.AppendLine("        {regiment.Id} = {{ x = /*{/*regiment.X*/}*/ y = {/*regiment.Y*/} }}");
             }
             content.AppendLine("    }");
 
@@ -188,7 +190,7 @@ namespace ModdingManager
                 content.AppendLine("    support = {");
                 foreach (var support in config.SupportItems)
                 {
-                    content.AppendLine($"        {support.Name} = {{ x = {support.X} y = {support.Y} }}");
+                    content.AppendLine("        {support.Id} = {{ x = {support.X} y = {support.Y} }}");
                 }
                 content.AppendLine("    }");
             }

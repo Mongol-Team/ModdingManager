@@ -1,0 +1,136 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:View"
+        xmlns:controls="clr-namespace:ViewControls"
+        x:Class="View.WPFCountryCreator"
+        mc:Ignorable="d"
+        Title="WPFCoutryCreator" Height="590" Width="800" Loaded="Window_Loaded"
+        ResizeMode="CanResize"
+        Style="{StaticResource WindowDark}">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <controls:WindowTitleBar Grid.Row="0"/>
+        
+        <Grid Grid.Row="1">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Horizontal" Margin="10">
+                <!-- Колонка 1 -->
+                <StackPanel Margin="10">
+                    <Label Content="файл coutrytags"/>
+                    <controls:SearchableComboBox x:Name="CountryFileNameBox"  Width="150"/>
+                    <Label Content="тег страны"/>
+                    
+                    <TextBox x:Name="TagBox" Width="120"/>
+
+                    <Label Content="технологии на старте"/>
+                    <RichTextBox x:Name="TechnologiesBox" Width="200" Height="100">
+                        <FlowDocument>
+                            <Paragraph>
+                                <Run Text=""/>
+                            </Paragraph>
+                        </FlowDocument>
+                    </RichTextBox>
+
+                    <Label Content="колво конвоев"/>
+                    <TextBox x:Name="ConvoysBox" Width="120"/>
+
+                    <Label Content="ласт выборы"/>
+                    <DatePicker x:Name="LastElectionsDatePicker"/>
+
+                    <Label Content="правящая партия"/>
+                    <controls:SearchableComboBox x:Name="RullingPartyBox" Width="150" Loaded="RullingPartyBox_Loaded"/>
+
+                    <Label Content="интервал выборов(в месяцах)"/>
+                    <TextBox x:Name="ElectionsDelayBox" Width="120"/>
+
+                    <CheckBox x:Name="HaveElectionsBox" Content="Есть ли выборы"/>
+                    <Button x:Name="ApplyButton" Content="Применить" Width="120" Background="#FFAB8338" Margin="0,10,0,0" Click="ApplyButton_Click"/>
+                    <Button x:Name="LoadConfigButton" Content="Загрузить конфиг" Width="120" Background="#FF4AAB38"  Margin="0,10,0,0" Click="LoadConfigButton_Click"/>
+                    <Button x:Name="SaveConfigButton" Content="Сохранить конфиг" Width="120" Background="#FFE82F2F" Margin="0,10,0,0" Click="SaveConfigButton_Click"/>
+                </StackPanel>
+
+                <!-- Колонка 2 -->
+                <StackPanel Margin="10">
+                    <Label Content="шаблон стартовых войск"/>
+                    <TextBox x:Name="StartOOBox" Width="120"/>
+
+                    <Label Content="стабильность"/>
+                    <TextBox x:Name="StabBox" Width="80"/>
+
+                    <Label Content="поддержка войны"/>
+                    <TextBox x:Name="WarSupBox" Width="100"/>
+
+                    <Label Content="id старторвых идей"/>
+                    <RichTextBox x:Name="StartingIdeasBox" Width="200" Height="80">
+                        <FlowDocument>
+                            <Paragraph>
+                                <Run Text=""/>
+                            </Paragraph>
+                        </FlowDocument>
+                    </RichTextBox>
+
+                    <Label Content="популярность партий(Name:Value)"/>
+                    <RichTextBox x:Name="PartyPopularitiesBox" Width="200" Height="80">
+                        <FlowDocument>
+                            <Paragraph>
+                                <Run Text=""/>
+                            </Paragraph>
+                        </FlowDocument>
+                    </RichTextBox>
+
+                    <Label Content="нанятые персонажи"/>
+                    <RichTextBox x:Name="RecruitingCharactersBox" Width="200" Height="80">
+                        <FlowDocument>
+                            <Paragraph>
+                                <Run Text=""/>
+                            </Paragraph>
+                        </FlowDocument>
+                    </RichTextBox>
+                </StackPanel>
+
+                <!-- Колонка 3 -->
+                <StackPanel Margin="10">
+                    <Label Content="id столицы"/>
+                    <TextBox x:Name="CapitalIdBox" Width="80"/>
+
+                    <Label Content="слоты ресерчей"/>
+                    <TextBox x:Name="ResearchSlotsBox" Width="80"/>
+
+                    <Label Content="флаги страны"/>
+                    <ScrollViewer Grid.Column="3" VerticalScrollBarVisibility="Auto" Height="100" Width="200" AllowDrop = "true">
+                        <StackPanel x:Name="CountryFlagsCanvas" Orientation="Vertical" AllowDrop = "true">
+                            
+                        </StackPanel>
+                    </ScrollViewer>
+
+
+                    <Label Content="стейты страны(id:IsCore)"/>
+                    <RichTextBox x:Name="StatesBox" Width="200" Height="80">
+                        <FlowDocument>
+                            <Paragraph>
+                                <Run Text=""/>
+                            </Paragraph>
+                        </FlowDocument>
+                    </RichTextBox>
+                    <Label Content="граф культура"/>
+                    <TextBox x:Name="GraficalCultureBox" Width="120"/>
+
+                    <Label Content="имя страны"/>
+                    <TextBox x:Name="CountryDescNameBox" Width="120"/>
+
+                    <Label Content="цвет на карте"/>
+                    <controls:ColorPickerDropdown x:Name="CountryColorPicker" Width="120"/>
+                </StackPanel>
+                
+            </StackPanel>
+        </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

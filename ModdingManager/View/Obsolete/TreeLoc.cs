@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib.Settings;
 
 namespace ModdingManager
 {
@@ -18,7 +19,7 @@ namespace ModdingManager
         public TreeLoc()
         {
             InitializeComponent();
-            textBox1.Text = ModManager.ModDirectory;
+            textBox1.Text = ModManagerSettings.Instance.ModDirectory;
         }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)

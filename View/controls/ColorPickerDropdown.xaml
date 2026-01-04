@@ -1,0 +1,27 @@
+﻿<UserControl x:Class="ViewControls.ColorPickerDropdown"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ViewControls"
+             Width="100" Height="25">
+    <Grid>
+        <Border x:Name="ColorPreview"
+                Background="{StaticResource BackgroundElement}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1"
+                CornerRadius="3"/>
+
+        <Popup x:Name="ColorPopup"
+           Placement="Bottom"
+           StaysOpen="True"
+           AllowsTransparency="True"
+           Closed="ColorPopup_Closed"
+           PlacementTarget="{Binding ElementName=ColorPreview}">
+            <Border Background="{StaticResource BackgroundCard}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" Focusable="True">
+                <local:ColorPicker x:Name="Picker"
+                           Width="285" Height="160"
+                           SelectedColorChanged="Picker_SelectedColorChanged"/>
+            </Border>
+        </Popup>
+
+    </Grid>
+</UserControl>

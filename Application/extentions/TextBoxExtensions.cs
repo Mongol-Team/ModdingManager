@@ -1,0 +1,62 @@
+﻿
+using System.Windows.Documents;
+using System.Windows.Forms;
+
+namespace Application.Extentions
+{
+    public static class TextBoxExtensions
+    {
+        public static List<string> GetLines(this System.Windows.Controls.RichTextBox rtb)
+        {
+            var lines = new List<string>();
+            var textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
+            string fullText = textRange.Text;
+
+            // Разбиваем по строкам (учитывая \r\n, \n и \r)
+            var split = fullText.Split(new[] { "\r\n", "\n", "\r" }, System.StringSplitOptions.None);
+            foreach (var line in split)
+            {
+                if (!string.IsNullOrEmpty(line))
+                {
+                    lines.Add(line);
+                }
+            }
+
+            return lines;
+        }
+        public static void SetLines(this System.Windows.Controls.RichTextBox rtb, IEnumerable<string> lines)
+        {
+            var document = new FlowDocument();
+            foreach (var line in lines)
+            {
+                var paragraph = new Paragraph(new Run(line));
+                document.Blocks.Add(paragraph);
+            }
+            rtb.Document = document;
+        }
+        public static void AddLine(this System.Windows.Controls.RichTextBox rtb, string line)
+        {
+            if (rtb.Document == null)
+                rtb.Document = new FlowDocument();
+
+            if (rtb.Document.Blocks.LastBlock is not Paragraph paragraph)
+            {
+                paragraph = new Paragraph();
+                rtb.Document.Blocks.Add(paragraph);
+            }
+
+            paragraph.Inlines.Add(new Run(line + "\n"));
+        }
+
+
+        public static List<string> GetLines(this RichTextBox rtb)
+        {
+            var lines = new List<string>();
+            foreach (var line in rtb.Lines)
+            {
+                lines.Add(line);
+            }
+            return lines;
+        }
+    }
+}

@@ -16,6 +16,7 @@ using TeximpNet.Compression;
 using TeximpNet.DDS;
 using TeximpNet;
 using ModdingManager.managers.@base;
+using ModdingManagerClassLib.Settings;
 
 namespace ModdingManager
 {
@@ -47,14 +48,14 @@ namespace ModdingManager
 
                 // Русская локализация
                 UpdateSingleLocalizationFile(
-                    Path.Combine(ModManager.ModDirectory, "localisation", "russian", $"{fileBaseName}_l_russian.yml"),
+                    Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", "russian", $"{fileBaseName}_l_russian.yml"),
                     "l_russian:",
                     name,
                     desc);
 
                 // Английская локализация
                 UpdateSingleLocalizationFile(
-                    Path.Combine(ModManager.ModDirectory, "localisation", "english", $"{fileBaseName}_l_english.yml"),
+                    Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", "english", $"{fileBaseName}_l_english.yml"),
                     "l_english:",
                     "", // Пустое значение для английской версии
                     "");
@@ -150,7 +151,7 @@ namespace ModdingManager
 
             try
             {
-                string directory = Path.Combine(ModManager.ModDirectory, "common");
+                string directory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common");
                 string filePath = "";
                 string content = "";
 
@@ -480,7 +481,7 @@ namespace ModdingManager
 
         private void UpdateIdeasGfxFile(string tag, string id)
         {
-            string filePath = Path.Combine(ModManager.ModDirectory, "interface", $"{tag}_ideas.gfx");
+            string filePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "interface", $"{tag}_ideas.gfx");
             string spriteEntry = $"\tspriteType = {{\n\t\tname = \"GFX_modifiers_{id}_icon\"\n\t\ttextureFile = \"gfx/interface/modifiers_{id}_icon.dds\"\n\t}}";
 
             // Создаем директорию, если ее нет
@@ -523,7 +524,7 @@ namespace ModdingManager
 
         private void UpdateCountryStateViewGui(string tag, string id)
         {
-            string filePath = Path.Combine(ModManager.ModDirectory, "interface", "countrystateview.gui");
+            string filePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "interface", "countrystateview.gui");
 
             if (!File.Exists(filePath))
             {
@@ -635,7 +636,7 @@ namespace ModdingManager
 
             try
             {
-                string directory = Path.Combine(ModManager.ModDirectory, "gfx", "interface", "modifiers");
+                string directory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "gfx", "interface", "modifiers");
                 Directory.CreateDirectory(directory);
 
                 string outputPath = Path.Combine(directory, $"modifiers_{id}_icon.dds");

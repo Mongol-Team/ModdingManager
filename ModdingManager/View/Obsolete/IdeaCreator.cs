@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using ModdingManagerClassLib.Settings;
 
 namespace ModdingManager
 {
@@ -20,7 +21,7 @@ namespace ModdingManager
             {
                 string countryTag = TagBox.Text;
                 // Формируем путь к файлу в директории мода
-                string ideasPath = Path.Combine(ModManager.ModDirectory, "common", "ideas", $"{countryTag}.txt");
+                string ideasPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "ideas", $"{countryTag}.txt");
                 string directoryPath = Path.GetDirectoryName(ideasPath);
 
                 // Создаем директорию если не существует
@@ -123,7 +124,7 @@ namespace ModdingManager
         public static void GenerateOrUpdateIdeaGFX(string ideaId, string tag)
         {
 
-            string gfxFilePath = Path.Combine(ModManager.ModDirectory, "interface", $"{tag}.gfx");
+            string gfxFilePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "interface", $"{tag}.gfx");
 
             string defaultHeader = "spriteTypes = {\n";
             string defaultFooter = "}\n";
@@ -163,8 +164,8 @@ namespace ModdingManager
         }
         public static void GenerateLocalizationFiles(string tag, string ideaId, string name, string description)
         {
-            string englishFilePath = Path.Combine(ModManager.ModDirectory, "localisation", "english", $"{tag}_ideas_l_english.yml");
-            string russianFilePath = Path.Combine(ModManager.ModDirectory, "localisation", "russian", $"{tag}_ideas_l_russian.yml");
+            string englishFilePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", "english", $"{tag}_ideas_l_english.yml");
+            string russianFilePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", "russian", $"{tag}_ideas_l_russian.yml");
 
             // Форматируем новые строки для добавления
             string englishEntry = $"{ideaId}:0 \"\"\n{ideaId}_desc:0 \"\"\n";
@@ -227,7 +228,7 @@ namespace ModdingManager
         private void ApplyButton_Click(object sender, EventArgs e)
         {
             if (!(IdBox.Text.Contains(" ")))
-            { 
+            {
                 CreateCountryIdea();
                 GenerateOrUpdateIdeaGFX(IdBox.Text, TagBox.Text);
                 GenerateLocalizationFiles(TagBox.Text, IdBox.Text, NameBox.Text, DescBox.Text);
@@ -239,7 +240,7 @@ namespace ModdingManager
                         Directory.CreateDirectory(path);
                         image.SaveAsDDS(path, id, 64, 64);
                     }
-                    SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManager.ModDirectory, IdBox.Text, TagBox.Text);
+                    SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManagerSettings.Instance.ModDirectory, IdBox.Text, TagBox.Text);
                 }
                 else
                 {
@@ -324,7 +325,7 @@ namespace ModdingManager
             try
             {
 
-                string historyCountriesPath = Path.Combine(ModManager.ModDirectory, "history", "countries");
+                string historyCountriesPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "history", "countries");
 
                 if (!Directory.Exists(historyCountriesPath))
                 {
@@ -339,7 +340,7 @@ namespace ModdingManager
                     return;
                 }
 
-                string countryFile = countryFiles[0]; 
+                string countryFile = countryFiles[0];
                 string fileContent = File.ReadAllText(countryFile, Encoding.UTF8);
 
                 string pattern = @"add_ideas\s*=\s*\{([^}]*)\}";

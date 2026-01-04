@@ -3,6 +3,8 @@ using ModdingManager.classes.handlers;
 using ModdingManager.classes.utils;
 using ModdingManagerModels;
 using System.IO;
+using ModdingManager.managers.@base;
+using ModdingManagerClassLib;
 
 namespace ModdingManager
 {
@@ -18,22 +20,22 @@ namespace ModdingManager
         private void UpdateCurrentConfig()
         {
             CurrentConfig.Tag = TagBox.Text;
-            CurrentConfig.Id = IdBox.Text;
-            CurrentConfig.Name = NameBox.Text;
-            CurrentConfig.Expire = ExpireTimePicker.Value.ToString("yyyy.MM.dd");
-            CurrentConfig.Attack = TryParseOrDefault(AtkBox.Text, 0);
-            CurrentConfig.Defense = TryParseOrDefault(DefBox.Text, 0);
-            CurrentConfig.Supply = TryParseOrDefault(SupplyBox.Text, 0);
-            CurrentConfig.Speed = TryParseOrDefault(SpdBox.Text, 0);
-            CurrentConfig.Skill = TryParseOrDefault(SkillBox.Text, 0);
-            CurrentConfig.AdvisorCost = TryParseOrDefault(AdvisorCost.Text, 0);
-            CurrentConfig.Types = CharTypesBox.GetLines();
-            CurrentConfig.Traits = PercBox.GetLines();
-            CurrentConfig.Description = DescBox.Text;
-            CurrentConfig.AiWillDo = AiDoBox.Text;
-            CurrentConfig.Ideology = IdeologyBox.Text;
-            CurrentConfig.BigImage = BigIconPanel.BackgroundImage;
-            CurrentConfig.SmallImage = SmalIconPanel.BackgroundImage;
+            CurrentConfig.Id = new(IdBox.Text);
+            //CurrentConfig.Name = NameBox.Text;
+            //CurrentConfig.Expire = ExpireTimePicker.Value.ToString("yyyy.MM.dd");
+            //CurrentConfig.Attack = TryParseOrDefault(AtkBox.Text, 0);
+            //CurrentConfig.Defense = TryParseOrDefault(DefBox.Text, 0);
+            //CurrentConfig.Supply = TryParseOrDefault(SupplyBox.Text, 0);
+            //CurrentConfig.Speed = TryParseOrDefault(SpdBox.Text, 0);
+            //CurrentConfig.Skill = TryParseOrDefault(SkillBox.Text, 0);
+            //CurrentConfig.AdvisorCost = TryParseOrDefault(AdvisorCost.Text, 0);
+            //CurrentConfig.Types = CharTypesBox.GetLines();
+            //CurrentConfig.Traits = PercBox.GetLines();
+            //CurrentConfig.Description = DescBox.Text;
+            //CurrentConfig.AiWillDo = AiDoBox.Text;
+            //CurrentConfig.Ideology = IdeologyBox.Text;
+            //CurrentConfig.BigImage = BigIconPanel.BackgroundImage;
+            //CurrentConfig.SmallImage = SmalIconPanel.BackgroundImage;
             HandlerIncetance = new CharacterHandler() { CurrentConfig = CurrentConfig };
         }
 
@@ -175,7 +177,7 @@ namespace ModdingManager
             CharacterCreator form = sender as CharacterCreator;
             ComboBox cmb = (ComboBox)form.Controls["IdeologyBox"];
             List<string> list = new();
-            foreach (IdeologyConfig ideo in ModConfig.Instance.Ideologies)
+            foreach (IdeologyConfig ideo in ModDataStorage.Mod.Ideologies)
             {
                 foreach (IdeologyType type in ideo.SubTypes)
                 {
