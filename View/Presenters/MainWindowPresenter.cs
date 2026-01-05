@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.Debugging;
 using Application.Settings;
+using View.Utils;
 using global::View;
 using System.Windows;
 using System.Windows.Controls;
@@ -56,7 +57,7 @@ namespace ViewPresenters
             var loadingWindow = new LoadingWindow
             {
                 Owner = _view,
-                Message = "Загрузка настроек..."
+                Message = UILocalization.GetString("Info.LoadingSettings")
             };
             loadingWindow.SetProgressBounds(0, 2);
             loadingWindow.Show();
@@ -65,15 +66,15 @@ namespace ViewPresenters
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
-                    loadingWindow.Message = "Загрузка настроек...";
+                    loadingWindow.Message = UILocalization.GetString("Info.LoadingSettings");
                 });
-                ModManagerSettings.Load();
+                ModManagerSettingsLoader.Load();
             });
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 loadingWindow.Progress = 1;
-                loadingWindow.Message = "Инициализация данных приложения...";
+                loadingWindow.Message = UILocalization.GetString("Info.InitializingData");
                 LoadConfig();
             });
 
@@ -100,11 +101,11 @@ namespace ViewPresenters
             if (HasAnyDir())
             {
                 UpdateModManager();
-                MessageBox.Show("Функция локализации по дереву фокусов временно недоступна (класс TreeLoc в Obsolete).", "Информация", MessageBoxButton.OK);
+                PlaceholderWindow.ShowPlaceholder("Функция локализации по дереву фокусов временно недоступна", _view);
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -118,7 +119,7 @@ namespace ViewPresenters
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -127,6 +128,7 @@ namespace ViewPresenters
             if (HasAnyDir())
             {
                 UpdateModManager();
+                PlaceholderWindow.ShowPlaceholder("Функция локализации технологий пока не готова", _view);
             }
             else
             {
@@ -138,11 +140,11 @@ namespace ViewPresenters
         {
             if (HasAnyDir())
             {
-                MessageBox.Show("Функция локализации для идей временно недоступна (класс IdeaLoc в Obsolete).", "Информация", MessageBoxButton.OK);
+                PlaceholderWindow.ShowPlaceholder("Функция локализации для идей временно недоступна", _view);
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -150,11 +152,11 @@ namespace ViewPresenters
         {
             if (HasAnyDir())
             {
-                MessageBox.Show("Функция локализации по стейтам временно недоступна (класс StateLoc в Obsolete).", "Информация", MessageBoxButton.OK);
+                PlaceholderWindow.ShowPlaceholder("Функция локализации по стейтам временно недоступна", _view);
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -168,7 +170,7 @@ namespace ViewPresenters
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -177,11 +179,11 @@ namespace ViewPresenters
             if (HasAnyDir())
             {
                 UpdateModManager();
-                MessageBox.Show("Создатель флагов временно недоступен (класс FlagCreator в Obsolete).", "Информация", MessageBoxButton.OK);
+                PlaceholderWindow.ShowPlaceholder("Создатель флагов временно недоступен", _view);
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -195,7 +197,7 @@ namespace ViewPresenters
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -204,11 +206,11 @@ namespace ViewPresenters
             if (HasAnyDir())
             {
                 UpdateModManager();
-                MessageBox.Show("Создатель персонажей временно недоступен (класс CharacterCreator в Obsolete).", "Информация", MessageBoxButton.OK);
+                PlaceholderWindow.ShowPlaceholder("Создатель персонажей временно недоступен", _view);
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -217,11 +219,11 @@ namespace ViewPresenters
             if (HasAnyDir())
             {
                 UpdateModManager();
-                MessageBox.Show("Создатель идей временно недоступен (класс IdeaCreator в Obsolete).", "Информация", MessageBoxButton.OK);
+                PlaceholderWindow.ShowPlaceholder("Создатель идей временно недоступен", _view);
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -230,11 +232,11 @@ namespace ViewPresenters
             if (HasAnyDir())
             {
                 UpdateModManager();
-                MessageBox.Show("Создатель модификаторов временно недоступен (класс ModifierCreator в Obsolete).", "Информация", MessageBoxButton.OK);
+                PlaceholderWindow.ShowPlaceholder("Создатель модификаторов временно недоступен", _view);
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -243,11 +245,11 @@ namespace ViewPresenters
             if (HasAnyDir())
             {
                 UpdateModManager();
-                MessageBox.Show("Создатель шаблонов временно недоступен (класс TemplateCreator в Obsolete).", "Информация", MessageBoxButton.OK);
+                PlaceholderWindow.ShowPlaceholder("Создатель шаблонов временно недоступен", _view);
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -261,7 +263,7 @@ namespace ViewPresenters
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
@@ -290,21 +292,20 @@ namespace ViewPresenters
             }
             else
             {
-                MessageBox.Show("Введите обе директории.", "Ошибка", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterBothDirectories"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 
         private bool HasAnyDir()
         {
-            var settings = ModManagerSettings.Instance;
-            return !string.IsNullOrEmpty(settings?.ModDirectory) || !string.IsNullOrEmpty(settings?.GameDirectory);
+            return !string.IsNullOrEmpty(ModManagerSettings.ModDirectory) || !string.IsNullOrEmpty(ModManagerSettings.GameDirectory);
         }
 
         private void UpdateModManager()
         {
             if (!_isApplicationInitialized)
             {
-                MessageBox.Show("Приложение еще не инициализировано. Пожалуйста, подождите.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(UILocalization.GetString("Info.AppNotInitialized"), UILocalization.GetString("Info.Info"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
         }

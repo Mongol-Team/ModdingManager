@@ -2,7 +2,7 @@
 using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
-using Models;
+using Models.Configs;
 using Models.GfxTypes;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
@@ -62,7 +62,7 @@ namespace Application.Composers
             IdeaConfig idea = new()
             {
                 Id = new Identifier(ideaBr.Name),
-                Localisation = new ConfigLocalisation() { Language = ModdingManagerSettings.Instance.CurrentLanguage },
+                Localisation = new ConfigLocalisation() { Language = ModManagerSettings.CurrentLanguage },
                 Modifiers = new Dictionary<ModifierDefinitionConfig, object>(),
                 Gfx = new SpriteType(DDF.NullImageSource, DDF.Null),
                 Tag = DDF.Null,

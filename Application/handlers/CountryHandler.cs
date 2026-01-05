@@ -1,12 +1,12 @@
-﻿using ModdingManager.managers.@base;
+﻿
 using Application.Extentions;
 using Application.Settings;
-using Models;
 using Models.Types.LocalizationData;
 using System.Globalization;
 using System.Text;
 using System.Windows;
 using MessageBox = System.Windows.MessageBox;
+using Models.Configs;
 
 
 public class CountryHandler
@@ -24,8 +24,8 @@ public class CountryHandler
     {
         try
         {
-            string ruLocPath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "localisation", "russian");
-            string enLocPath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "localisation", "english");
+            string ruLocPath = Path.Combine(ModManagerSettings.ModDirectory, "localisation", "russian");
+            string enLocPath = Path.Combine(ModManagerSettings.ModDirectory, "localisation", "english");
             Directory.CreateDirectory(ruLocPath);
             //Directory.CreateDirectory(enLocPath);
 
@@ -74,7 +74,7 @@ public class CountryHandler
             return;
         }
 
-        string tagsDir = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "common", "country_tags");
+        string tagsDir = Path.Combine(ModManagerSettings.ModDirectory, "common", "country_tags");
         string countryTag = this.Config.Id.ToString();
 
         string countryFileName = this.Config.CountryFileName;
@@ -153,8 +153,8 @@ public class CountryHandler
             return;
         }
 
-        string modStatesDir = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "history", "states");
-        string gameStatesDir = Path.Combine(ModdingManagerSettings.Instance.GameDirectory, "history", "states");
+        string modStatesDir = Path.Combine(ModManagerSettings.ModDirectory, "history", "states");
+        string gameStatesDir = Path.Combine(ModManagerSettings.GameDirectory, "history", "states");
 
         if (!Directory.Exists(modStatesDir))
         {
@@ -282,7 +282,7 @@ public class CountryHandler
         }
 
         string fileName = "pisda";/*$"{Config.Tag} - {Config.Localisation.NameValue}.txt";*/
-        string filePath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "history", "countries", fileName);
+        string filePath = Path.Combine(ModManagerSettings.ModDirectory, "history", "countries", fileName);
 
         try
         {
@@ -411,7 +411,7 @@ public class CountryHandler
             return;
         }
         string fileName = "pisyn";/*$"{this.Config.Tag} - {this.Config.Name}.txt";*/
-        string filePath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "common", "countries", fileName);
+        string filePath = Path.Combine(ModManagerSettings.ModDirectory, "common", "countries", fileName);
 
         try
         {
@@ -448,7 +448,7 @@ public class CountryHandler
             return;
         }
 
-        string flagsDir = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "gfx", "flags");
+        string flagsDir = Path.Combine(ModManagerSettings.ModDirectory, "gfx", "flags");
         string countryTag = this.Config.Id.ToString();
 
         try

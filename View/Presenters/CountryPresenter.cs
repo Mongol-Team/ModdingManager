@@ -1,5 +1,5 @@
 ﻿using Application.Extentions;
-using Models;
+using Models.Configs;
 using System.Windows;
 using ViewInterfaces;
 

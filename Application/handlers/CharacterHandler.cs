@@ -1,11 +1,11 @@
-﻿using ModdingManager.managers.@base;
+﻿
 using Application.Extentions;
 using Application.Settings;
-using Models;
 using Models.SubModels;
 using System.Text;
 using System.Windows;
 using MessageBox = System.Windows.MessageBox;
+using Models.Configs;
 
 namespace ModdingManager.classes.handlers
 {
@@ -15,7 +15,7 @@ namespace ModdingManager.classes.handlers
 
         public void HandleGFXFile()
         {
-            string guiDirectory = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "interface");
+            string guiDirectory = Path.Combine(ModManagerSettings.ModDirectory, "interface");
             Directory.CreateDirectory(guiDirectory);
             string filePath = Path.Combine(guiDirectory, $"{CurrentConfig.Tag}.gfx");
 
@@ -41,8 +41,8 @@ namespace ModdingManager.classes.handlers
                     .FirstOrDefault(path => Path.GetFileName(path).Contains(tag, StringComparison.Ordinal));
             }
             string tag = CurrentConfig.Tag;
-            string modPath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "history", "countries");
-            string gamePath = Path.Combine(ModdingManagerSettings.Instance.GameDirectory, "history", "countries");
+            string modPath = Path.Combine(ModManagerSettings.ModDirectory, "history", "countries");
+            string gamePath = Path.Combine(ModManagerSettings.GameDirectory, "history", "countries");
 
             try
             {
@@ -100,8 +100,8 @@ namespace ModdingManager.classes.handlers
         {
             try
             {
-                string ruLocPath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "localisation", "russian");
-                string enLocPath = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "localisation", "english");
+                string ruLocPath = Path.Combine(ModManagerSettings.ModDirectory, "localisation", "russian");
+                string enLocPath = Path.Combine(ModManagerSettings.ModDirectory, "localisation", "english");
                 Directory.CreateDirectory(ruLocPath);
                 Directory.CreateDirectory(enLocPath);
 
@@ -177,8 +177,8 @@ namespace ModdingManager.classes.handlers
                     return;
                 }
 
-                string leadersDir = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "gfx", "leaders", CurrentConfig.Tag);
-                string advisorsDir = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "gfx", "advisors", CurrentConfig.Tag);
+                string leadersDir = Path.Combine(ModManagerSettings.ModDirectory, "gfx", "leaders", CurrentConfig.Tag);
+                string advisorsDir = Path.Combine(ModManagerSettings.ModDirectory, "gfx", "advisors", CurrentConfig.Tag);
                 Directory.CreateDirectory(leadersDir);
                 Directory.CreateDirectory(advisorsDir);
 
@@ -198,7 +198,7 @@ namespace ModdingManager.classes.handlers
         {
             try
             {
-                string charactersDir = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "common", "characters");
+                string charactersDir = Path.Combine(ModManagerSettings.ModDirectory, "common", "characters");
                 Directory.CreateDirectory(charactersDir);
 
                 string filePath = Path.Combine(charactersDir, $"{CurrentConfig.Tag}.txt");

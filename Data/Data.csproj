@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Embedded\Text\BaisicUnitGroupsDefenitions.txt" />
+    <EmbeddedResource Include="Embedded\Text\RulesCoreDefenitions.txt" />
+    <EmbeddedResource Include="Resources\Localizations\english.loc" />
+    <EmbeddedResource Include="Resources\Localizations\russian.loc" />
     <None Remove="Data\Text\OtherModifierDefenitions.txt" />
   </ItemGroup>
 

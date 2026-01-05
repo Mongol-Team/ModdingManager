@@ -2,11 +2,11 @@
 using ViewInterfaces;
 using Application.Extentions;
 using Application.handlers;
-using Models;
 using Models.GfxTypes;
 using System;
 using System.Linq;
 using System.Windows;
+using Models.Configs;
 
 namespace ViewPresenters
 {

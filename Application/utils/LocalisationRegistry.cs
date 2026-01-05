@@ -1,12 +1,9 @@
-﻿using ModdingManager.managers.@base;
-using Application.Debugging;
+﻿using Application.Debugging;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.Types.LocalizationData;
 using Models.Types.LochalizationData;
-using Models.Types.Utils;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using System.Collections.Concurrent;
 using DDF = Data.DataDefaultValues;
 

@@ -2,7 +2,7 @@
 using Application.Extentions;
 using Application.Settings;
 using Data.Properties;
-using Models;
+using Models.Configs;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 using System.IO;
@@ -386,7 +386,7 @@ namespace View
         }
         public static List<string> LoadCountryFileNames()
         {
-            string countriesDir = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "common", "country_tags");
+            string countriesDir = Path.Combine(ModManagerSettings.ModDirectory, "common", "country_tags");
 
             if (!System.IO.Directory.Exists(countriesDir))
             {

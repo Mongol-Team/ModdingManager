@@ -48,14 +48,14 @@ namespace ModdingManager
 
                 // Русская локализация
                 UpdateSingleLocalizationFile(
-                    Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", "russian", $"{fileBaseName}_l_russian.yml"),
+                    Path.Combine(ModManagerSettings.ModDirectory, "localisation", "russian", $"{fileBaseName}_l_russian.yml"),
                     "l_russian:",
                     name,
                     desc);
 
                 // Английская локализация
                 UpdateSingleLocalizationFile(
-                    Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", "english", $"{fileBaseName}_l_english.yml"),
+                    Path.Combine(ModManagerSettings.ModDirectory, "localisation", "english", $"{fileBaseName}_l_english.yml"),
                     "l_english:",
                     "", // Пустое значение для английской версии
                     "");
@@ -151,7 +151,7 @@ namespace ModdingManager
 
             try
             {
-                string directory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common");
+                string directory = Path.Combine(ModManagerSettings.ModDirectory, "common");
                 string filePath = "";
                 string content = "";
 
@@ -481,7 +481,7 @@ namespace ModdingManager
 
         private void UpdateIdeasGfxFile(string tag, string id)
         {
-            string filePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "interface", $"{tag}_ideas.gfx");
+            string filePath = Path.Combine(ModManagerSettings.ModDirectory, "interface", $"{tag}_ideas.gfx");
             string spriteEntry = $"\tspriteType = {{\n\t\tname = \"GFX_modifiers_{id}_icon\"\n\t\ttextureFile = \"gfx/interface/modifiers_{id}_icon.dds\"\n\t}}";
 
             // Создаем директорию, если ее нет
@@ -524,7 +524,7 @@ namespace ModdingManager
 
         private void UpdateCountryStateViewGui(string tag, string id)
         {
-            string filePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "interface", "countrystateview.gui");
+            string filePath = Path.Combine(ModManagerSettings.ModDirectory, "interface", "countrystateview.gui");
 
             if (!File.Exists(filePath))
             {
@@ -636,7 +636,7 @@ namespace ModdingManager
 
             try
             {
-                string directory = Path.Combine(ModManagerSettings.Instance.ModDirectory, "gfx", "interface", "modifiers");
+                string directory = Path.Combine(ModManagerSettings.ModDirectory, "gfx", "interface", "modifiers");
                 Directory.CreateDirectory(directory);
 
                 string outputPath = Path.Combine(directory, $"modifiers_{id}_icon.dds");

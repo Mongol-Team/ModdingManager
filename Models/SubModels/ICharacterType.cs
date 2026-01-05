@@ -1,4 +1,5 @@
 ﻿using Data;
+using Models.Configs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using Application.Settings;
 using System.Text;
 
 namespace Application.Utils
@@ -11,86 +8,109 @@ namespace Application.Utils
         public static Dictionary<string, string> ParseConfigFile(string filePath)
         {
             var config = new Dictionary<string, string>();
-            
-            if (!File.Exists(filePath))
-                return config;
-            
-            var lines = File.ReadAllLines(filePath, Encoding.UTF8);
-            
-            foreach (var line in lines)
+            if (!File.Exists(filePath)) return config;
+
+            foreach (var line in File.ReadAllLines(filePath, Encoding.UTF8))
             {
-                var trimmedLine = line.Trim();
-                
-                if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith("#") || trimmedLine.StartsWith(";"))
-                    continue;
-                
-                var equalIndex = trimmedLine.IndexOf('=');
-                if (equalIndex <= 0)
-                    continue;
-                
-                var key = trimmedLine.Substring(0, equalIndex).Trim();
-                var value = trimmedLine.Substring(equalIndex + 1).Trim();
-                
-                if (value.StartsWith("\"") && value.EndsWith("\""))
-                {
+                var trimmed = line.Trim();
+                if (string.IsNullOrEmpty(trimmed) || trimmed[0] == '#' || trimmed[0] == ';') continue;
+
+                var idx = trimmed.IndexOf('=');
+                if (idx <= 0) continue;
+
+                var key = trimmed.Substring(0, idx).Trim();
+                var value = trimmed.Substring(idx + 1).Trim();
+                if (value.Length >= 2 && value[0] == '"' && value[^1] == '"')
                     value = value.Substring(1, value.Length - 2);
-                }
-                
+
                 config[key] = value;
             }
-            
+
             return config;
         }
-        
+
         public static void WriteConfigFile(string filePath, Dictionary<string, string> config)
         {
-            var directory = Path.GetDirectoryName(filePath);
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            var dir = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            var lines = new List<string>
             {
-                Directory.CreateDirectory(directory);
-            }
-            
-            var lines = new List<string>();
-            lines.Add("# Configuration file");
-            lines.Add($"# Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-            lines.Add("");
-            
+                "# Configuration file",
+                $"# Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
+                ""
+            };
+
             foreach (var kvp in config.OrderBy(x => x.Key))
             {
                 var value = kvp.Value;
-                if (value.Contains(" ") || value.Contains("=") || value.Contains("#") || value.Contains(";"))
-                {
+                if (value.Any(c => c == ' ' || c == '=' || c == '#' || c == ';'))
                     value = $"\"{value}\"";
-                }
                 lines.Add($"{kvp.Key}={value}");
             }
-            
+
             File.WriteAllLines(filePath, lines, Encoding.UTF8);
         }
-        
+
         public static List<string> ParseList(string value)
         {
-            if (string.IsNullOrEmpty(value))
-                return new List<string>();
-            
+            if (string.IsNullOrEmpty(value)) return new List<string>();
             if (value.StartsWith("[") && value.EndsWith("]"))
-            {
                 value = value.Substring(1, value.Length - 2);
-            }
-            
-            return value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+
+            return value.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => s.Trim().Trim('"'))
                 .Where(s => !string.IsNullOrEmpty(s))
                 .ToList();
         }
-        
-        public static string SerializeList(List<string> list)
+
+        public static string SerializeList(List<string> list) =>
+            list == null || list.Count == 0 ? "[]" : "[" + string.Join(",", list.Select(s => $"\"{s}\"")) + "]";
+
+        public static List<RecentProject> ParseRecentProjects(string value)
         {
-            if (list == null || list.Count == 0)
-                return "[]";
-            
-            return "[" + string.Join(",", list.Select(s => $"\"{s}\"")) + "]";
+            if (string.IsNullOrWhiteSpace(value)) return new List<RecentProject>();
+            if (value.StartsWith("[") && value.EndsWith("]"))
+                value = value.Substring(1, value.Length - 2);
+
+            if (string.IsNullOrWhiteSpace(value)) return new List<RecentProject>();
+
+            if (value.Contains("\"Path\""))
+            {
+                return value.Split(new[] { "},{" }, StringSplitOptions.None)
+                    .Select(item =>
+                    {
+                        var clean = item.Trim().TrimStart('{').TrimEnd('}');
+                        var parts = clean.Split(',');
+                        string path = string.Empty, name = string.Empty;
+
+                        foreach (var part in parts)
+                        {
+                            var kvp = part.Split(':', 2);
+                            if (kvp.Length != 2) continue;
+
+                            var key = kvp[0].Trim().Trim('"');
+                            var val = kvp[1].Trim().Trim('"');
+                            if (key.Equals("Path", StringComparison.OrdinalIgnoreCase)) path = val;
+                            else if (key.Equals("Name", StringComparison.OrdinalIgnoreCase)) name = val;
+                        }
+
+                        return string.IsNullOrEmpty(path) ? null : new RecentProject(path, name);
+                    })
+                    .Where(p => p != null)
+                    .ToList()!;
+            }
+
+            return ParseList("[" + value + "]")
+                .Where(p => !string.IsNullOrEmpty(p))
+                .Select(p => new RecentProject(p, Path.GetFileName(p) ?? p))
+                .ToList();
         }
+
+        public static string SerializeRecentProjects(List<RecentProject> projects) =>
+            projects == null || projects.Count == 0
+                ? "[]"
+                : "[" + string.Join(",", projects.Select(p => $"{{\"Path\":\"{p.Path}\",\"Name\":\"{p.Name}\"}}")) + "]";
     }
 }
-

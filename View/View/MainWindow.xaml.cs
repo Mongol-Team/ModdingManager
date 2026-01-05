@@ -20,8 +20,7 @@ namespace View
 
         private void TestingBtn_Click(object sender, RoutedEventArgs e)
         {
-            TestingWindow tw = new TestingWindow();
-            tw.Show();
+            PlaceholderWindow.ShowPlaceholder("Тестовая страница пока не готова", this);
         }
     }
 }

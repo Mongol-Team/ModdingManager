@@ -19,7 +19,7 @@ namespace ModdingManager
         public TreeLoc()
         {
             InitializeComponent();
-            textBox1.Text = ModManagerSettings.Instance.ModDirectory;
+            textBox1.Text = ModManagerSettings.ModDirectory;
         }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)

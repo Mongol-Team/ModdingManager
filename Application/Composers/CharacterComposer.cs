@@ -5,7 +5,6 @@ using Application.utils.Pathes;
 using Data;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.Enums;
 using Models.GfxTypes;
 using Models.Interfaces;
@@ -20,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Models.Configs;
 
 namespace Application.Composers
 {
@@ -186,7 +186,7 @@ namespace Application.Composers
             }
             cfg.Localisation = new ConfigLocalisation()
             {
-                Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                Language = ModManagerSettings.CurrentLanguage,
                 Source = cfg,
                 Data = new Dictionary<string, string>()
             };

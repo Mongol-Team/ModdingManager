@@ -1,11 +1,9 @@
-﻿using ModdingManager.classes.utils;
-using ModdingManager.managers.@base;
-using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
-using Models;
+﻿using Application.utils.Pathes;
+using Models.Configs;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 
 namespace Application.Composers
 {
@@ -45,8 +43,7 @@ namespace Application.Composers
         private static List<StrategicRegionConfig> ParseConfig(string filePath, Dictionary<int, StrategicRegionConfig> existingMap)
         {
             var result = new List<StrategicRegionConfig>();
-            var file = new TxtParser(new TxtPattern()).Parse(filePath) as HoiFuncFile;
-            if (file == null) return result;
+            if (new TxtParser(new TxtPattern()).Parse(filePath) is not HoiFuncFile file) return result;
 
             foreach (var regionBracket in file.Brackets)
             {
@@ -67,7 +64,7 @@ namespace Application.Composers
                     Id = new Identifier(id),
                     Provinces = matchedProvinces,
                     FilePath = file.FilePath,
-                    Color = ModManager.GenerateColorFromId(id),
+                    Color = System.Drawing.Color.FromArgb((byte)((id * 53) % 255), (byte)((id * 97) % 255), (byte)((id * 151) % 255)),
                     LocKey = keyVar?.Name ?? string.Empty,
                 });
             }

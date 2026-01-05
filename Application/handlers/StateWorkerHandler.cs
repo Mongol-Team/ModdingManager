@@ -1,8 +1,7 @@
 ﻿using ModdingManager.classes.utils;
-using ModdingManager.managers.@base;
+
 using Application;
 using Application.Debugging;
-using Models;
 using Models.Args;
 using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
@@ -11,6 +10,7 @@ using OpenCvSharp.Extensions;
 using System.Globalization;
 using System.Text;
 using Path = System.IO.Path;
+using Models.Configs;
 
 
 public class StateWorkerHandler

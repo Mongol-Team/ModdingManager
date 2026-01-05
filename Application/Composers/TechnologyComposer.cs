@@ -1,4 +1,4 @@
-﻿using ModdingManager.managers.@base;
+﻿
 using Application.Debugging;
 using Application.Extentions;
 using Application.Settings;
@@ -6,7 +6,6 @@ using Application.utils;
 using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.Enums;
 using Models.GfxTypes;
 using Models.Interfaces;
@@ -20,6 +19,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DDF = Data.DataDefaultValues;
+using Models.Configs;
 
 
 

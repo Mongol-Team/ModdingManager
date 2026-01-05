@@ -1,0 +1,54 @@
+<Window x:Class="View.PlaceholderWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:ViewControls"
+        xmlns:loc="clr-namespace:View.Utils"
+        Title="{loc:Localize Key=Window.InDevelopment}"
+        Width="500" Height="300"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Style="{StaticResource WindowDark}">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <controls:WindowTitleBar Grid.Row="0"/>
+        
+        <Grid Grid.Row="1" Margin="40">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="🚧" 
+                           FontSize="64" 
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,24"/>
+                
+                <TextBlock x:Name="MessageTextBlock"
+                           Text="{loc:Localize Key=Message.PageNotReady}"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimary}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="0,0,0,16"/>
+                
+                <TextBlock x:Name="WorkingTextBlock"
+                           Text="{loc:Localize Key=Message.WorkingOnIt}"
+                           FontSize="14"
+                           Foreground="{StaticResource TextSecondary}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="0,0,0,32"/>
+                
+                <Button x:Name="CloseButton"
+                        Content="{loc:Localize Key=Button.Close}"
+                        Width="120"
+                        Height="36"
+                        Style="{StaticResource ButtonDark}"
+                        Click="CloseButton_Click"
+                        HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
+

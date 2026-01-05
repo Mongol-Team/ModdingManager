@@ -1,9 +1,8 @@
-﻿using ModdingManager.managers.@base;
+﻿
 using Application.Debugging;
 using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.Enums;
 using Models.Types.ObjectCacheData;
 using OpenCvSharp;
@@ -13,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Typography.OpenFont.CFF;
+using Models.Configs;
 
 namespace Application.Composers
 {

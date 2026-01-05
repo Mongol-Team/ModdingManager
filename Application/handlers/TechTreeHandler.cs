@@ -1,4 +1,4 @@
-﻿using Models;
+﻿using Models.Configs;
 using Models.Types.Utils;
 using System;
 using System.Collections.Generic;

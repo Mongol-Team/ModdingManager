@@ -1,7 +1,11 @@
-﻿using Application.Debugging;
+﻿using ModdingManager.classes.utils;
+
+using Application.Debugging;
 using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using Data;
 using ModdingManager.classes.utils;
 using ModdingManager.managers.@base;
@@ -20,6 +24,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Models.Configs;
 
 namespace Application.Composers
 {

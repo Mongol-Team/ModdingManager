@@ -1,5 +1,4 @@
 ﻿using ViewControls;
-using Models;
 using Models.Enums;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
@@ -8,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows;
+using Models.Configs;
 
 namespace ViewInterfaces
 {

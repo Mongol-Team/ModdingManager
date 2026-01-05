@@ -1,8 +1,8 @@
 ﻿using Application;
 using Application.Extentions;
 using Application.Settings;
-using Models;
 using Models.Args;
+using Models.Configs;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -52,7 +52,7 @@ namespace ViewPresenters
             loadingWindow.SetProgressBounds(0, 4);
             loadingWindow.Show();
 
-            string modDirectory = ModdingManagerSettings.Instance.ModDirectory;
+            string modDirectory = ModManagerSettings.ModDirectory;
             _view.Display.Width = ModDataStorage.Mod.Map.Bitmap.Width;
             _view.Display.Height = ModDataStorage.Mod.Map.Bitmap.Height;
 

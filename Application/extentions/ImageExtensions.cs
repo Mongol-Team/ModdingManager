@@ -6,7 +6,6 @@ using SixLabors.ImageSharp.Formats.Tga;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -195,11 +194,11 @@ namespace Application.Extentions
             if (image == null)
                 return null;
 
-            using (MemoryStream memory = new MemoryStream())
+            using (MemoryStream memory = new())
             {
                 image.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
                 memory.Position = 0;
-                BitmapImage bitmapImage = new BitmapImage();
+                BitmapImage bitmapImage = new();
                 bitmapImage.BeginInit();
                 bitmapImage.StreamSource = memory;
                 bitmapImage.CacheOption = BitmapCacheOption.OnLoad;

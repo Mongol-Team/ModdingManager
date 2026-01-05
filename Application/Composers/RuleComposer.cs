@@ -1,4 +1,4 @@
-﻿using ModdingManager.managers.@base;
+﻿
 using Application.Debugging;
 using Application.Extentions;
 using Application.utils;
@@ -6,7 +6,6 @@ using Application.utils.Pathes;
 using Data;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.GfxTypes;
 using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
@@ -19,6 +18,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using DDF = Data.DataDefaultValues;
+using Models.Configs;
 
 namespace Application.Composers
 {

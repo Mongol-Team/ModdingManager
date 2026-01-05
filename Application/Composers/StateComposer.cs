@@ -1,13 +1,11 @@
-﻿using ModdingManager.managers.@base;
-using Application.Debugging;
-using Application.Settings;
+﻿using Application.Debugging;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
-using Models;
+using Models.Configs;
 using Models.Types;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Application.Extentions;
@@ -166,7 +164,7 @@ namespace Application.Composers
                 FilePath = file.FilePath,
                 VictoryPoints = victoryPoints,
                 Buildings = buildings,
-                Color = ModManager.GenerateColorFromId(id),
+                Color = Color = System.Drawing.Color.FromArgb((byte)((id * 53) % 255), (byte)((id * 97) % 255), (byte)((id * 151) % 255)),
                 Manpower = stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower")?.Value?.ToInt() ?? DataDefaultValues.NullInt,
                 LocalSupply = stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supply")?.Value?.ToDouble() ?? DataDefaultValues.NullInt,
                 Cathegory = category,

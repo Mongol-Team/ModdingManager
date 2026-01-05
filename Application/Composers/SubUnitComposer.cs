@@ -1,7 +1,6 @@
 ﻿using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.Enums;
 using Models.Types;
 using Models.Types.ObectCacheData;
@@ -19,6 +18,7 @@ using Application.Extentions;
 using Application.Debugging;
 using Models.GfxTypes;
 using Models.Types.LocalizationData;
+using Models.Configs;
 
 namespace Application.Composers
 {

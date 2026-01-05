@@ -1,16 +1,14 @@
 ﻿using Models.Types.ObjectCacheData;
-using Models.Types.Utils;
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using DDF = Data.DataDefaultValues;
 namespace Application.Extentions
 {
     public static class BraketExtentions
     {
-        public static string GetVarString(this Bracket gfxBracket, string name, string defaultValue = DDF.Null)
+        public static string? GetVarString(this Bracket gfxBracket, string name, string defaultValue = DDF.Null)
         {
             var val = gfxBracket.SubVars.FirstOrDefault(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-            return val != null ? val.Value.ToString() : defaultValue;
+            return val != null ? val.Value?.ToString() : defaultValue;
         }
 
         public static int GetVarInt(this Bracket gfxBracket, string name, int defaultValue = -1)

@@ -1,11 +1,11 @@
 ﻿using HtmlAgilityPack;
 using RawDataWorker.Parsers;
-using Models;
 using Models.Enums;
 using Models.Interfaces;
 using Models.Types.HtmlFilesData;
 using Models.Types.Utils;
 using System.Text.RegularExpressions;
+using Models.Configs;
 
 public class ModifierParser : Parser
 {
