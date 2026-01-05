@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 
 namespace Data
 {
@@ -15,4 +15,3 @@ namespace Data
         public const int NullInt = -1;
     }
 }
-

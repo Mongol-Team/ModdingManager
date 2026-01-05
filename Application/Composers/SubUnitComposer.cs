@@ -1,24 +1,16 @@
-﻿using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
+﻿using Application.Debugging;
+using Application.Extentions;
+using Application.Settings;
+using Application.utils.Pathes;
+using Models.Configs;
 using Models.Enums;
-using Models.Types;
+using Models.GfxTypes;
+using Models.Types.LocalizationData;
 using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
-using Newtonsoft.Json.Serialization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using Application.Settings;
-using Application.Extentions;
-using Application.Debugging;
-using Models.GfxTypes;
-using Models.Types.LocalizationData;
-using Models.Configs;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 
 namespace Application.Composers
 {
@@ -26,7 +18,7 @@ namespace Application.Composers
     {
         public static List<IConfig> Parse()
         {
-            List<IConfig> configs = new List<IConfig>();
+            List<IConfig> configs = new();
             string[] possiblePathes =
             {
                 ModPathes.RegimentsPath,
@@ -57,10 +49,10 @@ namespace Application.Composers
 
         public static List<SubUnitConfig> ParseFile(HoiFuncFile file)
         {
-            List<SubUnitConfig> configs = new List<SubUnitConfig>();
+            List<SubUnitConfig> configs = new();
             foreach (Bracket bracket in file.Brackets.Where(b => b.Name == "sub_units"))
             {
-                SubUnitConfig config = new SubUnitConfig();
+                SubUnitConfig config = new();
                 foreach (Bracket unitbr in bracket.SubBrackets)
                 {
                     config = ParseObject(unitbr);
@@ -73,9 +65,9 @@ namespace Application.Composers
 
         public static SubUnitConfig ParseObject(Bracket bracket)
         {
-            SubUnitConfig config = new SubUnitConfig();
+            SubUnitConfig config = new();
             config.Id = new Identifier(bracket.Name);
-            foreach(Var var in bracket.SubVars)
+            foreach (Var var in bracket.SubVars)
             {
                 switch (var.Name)
                 {
@@ -112,17 +104,17 @@ namespace Application.Composers
                         }
                         else
                         {
-                            try 
+                            try
                             {
-                                SubUnitGroupConfig newGroup = new SubUnitGroupConfig();
+                                SubUnitGroupConfig newGroup = new();
                                 newGroup.Id = new Identifier(var.Value.ToString());
                                 newGroup.Gfx = ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_group_{newGroup.Id.ToString()}_name");
-                                Dictionary<string, string> nameData = new Dictionary<string, string>();
+                                Dictionary<string, string> nameData = new();
                                 nameData.AddPair(ModDataStorage.Localisation.GetLocalisationByKey($"group_{newGroup.Id.ToString()}_title"));
                                 newGroup.Localisation = new()
                                 {
                                     Source = newGroup,
-                                    Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                                    Language = ModManagerSettings.CurrentLanguage,
                                     Data = nameData,
                                     IsConfigLocNull = false,
                                     ReplacebleResource = false,
@@ -142,7 +134,7 @@ namespace Application.Composers
                     case "can_exfiltrate_from_coast":
                         config.CanExfiltrateFromCoast = Convert.ToBoolean(var.Value);
                         break;
-                    
+
                     default:
                         var modDef = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
                         if (modDef != null)
@@ -150,7 +142,7 @@ namespace Application.Composers
                             config.Modifiers.Add(modDef, var.Value);
                         }
 
-                        else 
+                        else
                         {
                             //unknown var
                         }
@@ -160,7 +152,7 @@ namespace Application.Composers
                 }
 
             }
-            foreach(Bracket subb in bracket.SubBrackets)
+            foreach (Bracket subb in bracket.SubBrackets)
             {
                 switch (subb.Name)
                 {
@@ -178,11 +170,11 @@ namespace Application.Composers
                         bool isTerrainModifier = Enum.TryParse<ProvinceTerrain>(subb.Name, out var terrMod);
                         if (isTerrainModifier)
                         {
-                            Dictionary<ModifierDefinitionConfig, object> terrModDict = new Dictionary<ModifierDefinitionConfig, object>();
+                            Dictionary<ModifierDefinitionConfig, object> terrModDict = new();
                             foreach (Var terrVar in subb.SubVars)
                             {
                                 var modDef = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == terrVar.Name);
-                                
+
                                 if (modDef != null)
                                 {
                                     terrModDict.Add(modDef, terrVar.Value);
@@ -199,7 +191,7 @@ namespace Application.Composers
                 switch (arr.Name)
                 {
                     case "types":
-                        List<IternalUnitType> types = new List<IternalUnitType>();
+                        List<IternalUnitType> types = new();
                         foreach (var typeObj in arr.Values)
                         {
                             if (Enum.TryParse<IternalUnitType>(typeObj.ToString(), true, out var unitType))
@@ -210,7 +202,7 @@ namespace Application.Composers
                         config.Types = types;
                         break;
                     case "chategories":
-                        List<SubUnitCategoryConfig> chategories = new List<SubUnitCategoryConfig>();
+                        List<SubUnitCategoryConfig> chategories = new();
                         foreach (var chategoryObj in arr.Values)
                         {
                             var chategory = ModDataStorage.Mod.SubUnitChategories.FirstOrDefault(c => c.Id.ToString() == chategoryObj.ToString());
@@ -234,7 +226,7 @@ namespace Application.Composers
             {
                 if (config.Id != null)
                 {
-                    ModifierDefinitionConfig trainingMod = new ModifierDefinitionConfig()
+                    ModifierDefinitionConfig trainingMod = new()
                     {
                         Id = new Identifier($"experience_gain_{config.Id}_training_factor"),
                         Cathegory = ModifierDefinitionCathegoryType.Army,
@@ -250,12 +242,12 @@ namespace Application.Composers
 
                     trainingMod.Localisation = new ConfigLocalisation()
                     {
-                        Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                        Language = ModManagerSettings.CurrentLanguage,
                     };
                     trainingMod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(trainingMod.Id.ToString()));
-                    
+
                     ModifierDefinitionConfig combatMod = trainingMod;
-                    combatMod.Id = new($"experience_gain_{ config.Id }_combat_factor");
+                    combatMod.Id = new($"experience_gain_{config.Id}_combat_factor");
                     ModDataStorage.Mod.ModifierDefinitions.Add(combatMod);
                     ModDataStorage.Mod.ModifierDefinitions.Add(trainingMod);
                 }

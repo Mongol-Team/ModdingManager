@@ -164,7 +164,7 @@ namespace Application.Composers
                 FilePath = file.FilePath,
                 VictoryPoints = victoryPoints,
                 Buildings = buildings,
-                Color = Color = System.Drawing.Color.FromArgb((byte)((id * 53) % 255), (byte)((id * 97) % 255), (byte)((id * 151) % 255)),
+                Color = System.Drawing.Color.FromArgb((byte)((id * 53) % 255), (byte)((id * 97) % 255), (byte)((id * 151) % 255)),
                 Manpower = stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower")?.Value?.ToInt() ?? DataDefaultValues.NullInt,
                 LocalSupply = stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supply")?.Value?.ToDouble() ?? DataDefaultValues.NullInt,
                 Cathegory = category,

@@ -30,6 +30,7 @@ namespace Application.utils.Pathes
         public static readonly string CountryTagsPath = Combine("common", "country_tags");
         public static readonly string CommonCountriesPath = Combine("common", "countries");
         public static readonly string HistoryCountriesPath = Combine("history", "countries");
+        public static readonly string HistoryPath = Combine("history");
         public static readonly string IdeaTagsPath = Combine("common", "idea_tags");
         public static readonly string StatesPath = Combine("history", "states");
         public static readonly string LocalisationPath = Combine("localisation", CurrentLanguage);
@@ -40,5 +41,6 @@ namespace Application.utils.Pathes
         public static readonly string TechTreePath = Combine("common", "technologies");
         public static readonly string TechDefPath = Combine("common", "technology_tags");
         public static readonly string TraitsPath = Combine("common", "country_leader");
+        public static readonly string BuildingsPath = Combine("common", "buildings");
     }
 }

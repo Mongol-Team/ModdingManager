@@ -12,6 +12,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Models.Configs;
+using Models.Enums;
+using Data;
+using Models.GfxTypes;
+using Models.Types.Utils;
+using Application.Settings;
 
 namespace Application.Composers
 {
@@ -123,7 +128,7 @@ namespace Application.Composers
                     def.Id = new Identifier($"{ig.Id}_cost_factor");
                     def.Localisation = new ConfigLocalisation()
                     {
-                        Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                        Language = ModManagerSettings.CurrentLanguage,
                     };
                     def.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(def.Id.ToString()));
                     ModDataStorage.Mod.ModifierDefinitions.Add(def);

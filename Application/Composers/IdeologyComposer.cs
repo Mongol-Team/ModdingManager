@@ -1,15 +1,9 @@
-﻿using ModdingManager.classes.utils;
-
-using Application.Debugging;
+﻿using Application.Debugging;
 using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
 using Data;
-using ModdingManager.classes.utils;
-using ModdingManager.managers.@base;
-using Models;
+using Models.Configs;
 using Models.Enums;
 using Models.GfxTypes;
 using Models.Types;
@@ -18,13 +12,7 @@ using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Models.Configs;
 
 namespace Application.Composers
 {
@@ -33,7 +21,7 @@ namespace Application.Composers
         public IdeologyComposer() { }
         public static List<IConfig> Parse()
         {
-            List<IConfig> res = new List<IConfig>();
+            List<IConfig> res = new();
             string[] possiblePaths = {
         ModPathes.IdeologyPath,
         GamePathes.IdeologyPath
@@ -66,7 +54,7 @@ namespace Application.Composers
 
         public static List<IConfig> ParseFile(HoiFuncFile file, string filePath)
         {
-            List<IConfig> res = new List<IConfig>();
+            List<IConfig> res = new();
             Bracket ideologiesBracket = file.Brackets.FirstOrDefault(b => b.Name == "ideologies");
             if (ideologiesBracket == null)
             {
@@ -165,7 +153,7 @@ namespace Application.Composers
                     var mod = ModDataStorage.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == varItem.Name).FirstOrDefault();
                     if (mod == null || varItem.Value == null)
                     {
-                        Logger.AddDbgLog($"Ошибка, либо модификатор либо его значение не найдено!",  "IdeologyComposer");
+                        Logger.AddDbgLog($"Ошибка, либо модификатор либо его значение не найдено!", "IdeologyComposer");
                         continue;
                     }
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
@@ -184,7 +172,7 @@ namespace Application.Composers
                     var mod = ModDataStorage.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == varItem.Name).FirstOrDefault();
                     if (mod == null || varItem.Value == null)
                     {
-                        Logger.AddDbgLog($"Ошибка, либо модификатор либо его значение не найдено!",  "IdeologyComposer");
+                        Logger.AddDbgLog($"Ошибка, либо модификатор либо его значение не найдено!", "IdeologyComposer");
                         continue;
                     }
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
@@ -200,25 +188,14 @@ namespace Application.Composers
                 if (varItem.Name.StartsWith("ai_"))
                 {
                     string aiName = varItem.Name.Substring(3);
-                    IdeologyAIType ideologyAIType;
-                    switch (aiName)
+                    var ideologyAIType = aiName switch
                     {
-                        case "neutrality":
-                            ideologyAIType = IdeologyAIType.Neutrality;
-                            break;
-                        case "democracy":
-                            ideologyAIType = IdeologyAIType.Democracy;
-                            break;
-                        case "fascism":
-                            ideologyAIType = IdeologyAIType.Fascism;
-                            break;
-                        case "communism":
-                            ideologyAIType = IdeologyAIType.Communism;
-                            break;
-                        default:
-                            ideologyAIType = IdeologyAIType.None; // Keep original if not matched
-                            break;
-                    }
+                        "neutrality" => IdeologyAIType.Neutrality,
+                        "democracy" => IdeologyAIType.Democracy,
+                        "fascism" => IdeologyAIType.Fascism,
+                        "communism" => IdeologyAIType.Communism,
+                        _ => IdeologyAIType.None,// Keep original if not matched
+                    };
                     config.AiIdeologyName = ideologyAIType;
                 }
 
@@ -250,7 +227,7 @@ namespace Application.Composers
 
         public static void ParseDynamicModifierDefinitions(List<ModifierDefinitionConfig> defs)
         {
-            foreach(var ideology in defs)
+            foreach (var ideology in defs)
             {
                 ModifierDefinitionConfig dynDriftMod = new();
                 dynDriftMod.Id = new Identifier($"{ideology.Id}_drift");
@@ -265,16 +242,16 @@ namespace Application.Composers
                 ModDataStorage.Mod.ModifierDefinitions.Add(dynDriftMod);
                 dynDriftMod.Localisation = new ConfigLocalisation()
                 {
-                    Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                    Language = ModManagerSettings.CurrentLanguage,
                 };
                 dynDriftMod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(dynDriftMod.Id.ToString()));
 
                 ModifierDefinitionConfig dynAcceptanceMod = dynDriftMod;
-              
+
                 dynAcceptanceMod.Id = new Identifier($"{ideology.Id}_acceptance");
                 dynAcceptanceMod.Localisation = new ConfigLocalisation()
                 {
-                    Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                    Language = ModManagerSettings.CurrentLanguage,
                 };
                 dynAcceptanceMod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(dynAcceptanceMod.Id.ToString()));
 

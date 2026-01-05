@@ -1,16 +1,12 @@
 ﻿using Application.Debugging;
+using Application.Extentions;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
+using Models.Configs;
 using Models.Enums;
 using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Models.Configs;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 
 namespace Application.Composers
 {
@@ -18,7 +14,7 @@ namespace Application.Composers
     {
         public static List<IConfig> Parse()
         {
-            List<IConfig> configs = new List<IConfig>();
+            List<IConfig> configs = new();
             string[] possiblePathes =
             {
                 ModPathes.TraitsPath,
@@ -49,7 +45,7 @@ namespace Application.Composers
 
         public static List<CharacterTraitConfig> ParseFile(HoiFuncFile file)
         {
-            List<CharacterTraitConfig> traitConfigs = new List<CharacterTraitConfig>();
+            List<CharacterTraitConfig> traitConfigs = new();
             foreach (Bracket bracket in file.Brackets)
             {
                 if (bracket.Name == "leader_traits")
@@ -70,7 +66,7 @@ namespace Application.Composers
         }
         public static IConfig ParseObject(Bracket bracket)
         {
-            CharacterTraitConfig characterTrait = new CharacterTraitConfig();
+            CharacterTraitConfig characterTrait = new();
 
             characterTrait.Id = new(bracket.Name);
             foreach (Var var in bracket.SubVars)
@@ -78,7 +74,7 @@ namespace Application.Composers
                 switch (var.Name)
                 {
                     case "random":
-                        characterTrait.Random = var.Value.ToString().ToLower() == "yes" ? true : false;
+                        characterTrait.Random = var.Value.ToString().ToLower() == "yes";
                         break;
                     case "sprite":
                         characterTrait.Sprite = var.Value.ToInt();
@@ -136,7 +132,7 @@ namespace Application.Composers
                         }
                         else if (var.Name.EndsWith("skill"))
                         {
-                            switch(var.Name)
+                            switch (var.Name)
                             {
                                 case "skill":
                                     characterTrait.SkillTypes.Add(CharacterSkillType.Skill, (int)var.Value);
@@ -156,19 +152,19 @@ namespace Application.Composers
                                 case "maneuvering_skill":
                                     characterTrait.SkillTypes.Add(CharacterSkillType.Maneuvering, (int)var.Value);
                                     break;
-                                
+
                             }
                         }
                         else
                         {
                             Logger.AddLog($"Unknown var found: {var.Name} when trait parsing {bracket.Name}.");
                         }
-                        
+
                         break;
 
                 }
             }
-            foreach(Bracket br in bracket.SubBrackets)
+            foreach (Bracket br in bracket.SubBrackets)
             {
                 switch (br.Name)
                 {
@@ -185,7 +181,7 @@ namespace Application.Composers
                             {
                                 Logger.AddLog($"Unknown var found: {var.Name} when unit_type parsing {bracket.Name}.");
                                 continue;
-                            } 
+                            }
                             SubUnitConfig regiment = ModDataStorage.Mod.SubUnits.FirstOrDefault(r => r.Id.ToString() == var.Value.ToString());
                             if (regiment != null)
                             {
@@ -272,7 +268,7 @@ namespace Application.Composers
             }
             foreach (HoiArray array in bracket.Arrays)
             {
-                switch(array.Name)
+                switch (array.Name)
                 {
                     case "type":
                         foreach (var value in array.Values)

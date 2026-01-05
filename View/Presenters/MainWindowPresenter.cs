@@ -1,10 +1,9 @@
 ﻿using Application;
 using Application.Debugging;
 using Application.Settings;
-using View.Utils;
 using global::View;
 using System.Windows;
-using System.Windows.Controls;
+using View.Utils;
 using ViewControls;
 using MessageBox = System.Windows.MessageBox;
 
@@ -18,7 +17,7 @@ namespace ViewPresenters
 
         public MainWindowPresenter(MainWindow view)
         {
-            ModdingManagerSettings.Load();
+            ModManagerSettingsLoader.Load();
             ModDataStorage.ComposeMod();
             _view = view ?? throw new ArgumentNullException(nameof(view));
             WireUp();
@@ -75,7 +74,6 @@ namespace ViewPresenters
             {
                 loadingWindow.Progress = 1;
                 loadingWindow.Message = UILocalization.GetString("Info.InitializingData");
-                LoadConfig();
             });
 
             await System.Threading.Tasks.Task.Run(() =>
@@ -91,11 +89,6 @@ namespace ViewPresenters
             });
         }
 
-        private void LoadConfig()
-        {
-            _view.DirBox.Text = ModdingManagerSettings.Instance.ModDirectory;
-            _view.GameDirBox.Text = ModdingManagerSettings.Instance.GameDirectory;
-        }
         private void LocConvertButton_Click(object? sender, RoutedEventArgs e)
         {
             if (HasAnyDir())

@@ -1,13 +1,12 @@
 ﻿
 using Application.Extentions;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
+using Models.Configs;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using System.Drawing;
-using static OpenCvSharp.FileStorage;
-using Models.Configs;
 
 namespace Application.Composers
 {
@@ -16,7 +15,7 @@ namespace Application.Composers
         public CountryComposer() { }
         public static List<IConfig> Parse()
         {
-            List<IConfig> configs = new List<IConfig>();
+            List<IConfig> configs = new();
             string[] possibleHistoryPathes =
             {
                 ModPathes.HistoryCountriesPath,
@@ -60,7 +59,7 @@ namespace Application.Composers
                 if (!File.Exists(fullpath))
                     continue;
 
-                if (!(new TxtParser(new TxtPattern()).Parse(fullpath) is HoiFuncFile file))
+                if (new TxtParser(new TxtPattern()).Parse(fullpath) is not HoiFuncFile file)
                     continue;
 
                 var techs = new Dictionary<TechTreeItemConfig, int>();

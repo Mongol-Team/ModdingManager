@@ -2,18 +2,13 @@
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models;
+using Models.Configs;
 using Models.Enums;
 using Models.GfxTypes;
 using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Composers
 {
@@ -21,11 +16,11 @@ namespace Application.Composers
     {
         public static List<IConfig> Parse()
         {
-            List<IConfig> configs = new List<IConfig>();
+            List<IConfig> configs = new();
             string[] possiblePathes =
             {
-                ModPathes.BuildingPath,
-                GamePathes.BuildingPath
+                ModPathes.BuildingsPath,
+                GamePathes.BuildingsPath
             };
             foreach (string path in possiblePathes)
             {
@@ -53,10 +48,10 @@ namespace Application.Composers
 
         public static List<IConfig> ParseFile(HoiFuncFile hoiFuncFil)
         {
-            List<IConfig> cfgs = new List<IConfig>();
-            foreach(Bracket buildsBrk in hoiFuncFil.Brackets.Where(b => b.Name == "buildings"))
+            List<IConfig> cfgs = new();
+            foreach (Bracket buildsBrk in hoiFuncFil.Brackets.Where(b => b.Name == "buildings"))
             {
-                BuildingConfig buildingConfig = new BuildingConfig();
+                BuildingConfig buildingConfig = new();
                 foreach (Bracket bracket in buildsBrk.SubBrackets)
                 {
                     buildingConfig.Id = new(bracket.Name);
@@ -166,7 +161,7 @@ namespace Application.Composers
                                 }
                                 break;
                             case "level_cap":
-                                foreach(Var lcvar in buildBr.SubVars)
+                                foreach (Var lcvar in buildBr.SubVars)
                                 {
                                     switch (lcvar.Name)
                                     {
@@ -227,7 +222,7 @@ namespace Application.Composers
                 mdprod.Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx);
                 mdprod.Localisation = new ConfigLocalisation()
                 {
-                    Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                    Language = ModManagerSettings.CurrentLanguage,
                 };
                 mdprod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(mdprod.Id.ToString()));
 
@@ -235,7 +230,7 @@ namespace Application.Composers
                 mdrepair.Id = new($"state_repair_speed_{bc.Id}_factor");
                 mdrepair.Localisation = new ConfigLocalisation()
                 {
-                    Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                    Language = ModManagerSettings.CurrentLanguage,
                 };
                 mdrepair.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(mdrepair.Id.ToString()));
 

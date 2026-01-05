@@ -16,6 +16,7 @@ namespace Application.utils.Pathes
         public static readonly string IdeologyPath = Combine("common", "ideologies");
         public static readonly string CommonCountriesPath = Combine("common", "countries");
         public static readonly string HistoryCountriesPath = Combine("history", "countries");
+        public static readonly string HistoryPath = Combine("history");
         public static readonly string StatesPath = Combine("history", "states");
         public static readonly string ModifierDefFirstPath = Combine("common", "modifier_definitions");
         public static readonly string ModifierDefSecondPath = Combine("documentation", "modifiers_documentation.html");
@@ -40,6 +41,7 @@ namespace Application.utils.Pathes
         public static readonly string TechTreePath = Combine("common", "technologies");
         public static readonly string TechDefPath = Combine("common", "technology_tags");
         public static readonly string TraitsPath = Combine("common", "country_leader");
+        public static readonly string BuildingsPath = Combine("common", "buildings");
     }
 }
 
