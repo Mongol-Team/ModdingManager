@@ -56,9 +56,9 @@ namespace Application.Composers
             List<IConfig> cfgs = new List<IConfig>();
             foreach(Bracket buildsBrk in hoiFuncFil.Brackets.Where(b => b.Name == "buildings"))
             {
-                BuildingConfig buildingConfig = new BuildingConfig();
                 foreach (Bracket bracket in buildsBrk.SubBrackets)
                 {
+                    BuildingConfig buildingConfig = new BuildingConfig();
                     buildingConfig.Id = new(bracket.Name);
                     foreach (Var buidVar in bracket.SubVars)
                     {
@@ -206,6 +206,7 @@ namespace Application.Composers
                         }
                     }
 
+                    cfgs.Add(buildingConfig);
                 }
             }
 
