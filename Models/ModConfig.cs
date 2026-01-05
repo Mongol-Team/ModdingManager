@@ -13,7 +13,6 @@ namespace ModdingManager.classes.utils
         public List<IdeaConfig> Ideas { get; set; } = new();
         public List<TriggerDefenitionConfig> TriggerDefenitions { get; set; } = new();
         public List<IdeaTagConfig> IdeaTags { get; set; } = new();
-        public List<Var> Vars { get; set; } = new();
         public List<StaticModifierConfig> StaticModifiers { get; set; } = new();
         public List<OpinionModifierConfig> OpinionModifiers { get; set; } = new();
         public List<DynamicModifierConfig> DynamicModifiers { get; set; } = new();

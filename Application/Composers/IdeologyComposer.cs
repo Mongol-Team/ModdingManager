@@ -30,55 +30,53 @@ namespace Application.Composers
         {
             List<IConfig> res = new List<IConfig>();
             string[] possiblePaths = {
-                ModPathes.IdeologyPath,
-                GamePathes.IdeologyPath
-            };
+        ModPathes.IdeologyPath,
+        GamePathes.IdeologyPath
+    };
             foreach (string path in possiblePaths)
             {
                 if (!Directory.Exists(path))
                     throw new FileNotFoundException($"Dir not found: {path}");
                 List<string> ideologyFiles = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories).ToList();
-
                 foreach (string file in ideologyFiles)
                 {
                     string content = File.ReadAllText(file);
-
                     var parser = new TxtParser(new TxtPattern());
-
                     var parsedFile = (HoiFuncFile)parser.Parse(content);
                     if (parsedFile == null)
                     {
                         Logger.AddDbgLog("Failed to parse the ideology file:" + file, "IdeologyComposer");
                         continue;
                     }
-
-                    Bracket ideologiesBracket = parsedFile.Brackets.FirstOrDefault(b => b.Name == "ideologies");
-                    if (ideologiesBracket == null)
-                    {
-                        Logger.AddDbgLog("Failed to search ideologies in file:" + file, "IdeologyComposer");
-                        continue;
-                    }
-
-
-
-                    foreach (var ideologyBracket in ideologiesBracket.SubBrackets)
-                    {
-                        var config = ParseIdeologyConfig(ideologyBracket.Name, ideologyBracket);
-                        if (config != null)
-                            res.Add(config);
-                    }
+                    var fileConfigs = ParseFile(parsedFile, file);
+                    res.AddRange(fileConfigs);
                 }
-                if (res.Count > 0)
-                {
-                    PaseDynamicModifierDefenitions(res.OfType<ModifierDefinitionConfig>().ToList());
-                    return res;
-                }
-
             }
-            return new List<IConfig>();
-
+            if (res.Count > 0)
+            {
+                ParseDynamicModifierDefinitions(res.OfType<ModifierDefinitionConfig>().ToList());
+            }
+            return res;
         }
-        private static IdeologyConfig ParseIdeologyConfig(string name, Bracket bracket)
+
+        public static List<IConfig> ParseFile(HoiFuncFile file, string filePath)
+        {
+            List<IConfig> res = new List<IConfig>();
+            Bracket ideologiesBracket = file.Brackets.FirstOrDefault(b => b.Name == "ideologies");
+            if (ideologiesBracket == null)
+            {
+                Logger.AddDbgLog("Failed to search ideologies in file:" + filePath, "IdeologyComposer");
+                return res;
+            }
+            foreach (var ideologyBracket in ideologiesBracket.SubBrackets)
+            {
+                var config = ParseIdeologyConfig(ideologyBracket.Name, ideologyBracket);
+                if (config != null)
+                    res.Add(config);
+            }
+            return res;
+        }
+        public static IdeologyConfig ParseIdeologyConfig(string name, Bracket bracket)
         {
             var config = new IdeologyConfig
             {
@@ -159,7 +157,12 @@ namespace Application.Composers
             {
                 foreach (var varItem in modsBracket.SubVars)
                 {
-                    var mod = ModDataStorage.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
+                    var mod = ModDataStorage.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == varItem.Name).FirstOrDefault();
+                    if (mod == null || varItem.Value == null)
+                    {
+                        Logger.AddDbgLog($"Ошибка, либо модификатор либо его значение не найдено!",  "IdeologyComposer");
+                        continue;
+                    }
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
                     {
                         Logger.AddDbgLog($"Не удалось добавить модифер с Id = {(varItem.Value as HoiReference).Value}", "IdeologyComposer");
@@ -173,7 +176,12 @@ namespace Application.Composers
             {
                 foreach (var varItem in factionModsBracket.SubVars)
                 {
-                    var mod = ModDataStorage.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == (varItem.Value as HoiReference).Value).FirstOrDefault();
+                    var mod = ModDataStorage.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == varItem.Name).FirstOrDefault();
+                    if (mod == null || varItem.Value == null)
+                    {
+                        Logger.AddDbgLog($"Ошибка, либо модификатор либо его значение не найдено!",  "IdeologyComposer");
+                        continue;
+                    }
                     if (!config.Modifiers.TryAdd(mod, varItem.Value))
                     {
                         Logger.AddDbgLog($"Не удалось добавить модифер для фракции с Id = {(varItem.Value as HoiReference).Value}", "IdeologyComposer");
@@ -235,7 +243,7 @@ namespace Application.Composers
             return config;
         }
 
-        public static void PaseDynamicModifierDefenitions(List<ModifierDefinitionConfig> defs)
+        public static void ParseDynamicModifierDefinitions(List<ModifierDefinitionConfig> defs)
         {
             foreach(var ideology in defs)
             {

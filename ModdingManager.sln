@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.1.11312.151 d18.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "View", "View\View.csproj", "{C3D001C7-419D-4899-93CD-DF38C0EBA4CA}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RawDataWorker", "RawDataWorker\RawDataWorker.csproj", "{A673447A-5199-4B2F-BD7C-83CBB563394B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{829A9CF6-0945-4208-891B-AEC23FA6F902}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{797E8BBB-FF70-469A-8D20-74DE4E4DAFF8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{829A9CF6-0945-4208-891B-AEC23FA6F902}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{829A9CF6-0945-4208-891B-AEC23FA6F902}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{829A9CF6-0945-4208-891B-AEC23FA6F902}.Release|Any CPU.Build.0 = Release|Any CPU
+		{797E8BBB-FF70-469A-8D20-74DE4E4DAFF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{797E8BBB-FF70-469A-8D20-74DE4E4DAFF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{797E8BBB-FF70-469A-8D20-74DE4E4DAFF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{797E8BBB-FF70-469A-8D20-74DE4E4DAFF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
