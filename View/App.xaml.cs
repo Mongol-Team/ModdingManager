@@ -49,15 +49,15 @@ namespace View
             }
 
             var settingsWindow = new SettingsWindow();
-            settingsWindow.ShowDialog();
-
-            if (settingsWindow.DialogResult == true && !string.IsNullOrEmpty(settingsWindow.SelectedProjectPath))
+            settingsWindow.Show();
+            
+            settingsWindow.Closed += (s, e) =>
             {
-                ModManagerSettingsLoader.Save(settingsWindow.SelectedProjectPath, gameDirectory);
-            }
-
-            var mainWindow = new MainWindow();
-            mainWindow.Show();
+                if (string.IsNullOrEmpty(settingsWindow.SelectedProjectPath))
+                {
+                    Shutdown();
+                }
+            };
         }
     }
 }

@@ -1,27 +1,46 @@
-using View.Utils;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using Application;
+using Application.Settings;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
-using Application.Settings;
+using View.Utils;
 
 namespace View
 {
     public partial class SettingsWindow : Window
     {
         public string SelectedProjectPath { get; private set; } = string.Empty;
-        private List<RecentProject> _allProjects = new List<RecentProject>();
+        private List<RecentProject> _allProjects = new();
 
         public SettingsWindow()
         {
             InitializeComponent();
             LoadRecentProjects();
             SetupSearchPlaceholder();
+            UpdateGameDirectoryDisplay();
+        }
+
+        private void SettingsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (DialogResult != true && string.IsNullOrEmpty(SelectedProjectPath))
+            {
+                DialogResult = false;
+            }
+        }
+
+        private void UpdateGameDirectoryDisplay()
+        {
+            var gameDir = ModManagerSettings.GameDirectory;
+            if (string.IsNullOrEmpty(gameDir))
+            {
+                GameDirectoryTextBlock.Text = "";
+            }
+            else
+            {
+                var format = UILocalization.GetString("Message.CurrentGameDirectory");
+                GameDirectoryTextBlock.Text = string.Format(format, gameDir);
+            }
         }
 
         private void SetupSearchPlaceholder()
@@ -117,7 +136,7 @@ namespace View
         {
             var searchText = SearchTextBox.Text;
             var placeholderText = UILocalization.GetString("Message.SearchRecent");
-            
+
             if (searchText == placeholderText || string.IsNullOrWhiteSpace(searchText))
             {
                 UpdateProjectsDisplay(_allProjects);
@@ -132,17 +151,81 @@ namespace View
             UpdateProjectsDisplay(filtered);
         }
 
-        private void ProjectItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private async void ProjectItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is Border border && border.DataContext is RecentProject project)
             {
                 SelectedProjectPath = project.Path;
-                DialogResult = true;
-                Close();
+                try
+                {
+                    await LoadModData();
+                    var mainWindow = new MainWindow();
+                    System.Windows.Application.Current.MainWindow = mainWindow;
+                    mainWindow.Show();
+                    mainWindow.Activate();
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show(
+                        string.Format(UILocalization.GetString("Error.LoadModDataFailed"), ex.Message),
+                        UILocalization.GetString("Error.Error"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
             }
         }
 
-        private void CreateProjectButton_Click(object sender, RoutedEventArgs e)
+        public void UpdateLoadingProgress(int current, int total, string message)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                LoadingProgressBar.Visibility = Visibility.Visible;
+                LoadingStatusText.Visibility = Visibility.Visible;
+                LoadingProgressBar.Maximum = total;
+                LoadingProgressBar.Value = current;
+                LoadingStatusText.Text = message;
+            });
+        }
+
+        public void HideLoadingProgress()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                LoadingProgressBar.Visibility = Visibility.Collapsed;
+                LoadingStatusText.Visibility = Visibility.Collapsed;
+            });
+        }
+
+        private async System.Threading.Tasks.Task LoadModData()
+        {
+            if (!string.IsNullOrEmpty(SelectedProjectPath))
+            {
+                ModManagerSettings.ModDirectory = SelectedProjectPath;
+                ModManagerSettingsLoader.Save(SelectedProjectPath, ModManagerSettings.GameDirectory);
+            }
+
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                ModDataStorage.ComposeMod((current, total, message) =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        int progress = (int)((current / (double)total) * 100);
+                        UpdateLoadingProgress(progress, 100, message);
+                    });
+                });
+            });
+
+            await Dispatcher.InvokeAsync(async () =>
+            {
+                UpdateLoadingProgress(100, 100, "Загрузка завершена");
+                await System.Threading.Tasks.Task.Delay(300);
+                HideLoadingProgress();
+            });
+        }
+
+        private async void CreateProjectButton_Click(object sender, RoutedEventArgs e)
         {
             using (var dialog = new FolderBrowserDialog())
             {
@@ -158,13 +241,29 @@ namespace View
 
                     ModManagerSettingsLoader.AddRecentProject(projectPath, projectName);
                     SelectedProjectPath = projectPath;
-                    DialogResult = true;
-                    Close();
+                    try
+                    {
+                        await LoadModData();
+                        DialogResult = true;
+                        var mainWindow = new MainWindow();
+                        System.Windows.Application.Current.MainWindow = mainWindow;
+                        mainWindow.Show();
+                        Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"Ошибка при загрузке данных мода: {ex.Message}",
+                            "Ошибка",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        DialogResult = false;
+                    }
                 }
             }
         }
 
-        private void OpenProjectButton_Click(object sender, RoutedEventArgs e)
+        private async void OpenProjectButton_Click(object sender, RoutedEventArgs e)
         {
             using (var dialog = new FolderBrowserDialog())
             {
@@ -180,40 +279,28 @@ namespace View
 
                     ModManagerSettingsLoader.AddRecentProject(projectPath, projectName);
                     SelectedProjectPath = projectPath;
-                    DialogResult = true;
-                    Close();
+                    try
+                    {
+                        await LoadModData();
+                        DialogResult = true;
+                        var mainWindow = new MainWindow();
+                        System.Windows.Application.Current.MainWindow = mainWindow;
+                        mainWindow.Show();
+                        Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"Ошибка при загрузке данных мода: {ex.Message}",
+                            "Ошибка",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        DialogResult = false;
+                    }
                 }
             }
         }
 
-        private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
-        {
-            using (var dialog = new FolderBrowserDialog())
-            {
-                dialog.Description = UILocalization.GetString("Button.OpenFolder");
-                dialog.ShowNewFolderButton = false;
-
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    var projectPath = dialog.SelectedPath;
-                    var projectName = Path.GetFileName(projectPath);
-                    if (string.IsNullOrEmpty(projectName))
-                        projectName = projectPath;
-
-                    ModManagerSettingsLoader.AddRecentProject(projectPath, projectName);
-                    SelectedProjectPath = projectPath;
-                    DialogResult = true;
-                    Close();
-                }
-            }
-        }
-
-        private void CloneRepositoryButton_Click(object sender, RoutedEventArgs e)
-        {
-            PlaceholderWindow.ShowPlaceholder(
-                UILocalization.GetString("Message.PageNotReady") + " " + UILocalization.GetString("Button.CloneRepository"),
-                this);
-        }
     }
 
     public class ProjectGroup

@@ -18,7 +18,6 @@ namespace ViewPresenters
         public MainWindowPresenter(MainWindow view)
         {
             ModManagerSettingsLoader.Load();
-            ModDataStorage.ComposeMod();
             _view = view ?? throw new ArgumentNullException(nameof(view));
             WireUp();
             _view.Loaded += OnWindowLoaded;
@@ -53,40 +52,7 @@ namespace ViewPresenters
 
         private async System.Threading.Tasks.Task InitializeApplicationAsync()
         {
-            var loadingWindow = new LoadingWindow
-            {
-                Owner = _view,
-                Message = UILocalization.GetString("Info.LoadingSettings")
-            };
-            loadingWindow.SetProgressBounds(0, 2);
-            loadingWindow.Show();
-
-            await System.Threading.Tasks.Task.Run(() =>
-            {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    loadingWindow.Message = UILocalization.GetString("Info.LoadingSettings");
-                });
-                ModManagerSettingsLoader.Load();
-            });
-
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
-                loadingWindow.Progress = 1;
-                loadingWindow.Message = UILocalization.GetString("Info.InitializingData");
-            });
-
-            await System.Threading.Tasks.Task.Run(() =>
-            {
-                ModDataStorage.ComposeMod();
-            });
-
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
-                loadingWindow.Progress = 2;
-                loadingWindow.EndLoading();
-                _isApplicationInitialized = true;
-            });
+            _isApplicationInitialized = true;
         }
 
         private void LocConvertButton_Click(object? sender, RoutedEventArgs e)
@@ -125,7 +91,7 @@ namespace ViewPresenters
             }
             else
             {
-                MessageBox.Show("введите дирку", "директорию забыл", MessageBoxButton.OK);
+                MessageBox.Show(UILocalization.GetString("Error.EnterDirectory"), UILocalization.GetString("Error.Error"), MessageBoxButton.OK);
             }
         }
 

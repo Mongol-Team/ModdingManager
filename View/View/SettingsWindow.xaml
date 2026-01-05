@@ -7,21 +7,32 @@
         Width="1200" Height="700"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
-        Style="{StaticResource WindowDark}">
+        Style="{StaticResource WindowDark}"
+        Closing="SettingsWindow_Closing">
     <Grid Background="{StaticResource BackgroundApp}">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         
         <controls:WindowTitleBar Grid.Row="0"/>
         
-        <Grid Grid.Row="1" Margin="40">
+        <Grid Grid.Row="1" Margin="40,40,40,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="20"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
+            
+            <TextBlock x:Name="GameDirectoryTextBlock"
+                       Grid.Column="0"
+                       VerticalAlignment="Bottom"
+                       HorizontalAlignment="Left"
+                       FontSize="11"
+                       Foreground="{StaticResource TextTertiary}"
+                       Opacity="0.6"
+                       Margin="0,0,0,8"/>
             
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
@@ -43,7 +54,7 @@
                          Padding="12,8"/>
                 
                 <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl x:Name="ProjectsItemsControl">
+                    <ItemsControl x:Name="ProjectsItemsControl" Height="491">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Expander IsExpanded="True" Margin="0,0,0,16">
@@ -162,47 +173,26 @@
                                        Foreground="{StaticResource ButtonDarkText}"/>
                         </StackPanel>
                     </Button>
-                    
-                    <Button x:Name="OpenFolderButton" 
-                            Style="{StaticResource ButtonDark}"
-                            Height="60"
-                            FontSize="14"
-                            Click="OpenFolderButton_Click"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,0"
-                            Margin="0,0,0,12">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" 
-                                  Fill="#2196F3" 
-                                  Width="24" Height="24"
-                                  Margin="0,0,12,0"
-                                  Stretch="Uniform"/>
-                            <TextBlock x:Name="OpenFolderTextBlock" Text="{loc:Localize Key=Button.OpenFolder}" 
-                                       VerticalAlignment="Center"
-                                       Foreground="{StaticResource ButtonDarkText}"/>
-                        </StackPanel>
-                    </Button>
-                    
-                    <Button x:Name="CloneRepositoryButton" 
-                            Style="{StaticResource ButtonDark}"
-                            Height="60"
-                            FontSize="14"
-                            Click="CloneRepositoryButton_Click"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,0">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.16,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z" 
-                                  Fill="#9C27B0" 
-                                  Width="24" Height="24"
-                                  Margin="0,0,12,0"
-                                  Stretch="Uniform"/>
-                            <TextBlock x:Name="CloneRepositoryTextBlock" Text="{loc:Localize Key=Button.CloneRepository}" 
-                                       VerticalAlignment="Center"
-                                       Foreground="{StaticResource ButtonDarkText}"/>
-                        </StackPanel>
-                    </Button>
                 </StackPanel>
             </Grid>
+        </Grid>
+        
+        <Grid Grid.Row="2" Background="{StaticResource BackgroundSidebar}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar x:Name="LoadingProgressBar" Grid.Column="0" 
+                         Height="20" Margin="8,5,8,5"
+                         Minimum="0" Maximum="100" Value="0"
+                         Visibility="Collapsed"
+                         Foreground="{StaticResource Link}"/>
+            <TextBlock x:Name="LoadingStatusText" Grid.Column="1" 
+                       Text="" Margin="8,5,8,5"
+                       Foreground="{StaticResource TextTertiary}"
+                       FontSize="11"
+                       VerticalAlignment="Center"
+                       Visibility="Collapsed"/>
         </Grid>
     </Grid>
 </Window>

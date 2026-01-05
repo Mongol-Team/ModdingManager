@@ -31,18 +31,26 @@
         <Grid Grid.Row="1" Margin="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="300" MinWidth="200"/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="80"/>
-                <RowDefinition Height="80"/>
-                <RowDefinition Height="80"/>
-                <RowDefinition Height="80"/>
-                <RowDefinition Height="80"/>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="80"/>
-            </Grid.RowDefinitions>
+            
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="80"/>
+                </Grid.RowDefinitions>
+            
 
             <Button x:Name="LocConvertButton" Grid.Row="0" Grid.Column="0" Margin="44,16,44,8"
                 Content="Локализация по дерву фокусов"
@@ -98,14 +106,26 @@
                 Content="Создатель стартовых юнитов"
                 Style="{StaticResource ButtonLight}"/>
 
-            <StackPanel Grid.Row="6" Grid.ColumnSpan="3" Orientation="Horizontal" 
-                        HorizontalAlignment="Right" Margin="24,8,24,16">
-                <Button x:Name="DebugButton" Width="131" Height="37"
-                        Content="Debug" Style="{StaticResource ButtonDarkSmall}"/>
-                <Button x:Name="TestingBtn" Width="131" Height="37" Margin="12,0,0,0"
-                        Content="писюн ф6" Click="TestingBtn_Click"
-                        Style="{StaticResource ButtonDarkSmall}"/>
-            </StackPanel>
+                <StackPanel Grid.Row="6" Grid.ColumnSpan="3" Orientation="Horizontal" 
+                            HorizontalAlignment="Right" Margin="24,8,24,16">
+                    <Button x:Name="DebugButton" Width="131" Height="37"
+                            Content="Debug" Style="{StaticResource ButtonDarkSmall}"/>
+                    <Button x:Name="TestingBtn" Width="131" Height="37" Margin="12,0,0,0"
+                            Content="писюн ф6" Click="TestingBtn_Click"
+                            Style="{StaticResource ButtonDarkSmall}"/>
+                </StackPanel>
+            </Grid>
+            
+            <GridSplitter Grid.Column="1" 
+                          HorizontalAlignment="Stretch" 
+                          Background="{StaticResource BorderColor}"
+                          Width="5"
+                          ResizeDirection="Columns"
+                          ShowsPreview="True"/>
+            
+            <controls:FileExplorer x:Name="FileExplorerControl"
+                                   Grid.Column="2"
+                                   PathSelected="FileExplorerControl_PathSelected"/>
         </Grid>
     </Grid>
 </Window>
