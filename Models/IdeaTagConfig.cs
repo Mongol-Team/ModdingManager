@@ -15,7 +15,7 @@ namespace Models
         public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
-        public List<IdeaSlotConfig> Slots { get; set; } = new List<IdeaSlotConfig>();
+        public List<IdeaGroupConfig> Slots { get; set; } = new List<IdeaGroupConfig>();
         public List<string> CharacterSlots { get; set; } = new List<string>();
         public int Cost { get; set; }
         public int RemovalCost { get; set; }

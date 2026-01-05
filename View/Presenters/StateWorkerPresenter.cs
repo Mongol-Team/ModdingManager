@@ -52,7 +52,7 @@ namespace ViewPresenters
             loadingWindow.SetProgressBounds(0, 4);
             loadingWindow.Show();
 
-            string modDirectory = ModManagerSettings.Instance.ModDirectory;
+            string modDirectory = ModdingManagerSettings.Instance.ModDirectory;
             _view.Display.Width = ModDataStorage.Mod.Map.Bitmap.Width;
             _view.Display.Height = ModDataStorage.Mod.Map.Bitmap.Height;
 

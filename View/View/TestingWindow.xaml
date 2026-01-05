@@ -7,23 +7,27 @@
         xmlns:ctrs="clr-namespace:ViewControls"
         xmlns:controls="clr-namespace:ViewControls"
         mc:Ignorable="d"
-        Title="TestingWindow" Height="450" Width="800"
-        ResizeMode="CanResize"
-        Style="{StaticResource WindowDark}">
-    <Grid Background="{StaticResource BackgroundApp}">
+        Title="TestingWindow" Height="450" Width="800">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="209*"/>
+            <RowDefinition Height="225*"/>
         </Grid.RowDefinitions>
-        
-        <controls:WindowTitleBar Grid.Row="0"/>
-        
-        <Grid Grid.Row="1">
-        <Image x:Name="Fimoz" Margin="455,0,0,145"></Image>
-        
-            <ctrs:ConfigListViewer x:Name="Fima" Loaded="ConfigListViewer_Loaded" Margin="0,0,547,0">
+        <Image x:Name="Fimoz" Margin="455,0,0,145" Grid.RowSpan="2"></Image>
 
-            </ctrs:ConfigListViewer>
-        </Grid>
+        <ctrs:ConfigListViewer x:Name="chars" Loaded="ConfigListViewer_Loaded" Margin="0,0,547,0" Grid.RowSpan="2">
+
+        </ctrs:ConfigListViewer>
+        <ctrs:ConfigListViewer x:Name="ideology" Loaded="ConfigListViewer_Loaded" Margin="258,0,289,0" Grid.RowSpan="2">
+
+        </ctrs:ConfigListViewer>
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+              HorizontalScrollBarVisibility="Auto"
+              Width="250" Height="430" Margin="540,10,10,-6" Grid.RowSpan="2">
+            <StackPanel x:Name="MenuPanel">
+                <ctrs:ClassViewer x:Name="PenisildoBombardildo"/>
+            </StackPanel>
+        </ScrollViewer>
+
     </Grid>
 </Window>

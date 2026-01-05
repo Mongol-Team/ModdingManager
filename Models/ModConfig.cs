@@ -8,17 +8,16 @@ namespace ModdingManager.classes.utils
     {
         public List<RuleConfig> Rules { get; set; } = new();
         public List<StateCathegoryConfig> StateCathegories { get; set; } = new();
-        public List<SubUnitConfig> Regiments { get; set; } = new();
+        public List<SubUnitConfig> SubUnits { get; set; } = new();
         public List<CountryConfig> Countries { get; set; } = new();
         public List<IdeaConfig> Ideas { get; set; } = new();
         public List<TriggerDefenitionConfig> TriggerDefenitions { get; set; } = new();
         public List<IdeaTagConfig> IdeaTags { get; set; } = new();
-        public List<Var> Vars { get; set; } = new();
         public List<StaticModifierConfig> StaticModifiers { get; set; } = new();
         public List<OpinionModifierConfig> OpinionModifiers { get; set; } = new();
         public List<DynamicModifierConfig> DynamicModifiers { get; set; } = new();
         public List<ModifierDefinitionConfig> ModifierDefinitions { get; set; } = new();
-        public List<IdeaSlotConfig> IdeaSlots { get; set; } = new();
+        public List<IdeaGroupConfig> IdeaSlots { get; set; } = new();
         public List<BuildingConfig> Buildings { get; set; } = new();
         public List<IGfx> Gfxes { get; set; } = new();
         public List<TechCategoryConfig> TechCategories { get; set; } = new();

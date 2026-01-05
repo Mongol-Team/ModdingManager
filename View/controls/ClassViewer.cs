@@ -1,5 +1,9 @@
-﻿using Models.Args;
+﻿using Application;
+using ModdingManager.classes.utils;
+using Models.Args;
+using Models.Interfaces;
 using Models.Types.ObjectCacheData;
+using System.Collections;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -296,6 +300,43 @@ namespace ViewControls
                         }
                     };
                     inputControl = textBox;
+                }
+                else if (prop.PropertyType.GetInterface("IConfig") != null && prop.PropertyType != typeof(IGfx))
+                {
+                    var t = prop.PropertyType;
+                    var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p => p.PropertyType.IsGenericType &&
+                        p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) &&
+                        p.PropertyType.GetGenericArguments()[0] == t);
+                    if (listProp != null)
+                    {
+                        var list = (IEnumerable)listProp.GetValue(ModDataStorage.Mod);
+                        var currentValue = prop.GetValue(_buildingContent);
+                        object selected = null;
+                        if (currentValue != null)
+                        {
+                            foreach (var item in list)
+                            {
+                                if (item.Equals(currentValue))
+                                {
+                                    selected = currentValue;
+                                    break;
+                                }
+                            }
+                        }
+                        var searchCm = new SearchableComboBox()
+                        {
+                            ItemsSource = list,
+                            SelectedItem = selected
+                        };
+                        inputControl = searchCm;
+                        searchCm.SelectionChanged += (s, e) =>
+                        {
+                            var old = prop.GetValue(_buildingContent);
+                            var newValue = searchCm.SelectedItem;
+                            prop.SetValue(_buildingContent, newValue);
+                            RaisePropertyChanged(prop, old, newValue);
+                        };
+                    }
                 }
                 else if (prop.PropertyType == typeof(System.Windows.Media.Color))
                 {

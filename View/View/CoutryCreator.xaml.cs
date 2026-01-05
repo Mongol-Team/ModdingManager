@@ -386,7 +386,7 @@ namespace View
         }
         public static List<string> LoadCountryFileNames()
         {
-            string countriesDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "country_tags");
+            string countriesDir = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "common", "country_tags");
 
             if (!System.IO.Directory.Exists(countriesDir))
             {

@@ -1,9 +1,10 @@
-﻿using RawDataWorker.Interfaces;
-using Models.Enums;
+﻿using Models.Enums;
 using Models.Interfaces;
 using Models.Types.TableCacheData;
+using RawDataWorker.Interfaces;
 using System.Drawing;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Rx = RawDataWorker.Regexes;
 
 namespace RawDataWorker.Parsers
@@ -88,17 +89,17 @@ namespace RawDataWorker.Parsers
                         break;
 
                     case "ProvincesBiome":
-                        if (Enum.TryParse<ProvinceTerrain>(parts[index], out var provBiome))
+                        if (Enum.TryParse<ProvinceTerrain>(parts[index], ignoreCase: true, out var provBiome))
                             value = provBiome;
                         break;
 
                     case "ProvinceType":
-                        if (Enum.TryParse<ProvinceType>(parts[index], out var provType))
+                        if (Enum.TryParse<ProvinceType>(parts[index], ignoreCase: true, out var provType))
                             value = provType;
                         break;
 
                     case "AdjacencyType":
-                        if (Enum.TryParse<AdjacencyType>(parts[index], out var adjaType))
+                        if (Enum.TryParse<AdjacencyType>(parts[index], ignoreCase: true, out var adjaType))
                             value = adjaType;
                         break;
 

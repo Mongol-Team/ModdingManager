@@ -74,9 +74,14 @@
                     Информация
                 </Run>
             </TextBlock>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Width="250" Height="430">
-                <StackPanel x:Name="MenuPanel"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Auto"
+                  Width="250" Height="430">
+                <StackPanel x:Name="MenuPanel">
+                    <controls:ClassViewer x:Name="PenisildoBombardildo" Height="100">    </controls:ClassViewer>
+                </StackPanel>
             </ScrollViewer>
+
         </StackPanel>
         </Grid>
     </Grid>

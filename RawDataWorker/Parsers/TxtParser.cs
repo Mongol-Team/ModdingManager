@@ -5,6 +5,7 @@ using Models.Types.ObjectCacheData;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Rx = RawDataWorker.Regexes;
+using Data;
 
 namespace RawDataWorker.Parsers
 {
@@ -72,7 +73,7 @@ namespace RawDataWorker.Parsers
             });
 
             if (string.IsNullOrEmpty(result.Name))
-                result.Name = "Null";//todo change to call of DataDefaultValues
+                result.Name = DataDefaultValues.Null;
 
             MatchCollection vars = Rx.FindVar.Matches(content);
             foreach (Match match in vars)

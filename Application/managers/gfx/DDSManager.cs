@@ -40,7 +40,7 @@ namespace ModdingManager.classes.managers.gfx
         public static void SaveAllTechIconsAsDDS(TechTreeConfig treeConfig)
         {
 
-            string techIconDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "gfx", "interface", "technologies");
+            string techIconDir = Path.Combine(ModdingManagerSettings.Instance.ModDirectory, "gfx", "interface", "technologies");
             Directory.CreateDirectory(techIconDir);
 
             foreach (var item in treeConfig.Items)

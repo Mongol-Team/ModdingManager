@@ -17,10 +17,10 @@ namespace Models.SubModels
         public string Allowed { get; set; }
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
-        public IdeaSlotConfig AdvisorSlot { get; set; }
+        public IdeaGroupConfig AdvisorSlot { get; set; }
         public int AdvisorCost { get; set; } = 100;
         public IGfx Gfx { get; set; }
-        public IdeaSlotConfig Slot { get; set; }
+        public IdeaGroupConfig Slot { get; set; }
         public IdeaConfig Idea { get; set; }
         public IdeaLedgerType IdeaLedgerType { get; set; }
         public string Expire { get; set; }

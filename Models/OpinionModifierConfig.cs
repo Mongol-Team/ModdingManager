@@ -1,4 +1,5 @@
-﻿using Models.Enums;
+﻿using Data;
+using Models.Enums;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
@@ -20,7 +21,7 @@ namespace Models
         public bool IsTrade { get; set; }
         public int Value { get; set; }
         public int Decay { get; set; }
-        public Dictionary<TimeUnit, int> RemovalTime { get; set; }
+        public Dictionary<TimeUnit, int> RemovalTime { get; set; } = new Dictionary<TimeUnit, int> { { TimeUnit.Day, DataDefaultValues.NullInt } };
         public int MinTrust { get; set; }
         public int MaxTrust { get; set; }
     }

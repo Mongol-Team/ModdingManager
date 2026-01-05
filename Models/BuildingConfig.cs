@@ -1,4 +1,5 @@
-﻿using Models.Interfaces;
+﻿using Models.Enums;
+using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 using System;
@@ -13,22 +14,29 @@ namespace Models
     {
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
+        public bool AffectsEnergy { get; set; }
         public int BaseCost { get; set; }
         public int PerLevelCost { get; set; }
         public int PerControlledBuildingExtraCost { get; set; }
         public int MaxStateLevel { get; set; }
         public int MaxProvinceLevel { get; set; }
         public string Group { get; set; }
+        public bool SharesSlots { get; set; }
         public BuildingConfig ExcludeWith { get; set; }
-        public int Helth { get; set; }
+        public int Health { get; set; }
         public double DamageFactor { get; set; }
         public bool AlliedBuild { get; set; }
         public bool OnlyCoastal { get; set; }
+        public int SpecialIcon {  get; set; }
         public bool DisabledInDmZones { get; set; }
         public bool NeedsSupply { get; set; }
+        public bool NeedsDetection { get; set; }
         public bool HideIfMissingTech { get; set; }
-        public List<BuildingConfig> RaidGroupBuildings { get; set; }
         public bool IsBuildable { get; set; }
+        public bool OnlyDisplayIfExists { get; set; }
+        public IntelegenceType IntelType { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> StateModifiers { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> CountryModifiers { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> ProvineDamageModifiers { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> StateDamageModifiers { get; set; }
         public int ShowOnMap { get; set; }

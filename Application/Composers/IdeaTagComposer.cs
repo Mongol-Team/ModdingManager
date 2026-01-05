@@ -96,7 +96,7 @@ namespace Application.Composers
                         }
                         break;
                     case "slot":
-                        IdeaSlotConfig scfg = ModDataStorage.Mod.IdeaSlots.FirstOrDefault(s => s.Id.ToString() == var.Value.ToString());
+                        IdeaGroupConfig scfg = ModDataStorage.Mod.IdeaSlots.FirstOrDefault(s => s.Id.ToString() == var.Value.ToString());
                         if (scfg != null)
                             cfg.Slots.Add(scfg);
                         break;

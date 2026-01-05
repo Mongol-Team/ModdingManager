@@ -62,7 +62,7 @@ namespace Application.Composers
             IdeaConfig idea = new()
             {
                 Id = new Identifier(ideaBr.Name),
-                Localisation = new ConfigLocalisation() { Language = ModManagerSettings.Instance.CurrentLanguage },
+                Localisation = new ConfigLocalisation() { Language = ModdingManagerSettings.Instance.CurrentLanguage },
                 Modifiers = new Dictionary<ModifierDefinitionConfig, object>(),
                 Gfx = new SpriteType(DDF.NullImageSource, DDF.Null),
                 Tag = DDF.Null,

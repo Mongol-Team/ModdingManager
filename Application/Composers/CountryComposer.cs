@@ -32,13 +32,16 @@ namespace Application.Composers
                 string[] files = Directory.GetFiles(path);
                 foreach (string file in files)
                 {
-                    string[] lines = File.ReadAllLines(file);
-                    foreach (string line in lines)
+                    HoiFuncFile tagFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(file);
+                    foreach (var var in tagFile.Vars)
                     {
-                        string tag = line.Split('=')[0].Trim();
-                        string countryFilePath = line.Split('=')[1].Trim();
-                        CountryConfig countryConfig = ParseCountryConfig(tag, countryFilePath);
-                        configs.Add(countryConfig);
+                        string tag = var.Name;
+                        string countryFileName = var.Value?.ToString() ?? string.Empty;
+                        CountryConfig countryConfig = ParseCountryConfig(tag, countryFileName);
+                        if (countryConfig != null && !configs.Any(c => c.Id.ToString() == countryConfig.Id.ToString()))
+                        {
+                            configs.Add(countryConfig);
+                        }
                     }
                 }
             }
@@ -46,141 +49,129 @@ namespace Application.Composers
         }
         public static CountryConfig ParseCountryConfig(string tag, string path)
         {
-            string[] possibleHistoryPaths = {
-               Path.Combine(ModPathes.RootPath, path),
-               Path.Combine(GamePathes.RootPath, path)
+            string[] possibleHistoryPaths =
+            {
+                Path.Combine(ModPathes.HistoryPath, path),
+                Path.Combine(GamePathes.HistoryPath, path)
             };
-            string[] possibleCommonPaths = {
-               Path.Combine(ModPathes.RootPath, path),
-               Path.Combine(GamePathes.RootPath, path)
-            };
+
             foreach (var fullpath in possibleHistoryPaths)
             {
-                HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(fullpath) as HoiFuncFile;
+                if (!File.Exists(fullpath))
+                    continue;
 
-                Dictionary<TechTreeItemConfig, int> techs = new Dictionary<TechTreeItemConfig, int>();
-                foreach (var var in file.Brackets.FindById("set_technology").SubVars)
+                if (!(new TxtParser(new TxtPattern()).Parse(fullpath) is HoiFuncFile file))
+                    continue;
+
+                var techs = new Dictionary<TechTreeItemConfig, int>();
+                foreach (var var in file.Brackets.FindById("set_technology")?.SubVars ?? Enumerable.Empty<Var>())
                 {
-                    if (var != null)
-                    {
-                        string techId = var.Name.Substring(4);
-                        var techItem = ModDataStorage.Mod.TechTreeLedgers.GetTreeItem(techId);
-                        if (techItem != null && int.TryParse(var.Value.ToString(), out int level))
-                        {
-                            techs[techItem] = level;
-                        }
-                    }
+                    if (var?.Name == null || var.Name.Length < 4)
+                        continue;
+
+                    string techId = var.Name.Substring(4);
+                    var techItem = ModDataStorage.Mod.TechTreeLedgers.GetTreeItem(techId);
+                    if (techItem == null)
+                        continue;
+
+                    if (int.TryParse(var.Value?.ToString(), out int level))
+                        techs.SumToKey(techItem, level);
                 }
+
                 var states = new List<StateConfig>();
-                foreach (var state in techs.Values)
-                {
-                    var stateConfig = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == state);
-                    if (stateConfig != null)
-                        states.Add(stateConfig);
-                }
-
                 var countryFlags = new Dictionary<IdeologyConfig, Bitmap>();
-
-                //fima
                 var partyPopularities = new Dictionary<IdeologyConfig, int>();
-                foreach (var var in file.Brackets.FindById("set_popularities").SubVars)
+                foreach (var var in file.Brackets.FindById("set_popularities")?.SubVars ?? Enumerable.Empty<Var>())
                 {
-                    if (var != null)
-                    {
-                        string ideologyId = var.Name;
-                        var ideology = ModDataStorage.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == ideologyId);
-                        if (ideology != null && int.TryParse(var.Value.ToString(), out int popularity))
-                        {
-                            partyPopularities[ideology] = popularity;
-                        }
-                    }
+                    if (var?.Name == null)
+                        continue;
+
+                    var ideology = ModDataStorage.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == var.Name);
+                    if (ideology != null && int.TryParse(var.Value?.ToString(), out int popularity))
+                        partyPopularities[ideology] = popularity;
                 }
+
                 var ideas = new List<IdeaConfig>();
                 foreach (var var in file.Brackets.FindById("add_ideas")?.SubVars ?? Enumerable.Empty<Var>())
                 {
-                    if (var != null)
-                    {
-                        ideas.Add(ModDataStorage.Mod.Ideas.FindById(var.Name));
-                    }
+                    if (var?.Name == null)
+                        continue;
+
+                    var idea = ModDataStorage.Mod.Ideas.FindById(var.Name);
+                    if (idea != null)
+                        ideas.Add(idea);
                 }
+
                 var characters = new List<CountryCharacterConfig>();
                 foreach (var var in file.Brackets.FindById("add_character")?.SubVars ?? Enumerable.Empty<Var>())
                 {
-                    if (var != null)
-                    {
-                        characters.Add(ModDataStorage.Mod.Characters.FindById(var.Name));
-                    }
+                    if (var?.Name == null)
+                        continue;
+
+                    var character = ModDataStorage.Mod.Characters.FindById(var.Name);
+                    if (character != null)
+                        characters.Add(character);
                 }
+
                 var stateCores = new Dictionary<StateConfig, bool>();
                 foreach (var var in file.Brackets.FindById("add_core")?.SubVars ?? Enumerable.Empty<Var>())
                 {
-                    if (var != null && int.TryParse(var.Value.ToString(), out int isCore))
+                    if (var?.Name == null || !int.TryParse(var.Value?.ToString(), out int isCore))
+                        continue;
+
+                    if (int.TryParse(var.Name, out int stateId))
                     {
-                        var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == int.Parse(var.Name));
+                        var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == stateId);
                         if (state != null)
                             stateCores[state] = isCore != 0;
                     }
                 }
-                string convoyValueStr = file.Vars.FindById("set_convoys")?.Value?.ToString();
-                int convoys = 0;
-                if (int.TryParse(convoyValueStr, out int result))
-                {
-                    convoys = result;
-                }
-                string stabValueStr = file.Vars.FindById("set_stability")?.Value?.ToString();
-                double stab = 0;
-                if (double.TryParse(stabValueStr, out double resultS))
-                {
-                    stab = resultS;
-                }
-                string wsValueStr = file.Vars.FindById("set_war_support")?.Value?.ToString();
-                double ws = 0;
-                if (double.TryParse(stabValueStr, out double resultW))
-                {
-                    ws = resultW;
-                }
-                string resSlotsValueStr = file.Vars.FindById("set_convoys")?.Value?.ToString();
-                int resSlots = 1;
-                if (int.TryParse(convoyValueStr, out int resultR))
-                {
-                    resSlots = resultR;
-                }
+
+                int convoys = int.TryParse(file.Vars.FindById("set_convoys")?.Value?.ToString(), out int resultConvoys) ? resultConvoys : 0;
+                double stab = double.TryParse(file.Vars.FindById("set_stability")?.Value?.ToString(), out double resultStab) ? resultStab : 0;
+                double ws = double.TryParse(file.Vars.FindById("set_war_support")?.Value?.ToString(), out double resultWs) ? resultWs : 0;
+                int resSlots = int.TryParse(file.Vars.FindById("set_research_slots")?.Value?.ToString(), out int resultSlots) ? resultSlots : 1;
+
                 IdeologyConfig rulingParty = null;
                 DateOnly? lastElection = null;
                 int? electionFrequency = null;
                 bool? electionsAllowed = null;
-                foreach (Var politicsvar in file.Brackets.FindById("set_politics").SubVars)
+                foreach (var politicsvar in file.Brackets.FindById("set_politics")?.SubVars ?? Enumerable.Empty<Var>())
                 {
-                    switch (politicsvar.Name)
+                    switch (politicsvar?.Name)
                     {
                         case "ruling_party":
-                            string ideologyId = politicsvar.Value.ToString();
-                            rulingParty = ModDataStorage.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == ideologyId);
+                            rulingParty = ModDataStorage.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == politicsvar.Value?.ToString());
                             break;
                         case "last_election":
-                            if (DateOnly.TryParse(politicsvar.Value.ToString(), out DateOnly dt))
+                            if (DateOnly.TryParse(politicsvar.Value?.ToString(), out DateOnly dt))
                                 lastElection = dt;
                             break;
                         case "election_frequency":
-                            if (int.TryParse(politicsvar.Value.ToString(), out int ef))
+                            if (int.TryParse(politicsvar.Value?.ToString(), out int ef))
                                 electionFrequency = ef;
                             break;
                         case "elections_allowed":
-                            if (int.TryParse(politicsvar.Value.ToString(), out int ea))
+                            if (int.TryParse(politicsvar.Value?.ToString(), out int ea))
                                 electionsAllowed = ea != 0;
                             break;
                     }
                 }
-                CountryConfig countryConfig = new CountryConfig()
+
+                var capitalVar = file.Vars.FindById("capital");
+                int capital = capitalVar != null && int.TryParse(capitalVar.Value?.ToString(), out int cap) ? cap : -1;
+
+                var oobVar = file.Vars.FindById("oob");
+                string oob = oobVar?.Value?.ToString() ?? string.Empty;
+
+                return new CountryConfig
                 {
                     Id = new Identifier(tag),
-                    Capital = file.Vars.First(v => v.Name == "capital").Value as int? ?? -1,
-                    CountryFileName = System.IO.Path.GetFileName(path),
-                    //GraphicalCulture = null,
-                    //Color = null,
+                    Capital = capital,
+                    CountryFileName = Path.GetFileName(path),
                     Technologies = techs,
                     Convoys = convoys,
-                    OOB = file.Vars.FindById("oob").Value.ToString(),
+                    OOB = oob,
                     Stab = stab,
                     WarSup = ws,
                     ResearchSlots = resSlots,
@@ -188,20 +179,16 @@ namespace Application.Composers
                     LastElection = lastElection,
                     ElectionFrequency = electionFrequency,
                     ElectionsAllowed = electionsAllowed,
-
                     States = states,
                     CountryFlags = countryFlags,
                     PartyPopularities = partyPopularities,
                     Ideas = ideas,
                     Characters = characters,
-                    StateCores = stateCores,
+                    StateCores = stateCores
                 };
-
-
-
-                return countryConfig;
             }
-            throw new NotImplementedException();
+
+            return null;
         }
     }
 }

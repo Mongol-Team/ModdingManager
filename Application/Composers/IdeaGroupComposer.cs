@@ -12,10 +12,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Data;
+using Models.Types.Utils;
+using Models.Enums;
+using Application.Settings;
+using Models.GfxTypes;
 
 namespace Application.Composers
 {
-    public class IdeaSlotComposer : IComposer
+    public class IdeaGroupComposer : IComposer
     {
         public static List<IConfig> Parse()
         {
@@ -40,6 +45,7 @@ namespace Application.Composers
                 }
 
             }
+            PaseDynamicModifierDefenitions(result);
             return result;
         }
 
@@ -52,13 +58,13 @@ namespace Application.Composers
                 {
                     foreach (Bracket slot in br.SubBrackets)
                     {
-                        IdeaSlotConfig slotConfig = ModDataStorage.Mod.IdeaSlots.FindById(slot.Name);
+                        IdeaGroupConfig slotConfig = ModDataStorage.Mod.IdeaSlots.FindById(slot.Name);
                         if (slotConfig == null)
                         {
                             Var isLaw = slot.SubVars.FirstOrDefault(b => b.Name == "law");
                             Var useListView = slot.SubVars.FirstOrDefault(b => b.Name == "use_list_view");
                             Var designer = slot.SubVars.FirstOrDefault(b => b.Name == "designer");
-                            slotConfig = new IdeaSlotConfig()
+                            slotConfig = new IdeaGroupConfig()
                             {
                                 Id = slot?.Name != null ? new(slot.Name) : throw new ArgumentNullException(nameof(slot.Name)),
                                 IsLaw = isLaw != null ? (isLaw.Value as bool?) ?? false : false,
@@ -98,6 +104,36 @@ namespace Application.Composers
                 }
             }
             return result;
+        }
+
+        public static void PaseDynamicModifierDefenitions(List<IConfig> ideaGroups)
+        {
+            foreach (IdeaGroupConfig ig in ideaGroups)
+            {
+                if (ig.Id != null)
+                {
+                    ModifierDefinitionConfig def = new ModifierDefinitionConfig()
+                    {
+
+                        ScopeType = ScopeTypes.Country,
+                        ValueType = ModifierDefenitionValueType.Percent,
+                        IsCore = true,
+                        ColorType = ModifierDefenitionColorType.Bad,
+                        Precision = 2,
+                        FilePath = DataDefaultValues.ItemCreatedDynamically,
+                        Cathegory = ModifierDefinitionCathegoryType.Country,
+                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                    };
+
+                    def.Id = new Identifier($"{ig.Id}_cost_factor");
+                    def.Localisation = new ConfigLocalisation()
+                    {
+                        Language = ModdingManagerSettings.Instance.CurrentLanguage,
+                    };
+                    def.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(def.Id.ToString()));
+                    ModDataStorage.Mod.ModifierDefinitions.Add(def);
+                }
+            }
         }
     }
 }

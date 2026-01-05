@@ -42,8 +42,9 @@ namespace Application.Extentions
                 return false;
 
             var str = input.ToString();
-
-            return bool.TryParse(str, out bool result) && result;
+            if (str.ToLower() == "yes") return true;
+            else if (str.ToLower() == "no") return false;
+            else { return bool.TryParse(str, out bool result) && result; }
         }
 
         public static double ToDouble<TClass>(this TClass id) where TClass : class
