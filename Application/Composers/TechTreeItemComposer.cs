@@ -1,7 +1,7 @@
 ﻿using Application.Debugging;
 using Application.Extentions;
 using Application.utils.Pathes;
-using Models;
+using Models.Configs;
 using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;

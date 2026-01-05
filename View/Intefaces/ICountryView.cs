@@ -1,4 +1,4 @@
-﻿using Models;
+﻿using Models.Configs;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 using System.Windows;

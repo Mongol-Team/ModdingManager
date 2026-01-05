@@ -1,0 +1,27 @@
+﻿using Models.Enums;
+using Models.Interfaces;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Models.Configs
+{
+    public class OpinionModifierConfig : IModifier, IConfig
+    {
+        public IGfx Gfx { get; set; }
+        public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public bool IsTrade { get; set; }
+        public int Value { get; set; }
+        public int Decay { get; set; }
+        public Dictionary<TimeUnit, int> RemovalTime { get; set; }
+        public int MinTrust { get; set; }
+        public int MaxTrust { get; set; }
+    }
+}

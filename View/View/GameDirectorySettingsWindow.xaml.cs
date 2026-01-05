@@ -1,3 +1,4 @@
+using View.Utils;
 using System;
 using System.IO;
 using System.Windows;
@@ -16,14 +17,14 @@ namespace View
 
         private void LoadSettings()
         {
-            GameDirBox.Text = ModManagerSettings.Instance?.GameDirectory ?? string.Empty;
+            GameDirBox.Text = ModManagerSettings.GameDirectory ?? string.Empty;
         }
 
         private void BrowseGameButton_Click(object sender, RoutedEventArgs e)
         {
             using (var dialog = new FolderBrowserDialog())
             {
-                dialog.Description = "Выберите директорию игры";
+                dialog.Description = UILocalization.GetString("Label.GameDirectory");
                 dialog.ShowNewFolderButton = false;
                 if (!string.IsNullOrEmpty(GameDirBox.Text))
                 {
@@ -42,8 +43,8 @@ namespace View
             if (string.IsNullOrWhiteSpace(GameDirBox.Text))
             {
                 System.Windows.MessageBox.Show(
-                    "Пожалуйста, укажите директорию игры.",
-                    "Ошибка",
+                    UILocalization.GetString("Error.PleaseSpecifyDirectory"),
+                    UILocalization.GetString("Error.Error"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
@@ -52,14 +53,14 @@ namespace View
             if (!Directory.Exists(GameDirBox.Text))
             {
                 System.Windows.MessageBox.Show(
-                    "Указанная директория не существует.",
-                    "Ошибка",
+                    UILocalization.GetString("Error.DirectoryNotExists"),
+                    UILocalization.GetString("Error.Error"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
             }
 
-            ModManagerSettings.SaveGameDirectory(GameDirBox.Text);
+            ModManagerSettingsLoader.SaveGameDirectory(GameDirBox.Text);
             DialogResult = true;
             Close();
         }

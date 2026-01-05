@@ -1,6 +1,6 @@
 ﻿using Application;
 using Application.Settings;
-using Models;
+using Models.Configs;
 using Models.Types.LocalizationData;
 using System.Text;
 using UserControl = System.Windows.Controls.UserControl;
@@ -40,7 +40,7 @@ namespace ViewControls
         private void BuildDefaultLocData()
         {
             _localisation.Data = new Dictionary<string, string>();
-            _localisation.Data.Add($"l_{ModManagerSettings.Instance.CurrentLanguage}:", "");
+            _localisation.Data.Add($"l_{ModManagerSettings.CurrentLanguage}:", "");
             switch (_localisation.Source)
             {
                 case CountryConfig country:

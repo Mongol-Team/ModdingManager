@@ -1,13 +1,13 @@
-﻿using ModdingManager.managers.@base;
+﻿
 using Application.Extentions;
 using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using System.Drawing;
 using static OpenCvSharp.FileStorage;
+using Models.Configs;
 
 namespace Application.Composers
 {

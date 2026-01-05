@@ -1,6 +1,6 @@
 ﻿using Application;
 using Application.Extentions;
-using Models;
+using Models.Configs;
 using Models.Enums;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;

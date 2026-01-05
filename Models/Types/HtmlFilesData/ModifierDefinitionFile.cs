@@ -1,4 +1,5 @@
-﻿using Models.Interfaces;
+﻿using Models.Configs;
+using Models.Interfaces;
 
 namespace Models.Types.HtmlFilesData
 {

@@ -1,16 +1,13 @@
-﻿using ModdingManager.managers.@base;
-using Application.Debugging;
-using Application.Settings;
+﻿using Application.Debugging;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
-using Models;
+using Models.Configs;
 using Models.Types;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Application.Composers
 {
@@ -58,16 +55,14 @@ namespace Application.Composers
         }
         public static StateConfig ParseFile(string filePath)
         {
-
             if (!File.Exists(filePath))
             {
                 Logger.AddDbgLog($"Файл не найден: {filePath}", "IdeologyComposer");
                 return null;
             }
 
-            HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(filePath) as HoiFuncFile;
 
-            if (file == null || file.Brackets.Count == 0)
+            if (new TxtParser(new TxtPattern()).Parse(filePath) is not HoiFuncFile file || file.Brackets.Count == 0)
             {
                 Logger.AddDbgLog($"Не удалось распарсить файл: {filePath}", "IdeologyComposer");
                 return null;
@@ -97,7 +92,7 @@ namespace Application.Composers
                 Id = new Identifier(id),
                 Provinces = matchedProvinces,
                 FilePath = file.FilePath,
-                Color = ModManager.GenerateColorFromId(id),
+                Color = System.Drawing.Color.FromArgb((byte)((id * 53) % 255), (byte)((id * 97) % 255), (byte)((id * 151) % 255)),
                 Manpower = stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower")?.Value as int? ?? 0,
                 LocalSupply = stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supply")?.Value as double? ?? 0.0,
                 Cathegory = ModDataStorage.Mod.StateCathegories.Where(s => s.Id.ToString() == stateBracket.SubVars.FirstOrDefault(v => v.Name == "category")?.Value as string).First(),

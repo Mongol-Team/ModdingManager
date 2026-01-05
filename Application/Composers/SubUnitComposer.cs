@@ -1,7 +1,6 @@
 ﻿using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.Enums;
 using Models.Types;
 using Models.Types.ObectCacheData;
@@ -14,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Models.Configs;
 
 namespace Application.Composers
 {

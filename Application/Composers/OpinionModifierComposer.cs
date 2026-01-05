@@ -1,5 +1,5 @@
 ﻿using Application.utils.Pathes;
-using Models;
+using Models.Configs;
 using Models.Types.ObjectCacheData;
 using System;
 using System.Collections.Generic;

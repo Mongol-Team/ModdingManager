@@ -2,7 +2,6 @@
 using ViewControls;
 using ViewInterfaces;
 using ViewPresenters;
-using Models;
 using Models.Args;
 using Models.Types.Utils;
 using System.Windows;
@@ -12,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using Cursors = System.Windows.Input.Cursors;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using Models.Configs;
 
 
 namespace View

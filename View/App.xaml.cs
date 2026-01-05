@@ -1,6 +1,7 @@
 using Application.Settings;
 using System.IO;
 using System.Windows;
+using View.Utils;
 
 namespace View
 {
@@ -9,28 +10,52 @@ namespace View
         protected override void OnStartup(System.Windows.StartupEventArgs e)
         {
             base.OnStartup(e);
-            
-            ModManagerSettings.Load();
-            
-            var gameDirectory = ModManagerSettings.Instance?.GameDirectory ?? string.Empty;
-            
+
+            ModManagerSettingsLoader.Load();
+
+            var gameDirectory = ModManagerSettings.GameDirectory ?? string.Empty;
+
             if (string.IsNullOrWhiteSpace(gameDirectory) || !Directory.Exists(gameDirectory))
             {
                 System.Windows.MessageBox.Show(
-                    "Директория игры не найдена. Пожалуйста, настройте путь к игре через меню 'Настройки' -> 'Путь к игре'.",
-                    "Игра не найдена",
+                    UILocalization.GetString("Error.GameDirectoryNotFound"),
+                    UILocalization.GetString("Error.Error"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
+
+                using (var dialog = new FolderBrowserDialog())
+                {
+                    dialog.Description = UILocalization.GetString("Label.GameDirectory");
+                    dialog.ShowNewFolderButton = false;
+
+                    if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        gameDirectory = dialog.SelectedPath;
+                        ModManagerSettingsLoader.SaveGameDirectory(gameDirectory);
+                        ModManagerSettingsLoader.Load();
+                        gameDirectory = ModManagerSettings.GameDirectory ?? gameDirectory;
+                    }
+                    else
+                    {
+                        System.Windows.MessageBox.Show(
+                            UILocalization.GetString("Error.GameDirectoryNotSelected"),
+                            UILocalization.GetString("Error.Error"),
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        Shutdown();
+                        return;
+                    }
+                }
             }
-            
+
             var settingsWindow = new SettingsWindow();
             settingsWindow.ShowDialog();
-            
+
             if (settingsWindow.DialogResult == true && !string.IsNullOrEmpty(settingsWindow.SelectedProjectPath))
             {
-                ModManagerSettings.Save(settingsWindow.SelectedProjectPath, gameDirectory);
+                ModManagerSettingsLoader.Save(settingsWindow.SelectedProjectPath, gameDirectory);
             }
-            
+
             var mainWindow = new MainWindow();
             mainWindow.Show();
         }

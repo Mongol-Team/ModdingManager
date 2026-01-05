@@ -1,5 +1,4 @@
 ﻿using Application.Extentions;
-using Models;
 using Models.Types.Utils;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +16,7 @@ using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 using UserControl = System.Windows.Controls.UserControl;
 using Data.Properties;
+using Models.Configs;
 
 namespace ViewControls
 {

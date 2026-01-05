@@ -1,5 +1,4 @@
-﻿using ModdingManager.classes.utils;
-using Models;
+﻿using Models.Configs;
 using Models.Interfaces;
 
 namespace Application.Extentions

@@ -1,4 +1,6 @@
-﻿namespace Models.Args
+﻿using Models.Configs;
+
+namespace Models.Args
 {
     public class MarkEventArg
     {

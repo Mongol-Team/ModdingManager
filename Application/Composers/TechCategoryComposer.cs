@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DDF = Data.DataDefaultValues;
+using Models.Configs;
 namespace Application.Composers
 {
     public class TechCategoryComposer : IComposer

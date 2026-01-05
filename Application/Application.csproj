@@ -4,7 +4,7 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
 	<ItemGroup>
@@ -14,12 +14,6 @@
 		<None Remove="Enums\NewFile1.txt" />
 		<None Remove="Enums\ParsingArgumentType" />
 		<None Remove="Interfaces\**" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="..\Program.json">
-			<Link>Program.json</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 	</ItemGroup>
   <ItemGroup>
     <PackageReference Include="BCnEncoder.Net" Version="2.2.1" />

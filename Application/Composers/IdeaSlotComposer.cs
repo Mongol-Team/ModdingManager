@@ -1,10 +1,9 @@
-﻿using ModdingManager.managers.@base;
+﻿
 using Application.Debugging;
 using Application.Extentions;
 using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using System;
@@ -12,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Models.Configs;
 
 namespace Application.Composers
 {

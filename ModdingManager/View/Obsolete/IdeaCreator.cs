@@ -21,7 +21,7 @@ namespace ModdingManager
             {
                 string countryTag = TagBox.Text;
                 // Формируем путь к файлу в директории мода
-                string ideasPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "common", "ideas", $"{countryTag}.txt");
+                string ideasPath = Path.Combine(ModManagerSettings.ModDirectory, "common", "ideas", $"{countryTag}.txt");
                 string directoryPath = Path.GetDirectoryName(ideasPath);
 
                 // Создаем директорию если не существует
@@ -124,7 +124,7 @@ namespace ModdingManager
         public static void GenerateOrUpdateIdeaGFX(string ideaId, string tag)
         {
 
-            string gfxFilePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "interface", $"{tag}.gfx");
+            string gfxFilePath = Path.Combine(ModManagerSettings.ModDirectory, "interface", $"{tag}.gfx");
 
             string defaultHeader = "spriteTypes = {\n";
             string defaultFooter = "}\n";
@@ -164,8 +164,8 @@ namespace ModdingManager
         }
         public static void GenerateLocalizationFiles(string tag, string ideaId, string name, string description)
         {
-            string englishFilePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", "english", $"{tag}_ideas_l_english.yml");
-            string russianFilePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", "russian", $"{tag}_ideas_l_russian.yml");
+            string englishFilePath = Path.Combine(ModManagerSettings.ModDirectory, "localisation", "english", $"{tag}_ideas_l_english.yml");
+            string russianFilePath = Path.Combine(ModManagerSettings.ModDirectory, "localisation", "russian", $"{tag}_ideas_l_russian.yml");
 
             // Форматируем новые строки для добавления
             string englishEntry = $"{ideaId}:0 \"\"\n{ideaId}_desc:0 \"\"\n";
@@ -240,7 +240,7 @@ namespace ModdingManager
                         Directory.CreateDirectory(path);
                         image.SaveAsDDS(path, id, 64, 64);
                     }
-                    SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManagerSettings.Instance.ModDirectory, IdBox.Text, TagBox.Text);
+                    SaveIdeaGFXAsDDS(ImagePanel.BackgroundImage, ModManagerSettings.ModDirectory, IdBox.Text, TagBox.Text);
                 }
                 else
                 {
@@ -325,7 +325,7 @@ namespace ModdingManager
             try
             {
 
-                string historyCountriesPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "history", "countries");
+                string historyCountriesPath = Path.Combine(ModManagerSettings.ModDirectory, "history", "countries");
 
                 if (!Directory.Exists(historyCountriesPath))
                 {

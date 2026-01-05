@@ -1,7 +1,7 @@
 ﻿using Application;
 using Application.Debugging;
 using Application.Extentions;
-using Models;
+using Models.Configs;
 using System.Windows;
 using Orientation = System.Windows.Controls.Orientation;
 

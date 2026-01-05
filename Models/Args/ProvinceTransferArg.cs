@@ -1,4 +1,4 @@
-﻿using Models;
+﻿using Models.Configs;
 
 namespace Models.Args
 {

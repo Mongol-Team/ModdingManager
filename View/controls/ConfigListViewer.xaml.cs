@@ -1,6 +1,6 @@
 ﻿using Application.Debugging;
 using Application.Extentions;
-using Models;
+using Models.Configs;
 using Models.Interfaces;
 using Models.Types.Utils;
 using System;

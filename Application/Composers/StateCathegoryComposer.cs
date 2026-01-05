@@ -1,9 +1,8 @@
-﻿using ModdingManager.managers.@base;
+﻿
 using Application.Extentions;
 using Application.utils.Pathes;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models;
 using Models.Interfaces;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
@@ -13,6 +12,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Models.Configs;
 
 namespace Application.Composers
 {

@@ -147,7 +147,7 @@ namespace ModdingManager
                 return;
             }
 
-            var unitsDir = Path.Combine(ModManagerSettings.Instance.ModDirectory, "history", "units");
+            var unitsDir = Path.Combine(ModManagerSettings.ModDirectory, "history", "units");
             Directory.CreateDirectory(unitsDir);
 
             var fileName = $"{(config.OOBFileName ?? "division")}_{(config.OOBFileYear)}.txt";

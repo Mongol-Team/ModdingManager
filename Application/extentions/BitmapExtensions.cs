@@ -1,7 +1,4 @@
-﻿using BCnEncoder.Encoder;
-using BCnEncoder.Shared;
-using ModdingManager.managers.@base;
-using Application.Debugging;
+﻿using Application.Debugging;
 using Application.Settings;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
@@ -270,8 +267,8 @@ namespace Application.Extentions
                 throw new ArgumentException("Относительный путь не может быть пустым.", nameof(relativePath));
             relativePath = relativePath.Replace("/", "\\");
             // Комбинируем с директориями
-            string modPath = Path.Combine(ModManagerSettings.Instance.ModDirectory, relativePath);
-            string gamePath = Path.Combine(ModManagerSettings.Instance.GameDirectory, relativePath);
+            string modPath = Path.Combine(ModManagerSettings.ModDirectory, relativePath);
+            string gamePath = Path.Combine(ModManagerSettings.GameDirectory, relativePath);
 
             string? fullPath = null;
 
@@ -304,18 +301,13 @@ namespace Application.Extentions
 
             string ext = Path.GetExtension(pathWithFileName).ToLowerInvariant();
 
-            switch (ext)
+            return ext switch
             {
-                case ".dds":
-                    return LoadFromDDS(pathWithFileName);
-
-                case ".tga":
-                    return LoadFromTGA(pathWithFileName);
-                case ".png":
-                    return LoadFromPNG(pathWithFileName);
-                default:
-                    throw new NotSupportedException($"Файлы с расширением {ext} не поддерживаются.");
-            }
+                ".dds" => LoadFromDDS(pathWithFileName),
+                ".tga" => LoadFromTGA(pathWithFileName),
+                ".png" => LoadFromPNG(pathWithFileName),
+                _ => throw new NotSupportedException($"Файлы с расширением {ext} не поддерживаются."),
+            };
         }
         public static Bitmap LoadFromPNG(string path)
         {
@@ -353,7 +345,7 @@ namespace Application.Extentions
                     // Парсим DDS header для детальной информации о формате
                     stream.Position = 0;
                     var reader = new BinaryReader(stream);
-                    string magic = new string(reader.ReadChars(4));
+                    string magic = new(reader.ReadChars(4));
                     if (magic != "DDS ")
                     {
                         Logger.AddDbgLog($"Неверная магия DDS: {magic} для {path}. Fallback to PNG.");
