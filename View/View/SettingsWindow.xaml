@@ -182,11 +182,11 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ProgressBar x:Name="LoadingProgressBar" Grid.Column="0" 
+            <controls:ProgressBar x:Name="LoadingProgressBar" Grid.Column="0" 
                          Height="20" Margin="8,5,8,5"
                          Minimum="0" Maximum="100" Value="0"
                          Visibility="Collapsed"
-                         Foreground="{StaticResource Link}"/>
+                         ProgressBrush="{StaticResource Link}"/>
             <TextBlock x:Name="LoadingStatusText" Grid.Column="1" 
                        Text="" Margin="8,5,8,5"
                        Foreground="{StaticResource TextTertiary}"

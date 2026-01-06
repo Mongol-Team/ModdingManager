@@ -4,14 +4,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         xmlns:local="clr-namespace:ViewControls"
-        mc:Ignorable="d" 
-        d:DesignHeight="110" d:DesignWidth="200"
+        mc:Ignorable="d" d:DesignWidth="200"
         WindowStyle="ToolWindow" ResizeMode="NoResize" 
         WindowStartupLocation="CenterOwner" SizeToContent="WidthAndHeight"
         Title="Загрузка..." ShowInTaskbar="False" Topmost="True"
-        Style="{StaticResource WindowDark}">
-    <StackPanel Margin="20" Background="{StaticResource BackgroundApp}">
+        Style="{StaticResource WindowDark}" Height="119">
+    <StackPanel Margin="20,20,20,54" Background="{StaticResource BackgroundApp}">
+        <local:ProgressBar x:Name="LoadingProgressBar" Width="158" Height="18" Minimum="0" Maximum="4" RenderTransformOrigin="0.51,-1.343"/>
         <TextBlock x:Name="ProgressMessageBox" Text="" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,10" Foreground="{StaticResource TextPrimary}"/>
-        <ProgressBar x:Name="LoadingProgressBar" Width="200" Height="20" Minimum="0" Maximum="4"/>
     </StackPanel>
 </Window>
