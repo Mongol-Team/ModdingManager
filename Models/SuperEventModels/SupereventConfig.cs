@@ -1,4 +1,5 @@
-﻿using Models.Configs;
+﻿using Models.Attributes;
+using Models.Configs;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
@@ -6,6 +7,7 @@ using static Models.SuperEventModels.SuperEventGuiElements;
 
 namespace Models.SuperEventModels
 {
+    [ConfigCreator(ConfigCreatorType.GenericGuiCreator)]
     public class SupereventConfig : IConfig
     {
         public IGfx Gfx { get; set; }

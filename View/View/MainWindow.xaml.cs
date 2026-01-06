@@ -1,45 +1,122 @@
-﻿using ViewPresenters;
-using System.Windows;
-using Application.Settings;
+﻿using Application.Utils;
 using System.IO;
+using System.Windows;
 using View.Utils;
+using ViewControls;
+using ViewControls.Docking;
 
 namespace View
 {
     public partial class MainWindow : Window
     {
+        private FileExplorer _fileExplorerControl;
+
+
         public MainWindow()
         {
             InitializeComponent();
-            var presenter = new MainWindowPresenter(this);
-            InitializeFileExplorer();
+            InitializeDocking();
         }
 
-        private void InitializeFileExplorer()
+        private void InitializeDocking()
         {
-            var modDirectory = ModManagerSettings.ModDirectory;
-            if (!string.IsNullOrEmpty(modDirectory) && Directory.Exists(modDirectory))
+            LoadLayout();
+
+            var solutionExplorerTitle = UILocalization.GetString("Window.SolutionExplorer");
+            var existingPanel = FindPanelWithTitle(solutionExplorerTitle);
+
+            if (existingPanel == null)
             {
-                FileExplorerControl.RootPath = modDirectory;
+                _fileExplorerControl = new FileExplorer
+                {
+                    Title = solutionExplorerTitle
+                };
+                _fileExplorerControl.LoadModData();
+                _fileExplorerControl.ItemSelected += FileExplorerControl_ItemSelected;
+
+                var fileExplorerPanel = new DockPanelInfo
+                {
+                    Title = solutionExplorerTitle,
+                    Content = _fileExplorerControl,
+                    CanClose = false,
+                    CanPin = true,
+                    IsPinned = true
+                };
+
+                DockManager.AddPanel(fileExplorerPanel, DockSide.Right);
             }
-            
-            FileExplorerControl.Title = View.Utils.UILocalization.GetString("Window.SolutionExplorer");
+            else if (existingPanel.Content is null or not FileExplorer)
+            {
+                _fileExplorerControl = new FileExplorer
+                {
+                    Title = solutionExplorerTitle
+                };
+                _fileExplorerControl.LoadModData();
+                _fileExplorerControl.ItemSelected += FileExplorerControl_ItemSelected;
+                existingPanel.Content = _fileExplorerControl;
+            }
+            else
+            {
+                _fileExplorerControl = existingPanel.Content as FileExplorer;
+                if (_fileExplorerControl != null)
+                {
+                    _fileExplorerControl.ItemSelected += FileExplorerControl_ItemSelected;
+                }
+            }
         }
 
-        private void GameDirectoryMenuItem_Click(object sender, RoutedEventArgs e)
+        private DockPanelInfo FindPanelWithTitle(string title)
         {
-            var settingsWindow = new GameDirectorySettingsWindow();
-            settingsWindow.Owner = this;
-            settingsWindow.ShowDialog();
+            foreach (var panel in DockManager.GetAllPanels())
+            {
+                if (panel.Title == title)
+                {
+                    return panel;
+                }
+            }
+            return null;
         }
 
-        private void TestingBtn_Click(object sender, RoutedEventArgs e)
+
+        private void LoadLayout()
         {
-            PlaceholderWindow.ShowPlaceholder("Тестовая страница пока не готова", this);
+            try
+            {
+                var layoutPath = Path.Combine(AppPaths.DataDirectory, "layout.json");
+                var layout = LayoutSerializer.LoadFromFile(layoutPath);
+                if (layout != null)
+                {
+                    LayoutSerializer.Deserialize(DockManager, layout);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading layout: {ex.Message}");
+            }
         }
 
-        private void FileExplorerControl_PathSelected(object sender, RoutedEventArgs e)
+        private void SaveLayout()
         {
+            try
+            {
+                var layout = LayoutSerializer.Serialize(DockManager);
+                var layoutPath = Path.Combine(AppPaths.DataDirectory, "layout.json");
+                LayoutSerializer.SaveToFile(layout, layoutPath);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error saving layout: {ex.Message}");
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SaveLayout();
+        }
+
+        private void FileExplorerControl_ItemSelected(object sender, RoutedEventArgs e)
+        {
+            // Обработка выбора элемента мода
         }
     }
 }

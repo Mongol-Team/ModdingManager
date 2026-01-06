@@ -1,14 +1,15 @@
-<Window x:Class="View.SettingsWindow"
+<Window x:Class="View.WelcomeWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:ViewControls"
         xmlns:loc="clr-namespace:View.Utils"
+        xmlns:enums="clr-namespace:Models.Enums"
         Title="{loc:Localize Key=Window.ModdingManager}"
         Width="1200" Height="700"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
         Style="{StaticResource WindowDark}"
-        Closing="SettingsWindow_Closing">
+        Closing="WelcomeWindow_Closing">
     <Grid Background="{StaticResource BackgroundApp}">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -127,6 +128,8 @@
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
@@ -174,6 +177,67 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
+                
+                <TextBlock x:Name="SettingsTextBlock" Grid.Row="2" Text="Настройки" 
+                           FontSize="20" FontWeight="Light"
+                           Foreground="{StaticResource TextPrimary}"
+                           Margin="0,24,0,24"/>
+                
+                <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Label Content="Процент использования параллелизма:" 
+                               Style="{StaticResource TextLabel}" 
+                               Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="ParallelismSlider" 
+                                    Grid.Column="0"
+                                    Minimum="1" Maximum="100" 
+                                    TickFrequency="10" 
+                                    IsSnapToTickEnabled="True"
+                                    Margin="0,0,12,0"
+                                    ValueChanged="ParallelismSlider_ValueChanged"/>
+                            <TextBlock x:Name="ParallelismValueText" 
+                                       Grid.Column="1"
+                                       Text="50%"
+                                       Foreground="{StaticResource TextSecondary}"
+                                       VerticalAlignment="Center"
+                                       MinWidth="50"
+                                       TextAlignment="Right"/>
+                        </Grid>
+                        
+                        <CheckBox x:Name="DebugModeCheckBox" 
+                                  Content="Режим отладки"
+                                  Style="{StaticResource CheckBoxDark}"
+                                  Margin="0,0,0,16"
+                                  Checked="DebugModeCheckBox_Checked"
+                                  Unchecked="DebugModeCheckBox_Unchecked"/>
+                        
+                        <Label Content="Язык интерфейса:" 
+                               Style="{StaticResource TextLabel}" 
+                               Margin="0,0,0,8"/>
+                        <ComboBox x:Name="LanguageComboBox"
+                                  Style="{StaticResource ComboBoxDark}"
+                                  Margin="0,0,0,16"
+                                  SelectionChanged="LanguageComboBox_SelectionChanged">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        
+                        <Button x:Name="SaveSettingsButton"
+                                Content="Сохранить настройки"
+                                Style="{StaticResource ButtonDark}"
+                                Height="40"
+                                Click="SaveSettingsButton_Click"
+                                Margin="0,8,0,0"/>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
         </Grid>
         

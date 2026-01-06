@@ -1,6 +1,4 @@
-using System;
 using System.Diagnostics;
-using System.IO;
 
 namespace Application.Utils
 {
@@ -18,13 +16,13 @@ namespace Application.Utils
 
             var baseDir = BaseDirectory;
             var dirName = Path.GetFileName(Path.GetDirectoryName(baseDir))?.ToLowerInvariant();
-            
-            if (dirName == "debug" || dirName == "release")
+
+            if (dirName is "debug" or "release")
                 return true;
 
             var parentDir = Path.GetDirectoryName(Path.GetDirectoryName(baseDir));
             var parentDirName = Path.GetFileName(parentDir)?.ToLowerInvariant();
-            
+
             if (parentDirName == "bin")
                 return true;
 
@@ -61,24 +59,11 @@ namespace Application.Utils
                 throw new FileNotFoundException($"Configuration file not found: {ProgramCfgPath}");
         }
 
-        public static string ReadProgramCfg()
-        {
-            EnsureProgramCfgExists();
-            return File.ReadAllText(ProgramCfgPath);
-        }
-
-        public static void WriteProgramCfg(string text)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(ProgramCfgPath)!);
-            File.WriteAllText(ProgramCfgPath, text);
-        }
-
         private static string Ensure(string dir)
         {
             if (!Directory.Exists(dir))
-            {
                 Directory.CreateDirectory(dir);
-            }
+
             return dir;
         }
     }

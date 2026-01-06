@@ -1,4 +1,5 @@
 ﻿using Data;
+using Models.Attributes;
 using Models.GfxTypes;
 using Models.Interfaces;
 using Models.SubModels;
@@ -7,6 +8,7 @@ using Models.Types.Utils;
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class CountryCharacterConfig : IConfig
     {
         public IGfx Gfx { get; set; } = new SpriteType(DataDefaultValues.NullImageSource, DataDefaultValues.Null);

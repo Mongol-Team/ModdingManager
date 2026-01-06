@@ -22,21 +22,21 @@ namespace Data.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        public Resources() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Data.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace Data.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] color_spectrum {
+        public static byte[] color_spectrum {
             get {
                 object obj = ResourceManager.GetObject("color_spectrum", resourceCulture);
                 return ((byte[])(obj));
@@ -73,7 +73,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] err {
+        public static byte[] err {
             get {
                 object obj = ResourceManager.GetObject("err", resourceCulture);
                 return ((byte[])(obj));
@@ -83,7 +83,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] healer {
+        public static byte[] healer {
             get {
                 object obj = ResourceManager.GetObject("healer", resourceCulture);
                 return ((byte[])(obj));
@@ -93,7 +93,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap item_with_no_gfx_image {
+        public static System.Drawing.Bitmap item_with_no_gfx_image {
             get {
                 object obj = ResourceManager.GetObject("item_with_no_gfx_image", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -103,7 +103,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap new_regiment_slot_support {
+        public static System.Drawing.Bitmap new_regiment_slot_support {
             get {
                 object obj = ResourceManager.GetObject("new_regiment_slot_support", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -113,7 +113,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap null_item_image {
+        public static System.Drawing.Bitmap null_item_image {
             get {
                 object obj = ResourceManager.GetObject("null_item_image", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -123,7 +123,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap superevent_bg_1 {
+        public static System.Drawing.Bitmap superevent_bg_1 {
             get {
                 object obj = ResourceManager.GetObject("superevent_bg_1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -133,7 +133,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap superevent_button_1 {
+        public static System.Drawing.Bitmap superevent_button_1 {
             get {
                 object obj = ResourceManager.GetObject("superevent_button_1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -143,7 +143,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tech_industry_available_item_bg {
+        public static System.Drawing.Bitmap tech_industry_available_item_bg {
             get {
                 object obj = ResourceManager.GetObject("tech_industry_available_item_bg", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -153,7 +153,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap technology_available_item_bg {
+        public static System.Drawing.Bitmap technology_available_item_bg {
             get {
                 object obj = ResourceManager.GetObject("technology_available_item_bg", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -163,7 +163,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap techtree_tabs {
+        public static System.Drawing.Bitmap techtree_tabs {
             get {
                 object obj = ResourceManager.GetObject("techtree_tabs", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -173,7 +173,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap techtree_tabs_shadowing {
+        public static System.Drawing.Bitmap techtree_tabs_shadowing {
             get {
                 object obj = ResourceManager.GetObject("techtree_tabs_shadowing", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -183,7 +183,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tiled_plain_bg {
+        public static System.Drawing.Bitmap tiled_plain_bg {
             get {
                 object obj = ResourceManager.GetObject("tiled_plain_bg", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -193,7 +193,7 @@ namespace Data.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] warn {
+        public static byte[] warn {
             get {
                 object obj = ResourceManager.GetObject("warn", resourceCulture);
                 return ((byte[])(obj));

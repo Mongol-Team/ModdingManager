@@ -1,10 +1,12 @@
-﻿using Models.Interfaces;
+﻿using Models.Attributes;
+using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class DynamicModifierConfig : IConfig, IModifier
     {
         public Identifier Id { get; set; }

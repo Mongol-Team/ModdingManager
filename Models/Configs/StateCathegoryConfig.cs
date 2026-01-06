@@ -1,4 +1,5 @@
-﻿using Models.Interfaces;
+﻿using Models.Attributes;
+using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 using System;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class StateCathegoryConfig : IConfig
     {
         public IGfx Gfx { get; set; }

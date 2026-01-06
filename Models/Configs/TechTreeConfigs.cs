@@ -1,10 +1,12 @@
-﻿using Models.Enums;
+﻿using Models.Attributes;
+using Models.Enums;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.GenericGuiCreator)]
     public class TechTreeConfig : IConfig
     {
         public IGfx Gfx { get; set; }

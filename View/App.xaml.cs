@@ -48,12 +48,12 @@ namespace View
                 }
             }
 
-            var settingsWindow = new SettingsWindow();
-            settingsWindow.Show();
+            var welcomeWindow = new WelcomeWindow();
+            welcomeWindow.Show();
             
-            settingsWindow.Closed += (s, e) =>
+            welcomeWindow.Closed += (s, e) =>
             {
-                if (string.IsNullOrEmpty(settingsWindow.SelectedProjectPath))
+                if (string.IsNullOrEmpty(welcomeWindow.SelectedProjectPath))
                 {
                     Shutdown();
                 }

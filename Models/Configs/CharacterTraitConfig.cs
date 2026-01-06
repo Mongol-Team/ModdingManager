@@ -1,9 +1,11 @@
-﻿using Models.Enums;
+﻿using Models.Attributes;
+using Models.Enums;
 using Models.Interfaces;
 using Models.Types.Utils;
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class CharacterTraitConfig : IConfig
     {
         public Identifier Id { get; set; }
