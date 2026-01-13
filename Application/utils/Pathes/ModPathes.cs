@@ -5,8 +5,8 @@ namespace Application.utils.Pathes
 {
     public static class ModPathes
     {
-        private static string BaseDirectory => ModManagerSettings.ModDirectory;
-        private static string CurrentLanguage => ModManagerSettings.CurrentLanguage.ToString();
+        public static string BaseDirectory => ModManagerSettings.ModDirectory;
+        public static string CurrentLanguage => ModManagerSettings.CurrentLanguage.ToString();
 
         private static string Combine(params string[] paths)
         {

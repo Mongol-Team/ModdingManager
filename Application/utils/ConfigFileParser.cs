@@ -5,12 +5,12 @@ namespace Application.Utils
 {
     public static class ConfigFileParser
     {
-        public static Dictionary<string, string> ParseConfigFile(string filePath)
+        public static Dictionary<string, string> ParseConfigFile(string FileFullPath)
         {
             var config = new Dictionary<string, string>();
-            if (!File.Exists(filePath)) return config;
+            if (!File.Exists(FileFullPath)) return config;
 
-            foreach (var line in File.ReadAllLines(filePath, Encoding.UTF8))
+            foreach (var line in File.ReadAllLines(FileFullPath, Encoding.UTF8))
             {
                 var trimmed = line.Trim();
                 if (string.IsNullOrEmpty(trimmed) || trimmed[0] == '#' || trimmed[0] == ';') continue;
@@ -29,9 +29,9 @@ namespace Application.Utils
             return config;
         }
 
-        public static void WriteConfigFile(string filePath, Dictionary<string, string> config)
+        public static void WriteConfigFile(string FileFullPath, Dictionary<string, string> config)
         {
-            var dir = Path.GetDirectoryName(filePath);
+            var dir = Path.GetDirectoryName(FileFullPath);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
@@ -50,7 +50,7 @@ namespace Application.Utils
                 lines.Add($"{kvp.Key}={value}");
             }
 
-            File.WriteAllLines(filePath, lines, Encoding.UTF8);
+            File.WriteAllLines(FileFullPath, lines, Encoding.UTF8);
         }
 
         public static List<string> ParseList(string value)

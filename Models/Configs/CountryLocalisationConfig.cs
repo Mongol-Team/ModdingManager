@@ -12,6 +12,8 @@ namespace Models.Configs
         public string AdjValue { get; set; }
         public string DefValue { get; set; }
         public Tuple<IdeologyConfig, string, string> IdeologyValues { get; set; }
-
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
     }
 }

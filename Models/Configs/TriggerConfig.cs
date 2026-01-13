@@ -11,5 +11,8 @@ namespace Models.Configs
         public ConfigLocalisation Localisation { get; set; }
         public Dictionary<TriggerDefenitionConfig, bool> Triggers { get; set; } = new();
         public IGfx Gfx { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
     }
 }

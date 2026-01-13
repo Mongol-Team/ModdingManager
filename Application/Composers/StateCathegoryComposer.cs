@@ -36,6 +36,10 @@ namespace Application.Composers
                 foreach (string file in files)
                 {
                     res.AddRange(ParseStateCathegoryFile(file).Cast<IConfig>().ToList());
+                    foreach (var cfg in res)
+                    {
+                        cfg.FileFullPath = file;
+                    }
                 }
                 if (res.Count != 0)
                 {
@@ -45,10 +49,10 @@ namespace Application.Composers
             }
             return res;
         }
-        public static List<StateCathegoryConfig> ParseStateCathegoryFile(string filePath)
+        public static List<StateCathegoryConfig> ParseStateCathegoryFile(string FileFullPath)
         {
             List<StateCathegoryConfig> result = new();
-            HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(filePath) as HoiFuncFile;
+            HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(FileFullPath) as HoiFuncFile;
             foreach (var bracket in file.Brackets.FirstOrDefault(b => b.Name == "state_categories").SubBrackets)
             {
                 if (bracket.Name != null)

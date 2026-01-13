@@ -5,7 +5,7 @@ namespace Models.Types.LochalizationData
 {
     public class LocalizationFile : IHoiData
     {
-        public string FilePath { get; set; }
+        public string FileFullPath { get; set; }
         public List<LocalizationBlock> Localizations { get; set; } = new List<LocalizationBlock>();
     }
 }

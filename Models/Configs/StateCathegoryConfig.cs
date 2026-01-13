@@ -14,6 +14,9 @@ namespace Models.Configs
     {
         public IGfx Gfx { get; set; }
         public Color Color { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; } = new();
         public ConfigLocalisation Localisation { get; set; }
         public Identifier Id { get; set; }

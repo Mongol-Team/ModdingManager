@@ -16,6 +16,9 @@ namespace Models.Configs
         public IGfx Gfx { get; set; }
         public ConfigLocalisation CustomTooltip { get; set; }
         public ScopeTypes Scope { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public List<TargetType> Target { get; set; }
         public Identifier Id { get; set; }
     }

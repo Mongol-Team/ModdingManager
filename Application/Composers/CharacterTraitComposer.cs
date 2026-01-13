@@ -32,6 +32,7 @@ namespace Application.Composers
                         List<CharacterTraitConfig> traitConfigs = ParseFile(hoiFuncFile);
                         foreach (CharacterTraitConfig traitConfig in traitConfigs)
                         {
+                            traitConfig.FileFullPath = file;
                             if (!configs.Any(c => c.Id.ToString() == traitConfig.Id.ToString()))
                             {
                                 configs.Add(traitConfig);
@@ -58,7 +59,7 @@ namespace Application.Composers
                 }
                 else
                 {
-                    Logger.AddLog($"Unknown braket found: {bracket.Name} when trait parsing {file.FilePath}.");
+                    Logger.AddLog($"Unknown braket found: {bracket.Name} when trait parsing {file.FileFullPath}.");
                 }
             }
 

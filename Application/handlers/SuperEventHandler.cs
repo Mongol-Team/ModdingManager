@@ -119,7 +119,7 @@ public class SuperEventHandler
         w.WriteLine("}");
     }
 
-    // ==== IMAGES (из GuiDocument, через маппинг Sprite -> filePath) ====
+    // ==== IMAGES (из GuiDocument, через маппинг Sprite -> FileFullPath) ====
 
     /// <summary>
     /// Сохраняет файлы кнопок в gfx/superevent/button/{id}_{button.fontSign}_bg.dds,
@@ -219,12 +219,12 @@ public class SuperEventHandler
 
         string guiDir = Path.Combine(ModManagerSettings.ModDirectory, "interface");
         Directory.CreateDirectory(guiDir);
-        string filePath = Path.Combine(guiDir, $"SUPEREVENT_{CurrentConfig.Id}_window.gfx");
+        string FileFullPath = Path.Combine(guiDir, $"SUPEREVENT_{CurrentConfig.Id}_window.gfx");
 
         var win = CurrentConfig.Gui.Containers.FirstOrDefault();
         if (win == null) return;
 
-        using var w = new StreamWriter(filePath);
+        using var w = new StreamWriter(FileFullPath);
         w.WriteLine("spriteTypes = {");
 
         // Иконки (image/background) — пишем как есть по spriteType
@@ -275,9 +275,9 @@ public class SuperEventHandler
 
         string guiDirectory = Path.Combine(ModManagerSettings.ModDirectory, "interface");
         Directory.CreateDirectory(guiDirectory);
-        string filePath = Path.Combine(guiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_window.gui");
+        string FileFullPath = Path.Combine(guiDirectory, $"SUPEREVENT_{CurrentConfig.Id}_window.gui");
 
-        using var w = new StreamWriter(filePath);
+        using var w = new StreamWriter(FileFullPath);
         w.WriteLine("guiTypes = {");
         w.WriteLine("\tcontainerWindowType = {");
         w.WriteLine($"\t\tname = \"SUPEREVENT_{CurrentConfig.Id}_window\"");
@@ -375,9 +375,9 @@ public class SuperEventHandler
         string locDirectory = Path.Combine(ModManagerSettings.ModDirectory, "localisation", language);
         Directory.CreateDirectory(locDirectory);
 
-        string filePath = Path.Combine(locDirectory, $"superevents_l_{language}.yml");
-        List<string> lines = File.Exists(filePath)
-            ? File.ReadAllLines(filePath, Encoding.UTF8).ToList()
+        string FileFullPath = Path.Combine(locDirectory, $"superevents_l_{language}.yml");
+        List<string> lines = File.Exists(FileFullPath)
+            ? File.ReadAllLines(FileFullPath, Encoding.UTF8).ToList()
             : new List<string>();
 
         if (lines.Count == 0 || !lines[0].StartsWith(header))
@@ -408,7 +408,7 @@ public class SuperEventHandler
             lines.Add($" {key}: \"§M{EscapeYamlString(optionText)}\"");
         }
 
-        File.WriteAllLines(filePath, lines, Encoding.UTF8);
+        File.WriteAllLines(FileFullPath, lines, Encoding.UTF8);
     }
 
     private string EscapeYamlString(string input)
@@ -426,9 +426,9 @@ public class SuperEventHandler
 
         string dir = Path.Combine(ModManagerSettings.ModDirectory, "common", "scripted_guis");
         Directory.CreateDirectory(dir);
-        string filePath = Path.Combine(dir, $"SUPEREVENT_{CurrentConfig.Id}_scripted_gui.txt");
+        string FileFullPath = Path.Combine(dir, $"SUPEREVENT_{CurrentConfig.Id}_scripted_gui.txt");
 
-        using var w = new StreamWriter(filePath);
+        using var w = new StreamWriter(FileFullPath);
         w.WriteLine("scripted_gui = {");
         w.WriteLine();
         w.WriteLine($"\tSUPEREVENT_{CurrentConfig.Id}_window = {{ ");
@@ -503,11 +503,11 @@ public class SuperEventHandler
 
         string interfaceDirectory = Path.Combine(ModManagerSettings.ModDirectory, "interface");
         Directory.CreateDirectory(interfaceDirectory);
-        string filePath = Path.Combine(interfaceDirectory, "font_definitions.gfx");
+        string FileFullPath = Path.Combine(interfaceDirectory, "font_definitions.gfx");
 
         HashSet<FontSignature> uniqueFonts = CollectFontSignatures();
 
-        using var w = new StreamWriter(filePath);
+        using var w = new StreamWriter(FileFullPath);
         w.WriteLine("bitmapfonts = {");
 
         foreach (var fontSign in uniqueFonts)

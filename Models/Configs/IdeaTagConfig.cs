@@ -14,6 +14,9 @@ namespace Models.Configs
     {
         public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public List<IdeaGroupConfig> Slots { get; set; } = new List<IdeaGroupConfig>();
         public List<string> CharacterSlots { get; set; } = new List<string>();

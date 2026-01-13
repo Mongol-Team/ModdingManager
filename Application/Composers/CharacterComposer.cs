@@ -46,6 +46,7 @@ namespace Application.Composers
                         List<CountryCharacterConfig> charConfigs = ParseFile(hoiFuncFile).Cast<CountryCharacterConfig>().ToList();
                         foreach (CountryCharacterConfig charConfig in charConfigs)
                         {
+                            charConfig.FileFullPath = file;
                             if (!configs.Any(c => c.Id == charConfig.Id))
                             {
                                 configs.Add(charConfig);

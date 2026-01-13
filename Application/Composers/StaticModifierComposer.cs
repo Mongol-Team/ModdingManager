@@ -33,6 +33,7 @@ namespace Application.Composers
                         foreach (var bracket in funcfile.Brackets)
                         {
                             var cfg = ParseSingleModifer(bracket);
+                            cfg.FileFullPath = file;
                             if (cfg != null)
                                 configs.Add(cfg);
                         }

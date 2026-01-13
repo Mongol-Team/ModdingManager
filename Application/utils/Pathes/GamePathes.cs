@@ -5,8 +5,8 @@ namespace Application.utils.Pathes
 {
     public static class GamePathes
     {
-        private static string BaseDirectory => ModManagerSettings.GameDirectory;
-        private static string CurrentLanguage => ModManagerSettings.CurrentLanguage.ToString();
+        public static string BaseDirectory => ModManagerSettings.GameDirectory;
+        public static string CurrentLanguage => ModManagerSettings.CurrentLanguage.ToString();
 
         private static string Combine(params string[] paths)
         {

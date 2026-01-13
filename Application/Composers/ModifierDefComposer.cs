@@ -42,6 +42,7 @@ namespace Application.Composers
                     foreach (var bracket in hoiFuncFile.Brackets)
                     {
                         ModifierDefinitionConfig cfg = ParseModifierDefConfig(bracket);
+                        cfg.FileFullPath = file;
                         if (cfg != null)
                             res.Add(cfg);
                     }

@@ -58,7 +58,7 @@ namespace Application.Composers
 
                         string id = tree.Id.ToString();
                         if (seenDefIds.Contains(id)) continue;
-
+                        tree.FileFullPath = file;
                         seenDefIds.Add(id);
                         configs.Add(tree);
                     }

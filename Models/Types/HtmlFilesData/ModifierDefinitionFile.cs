@@ -5,7 +5,7 @@ namespace Models.Types.HtmlFilesData
 {
     public class ModifierDefinitionFile : IHoiData
     {
-        public string FilePath { get; set; }
+        public string FileFullPath { get; set; }
         public List<ModifierDefinitionConfig> ModifierDefinitions { get; set; }
     }
 }

@@ -25,5 +25,8 @@ namespace Models.SubModels
         public int Planning { get; set; } = 1;
         public string Expire { get; set; }
         public List<CharacterTraitConfig> Traits { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
     }
 }

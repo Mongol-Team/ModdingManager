@@ -8,6 +8,9 @@ namespace Models.Configs
     {
         public Identifier Id { get; set; }
         public int Sprite { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public Types.LocalizationData.ConfigLocalisation Localisation { get; set; }
         public IGfx Gfx { get; set; }
         public List<CharacterType> CharacterTypes { get; set; } = new List<CharacterType>();

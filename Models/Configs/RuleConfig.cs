@@ -14,8 +14,10 @@ namespace Models.Configs
         public string GroupId { get; set; }
         public string RequiredDlc { get; set; }
         public string ExcludedDlc { get; set; }
-        public List<BaseConfig> Options { get; set; }
         public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
+        public List<BaseConfig> Options { get; set; }
         public BaseConfig Default { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public Identifier Id { get; set; }

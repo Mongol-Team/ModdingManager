@@ -12,6 +12,9 @@ namespace Models.SubModels
     public class FieldMarshalCharacterType : ICharacterType
     {
         public string Visible { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public string Available { get; set; }
         public string Allowed { get; set; }
         public Identifier Id { get; set; }

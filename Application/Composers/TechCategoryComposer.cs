@@ -47,7 +47,8 @@ namespace Application.Composers
                             configs.Add(new TechCategoryConfig
                             {
                                 Id = new(id),
-                                Gfx = new SpriteType(DDF.ItemWithNoGfxImage, DDF.Null)
+                                Gfx = new SpriteType(DDF.ItemWithNoGfxImage, DDF.Null),
+                                FileFullPath = file,
                             });
                         }
                     }

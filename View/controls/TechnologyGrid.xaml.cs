@@ -650,16 +650,16 @@ namespace ViewControls
                 string[] files = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
                 if (files.Length > 0)
                 {
-                    string filePath = files[0];
+                    string FileFullPath = files[0];
 
-                    string extension = System.IO.Path.GetExtension(filePath).ToLower();
+                    string extension = System.IO.Path.GetExtension(FileFullPath).ToLower();
                     if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
                     {
                         try
                         {
                             BitmapImage bitmap = new BitmapImage();
                             bitmap.BeginInit();
-                            bitmap.UriSource = new Uri(filePath);
+                            bitmap.UriSource = new Uri(FileFullPath);
                             bitmap.EndInit();
 
                             TechBGImage.ImageSource = bitmap;

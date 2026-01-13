@@ -12,7 +12,7 @@ namespace Application.managers
 {
     public static class ImageManager
     {
-        public static Bitmap LoadAndCropRightSideOfIcon(string filePath)
+        public static Bitmap LoadAndCropRightSideOfIcon(string FileFullPath)
         {
             static Bitmap CropLeftHalf(Bitmap original)
             {
@@ -23,7 +23,7 @@ namespace Application.managers
 
             try
             {
-                using var fullBitmap = DDSManager.LoadDDSAsBitmap(filePath);
+                using var fullBitmap = DDSManager.LoadDDSAsBitmap(FileFullPath);
                 return CropLeftHalf(fullBitmap);
             }
             catch

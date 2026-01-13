@@ -39,6 +39,7 @@ namespace Application.Composers
 
                             foreach (var config in configList)
                             {
+                                config.FileFullPath = file;
                                 string id = config.Id.ToString();
                                 if (!seenIds.Contains(id))
                                 {

@@ -354,8 +354,8 @@ namespace View
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (files.Length > 0)
                 {
-                    string filePath = files[0];
-                    BitmapImage bitmap = new(new Uri(filePath));
+                    string FileFullPath = files[0];
+                    BitmapImage bitmap = new(new Uri(FileFullPath));
 
                     if (sender == SmallTechIconCanvas)
                     {

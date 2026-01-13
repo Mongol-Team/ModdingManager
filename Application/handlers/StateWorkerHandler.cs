@@ -104,17 +104,17 @@ public class StateWorkerHandler
     public void ChangeState(StateConfig state, string oldName, string newName)
     {
         //// Проверяем, что состояние имеет ID и путь к файлу
-        //if (state.Id == null || string.IsNullOrEmpty(state.FilePath))
+        //if (state.Id == null || string.IsNullOrEmpty(state.FileFullPath))
         //    return;
 
         //// Получаем кеш состояний
         //var stateCache = ModDataStorage.Mod.MapCache.GetStateFiles();
 
         //// Если файл отсутствует в кеше, загружаем его
-        //if (!stateCache.TryGetValue(state.FilePath, out var cachedFile))
+        //if (!stateCache.TryGetValue(state.FileFullPath, out var cachedFile))
         //{
-        //    ModDataStorage.Mod.MapCache.AddStateFile(state.FilePath);
-        //    if (!stateCache.TryGetValue(state.FilePath, out cachedFile))
+        //    ModDataStorage.Mod.MapCache.AddStateFile(state.FileFullPath);
+        //    if (!stateCache.TryGetValue(state.FileFullPath, out cachedFile))
         //        return; // Файл не удалось загрузить
         //}
 
@@ -132,7 +132,7 @@ public class StateWorkerHandler
 
         //UpdateBuildings(stateBracket, state.Buildings);
         //cachedFile.IsDirty = true;
-        //ModDataStorage.Mod.MapCache.MarkStateFileDirty(state.FilePath);
+        //ModDataStorage.Mod.MapCache.MarkStateFileDirty(state.FileFullPath);
         //ModDataStorage.Mod.MapCache.SaveDirtyStateFiles();
     }
 
@@ -141,21 +141,21 @@ public class StateWorkerHandler
         //string basePath = Path.Combine(ModManagerSettings.Instance.ModDirectory, "localisation", ModManagerSettings.CurrentLanguage);
         //string replacePath = Path.Combine(basePath, "replace");
         //string fileName = $"state_names_l_{ModManagerSettings.CurrentLanguage}.yml";
-        //string filePath1 = Path.Combine(basePath, fileName);
-        //string filePath2 = Path.Combine(replacePath, fileName);
+        //string FileFullPath1 = Path.Combine(basePath, fileName);
+        //string FileFullPath2 = Path.Combine(replacePath, fileName);
 
         //Directory.CreateDirectory(basePath);
         //Directory.CreateDirectory(replacePath);
 
-        //if (!File.Exists(filePath1))
-        //    File.WriteAllText(filePath1, $"l_{ModManagerSettings.CurrentLanguage}:\n");
-        //if (!File.Exists(filePath2))
-        //    File.WriteAllText(filePath2, $"l_{ModManagerSettings.CurrentLanguage}:\n");
+        //if (!File.Exists(FileFullPath1))
+        //    File.WriteAllText(FileFullPath1, $"l_{ModManagerSettings.CurrentLanguage}:\n");
+        //if (!File.Exists(FileFullPath2))
+        //    File.WriteAllText(FileFullPath2, $"l_{ModManagerSettings.CurrentLanguage}:\n");
 
         //try
         //{
-        //    using var fileStream1 = new FileStream(filePath1, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-        //    using var fileStream2 = new FileStream(filePath2, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        //    using var fileStream1 = new FileStream(FileFullPath1, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        //    using var fileStream2 = new FileStream(FileFullPath2, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
 
         //    var searcher = new FileSearcher
         //    {
@@ -174,7 +174,7 @@ public class StateWorkerHandler
         //    searcher.SetVar(newVar, 1);
 
         //    // Обновляем кэш
-        //    newVar.AddProperty("sourcePath", filePath1);
+        //    newVar.AddProperty("sourcePath", FileFullPath1);
         //    ModDataStorage.Mod.LocCache.StateLocalisation.RemoveAll(v =>
         //        v.Value.ToString().Trim('"').Equals(oldName, StringComparison.OrdinalIgnoreCase));
         //    ModDataStorage.Mod.LocCache.StateLocalisation.Add(newVar);
@@ -291,7 +291,7 @@ public class StateWorkerHandler
         //  Directory.CreateDirectory(locFolder);
         //  Directory.CreateDirectory(replaceFolder);
 
-        //  string filePath = Path.Combine(locFolder, $"victory_points_l_{ModManagerSettings.CurrentLanguage}.yml");
+        //  string FileFullPath = Path.Combine(locFolder, $"victory_points_l_{ModManagerSettings.CurrentLanguage}.yml");
         //  string replacePath = Path.Combine(replaceFolder, $"victory_points_l_{ModManagerSettings.CurrentLanguage}.yml");
         //  string header = $"﻿l_{ModManagerSettings.CurrentLanguage}:\n";
 
@@ -322,10 +322,10 @@ public class StateWorkerHandler
         //      File.WriteAllLines(path, lines, new UTF8Encoding(true));
         //  }
 
-        //  EnsureFileHasName(filePath, header);
+        //  EnsureFileHasName(FileFullPath, header);
         //  EnsureFileHasName(replacePath, header);
 
-        //  UpdateLineInFile(filePath, vpKey, newLineLoc);
+        //  UpdateLineInFile(FileFullPath, vpKey, newLineLoc);
         //  UpdateLineInFile(replacePath, vpKey, newLineLoc);
 
 

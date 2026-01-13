@@ -10,8 +10,8 @@ namespace Application.Settings
             try
             {
                 AppPaths.EnsureProgramCfgExists();
-                var configFilePath = AppPaths.ProgramCfgPath;
-                var config = ConfigFileParser.ParseConfigFile(configFilePath);
+                var configFileFullPath = AppPaths.ProgramCfgPath;
+                var config = ConfigFileParser.ParseConfigFile(configFileFullPath);
 
                 ModManagerSettings.ModDirectory = config.TryGetValue("ModDirectory", out var modDir) ? modDir : string.Empty;
                 ModManagerSettings.GameDirectory = config.TryGetValue("GameDirectory", out var gameDir) ? gameDir : string.Empty;

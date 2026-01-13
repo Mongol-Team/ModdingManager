@@ -12,6 +12,9 @@ namespace Models.Configs
         public IGfx Gfx { get; set; } = new SpriteType(DataDefaultValues.NullImageSource, DataDefaultValues.Null);
         public IGfx SmallGfx { get; set; } = new SpriteType(DataDefaultValues.NullImageSource, DataDefaultValues.Null);
         public Identifier Id { get; set; } = new(DataDefaultValues.Null);
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public ConfigLocalisation Localisation { get; set; } = new();
         public List<ICharacterType> Types { get; set; } = [];
         public string Tag { get; set; } = DataDefaultValues.Null;

@@ -12,6 +12,9 @@ namespace Models.Configs
         public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public string Description { get; set; }
         public string Noun { get; set; }
         public string Name { get; set; }
