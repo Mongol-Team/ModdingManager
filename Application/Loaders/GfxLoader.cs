@@ -69,19 +69,19 @@ namespace Application.Loaders
             Logger.AddLog($"Loaded {gfxDictionary.Count} unique GFX items (total processed: {totalLoaded}), with mod priority overrides applied.");
             return gfxDictionary.Values.ToList();
         }
-        public static List<IGfx> LoadFromFile(string gfxFileFullPath)
+        public static List<IGfx> LoadFromFile(string gfxFilePath)
         {
             HoiFuncFile parser = new();
             try
             {
-                parser = new TxtParser(new TxtPattern()).Parse(gfxFileFullPath) as HoiFuncFile;
+                parser = new TxtParser(new TxtPattern()).Parse(gfxFilePath) as HoiFuncFile;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Не удалось распарсить GFX файл: {gfxFileFullPath}");
+                MessageBox.Show($"Не удалось распарсить GFX файл: {gfxFilePath}");
             }
             List<IGfx> result = new();
-            if (new TxtParser(new TxtPattern()).Parse(gfxFilePath) is not HoiFuncFile parser) return result;
+            if (new TxtParser(new TxtPattern()).Parse(gfxFilePath) is not HoiFuncFile funcFile) return result;
             if (parser.Brackets.Count == 0) return result;
             foreach (Bracket defineBr in parser.Brackets)
             {
