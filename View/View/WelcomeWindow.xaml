@@ -1,9 +1,10 @@
-<Window x:Class="View.WelcomeWindow"
+<base:BaseWindow x:Class="View.WelcomeWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:ViewControls"
         xmlns:loc="clr-namespace:View.Utils"
         xmlns:enums="clr-namespace:Models.Enums"
+        xmlns:base="clr-namespace:View"
         Title="{loc:Localize Key=Window.ModdingManager}"
         Width="1200" Height="700"
         WindowStartupLocation="CenterScreen"
@@ -203,7 +204,7 @@
                             <TextBlock x:Name="ParallelismValueText" 
                                        Grid.Column="1"
                                        Text="50%"
-                                       Foreground="{StaticResource TextSecondary}"
+                                       Foreground="{StaticResource TextPrimary}"
                                        VerticalAlignment="Center"
                                        MinWidth="50"
                                        TextAlignment="Right"/>
@@ -259,4 +260,4 @@
                        Visibility="Collapsed"/>
         </Grid>
     </Grid>
-</Window>
+</base:BaseWindow>

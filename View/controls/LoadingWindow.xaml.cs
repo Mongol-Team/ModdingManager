@@ -13,9 +13,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using View;
+
 namespace ViewControls
 {
-    public partial class LoadingWindow : Window
+    public partial class LoadingWindow : BaseWindow
     {
         public LoadingWindow()
         {

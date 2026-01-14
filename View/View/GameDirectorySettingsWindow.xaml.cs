@@ -7,7 +7,7 @@ using Application.Settings;
 
 namespace View
 {
-    public partial class GameDirectorySettingsWindow : Window
+    public partial class GameDirectorySettingsWindow : BaseWindow
     {
         public GameDirectorySettingsWindow()
         {
@@ -42,25 +42,24 @@ namespace View
         {
             if (string.IsNullOrWhiteSpace(GameDirBox.Text))
             {
-                System.Windows.MessageBox.Show(
+                ShowWarning(
                     UILocalization.GetString("Error.PleaseSpecifyDirectory"),
-                    UILocalization.GetString("Error.Error"),
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    NotificationCorner.TopRight);
                 return;
             }
 
             if (!Directory.Exists(GameDirBox.Text))
             {
-                System.Windows.MessageBox.Show(
+                ShowWarning(
                     UILocalization.GetString("Error.DirectoryNotExists"),
-                    UILocalization.GetString("Error.Error"),
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    NotificationCorner.TopRight);
                 return;
             }
 
             ModManagerSettingsLoader.SaveGameDirectory(GameDirBox.Text);
+            ShowSuccess(
+                "Настройки сохранены",
+                NotificationCorner.TopRight);
             DialogResult = true;
             Close();
         }

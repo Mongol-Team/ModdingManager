@@ -38,13 +38,71 @@
                 Background="{StaticResource BackgroundCard}"
                 BorderBrush="{StaticResource BorderColor}"
                 BorderThickness="1,0,0,0">
-            <Grid>
-                <TextBlock Text="Файл будет отображаться здесь"
-                           Foreground="{StaticResource TextTertiary}"
-                           FontSize="14"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-            </Grid>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="20">
+                <StackPanel>
+                    <TextBlock Text="Примеры контролов, которые могут отображаться:"
+                               Style="{StaticResource GenericViewerSectionTitle}"/>
+                    
+                    <!-- TextBox для string -->
+                    <TextBox Tag="TextBox (string)" Style="{StaticResource GenericViewerTextBox}"/>
+                    
+                    <!-- TextBox для int -->
+                    <TextBox Tag="TextBox (int)" Style="{StaticResource GenericViewerTextBox}"/>
+                    
+                    <!-- TextBox для double -->
+                    <TextBox Tag="TextBox (double)" Style="{StaticResource GenericViewerTextBox}"/>
+                    
+                    <!-- ComboBox для enum -->
+                    <ComboBox Style="{StaticResource GenericViewerComboBox}">
+                        <ComboBoxItem Content="ComboBox (enum)" IsEnabled="False" Foreground="{StaticResource InputPlaceholder}"/>
+                        <ComboBoxItem Content="Option 1"/>
+                        <ComboBoxItem Content="Option 2"/>
+                        <ComboBoxItem Content="Option 3"/>
+                    </ComboBox>
+                    
+                    <!-- CheckBox для bool -->
+                    <CheckBox Content="CheckBox (bool)" IsChecked="True" Style="{StaticResource GenericViewerCheckBox}"/>
+                    
+                    <!-- DatePicker для DateTime -->
+                    <controls:CustomDatePicker Tag="DatePicker (DateTime)" Margin="0,0,0,10"/>
+                    
+                    <!-- ColorPickerDropdown для Color -->
+                    <controls:ColorPickerDropdown Width="120" Margin="0,0,0,10" Tag="ColorPickerDropdown (Color)"/>
+                    
+                    <!-- SearchableComboBox для IConfig -->
+                    <controls:SearchableComboBox Width="200" Margin="0,0,0,10" Tag="SearchableComboBox (IConfig)"/>
+                    
+                    <!-- LocalisationDisplay для ConfigLocalisation -->
+                    <controls:LocalisationDisplay Margin="0,0,0,10" Tag="LocalisationDisplay (ConfigLocalisation)"/>
+                    
+                    <!-- Expander для List -->
+                    <Expander Header="Expander (List&lt;T&gt;)" IsExpanded="False" Style="{StaticResource GenericViewerExpander}">
+                        <StackPanel>
+                            <TextBox Tag="Элемент списка" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                            <TextBox Tag="Элемент списка" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                            <TextBox Tag="Элемент списка" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                            <Button Content="Add" Style="{StaticResource GenericViewerButton}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Expander>
+                    
+                    <!-- TextBox для List<Var> (многострочный) -->
+                    <TextBox Tag="TextBox (List&lt;Var&gt; - многострочный)"
+                             Height="100"
+                             Style="{StaticResource GenericViewerMultilineTextBox}"/>
+                    
+                    <!-- Expander для Dictionary -->
+                    <Expander Header="Expander (Dictionary&lt;K,V&gt;)" IsExpanded="False" Style="{StaticResource GenericViewerExpander}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <TextBox Tag="Key" Width="100" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                                <TextBox Tag="Value" Width="100" Margin="10,0,0,0" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                                <Button Content="Remove" Style="{StaticResource GenericViewerButton}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                            <Button Content="Add" Style="{StaticResource GenericViewerButton}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </ScrollViewer>
         </Border>
     </Grid>
 </UserControl>

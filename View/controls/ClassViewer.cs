@@ -200,6 +200,8 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
                     {
@@ -218,6 +220,8 @@ namespace ViewControls
                         Text = identifier?.ToString() ?? string.Empty,
                         Margin = ElementMargin,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
                     {
@@ -236,6 +240,8 @@ namespace ViewControls
                         Text = identifier?.ToString() ?? string.Empty,
                         Margin = ElementMargin,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
                     {
@@ -262,6 +268,7 @@ namespace ViewControls
                         SelectedItem = value,
                         Margin = ElementMargin,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("ComboBoxDark")
                     };
                     comboBox.SelectionChanged += (s, e) =>
                     {
@@ -293,6 +300,7 @@ namespace ViewControls
                         SelectedItem = localisation.Language,
                         Margin = ElementMargin,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("ComboBoxDark")
                     };
                     languageComboBox.SelectionChanged += (s, e) =>
                     {
@@ -308,8 +316,72 @@ namespace ViewControls
                     {
                         Orientation = Orientation.Vertical
                     };
-                    stackPanel.Children.Add(languageComboBox);
-                    stackPanel.Children.Add(localisationDisplay);
+                    
+                    var languageRow = new Grid
+                    {
+                        Margin = new Thickness(0, ElementMargin.Top, 0, ElementMargin.Bottom)
+                    };
+                    languageRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+                    languageRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    languageRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+                    
+                    var languageLabel = new TextBlock
+                    {
+                        Text = "Language",
+                        Style = (Style)TryFindResource("TextSmall"),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+                        Margin = new Thickness(ElementMargin.Left, 0, 10, 0)
+                    };
+                    
+                    if (languageComboBox is FrameworkElement fe1)
+                    {
+                        fe1.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+                        fe1.Margin = new Thickness(0, 0, ElementMargin.Right, 0);
+                    }
+                    
+                    Grid.SetColumn(languageLabel, 0);
+                    Grid.SetColumn(languageComboBox, 2);
+                    languageRow.Children.Add(languageLabel);
+                    languageRow.Children.Add(languageComboBox);
+                    if (this.Width > 0)
+                    {
+                        languageRow.Width = this.Width;
+                    }
+                    stackPanel.Children.Add(languageRow);
+                    
+                    var localisationRow = new Grid
+                    {
+                        Margin = new Thickness(0, ElementMargin.Top + 10, 0, ElementMargin.Bottom)
+                    };
+                    localisationRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+                    localisationRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    localisationRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+                    
+                    var localisationLabel = new TextBlock
+                    {
+                        Text = "Localisation",
+                        Style = (Style)TryFindResource("TextSmall"),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+                        Margin = new Thickness(ElementMargin.Left, 0, 10, 0)
+                    };
+                    
+                    if (localisationDisplay is FrameworkElement fe2)
+                    {
+                        fe2.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+                        fe2.Margin = new Thickness(0, 0, ElementMargin.Right, 0);
+                    }
+                    
+                    Grid.SetColumn(localisationLabel, 0);
+                    Grid.SetColumn(localisationDisplay, 2);
+                    localisationRow.Children.Add(localisationLabel);
+                    localisationRow.Children.Add(localisationDisplay);
+                    if (this.Width > 0)
+                    {
+                        localisationRow.Width = this.Width;
+                    }
+                    stackPanel.Children.Add(localisationRow);
                     
                     inputControl = stackPanel;
                 }
@@ -335,6 +407,8 @@ namespace ViewControls
                         Height = 100,
                         TextWrapping = TextWrapping.Wrap,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Tag = prop.Name
                     };
 
                     textBox.TextChanged += (s, e) =>
@@ -401,6 +475,8 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
                     {
@@ -468,10 +544,11 @@ namespace ViewControls
                 }
                 else if (prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(DateTime?))
                 {
-                    var datePicker = new DatePicker
+                    var datePicker = new CustomDatePicker
                     {
                         SelectedDate = (DateTime?)value,
-                        Margin = ElementMargin
+                        Margin = ElementMargin,
+                        Width = this.Width
                     };
                     datePicker.SelectedDateChanged += (s, e) =>
                     {
@@ -481,6 +558,11 @@ namespace ViewControls
                             var newDate = datePicker.SelectedDate.Value;
                             prop.SetValue(_buildingContent, newDate);
                             RaisePropertyChanged(prop, old, newDate);
+                        }
+                        else
+                        {
+                            prop.SetValue(_buildingContent, null);
+                            RaisePropertyChanged(prop, old, null);
                         }
                     };
                     inputControl = datePicker;
@@ -492,6 +574,8 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
                     {
@@ -511,6 +595,8 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
                     {
@@ -530,6 +616,8 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
+                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
                     {
@@ -545,7 +633,7 @@ namespace ViewControls
                 else if (prop.PropertyType == typeof(DateOnly) || prop.PropertyType == typeof(DateOnly?))
                 {
                     var currentDate = (DateOnly?)value;
-                    var datePicker = new DatePicker
+                    var datePicker = new CustomDatePicker
                     {
                         SelectedDate = currentDate.HasValue ? currentDate.Value.ToDateTime(new TimeOnly(0)) : null,
                         Margin = ElementMargin,
@@ -559,6 +647,11 @@ namespace ViewControls
                             var dateOnly = DateOnly.FromDateTime(datePicker.SelectedDate.Value);
                             prop.SetValue(_buildingContent, dateOnly);
                             RaisePropertyChanged(prop, old, dateOnly);
+                        }
+                        else
+                        {
+                            prop.SetValue(_buildingContent, null);
+                            RaisePropertyChanged(prop, old, null);
                         }
                     };
                     inputControl = datePicker;
@@ -594,6 +687,8 @@ namespace ViewControls
                             Height = 100,
                             TextWrapping = TextWrapping.Wrap,
                             Width = this.Width,
+                            Style = (Style)TryFindResource("TextBoxDark"),
+                            Tag = prop.Name
                         };
                         textBox.TextChanged += (s, e) =>
                         {
@@ -1004,19 +1099,42 @@ namespace ViewControls
 
                 if (inputControl != null)
                 {
-                    var label = new Label
+                    var label = new TextBlock
                     {
-                        Content = prop.Name,
-                        FontSize = FontSize,
-                        Margin = ElementMargin,
-                        Width = this.Width,
-                        HorizontalAlignment = GetHorizontalAlignment()
+                        Text = prop.Name,
+                        Style = (Style)TryFindResource("TextSmall"),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+                        Margin = new Thickness(ElementMargin.Left, 0, 10, 0)
                     };
 
-                    inputControl.HorizontalAlignment = GetHorizontalAlignment();
+                    if (inputControl is FrameworkElement fe)
+                    {
+                        fe.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+                        fe.Margin = new Thickness(0, 0, ElementMargin.Right, 0);
+                    }
 
-                    Children.Add(label);
-                    Children.Add(inputControl);
+                    var rowPanel = new Grid
+                    {
+                        Margin = new Thickness(0, ElementMargin.Top, 0, ElementMargin.Bottom)
+                    };
+                    rowPanel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+                    rowPanel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    rowPanel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+
+                    Grid.SetColumn(label, 0);
+                    Grid.SetColumn(inputControl, 2);
+
+                    rowPanel.Children.Add(label);
+                    rowPanel.Children.Add(inputControl);
+
+                    rowPanel.HorizontalAlignment = GetHorizontalAlignment();
+                    if (this.Width > 0)
+                    {
+                        rowPanel.Width = this.Width;
+                    }
+
+                    Children.Add(rowPanel);
                 }
             }
 
@@ -1051,6 +1169,7 @@ namespace ViewControls
                 {
                     Text = value?.ToString() ?? string.Empty,
                     Width = 200,
+                    Style = (Style)FindResource("TextBoxDark")
                 };
                 if (onValueChanged != null)
                 {
@@ -1064,6 +1183,7 @@ namespace ViewControls
                 {
                     Text = value?.ToString() ?? "0",
                     Width = 200,
+                    Style = (Style)FindResource("TextBoxDark")
                 };
                 if (onValueChanged != null)
                 {
@@ -1085,6 +1205,7 @@ namespace ViewControls
                     ItemsSource = enumValues,
                     SelectedItem = value,
                     Width = 200,
+                    Style = (Style)FindResource("ComboBoxDark")
                 };
                 if (onValueChanged != null)
                 {
@@ -1120,6 +1241,7 @@ namespace ViewControls
                 {
                     Text = identifier?.ToString() ?? string.Empty,
                     Width = 200,
+                    Style = (Style)FindResource("TextBoxDark")
                 };
                 if (onValueChanged != null)
                 {
@@ -1133,6 +1255,7 @@ namespace ViewControls
                 Text = value?.ToString() ?? string.Empty,
                 IsReadOnly = true,
                 Width = 200,
+                Style = (Style)FindResource("TextBoxDark")
             };
         }
     }

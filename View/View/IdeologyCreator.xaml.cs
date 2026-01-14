@@ -17,7 +17,7 @@ namespace View
     /// <summary>
     /// Логика взаимодействия для IdeologyCreator.xaml
     /// </summary>
-    public partial class IdeologyCreator : Window
+    public partial class IdeologyCreator : BaseWindow
     {
         public IdeologyCreator()
         {

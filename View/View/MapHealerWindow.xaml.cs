@@ -5,7 +5,7 @@ namespace View
     /// <summary>
     /// Логика взаимодействия для MapHealerWindow.xaml
     /// </summary>
-    public partial class MapHealerWindow : Window
+    public partial class MapHealerWindow : BaseWindow
     {
         public MapHealerWindow()
         {

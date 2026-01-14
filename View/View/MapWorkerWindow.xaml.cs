@@ -16,7 +16,7 @@ using Models.Configs;
 
 namespace View
 {
-    public partial class MapWorkerWindow : Window, IStateWorkerView
+    public partial class MapWorkerWindow : BaseWindow, IStateWorkerView
     {
         private System.Windows.Point _mousePosition;
         public event Action<string> MapLayerChanged;

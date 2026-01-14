@@ -17,7 +17,7 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace View
 {
-    public partial class TechTreeCreator : Window, ITechTreeCreatorView
+    public partial class TechTreeCreator : BaseWindow, ITechTreeCreatorView
     {
         public TechTreeCreator()
         {
@@ -260,12 +260,12 @@ namespace View
 
         public void ShowMessage(string message, string title)
         {
-            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+            ShowInfo(message, NotificationCorner.TopRight);
         }
 
         public void ShowError(string message, string title)
         {
-            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            ShowError(message, NotificationCorner.TopRight);
         }
 
         public void UpdateUIFromConfig(TechTreeConfig config)
@@ -391,7 +391,7 @@ namespace View
                     }
                     catch (Exception ex)
                     {
-                        System.Windows.MessageBox.Show($"Ошибка при загрузке изображения: {ex.Message}");
+                        ShowError($"Ошибка при загрузке изображения: {ex.Message}", NotificationCorner.TopRight);
                     }
                 }
             }

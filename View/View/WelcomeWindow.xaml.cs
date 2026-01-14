@@ -5,12 +5,12 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Forms;
 using View.Utils;
-using MessageBox = System.Windows.MessageBox;
 
 namespace View
 {
-    public partial class WelcomeWindow : Window
+    public partial class WelcomeWindow : BaseWindow
     {
         public string SelectedProjectPath { get; private set; } = string.Empty;
         private List<RecentProject> _allProjects = new();
@@ -162,19 +162,17 @@ namespace View
                 try
                 {
                     await LoadModData();
-                    var mainWindow = new MainWindow();
+                    MainWindow mainWindow = new MainWindow();
                     System.Windows.Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
                     mainWindow.Activate();
-                    Close();
+                    this.Close();
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show(
+                    ShowError(
                         string.Format(UILocalization.GetString("Error.LoadModDataFailed"), ex.Message),
-                        UILocalization.GetString("Error.Error"),
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                        NotificationCorner.TopRight);
                 }
             }
         }
@@ -247,20 +245,18 @@ namespace View
                     try
                     {
                         await LoadModData();
-                        DialogResult = true;
+                        ((Window)this).DialogResult = true;
                         var mainWindow = new MainWindow();
-                        System.Windows.Application.Current.MainWindow = mainWindow;
+                        System.Windows.Application.Current.MainWindow = (Window)mainWindow;
                         mainWindow.Show();
-                        Close();
+                        this.Close();
                     }
                     catch (Exception ex)
                     {
-                        System.Windows.MessageBox.Show(
+                        ShowError(
                             $"Ошибка при загрузке данных мода: {ex.Message}",
-                            "Ошибка",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-                        DialogResult = false;
+                            NotificationCorner.TopRight);
+                        ((Window)this).DialogResult = false;
                     }
                 }
             }
@@ -285,20 +281,18 @@ namespace View
                     try
                     {
                         await LoadModData();
-                        DialogResult = true;
+                        ((Window)this).DialogResult = true;
                         var mainWindow = new MainWindow();
-                        System.Windows.Application.Current.MainWindow = mainWindow;
+                        System.Windows.Application.Current.MainWindow = (Window)mainWindow;
                         mainWindow.Show();
-                        Close();
+                        this.Close();
                     }
                     catch (Exception ex)
                     {
-                        System.Windows.MessageBox.Show(
+                        ShowError(
                             $"Ошибка при загрузке данных мода: {ex.Message}",
-                            "Ошибка",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-                        DialogResult = false;
+                            NotificationCorner.TopRight);
+                        ((Window)this).DialogResult = false;
                     }
                 }
             }
@@ -352,11 +346,9 @@ namespace View
 
             ModManagerSettingsLoader.Save(ModManagerSettings.ModDirectory ?? string.Empty, ModManagerSettings.GameDirectory ?? string.Empty);
 
-            MessageBox.Show(
+            ShowSuccess(
                 "Настройки сохранены",
-                "Успех",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+                NotificationCorner.TopRight);
         }
 
     }

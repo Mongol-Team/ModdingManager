@@ -7,7 +7,7 @@ using ViewControls.Docking;
 
 namespace View
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : BaseWindow
     {
         private FileExplorer _fileExplorerControl;
 

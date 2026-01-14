@@ -18,7 +18,7 @@ namespace View
     /// <summary>
     /// Логика взаимодействия для WPFCoutryCreator.xaml
     /// </summary>
-    public partial class WPFCountryCreator : Window, ICountryView
+    public partial class WPFCountryCreator : BaseWindow, ICountryView
     {
         private readonly CountryPresenter _presenter;
 
@@ -330,12 +330,12 @@ namespace View
         // Методы
         public void ShowMessage(string message)
         {
-            System.Windows.MessageBox.Show(message, "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            ShowSuccess(message, NotificationCorner.TopRight);
         }
 
         public void ShowError(string message)
         {
-            System.Windows.MessageBox.Show(message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            ShowError(message, NotificationCorner.TopRight);
         }
 
         public void ClearFlags()
@@ -384,13 +384,13 @@ namespace View
 
             CountryFileNameBox.ItemsSource = LoadCountryFileNames();
         }
-        public static List<string> LoadCountryFileNames()
+        public List<string> LoadCountryFileNames()
         {
             string countriesDir = Path.Combine(ModManagerSettings.ModDirectory, "common", "country_tags");
 
             if (!System.IO.Directory.Exists(countriesDir))
             {
-                System.Windows.MessageBox.Show("Папка 'countries' не найдена!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowError("Папка 'countries' не найдена!", NotificationCorner.TopRight);
                 return null;
             }
 
@@ -422,7 +422,7 @@ namespace View
                     }
                     catch (Exception ex)
                     {
-                        System.Windows.MessageBox.Show($"Ошибка при загрузке изображения: {ex.Message}");
+                        ShowError($"Ошибка при загрузке изображения: {ex.Message}", NotificationCorner.TopRight);
                     }
                 }
             }

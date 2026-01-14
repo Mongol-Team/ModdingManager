@@ -7,6 +7,8 @@
         <ResourceDictionary Source="ButtonStyles.xaml"/>
         <ResourceDictionary Source="InputStyles.xaml"/>
         <ResourceDictionary Source="WindowStyles.xaml"/>
+        <ResourceDictionary Source="NotificationStyles.xaml"/>
+        <ResourceDictionary Source="GenericViewerStyles.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
 
