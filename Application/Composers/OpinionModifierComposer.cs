@@ -37,6 +37,7 @@ namespace Application.Composers
                         List<IConfig> fileConfigs = ParseFile(hoiFuncFile);
                         foreach (IConfig config in fileConfigs)
                         {
+                            config.FileFullPath = file;
                             if (!configs.Any(c => c.Id.ToString() == config.Id.ToString()))
                             {
                                 configs.Add(config);

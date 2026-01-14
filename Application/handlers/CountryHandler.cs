@@ -32,11 +32,11 @@ public class CountryHandler
             //string ruContent = GenerateLocalizationContent(this.Config.Tag, "l_russian", this.Config.Localisation.NameValue, this.Config.RulingParty);
             //string enContent = GenerateLocalizationContent(this.Config.Tag, "l_english", this.Config.Localisation.NameValue, this.Config.RulingParty);
 
-            string ruFilePath = Path.Combine(ruLocPath, $"{this.Config.Id}_history_l_russian.yml");
-            string enFilePath = Path.Combine(enLocPath, $"{this.Config.Id}_history_l_english.yml");
+            string ruFileFullPath = Path.Combine(ruLocPath, $"{this.Config.Id}_history_l_russian.yml");
+            string enFileFullPath = Path.Combine(enLocPath, $"{this.Config.Id}_history_l_english.yml");
 
-            //File.WriteAllText(ruFilePath, ruContent, new UTF8Encoding(true));
-            //File.WriteAllText(enFilePath, enContent, new UTF8Encoding(true));
+            //File.WriteAllText(ruFileFullPath, ruContent, new UTF8Encoding(true));
+            //File.WriteAllText(enFileFullPath, enContent, new UTF8Encoding(true));
 
             MessageBox.Show("Файлы локализации успешно созданы!", "Успех",
                             MessageBoxButton.OK, MessageBoxImage.Information);
@@ -95,20 +95,20 @@ public class CountryHandler
             string[] tagFiles;
 
             // Если задан конкретный файл — использовать его
-            string specificTagFilePath = !string.IsNullOrWhiteSpace(this.Config.CountryFileName)
+            string specificTagFileFullPath = !string.IsNullOrWhiteSpace(this.Config.CountryFileName)
                 ? Path.Combine(tagsDir, this.Config.CountryFileName)
                 : null;
 
-            if (!string.IsNullOrWhiteSpace(specificTagFilePath) && File.Exists(specificTagFilePath))
+            if (!string.IsNullOrWhiteSpace(specificTagFileFullPath) && File.Exists(specificTagFileFullPath))
             {
-                string content = File.ReadAllText(specificTagFilePath);
+                string content = File.ReadAllText(specificTagFileFullPath);
                 if (content.Contains($"{countryTag} ="))
                 {
-                    MessageBox.Show($"Тег {countryTag} уже существует в файле {Path.GetFileName(specificTagFilePath)}!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"Тег {countryTag} уже существует в файле {Path.GetFileName(specificTagFileFullPath)}!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                using (StreamWriter writer = File.AppendText(specificTagFilePath))
+                using (StreamWriter writer = File.AppendText(specificTagFileFullPath))
                 {
                     //writer.WriteLine(newEntry);
                 }
@@ -192,11 +192,11 @@ public class CountryHandler
                 }
             }
 
-            foreach (string filePath in stateFiles)
+            foreach (string FileFullPath in stateFiles)
             {
                 try
                 {
-                    string[] lines = File.ReadAllLines(filePath, utf8WithoutBom);
+                    string[] lines = File.ReadAllLines(FileFullPath, utf8WithoutBom);
                     bool modified = false;
                     bool hasCore = false;
 
@@ -255,7 +255,7 @@ public class CountryHandler
 
                     if (modified)
                     {
-                        File.WriteAllLines(filePath, lines, utf8WithoutBom);
+                        File.WriteAllLines(FileFullPath, lines, utf8WithoutBom);
                     }
                 }
                 catch (Exception ex)
@@ -282,13 +282,13 @@ public class CountryHandler
         }
 
         string fileName = "pisda";/*$"{Config.Tag} - {Config.Localisation.NameValue}.txt";*/
-        string filePath = Path.Combine(ModManagerSettings.ModDirectory, "history", "countries", fileName);
+        string FileFullPath = Path.Combine(ModManagerSettings.ModDirectory, "history", "countries", fileName);
 
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(FileFullPath));
 
-            using (StreamWriter writer = new StreamWriter(filePath, false, new UTF8Encoding(true)))
+            using (StreamWriter writer = new StreamWriter(FileFullPath, false, new UTF8Encoding(true)))
             {
                 if (int.IsPositive(this.Config.Capital ?? 0))
                 {
@@ -391,7 +391,7 @@ public class CountryHandler
                 }
             }
 
-            MessageBox.Show($"Файл истории страны успешно создан: {filePath}", "Готово", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"Файл истории страны успешно создан: {FileFullPath}", "Готово", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
@@ -411,13 +411,13 @@ public class CountryHandler
             return;
         }
         string fileName = "pisyn";/*$"{this.Config.Tag} - {this.Config.Name}.txt";*/
-        string filePath = Path.Combine(ModManagerSettings.ModDirectory, "common", "countries", fileName);
+        string FileFullPath = Path.Combine(ModManagerSettings.ModDirectory, "common", "countries", fileName);
 
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(FileFullPath));
 
-            using (StreamWriter writer = new StreamWriter(filePath, false, Encoding.UTF8))
+            using (StreamWriter writer = new StreamWriter(FileFullPath, false, Encoding.UTF8))
             {
                 if (!string.IsNullOrWhiteSpace(this.Config.GraphicalCulture))
                 {
@@ -432,7 +432,7 @@ public class CountryHandler
                     writer.WriteLine($"color = rgb {{ {color.R} {color.G} {color.B} }}");
                 }
 
-                MessageBox.Show($"Файл страны успешно создан: {filePath}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Файл страны успешно создан: {FileFullPath}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         catch (Exception ex)

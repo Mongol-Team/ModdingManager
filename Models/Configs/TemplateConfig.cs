@@ -11,6 +11,9 @@ namespace Models.Configs
         public List<SubUnitConfig> BrigadeItems { get; set; } = new List<SubUnitConfig>();
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public bool? IsLocked { get; set; }
         public string? Namespace { get; set; }
         public bool? AllowTraining { get; set; }

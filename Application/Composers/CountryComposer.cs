@@ -37,6 +37,7 @@ namespace Application.Composers
                         string tag = var.Name;
                         string countryFileName = var.Value?.ToString() ?? string.Empty;
                         CountryConfig countryConfig = ParseCountryConfig(tag, countryFileName);
+                        countryConfig.FileFullPath = file;
                         if (countryConfig != null && !configs.Any(c => c.Id.ToString() == countryConfig.Id.ToString()))
                         {
                             configs.Add(countryConfig);

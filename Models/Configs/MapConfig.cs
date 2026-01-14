@@ -13,6 +13,9 @@ namespace Models.Configs
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public List<StateConfig> States { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public List<ProvinceConfig> Provinces { get; set; }
         public List<StrategicRegionConfig> StrategicRegions { get; set; }
         public List<CountryConfig> Countries { get; set; }

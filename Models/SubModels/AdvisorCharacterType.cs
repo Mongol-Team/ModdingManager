@@ -26,5 +26,8 @@ namespace Models.SubModels
         public IdeaLedgerType IdeaLedgerType { get; set; }
         public string Expire { get; set; }
         public List<CharacterTraitConfig> Traits { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
     }
 }

@@ -82,13 +82,21 @@
             return list[index];
         }
         public static void AddSafe<TKey, TValue>(
-            this ICollection<KeyValuePair<TKey, TValue>> collection,
-            TKey key,
-            TValue value)
+      this ICollection<KeyValuePair<TKey, TValue>> collection,
+      TKey key,
+      TValue value)
         {
             if (collection == null || key == null) return;
+
+            var existing = collection.FirstOrDefault(kv => EqualityComparer<TKey>.Default.Equals(kv.Key, key));
+            if (!existing.Equals(default(KeyValuePair<TKey, TValue>)))
+            {
+                collection.Remove(existing);
+            }
+
             collection.Add(new KeyValuePair<TKey, TValue>(key, value));
         }
+
 
         public static List<string> ToListString<T>(this List<T> list)
         {

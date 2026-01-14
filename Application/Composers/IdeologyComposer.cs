@@ -42,6 +42,10 @@ namespace Application.Composers
                         continue;
                     }
                     var fileConfigs = ParseFile(parsedFile, file);
+                    foreach (var cfg in fileConfigs)
+                    { 
+                        cfg.FileFullPath = file;
+                    }
                     res.AddRange(fileConfigs);
                 }
             }
@@ -52,13 +56,13 @@ namespace Application.Composers
             return res;
         }
 
-        public static List<IConfig> ParseFile(HoiFuncFile file, string filePath)
+        public static List<IConfig> ParseFile(HoiFuncFile file, string FileFullPath)
         {
             List<IConfig> res = new();
             Bracket ideologiesBracket = file.Brackets.FirstOrDefault(b => b.Name == "ideologies");
             if (ideologiesBracket == null)
             {
-                Logger.AddDbgLog("Failed to search ideologies in file:" + filePath, "IdeologyComposer");
+                Logger.AddDbgLog("Failed to search ideologies in file:" + FileFullPath, "IdeologyComposer");
                 return res;
             }
             foreach (var ideologyBracket in ideologiesBracket.SubBrackets)
@@ -237,7 +241,7 @@ namespace Application.Composers
                 dynDriftMod.ScopeType = ScopeTypes.Country;
                 dynDriftMod.ColorType = ModifierDefenitionColorType.Good;
                 dynDriftMod.Precision = 2;
-                dynDriftMod.FilePath = DataDefaultValues.ItemCreatedDynamically;
+                dynDriftMod.FileFullPath = DataDefaultValues.ItemCreatedDynamically;
                 dynDriftMod.Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx);
                 ModDataStorage.Mod.ModifierDefinitions.Add(dynDriftMod);
                 dynDriftMod.Localisation = new ConfigLocalisation()

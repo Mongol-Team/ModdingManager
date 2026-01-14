@@ -13,6 +13,9 @@ namespace Models.SubModels
     public class CountryLeaderCharacterType : ICharacterType
     {
         public List<CharacterTraitConfig> Traits { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public string Visible { get; set; }
         public string Available { get; set; }
         public string Allowed { get; set; }

@@ -39,7 +39,12 @@ namespace Application.Composers
                     foreach (var file in files)
                     {
                         HoiFuncFile hoifile = new TxtParser(new TxtPattern()).Parse(file) as HoiFuncFile;
+
                         List<IConfig> parsed = ParseSingleFile(hoifile);
+                        foreach (var cfg in parsed)
+                        {
+                            cfg.FileFullPath = file;
+                        }
                         result.AddRange(parsed);
                     }
                 }
@@ -120,7 +125,7 @@ namespace Application.Composers
                         IsCore = true,
                         ColorType = ModifierDefenitionColorType.Bad,
                         Precision = 2,
-                        FilePath = DataDefaultValues.ItemCreatedDynamically,
+                        FileFullPath = DataDefaultValues.ItemCreatedDynamically,
                         Cathegory = ModifierDefinitionCathegoryType.Country,
                         Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
                     };

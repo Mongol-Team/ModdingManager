@@ -5,8 +5,8 @@ namespace Application.utils.Pathes
 {
     public static class GamePathes
     {
-        private static string BaseDirectory => ModManagerSettings.GameDirectory;
-        private static string CurrentLanguage => ModManagerSettings.CurrentLanguage.ToString();
+        public static string BaseDirectory => ModManagerSettings.GameDirectory;
+        public static string CurrentLanguage => ModManagerSettings.CurrentLanguage.ToString();
 
         private static string Combine(params string[] paths)
         {
@@ -21,7 +21,8 @@ namespace Application.utils.Pathes
         public static string InterfacePath => Combine("interface");
         public static string StrategicRegionPath => Combine("map", "strategicregions");
         public static string ModifierDefFirstPath => Combine("common", "modifier_definitions");
-        public static string ModifierDefSecondPath => Combine("documentation", "modifiers_documentation.html");
+        public static string ModifierHtmlPath => Combine("documentation", "modifiers_documentation.html");
+        public static string ModifiersMdPath => Combine("documentation", "modifiers_documentation.md");
         public static string StateCathegoryPath => Combine("common", "state_category");
         public static string RegimentsPath => Combine("common", "units");
         public static string RulesPath => Combine("common", "game_rules");

@@ -394,8 +394,8 @@ namespace View
                 return null;
             }
 
-            var filePaths = System.IO.Directory.GetFiles(countriesDir);
-            var fileNamesLines = filePaths.Select(path => Path.GetFileName(path)).ToList();
+            var FileFullPaths = System.IO.Directory.GetFiles(countriesDir);
+            var fileNamesLines = FileFullPaths.Select(path => Path.GetFileName(path)).ToList();
             return fileNamesLines;
 
         }

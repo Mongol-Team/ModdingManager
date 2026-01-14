@@ -15,10 +15,12 @@ namespace Models.Configs
         public List<ProvinceConfig> Provinces { get; set; }
         [JsonIgnore]
         public Identifier Id { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public Color Color { get; set; }
         [JsonIgnore]
-        public string FilePath { get; set; }
         public string LocalizationKey { get; set; } = string.Empty;
         public StateCathegoryConfig Cathegory { get; set; }
         public int? Manpower { get; set; }

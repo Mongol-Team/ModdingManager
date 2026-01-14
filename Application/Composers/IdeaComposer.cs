@@ -29,6 +29,10 @@ namespace Application.Composers
                 foreach (string fileStr in fileStrs)
                 {
                     List<IConfig> cfgs = ParseFile(fileStr);
+                    foreach (IConfig cf in cfgs)
+                    {
+                        cf.FileFullPath = fileStr;
+                    }
                     if (cfgs != null && cfgs.Count > 0)
                     {
                         result.AddRange(cfgs);

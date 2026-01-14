@@ -11,6 +11,7 @@ using RawDataWorker.Parsers.Patterns;
 using System.Collections.Concurrent;
 using System.Drawing;
 using DDF = Data.DataDefaultValues;
+using System.Windows;
 namespace Application.Loaders
 {
     public static class GfxLoader
@@ -68,8 +69,17 @@ namespace Application.Loaders
             Logger.AddLog($"Loaded {gfxDictionary.Count} unique GFX items (total processed: {totalLoaded}), with mod priority overrides applied.");
             return gfxDictionary.Values.ToList();
         }
-        public static List<IGfx> LoadFromFile(string gfxFilePath)
+        public static List<IGfx> LoadFromFile(string gfxFileFullPath)
         {
+            HoiFuncFile parser = new();
+            try
+            {
+                parser = new TxtParser(new TxtPattern()).Parse(gfxFileFullPath) as HoiFuncFile;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось распарсить GFX файл: {gfxFileFullPath}");
+            }
             List<IGfx> result = new();
             if (new TxtParser(new TxtPattern()).Parse(gfxFilePath) is not HoiFuncFile parser) return result;
             if (parser.Brackets.Count == 0) return result;
@@ -183,7 +193,7 @@ namespace Application.Loaders
                                    : File.Exists(gamePath1) ? BitmapExtensions.LoadResourceFullPath(gamePath1) : DDF.NullImageSource,
                             BgContent = File.Exists(modPath2) ? BitmapExtensions.LoadResourceFullPath(modPath2)
                                      : File.Exists(gamePath2) ? BitmapExtensions.LoadResourceFullPath(gamePath2) : DDF.NullImageSource,
-                            Size = new Point(
+                            Size = new System.Drawing.Point(
                                 gfxBracket.GetSubBracketVarInt("size", "x"),
                                 gfxBracket.GetSubBracketVarInt("size", "y")),
                             EffectFile = gfxBracket.GetVarString("effectFile"),
@@ -212,10 +222,10 @@ namespace Application.Loaders
                             TilingCenter = gfxBracket.GetVarBool("tilingCenter"),
                             Looping = gfxBracket.GetVarBool("looping"),
                             AnimationRateSpf = gfxBracket.GetVarInt("animation_rate_spf"),
-                            Size = new Point(
+                            Size = new System.Drawing.Point(
                                 gfxBracket.GetSubBracketVarInt("size", "x"),
                                 gfxBracket.GetSubBracketVarInt("size", "y")),
-                            BorderSize = new Point(
+                            BorderSize = new System.Drawing.Point(
                                 gfxBracket.GetSubBracketVarInt("borderSize", "x"),
                                 gfxBracket.GetSubBracketVarInt("borderSize", "y"))
                         };
@@ -235,7 +245,7 @@ namespace Application.Loaders
                         return new LineChartType()
                         {
                             Id = new Identifier(gfxBracket.GetVarString("name")),
-                            Size = new Point(
+                            Size = new System.Drawing.Point(
                                 gfxBracket.GetSubBracketVarInt("size", "x"),
                                 gfxBracket.GetSubBracketVarInt("size", "y")),
                             LineWidth = gfxBracket.GetVarDouble("lineWidth"),

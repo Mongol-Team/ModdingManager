@@ -26,6 +26,9 @@ namespace Models.Configs
         public bool SharesSlots { get; set; }
         public BuildingConfig ExcludeWith { get; set; }
         public int Health { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public double DamageFactor { get; set; }
         public bool AlliedBuild { get; set; }
         public bool OnlyCoastal { get; set; }

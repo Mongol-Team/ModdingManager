@@ -14,6 +14,9 @@ namespace Models.Configs
     {
         public IGfx Gfx { get; set; }
         public IGfx White { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public IGfx Small { get; set; }
         public SubUnitConfig() { }
         public Identifier Id { get; set; }

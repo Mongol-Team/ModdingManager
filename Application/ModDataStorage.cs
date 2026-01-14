@@ -32,13 +32,74 @@ public static class ModDataStorage
 
     public static void ComposeMod(Action<int, int, string>? progressCallback = null)
     {
-        int currentStep = 0;
-        int totalSteps = 19;
-
-        void ReportProgress(string message)
+        var steps = new List<(Action action, string message)>
         {
+            (() => { Mod = new ModConfig(); Localisation = new LocalisationRegistry(); }, "Инициализация локализации..."),
+            (() => { Mod.Gfxes = GfxLoader.LoadAll(); }, "Загрузка графики..."),
+            (() => { Mod.ModifierDefinitions = ModifierDefComposer.Parse().Cast<ModifierDefinitionConfig>().ToList(); }, "Загрузка определений модификаторов..."),
+            (() => { Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList(); }, "Загрузка идеологий..."),
+
+            (() => { Mod.Map.Provinces = ProvinceComposer.Parse().Cast<ProvinceConfig>().ToList(); }, "Загрузка провинций..."),
+            (() => { Mod.StateCathegories = StateCathegoryComposer.Parse().Cast<StateCathegoryConfig>().ToList(); }, "Загрузка категорий штатов..."),
+            (() => { Mod.Rules = RuleComposer.Parse().Cast<RuleConfig>().ToList(); }, "Загрузка правил..."),
+            (() => { Mod.StaticModifiers = StaticModifierComposer.Parse().Cast<StaticModifierConfig>().ToList(); }, "Загрузка статических модификаторов..."),
+            (() => { Mod.DynamicModifiers = DynamicModifierComposer.Parse().Cast<DynamicModifierConfig>().ToList(); }, "Загрузка динамических модификаторов..."),
+            (() => { Mod.IdeaSlots = IdeaGroupComposer.Parse().Cast<IdeaGroupConfig>().ToList(); }, "Загрузка слотов идей..."),
+            (() => { Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList(); }, "Загрузка идей..."),
+            (() => { Mod.IdeaTags = IdeaTagComposer.Parse().Cast<IdeaTagConfig>().ToList(); }, "Загрузка тегов идей..."),
+            (() => { Mod.TechTreeLedgers = TechnologyComposer.Parse().Cast<TechTreeConfig>().ToList(); }, "Загрузка технологий..."),
+            (() => { Mod.CharacterTraits = CharacterTraitComposer.Parse().Cast<CharacterTraitConfig>().ToList(); }, "Загрузка черт персонажей..."),
+            (() => { Mod.Characters = CharacterComposer.Parse().Cast<CountryCharacterConfig>().ToList(); }, "Загрузка персонажей..."),
+            (() => { Mod.SubUnitGroups = SubUnitGroupComposer.Parse().Cast<SubUnitGroupConfig>().ToList(); }, "Загрузка групп подразделений..."),
+            (() => { Mod.SubUnits = SubUnitComposer.Parse().Cast<SubUnitConfig>().ToList(); }, "Загрузка подразделений..."),
+            (() => { Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList(); }, "Загрузка модификаторов мнений..."),
+            (() => { Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToList(); }, "Загрузка стран..."),
+
+            (() => { OverrideManager.HandleOverride(); }, "Обрабатоваем реплейс ресурсы..."),
+            (() => { Mod.Map = MapComposer.Parse().FirstOrDefault() as MapConfig; }, "Загрузка карты..."),
+        };
+
+        int totalSteps = steps.Count;
+        int currentStep = 0;
+
+        foreach (var step in steps)
+        {
+            step.action();
             currentStep++;
-            progressCallback?.Invoke(currentStep, totalSteps, message);
+            progressCallback?.Invoke(currentStep, totalSteps, step.message);
+        }
+
+        // Логирование остаётся как у тебя
+        var customMods = Mod.ModifierDefinitions.Where(m => m.IsCore == false).ToList();
+        Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{(Mod.Ideologies.Count > 0 ? Mod.Ideologies.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"ModDefs Intalized:{Mod.ModifierDefinitions.Count}, some rng obj:{(Mod.ModifierDefinitions.Count > 0 ? Mod.ModifierDefinitions.Random().Id.ToString() : "none")}, has custom mods?:{Mod.ModifierDefinitions.Any(m => m.IsCore == false)}: {(customMods.Count > 0 ? customMods.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"GFXes Intalized:{Mod.Gfxes.Count}, some rng obj:{(Mod.Gfxes.Count > 0 ? Mod.Gfxes.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"Localisation Intalized:{Localisation.OtherLocalisation.Data.Count}, some rng obj:{Localisation.VictoryPointsLocalisation.Data.Count}");
+        Logger.AddLog($"Provinces Intalized:{Mod.Map.Provinces.Count}, some rng obj:{(Mod.Map.Provinces.Count > 0 ? Mod.Map.Provinces.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"StateCathegories Intalized:{Mod.StateCathegories.Count}, some rng obj:{(Mod.StateCathegories.Count > 0 ? Mod.StateCathegories.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"Rules Intalized:{Mod.Rules.Count}, some rng obj:{(Mod.Rules.Count > 0 ? Mod.Rules.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"StaticModifiers Intalized:{Mod.StaticModifiers.Count}, some rng obj:{(Mod.StaticModifiers.Count > 0 ? Mod.StaticModifiers.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"DynamicModifiers Intalized:{Mod.DynamicModifiers.Count}, some rng obj:{(Mod.DynamicModifiers.Count > 0 ? Mod.DynamicModifiers.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"IdeaSlots Intalized:{Mod.IdeaSlots.Count}, some rng obj:{(Mod.IdeaSlots.Count > 0 ? Mod.IdeaSlots.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"IdeaTags Intalized:{Mod.IdeaTags.Count}, some rng obj:{GetRandomId(Mod.IdeaTags)}");
+        Logger.AddLog($"TechTreeLedgers Intalized:{Mod.TechTreeLedgers.Count}, some rng obj:{(Mod.Ideologies.Count > 0 ? Mod.Ideologies.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"CharacterTraits Intalized:{Mod.CharacterTraits.Count}, some rng obj:{(Mod.CharacterTraits.Count > 0 ? Mod.CharacterTraits.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"Characters Intalized:{Mod.Characters.Count}, some rng obj:{(Mod.Characters.Count > 0 ? Mod.Characters.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"SubUnitComposer Intalized:{Mod.SubUnits.Count}, some rng obj:{(Mod.SubUnits.Count > 0 ? Mod.SubUnits.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"OpinionMods Intalized:{Mod.OpinionModifiers.Count}, some rng obj:{(Mod.OpinionModifiers.Count > 0 ? Mod.OpinionModifiers.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"Countries Intalized:{Mod.Countries.Count}, some rng obj:{(Mod.Countries.Count > 0 ? Mod.Countries.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"Map Intalized: \nProvinces:{Mod.Map.Provinces.Count} \nStates:{Mod.Map.States.Count} \nSRegions:{Mod.Map.StrategicRegions.Count}");
+
+    }
+
+    public static void LegacyCompose(Action<int, int, string>? progressCallback = null)
+    {
+        int currentStep = 0; 
+        var messages = new List<string>(); 
+        void ReportProgress(string message) { 
+            messages.Add(message); 
+            currentStep++; 
+            progressCallback?.Invoke(currentStep, messages.Count, message); 
         }
 
         Mod = new ModConfig();
@@ -46,122 +107,91 @@ public static class ModDataStorage
         Localisation = new LocalisationRegistry();
         sw.Stop();
         ReportProgress("Инициализация локализации...");
-        Logger.AddLog($"Localisation Initialized: {Localisation.OtherLocalisation.Data.Count} items, sample: {Localisation.VictoryPointsLocalisation.Data.Count} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
-
-        //sw.Restart();
-        //Mod.Gfxes = GfxLoader.LoadAll();
-        //sw.Stop();
-        //ReportProgress("Загрузка графики...");
-        //Logger.AddLog($"GFXes Initialized: {Mod.Gfxes.Count} items, sample: {(Mod.Gfxes.Count > 0 ? Mod.Gfxes.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
-
-        sw.Restart();
+        
+        Mod.Gfxes = GfxLoader.LoadAll();
+        ReportProgress("Загрузка графики...");
+       
         Mod.ModifierDefinitions = ModifierDefComposer.Parse().Cast<ModifierDefinitionConfig>().ToList();
         sw.Stop();
         ReportProgress("Загрузка определений модификаторов...");
         var customMods = Mod.ModifierDefinitions.Where(m => m.IsCore == false).ToList();
-        Logger.AddLog($"ModDefs Initialized: {Mod.ModifierDefinitions.Count} items, sample: {(Mod.ModifierDefinitions.Count > 0 ? Mod.ModifierDefinitions.Random().Id.ToString() : "none")}, custom mods: {customMods.Count} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
-
-        sw.Restart();
+       
         Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
         sw.Stop();
         ReportProgress("Загрузка идеологий...");
-        Logger.AddLog($"Ideologies Initialized: {Mod.Ideologies.Count} items, sample: {(Mod.Ideologies.Count > 0 ? Mod.Ideologies.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
 
-        sw.Restart();
-        Mod.Map.Provinces = ProvinceComposer.Parse().Cast<ProvinceConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка провинций...");
-        Logger.AddLog($"Provinces Initialized: {Mod.Map.Provinces.Count} items, sample: {(Mod.Map.Provinces.Count > 0 ? Mod.Map.Provinces.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        OverrideManager.HandleOverride();
+        ReportProgress("Обрабатоваем реплейс ресурсы...");
+        Logger.AddLog($"Ideologies Intalized:{Mod.Ideologies.Count}, some rng obj:{(Mod.Ideologies.Count > 0 ? Mod.Ideologies.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"ModDefs Intalized:{Mod.ModifierDefinitions.Count}, some rng obj:{(Mod.ModifierDefinitions.Count > 0 ? Mod.ModifierDefinitions.Random().Id.ToString() : "none")}, has custom mods?:{Mod.ModifierDefinitions.Any(m => m.IsCore == false)}: {(customMods.Count > 0 ? customMods.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"GFXes Intalized:{Mod.Gfxes.Count}, some rng obj:{(Mod.Gfxes.Count > 0 ? Mod.Gfxes.Random().Id.ToString() : "none")}");
+        Logger.AddLog($"Localisation Intalized:{Localisation.OtherLocalisation.Data.Count}, some rng obj:{Localisation.VictoryPointsLocalisation.Data.Count}");
 
-        sw.Restart();
-        Mod.StateCathegories = StateCathegoryComposer.Parse().Cast<StateCathegoryConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка категорий штатов...");
-        Logger.AddLog($"StateCathegories Initialized: {Mod.StateCathegories.Count} items, sample: {(Mod.StateCathegories.Count > 0 ? Mod.StateCathegories.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
 
-        sw.Restart();
-        Mod.Rules = RuleComposer.Parse().Cast<RuleConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка правил...");
-        Logger.AddLog($"Rules Initialized: {Mod.Rules.Count} items, sample: {(Mod.Rules.Count > 0 ? Mod.Rules.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
 
-        sw.Restart();
-        Mod.StaticModifiers = StaticModifierComposer.Parse().Cast<StaticModifierConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка статических модификаторов...");
-        Logger.AddLog($"StaticModifiers Initialized: {Mod.StaticModifiers.Count} items, sample: {(Mod.StaticModifiers.Count > 0 ? Mod.StaticModifiers.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
 
-        sw.Restart();
-        Mod.DynamicModifiers = DynamicModifierComposer.Parse().Cast<DynamicModifierConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка динамических модификаторов...");
-        Logger.AddLog($"DynamicModifiers Initialized: {Mod.DynamicModifiers.Count} items, sample: {(Mod.DynamicModifiers.Count > 0 ? Mod.DynamicModifiers.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.Map.Provinces = ProvinceComposer.Parse().Cast<ProvinceConfig>().ToList();
+        //ReportProgress("Загрузка провинций...");
+        //Logger.AddLog($"Provinces Intalized:{Mod.Map.Provinces.Count}, some rng obj:{(Mod.Map.Provinces.Count > 0 ? Mod.Map.Provinces.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.IdeaSlots = IdeaGroupComposer.Parse().Cast<IdeaGroupConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка слотов идей...");
-        Logger.AddLog($"IdeaSlots Initialized: {Mod.IdeaSlots.Count} items, sample: {(Mod.IdeaSlots.Count > 0 ? Mod.IdeaSlots.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.StateCathegories = StateCathegoryComposer.Parse().Cast<StateCathegoryConfig>().ToList();
+        //ReportProgress("Загрузка категорий штатов...");
+        //Logger.AddLog($"StateCathegories Intalized:{Mod.StateCathegories.Count}, some rng obj:{(Mod.StateCathegories.Count > 0 ? Mod.StateCathegories.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка идей...");
-        Logger.AddLog($"Ideas Initialized: {Mod.Ideas.Count} items, sample: {(Mod.Ideas.Count > 0 ? Mod.Ideas.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.Rules = RuleComposer.Parse().Cast<RuleConfig>().ToList();
+        //ReportProgress("Загрузка правил...");
+        //Logger.AddLog($"Rules Intalized:{Mod.Rules.Count}, some rng obj:{(Mod.Rules.Count > 0 ? Mod.Rules.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.IdeaTags = IdeaTagComposer.Parse().Cast<IdeaTagConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка тегов идей...");
-        Logger.AddLog($"IdeaTags Initialized: {Mod.IdeaTags.Count} items, sample: {GetRandomId(Mod.IdeaTags)} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.StaticModifiers = StaticModifierComposer.Parse().Cast<StaticModifierConfig>().ToList();
+        //ReportProgress("Загрузка статических модификаторов...");
+        //Logger.AddLog($"StaticModifiers Intalized:{Mod.StaticModifiers.Count}, some rng obj:{(Mod.StaticModifiers.Count > 0 ? Mod.StaticModifiers.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.TechTreeLedgers = TechnologyComposer.Parse().Cast<TechTreeConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка технологий...");
-        Logger.AddLog($"TechTreeLedgers Initialized: {Mod.TechTreeLedgers.Count} items, sample: {(Mod.TechTreeLedgers.Count > 0 ? Mod.TechTreeLedgers.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.DynamicModifiers = DynamicModifierComposer.Parse().Cast<DynamicModifierConfig>().ToList();
+        //ReportProgress("Загрузка динамических модификаторов...");
+        //Logger.AddLog($"DynamicModifiers Intalized:{Mod.DynamicModifiers.Count}, some rng obj:{(Mod.DynamicModifiers.Count > 0 ? Mod.DynamicModifiers.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.CharacterTraits = CharacterTraitComposer.Parse().Cast<CharacterTraitConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка черт персонажей...");
-        Logger.AddLog($"CharacterTraits Initialized: {Mod.CharacterTraits.Count} items, sample: {(Mod.CharacterTraits.Count > 0 ? Mod.CharacterTraits.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.IdeaSlots = IdeaGroupComposer.Parse().Cast<IdeaGroupConfig>().ToList();
+        //ReportProgress("Загрузка слотов идей...");
+        //Logger.AddLog($"IdeaSlots Intalized:{Mod.IdeaSlots.Count}, some rng obj:{(Mod.IdeaSlots.Count > 0 ? Mod.IdeaSlots.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.Characters = CharacterComposer.Parse().Cast<CountryCharacterConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка персонажей...");
-        Logger.AddLog($"Characters Initialized: {Mod.Characters.Count} items, sample: {(Mod.Characters.Count > 0 ? Mod.Characters.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToList();
+        //ReportProgress("Загрузка идей...");
+        //Logger.AddLog($"Ideas Intalized:{Mod.Ideas.Count}, some rng obj:{(Mod.Ideas.Count > 0 ? Mod.Ideas.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.SubUnitGroups = SubUnitGroupComposer.Parse().Cast<SubUnitGroupConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка групп подразделений...");
-        Logger.AddLog($"SubUnitGroups Initialized: {Mod.SubUnitGroups.Count} items | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.IdeaTags = IdeaTagComposer.Parse().Cast<IdeaTagConfig>().ToList();
+        //ReportProgress("Загрузка тегов идей...");
+        //Logger.AddLog($"IdeaTags Intalized:{Mod.IdeaTags.Count}, some rng obj:{GetRandomId(Mod.IdeaTags)}");
 
-        sw.Restart();
-        Mod.SubUnits = SubUnitComposer.Parse().Cast<SubUnitConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка подразделений...");
-        Logger.AddLog($"SubUnits Initialized: {Mod.SubUnits.Count} items, sample: {(Mod.SubUnits.Count > 0 ? Mod.SubUnits.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.TechTreeLedgers = TechnologyComposer.Parse().Cast<TechTreeConfig>().ToList();
+        //ReportProgress("Загрузка технологий...");
+        //Logger.AddLog($"TechTreeLedgers Intalized:{Mod.TechTreeLedgers.Count}, some rng obj:{(Mod.Ideologies.Count > 0 ? Mod.Ideologies.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка модификаторов мнений...");
-        Logger.AddLog($"OpinionModifiers Initialized: {Mod.OpinionModifiers.Count} items, sample: {(Mod.OpinionModifiers.Count > 0 ? Mod.OpinionModifiers.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.CharacterTraits = CharacterTraitComposer.Parse().Cast<CharacterTraitConfig>().ToList();
+        //ReportProgress("Загрузка черт персонажей...");
+        //Logger.AddLog($"CharacterTraits Intalized:{Mod.CharacterTraits.Count}, some rng obj:{(Mod.CharacterTraits.Count > 0 ? Mod.CharacterTraits.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToList();
-        sw.Stop();
-        ReportProgress("Загрузка стран...");
-        Logger.AddLog($"Countries Initialized: {Mod.Countries.Count} items, sample: {(Mod.Countries.Count > 0 ? Mod.Countries.Random().Id.ToString() : "none")} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.Characters = CharacterComposer.Parse().Cast<CountryCharacterConfig>().ToList();
+        //ReportProgress("Загрузка персонажей...");
+        //Logger.AddLog($"Characters Intalized:{Mod.Characters.Count}, some rng obj:{(Mod.Characters.Count > 0 ? Mod.Characters.Random().Id.ToString() : "none")}");
 
-        sw.Restart();
-        Mod.Map = MapComposer.Parse().FirstOrDefault() as MapConfig;
-        sw.Stop();
-        ReportProgress("Загрузка карты...");
-        Logger.AddLog($"Map Initialized: Provinces: {Mod.Map.Provinces.Count}, States: {Mod.Map.States.Count}, StrategicRegions: {Mod.Map.StrategicRegions.Count} | Time: {sw.ElapsedMilliseconds}ms", ConsoleColor.Cyan);
+        //Mod.SubUnitGroups = SubUnitGroupComposer.Parse().Cast<SubUnitGroupConfig>().ToList();
+        //ReportProgress("Загрузка групп подразделений...");
+
+        //Mod.SubUnits = SubUnitComposer.Parse().Cast<SubUnitConfig>().ToList();
+        //ReportProgress("Загрузка подразделений...");
+        //Logger.AddLog($"SubUnitComposer Intalized:{Mod.SubUnits.Count}, some rng obj:{(Mod.SubUnits.Count > 0 ? Mod.SubUnits.Random().Id.ToString() : "none")}");
+
+        //Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToList();
+        //ReportProgress("Загрузка модификаторов мнений...");
+        //Logger.AddLog($"OpinionMods Intalized:{Mod.OpinionModifiers.Count}, some rng obj:{(Mod.OpinionModifiers.Count > 0 ? Mod.OpinionModifiers.Random().Id.ToString() : "none")}");
+
+        //Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToList();
+        //ReportProgress("Загрузка стран...");
+        //Logger.AddLog($"Countries Intalized:{Mod.Countries.Count}, some rng obj:{(Mod.Countries.Count > 0 ? Mod.Countries.Random().Id.ToString() : "none")}");
+
+        //Mod.Map = MapComposer.Parse().FirstOrDefault() as MapConfig;
+        //ReportProgress("Загрузка карты...");
+        //Logger.AddLog($"Map Intalized: \nProvinces:{Mod.Map.Provinces.Count} \nStates:{Mod.Map.States.Count} \nSRegions:{Mod.Map.StrategicRegions.Count}");
     }
 }
 

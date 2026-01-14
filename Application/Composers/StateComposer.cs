@@ -36,14 +36,10 @@ namespace Application.Composers
 
                 var files = Directory.GetFiles(folder);
 
-                //Parallel.ForEach(files, file =>
-                //{
-                //    var stateConfig = ParseStateConfig(file);
-                //    result.Add(stateConfig);
-                //});
                 foreach (var file in files)
                 {
                     var stateConfig = ParseFile(file);
+                    stateConfig.FileFullPath = file;
                     result.Add(stateConfig);
                 }
 
@@ -54,35 +50,34 @@ namespace Application.Composers
                     Logger.AddDbgLog($"[⚠️] No state files found in mod folder: {folder}", "IdeologyComposer");
                 }
             }
-
             watch.Stop();
             return result.ToList();
         }
-        public static StateConfig? ParseFile(string filePath)
+        public static StateConfig? ParseFile(string FileFullPath)
         {
-            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            if (string.IsNullOrWhiteSpace(FileFullPath) || !File.Exists(FileFullPath))
             {
-                Logger.AddDbgLog($"Файл не найден или путь пуст: {filePath}", "IdeologyComposer");
+                Logger.AddDbgLog($"Файл не найден или путь пуст: {FileFullPath}", "IdeologyComposer");
                 return null;
             }
 
-            if (!(new TxtParser(new TxtPattern()).Parse(filePath) is HoiFuncFile file) || file.Brackets.Count == 0)
+            if (!(new TxtParser(new TxtPattern()).Parse(FileFullPath) is HoiFuncFile file) || file.Brackets.Count == 0)
             {
-                Logger.AddDbgLog($"Не удалось распарсить файл: {filePath}", "IdeologyComposer");
+                Logger.AddDbgLog($"Не удалось распарсить файл: {FileFullPath}", "IdeologyComposer");
                 return null;
             }
 
             var stateBracket = file.Brackets.FirstOrDefault();
             if (stateBracket == null)
             {
-                Logger.AddDbgLog($"Нет корневого блока в файле: {filePath}", "IdeologyComposer");
+                Logger.AddDbgLog($"Нет корневого блока в файле: {FileFullPath}", "IdeologyComposer");
                 return null;
             }
 
             var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
             if (idVar?.Value == null || !int.TryParse(idVar.Value.ToString(), out int id))
             {
-                Logger.AddDbgLog($"Не удалось извлечь ID из файла: {filePath}", "IdeologyComposer");
+                Logger.AddDbgLog($"Не удалось извлечь ID из файла: {FileFullPath}", "IdeologyComposer");
                 return null;
             }
 
@@ -121,7 +116,7 @@ namespace Application.Composers
                     }
                     else
                     {
-                        Logger.AddDbgLog($"Неверный формат victory_points в штате {id} в файле {filePath}", "StateComposer");
+                        Logger.AddDbgLog($"Неверный формат victory_points в штате {id} в файле {FileFullPath}", "StateComposer");
                     }
                 }
             }
@@ -139,7 +134,7 @@ namespace Application.Composers
                     }
                     else
                     {
-                        Logger.AddDbgLog($"Неизвестное здание {buildingVar.Name} в штате {id} в файле {filePath}", "StateComposer");
+                        Logger.AddDbgLog($"Неизвестное здание {buildingVar.Name} в штате {id} в файле {FileFullPath}", "StateComposer");
                     }
                 }
             }
@@ -150,7 +145,7 @@ namespace Application.Composers
 
             if (category == null)
             {
-                Logger.AddDbgLog($"Не найдена категория '{categoryStr}' для штата {id} в файле {filePath}", "StateComposer");
+                Logger.AddDbgLog($"Не найдена категория '{categoryStr}' для штата {id} в файле {FileFullPath}", "StateComposer");
                 return null; // или можно вернуть дефолтную категорию
             }
 
@@ -161,7 +156,7 @@ namespace Application.Composers
                 Provinces = matchedProvinces,
                 OwnerTag = ownerTag,
                 CoresTag = cores,
-                FilePath = file.FilePath,
+                FileFullPath = file.FileFullPath,
                 VictoryPoints = victoryPoints,
                 Buildings = buildings,
                 Color = System.Drawing.Color.FromArgb((byte)((id * 53) % 255), (byte)((id * 97) % 255), (byte)((id * 151) % 255)),

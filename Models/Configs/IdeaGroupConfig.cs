@@ -10,6 +10,9 @@ namespace Models.Configs
     {
         public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public bool IsLaw { get; set; }
         public bool UseListView { get; set; }
         public bool IsDesigner { get; set; }

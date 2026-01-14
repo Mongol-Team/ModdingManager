@@ -49,6 +49,7 @@ namespace Application.Composers
                     foreach (var br in funcfile.Brackets)
                     {
                         var cfg = ParseSingleRule(br);
+                        cfg.FileFullPath = file;
                         if (cfg != null)
                             configs.Add(cfg);
                     }

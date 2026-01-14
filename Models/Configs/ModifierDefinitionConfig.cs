@@ -14,10 +14,11 @@ namespace Models.Configs
         public ConfigLocalisation Localisation { get; set; }
         public ModifierDefenitionValueType ValueType { get; set; } = ModifierDefenitionValueType.Number;
         public int Precision { get; set; } = 1;
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public ModifierDefinitionCathegoryType Cathegory { get; set; } = ModifierDefinitionCathegoryType.Country;
         public ModifierDefenitionColorType ColorType { get; set; } = ModifierDefenitionColorType.Good;
-        public bool IsCore { get; set; } = false;
         public ScopeTypes ScopeType { get; set; }
-        public string FilePath { get; set; }
     }
 }

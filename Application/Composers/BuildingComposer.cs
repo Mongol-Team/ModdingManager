@@ -34,6 +34,7 @@ namespace Application.Composers
                         List<IConfig> buildingConfigs = ParseFile(hoiFuncFile);
                         foreach (BuildingConfig buildingConfig in buildingConfigs)
                         {
+                            buildingConfig.FileFullPath = file;
                             if (!configs.Any(c => c.Id == buildingConfig.Id))
                             {
                                 configs.Add(buildingConfig);
@@ -213,7 +214,7 @@ namespace Application.Composers
             {
                 ModifierDefinitionConfig mdprod = new();
                 mdprod.Id = new($"state_production_speed_{bc.Id}_factor");
-                mdprod.FilePath = DataDefaultValues.ItemCreatedDynamically;
+                mdprod.FileFullPath = DataDefaultValues.ItemCreatedDynamically;
                 mdprod.IsCore = true;
                 mdprod.Cathegory = ModifierDefinitionCathegoryType.Country;
                 mdprod.Precision = 2;

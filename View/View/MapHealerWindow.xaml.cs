@@ -29,7 +29,7 @@ namespace View
             //    // Process State files
             //    foreach (var kvp in mapCache.StatesCache)
             //    {
-            //        string stateFilePath = kvp.Key;
+            //        string stateFileFullPath = kvp.Key;
             //        StateCachedFile stateFile = kvp.Value;
             //        if (stateFile == null)
             //        {
@@ -50,7 +50,7 @@ namespace View
 
             //        if (provincesBracket != null)
             //        {
-            //            CleanBracketContent(provincesBracket, stateFilePath, "provinces");
+            //            CleanBracketContent(provincesBracket, stateFileFullPath, "provinces");
             //            statemodified = true;
             //        }
 
@@ -71,7 +71,7 @@ namespace View
             //                if (hasBad)
             //                {
             //                    historyBracket.SubBrackets.Remove(vpBracket);
-            //                    Logger.AddDbgLog($"Removed invalid victory_points bracket from state file: {stateFilePath}");
+            //                    Logger.AddDbgLog($"Removed invalid victory_points bracket from state file: {stateFileFullPath}");
             //                    statemodified = true;
             //                }
             //            }
@@ -79,14 +79,14 @@ namespace View
 
             //        if (statemodified)
             //        {
-            //            mapCache.MarkStateFileDirty(stateFilePath);
+            //            mapCache.MarkStateFileDirty(stateFileFullPath);
             //        }
             //    }
 
             //    // Process Strategic Region files
             //    foreach (var kvp in mapCache.StrategicRegionsCache)
             //    {
-            //        string regionfFilePath = kvp.Key;
+            //        string regionfFileFullPath = kvp.Key;
             //        StrategicRegionCachedFile regionFile = kvp.Value;
             //        Bracket regionBracket = regionFile.RegionBracket;
             //        bool regionmodified = false;
@@ -96,18 +96,18 @@ namespace View
 
             //        if (provincesBracket != null)
             //        {
-            //            CleanBracketContent(provincesBracket, regionfFilePath, "strategic region provinces");
+            //            CleanBracketContent(provincesBracket, regionfFileFullPath, "strategic region provinces");
             //            regionmodified = true;
             //        }
 
             //        if (regionmodified)
             //        {
-            //            mapCache.MarkStrategicRegionFileDirty(regionfFilePath);
+            //            mapCache.MarkStrategicRegionFileDirty(regionfFileFullPath);
             //        }
             //    }
 
 
-            //    string filePath = ModDataStorage.Mod.MapCache.MapDefinitionCache.FilePath;
+            //    string FileFullPath = ModDataStorage.Mod.MapCache.MapDefinitionCache.FileFullPath;
             //    DefinitionCachedFile defFile = ModDataStorage.Mod.MapCache.MapDefinitionCache;
             //    bool modified = false;
 
@@ -118,7 +118,7 @@ namespace View
             //        if (parts.Length > 0 && int.TryParse(parts[0], out int provId) && !existingProvs.Contains(provId))
             //        {
             //            linesToRemove.Add(line);
-            //            Logger.AddDbgLog($"Removed non-existing province {provId} from definition file: {filePath}");
+            //            Logger.AddDbgLog($"Removed non-existing province {provId} from definition file: {FileFullPath}");
             //        }
             //    }
 
@@ -130,7 +130,7 @@ namespace View
 
             //    if (modified)
             //    {
-            //        mapCache.MarkDefinitionFileDirty(filePath);
+            //        mapCache.MarkDefinitionFileDirty(FileFullPath);
             //    }
 
 
@@ -147,7 +147,7 @@ namespace View
             //    }
 
             //    var lines = ModDataStorage.Mod.MapCache.MapDefinitionCache.DefinitionLines;
-            //    var filePath = ModDataStorage.Mod.MapCache.MapDefinitionCache.FilePath;
+            //    var FileFullPath = ModDataStorage.Mod.MapCache.MapDefinitionCache.FileFullPath;
             //    if (lines.Count == 0)
             //    {
             //        return;
@@ -171,7 +171,7 @@ namespace View
             //        if (parts.Length != 8)
             //        {
             //            string msg = $"[Critical in prov define] Line {lineNum} does not have exactly 8 parts separated by ';'. Found {parts.Length} parts.";
-            //            errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //            errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            continue;
             //        }
 
@@ -191,7 +191,7 @@ namespace View
             //            {
             //                // Critical 6: Duplicate ID
             //                string msg = $"[Critical in prov define] Duplicate province ID {id} found on lines {idToLine[id]} and {lineNum}.";
-            //                errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            }
             //            else
             //            {
@@ -213,7 +213,7 @@ namespace View
             //        {
             //            // Critical 5: Invalid formatting or data types
             //            string msg = $"[Critical in prov define] Line {lineNum} has invalid data or formatting: {ex.Message}.";
-            //            errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //            errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //        }
             //    }
 
@@ -221,7 +221,7 @@ namespace View
             //    if (!hasZero)
             //    {
             //        string msg = "[Critical in prov define] Province ID 0 is missing (required).";
-            //        errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //        errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //    }
 
             //    // Check sequence for gaps and differences
@@ -236,7 +236,7 @@ namespace View
             //            if (!parsedIds.Contains(id))
             //            {
             //                string msg = $"[Critical in prov define] Missing province ID {id} in sequence from {minId} to {maxId}.";
-            //                errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            }
             //        }
 
@@ -251,7 +251,7 @@ namespace View
             //            if (diff != 1)
             //            {
             //                string msg = $"[Critical in prov define] Non-sequential province IDs: {current} (line {idToLine[current]}) followed by {next} (line {idToLine[next]}). Expected {current + 1}.";
-            //                errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            }
             //        }
             //    }
@@ -262,14 +262,14 @@ namespace View
             //        var (r, g, b) = colorEntry.Key;
             //        string linesStr = string.Join(", ", colorEntry.Value);
             //        string msg = $"[Critical in prov define] Duplicate color RGB({r},{g},{b}) found on lines {linesStr}.";
-            //        errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //        errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //    }
 
             //    // Warning 1: No empty line at end
             //    if (!string.IsNullOrEmpty(lines.LastOrDefault()?.Trim()))
             //    {
             //        string msg = "[Warn in prov define] No empty line at the end of the file.";
-            //        errorPanel.AddError(ErrorType.Warning, msg, filePath);
+            //        errorPanel.AddError(ErrorType.Warning, msg, FileFullPath);
             //    }
 
             //    // Warning 2: Province 0 incorrect format
@@ -280,7 +280,7 @@ namespace View
             //        {
             //            int zeroLineNum = lines.IndexOf(zeroLine) + 1;
             //            string msg = $"[Warn in prov define] Province ID 0 on line {zeroLineNum} does not match ideal format: '0;0;0;0;land;false;unknown;0'.";
-            //            errorPanel.AddError(ErrorType.Warning, msg, filePath);
+            //            errorPanel.AddError(ErrorType.Warning, msg, FileFullPath);
             //        }
             //    }
 
@@ -302,15 +302,15 @@ namespace View
             //    var provinceToFile = new Dictionary<int, string>();
             //    foreach (var kvp in mapCache.StatesCache)
             //    {
-            //        string filePath = kvp.Key;
-            //        string fileName = System.IO.Path.GetFileName(filePath);
+            //        string FileFullPath = kvp.Key;
+            //        string fileName = System.IO.Path.GetFileName(FileFullPath);
             //        StateCachedFile stateFile = kvp.Value;
             //        Bracket stateBracket = stateFile.StateBracket;
 
             //        if (stateBracket == null)
             //        {
             //            string msg = $"[Critical in state defines] In file {fileName}: Failed to parse state bracket.";
-            //            errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //            errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            continue;
             //        }
 
@@ -321,7 +321,7 @@ namespace View
             //            if (!string.IsNullOrEmpty(trimmed) && !trimmed.StartsWith("#"))
             //            {
             //                string msg = $"[Critical in state defines] In file {fileName}: Unexpected content not part of any assignment or bracket: '{trimmed}'.";
-            //                errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            }
             //        }
 
@@ -342,7 +342,7 @@ namespace View
             //                if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]) || string.IsNullOrWhiteSpace(parts[1]))
             //                {
             //                    string msg = $"[Critical in state defines] In file {fileName}: Invalid assignment '=' without proper name and value on line {i + 1}: '{line}'.";
-            //                    errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                    errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //                }
             //            }
             //        }
@@ -351,7 +351,7 @@ namespace View
             //        if (stateBracket.EndPosition <= stateBracket.StartPosition)
             //        {
             //            string msg = $"[Critical in state defines] In file {fileName}: Unmatched or improperly paired brackets in state definition.";
-            //            errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //            errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //        }
 
             //        // Critical 3: Missing provinces bracket
@@ -361,14 +361,14 @@ namespace View
             //        if (provincesBrackets.Count == 0)
             //        {
             //            string msg = $"[Critical in state defines] In file {fileName}: Missing 'provinces' bracket in state.";
-            //            errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //            errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //        }
 
             //        // Critical 9: Provinces defined multiple times
             //        if (provincesBrackets.Count > 1)
             //        {
             //            string msg = $"[Critical in state defines] In file {fileName}: 'provinces' bracket defined multiple times.";
-            //            errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //            errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //        }
 
             //        Bracket provincesBracket = provincesBrackets.FirstOrDefault();
@@ -379,14 +379,14 @@ namespace View
             //            if (provincesBracket.Content.Count == 0)
             //            {
             //                string msg = $"[Critical in state defines] In file {fileName}: 'provinces' bracket is empty (no content).";
-            //                errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            }
 
             //            // Critical 5: SubVars or SubBrackets in provinces
             //            if (provincesBracket.SubVars.Count > 0 || provincesBracket.SubBrackets.Count > 0)
             //            {
             //                string msg = $"[Critical in state defines] In file {fileName}: 'provinces' bracket contains unexpected SubVars or SubBrackets (should only have province IDs).";
-            //                errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            }
 
             //            // Critical 6: Non-existing provinces in provinces
@@ -405,7 +405,7 @@ namespace View
             //                    if (!seenInFile.Add(id))
             //                    {
             //                        string msg = $"[Critical in state defines] In file {fileName}: Duplicate province ID {id} within the same 'provinces' bracket.";
-            //                        errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                        errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //                    }
             //                }
             //            }
@@ -418,7 +418,7 @@ namespace View
             //                if (provinceToFile.TryGetValue(id, out string prevFile))
             //                {
             //                    string msg = $"[Critical in state defines] Province ID {id} duplicated in files {prevFile} and {fileName}.";
-            //                    errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                    errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //                }
             //                else
             //                {
@@ -431,7 +431,7 @@ namespace View
             //            {
             //                string badIdsStr = string.Join(", ", badIds);
             //                string msg = $"[Critical in state defines] In file {fileName}: Non-existing province IDs in 'provinces': {badIdsStr}.";
-            //                errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            }
             //        }
 
@@ -442,7 +442,7 @@ namespace View
             //        if (historyBrackets.Count == 0)
             //        {
             //            string msg = $"[Critical in state defines] In file {fileName}: Missing 'history' bracket in state.";
-            //            errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //            errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //        }
             //        else
             //        {
@@ -450,7 +450,7 @@ namespace View
             //            if (historyBracket.SubVars.Count == 0)
             //            {
             //                string msg = $"[Critical in state defines] In file {fileName}: 'history' bracket is empty (no SubVars).";
-            //                errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            }
             //        }
 
@@ -458,7 +458,7 @@ namespace View
             //        if (historyBrackets.Count > 1)
             //        {
             //            string msg = $"[Critical in state defines] In file {fileName}: 'history' bracket defined multiple times.";
-            //            errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //            errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //        }
 
             //        // Critical 10-13: Missing required SubVars in state
@@ -468,7 +468,7 @@ namespace View
             //            if (stateBracket.GetSubVarIndex(varName) == -1)
             //            {
             //                string msg = $"[Critical in state defines] In file {fileName}: Missing required variable '{varName}' in state bracket.";
-            //                errorPanel.AddError(ErrorType.Critical, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Critical, msg, FileFullPath);
             //            }
             //        }
 
@@ -481,21 +481,21 @@ namespace View
             //            if (historyBracket.GetSubVarIndex("owner") == -1)
             //            {
             //                string msg = $"[Warn in state defines] In file {fileName}: Missing 'owner' variable in history bracket.";
-            //                errorPanel.AddError(ErrorType.Warning, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Warning, msg, FileFullPath);
             //            }
 
             //            // Warn 2: Missing add_core_of in history.SubVars
             //            if (historyBracket.GetSubVarIndex("add_core_of") == -1)
             //            {
             //                string msg = $"[Warn in state defines] In file {fileName}: Missing 'add_core_of' variable in history bracket.";
-            //                errorPanel.AddError(ErrorType.Warning, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Warning, msg, FileFullPath);
             //            }
 
             //            // Warn 3: Missing buildings in history.SubBrackets
             //            if (historyBracket.GetSubBracketIndex("buildings") == -1)
             //            {
             //                string msg = $"[Warn in state defines] In file {fileName}: Missing 'buildings' bracket in history.";
-            //                errorPanel.AddError(ErrorType.Warning, msg, filePath);
+            //                errorPanel.AddError(ErrorType.Warning, msg, FileFullPath);
             //            }
             //        }
             //    }

@@ -18,6 +18,9 @@ namespace Models.Configs
         public ConfigLocalisation Localisation { get; set; }
         public string Name { get; set; }
         public Color Color { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public bool IsCoastal { get; set; }
         public int ContinentId { get; set; }
         public ProvinceType Type { get; set; }

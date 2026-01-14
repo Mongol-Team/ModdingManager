@@ -26,11 +26,12 @@ namespace Application.Composers
 
                 string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
 
-                foreach (string filePath in files)
+                foreach (string FileFullPath in files)
                 {
-                    var configs = ParseConfig(filePath, strategicMap);
+                    var configs = ParseConfig(FileFullPath, strategicMap);
                     foreach (var config in configs)
                     {
+                        config.FileFullPath = FileFullPath;
                         strategicMap[config.Id.ToInt()] = config;
                     }
                 }
@@ -40,10 +41,10 @@ namespace Application.Composers
             return res;
         }
 
-        private static List<StrategicRegionConfig> ParseConfig(string filePath, Dictionary<int, StrategicRegionConfig> existingMap)
+        private static List<StrategicRegionConfig> ParseConfig(string FileFullPath, Dictionary<int, StrategicRegionConfig> existingMap)
         {
             var result = new List<StrategicRegionConfig>();
-            if (new TxtParser(new TxtPattern()).Parse(filePath) is not HoiFuncFile file) return result;
+            if (new TxtParser(new TxtPattern()).Parse(FileFullPath) is not HoiFuncFile file) return result;
 
             foreach (var regionBracket in file.Brackets)
             {
@@ -63,7 +64,7 @@ namespace Application.Composers
                 {
                     Id = new Identifier(id),
                     Provinces = matchedProvinces,
-                    FilePath = file.FilePath,
+                    FileFullPath = file.FileFullPath,
                     Color = System.Drawing.Color.FromArgb((byte)((id * 53) % 255), (byte)((id * 97) % 255), (byte)((id * 151) % 255)),
                     LocKey = keyVar?.Name ?? string.Empty,
                 });

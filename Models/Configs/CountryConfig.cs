@@ -14,6 +14,9 @@ namespace Models.Configs
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public int? Capital { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public string? CountryFileName { get; set; }
         public string? GraphicalCulture { get; set; }
         public Color? Color { get; set; }

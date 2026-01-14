@@ -36,6 +36,7 @@ namespace Application.Composers
                         List<SubUnitConfig> traitConfigs = ParseFile(hoiFuncFile);
                         foreach (SubUnitConfig traitConfig in traitConfigs)
                         {
+                            traitConfig.FileFullPath = file;
                             if (!configs.Any(c => c.Id == traitConfig.Id))
                             {
                                 configs.Add(traitConfig);
@@ -235,7 +236,7 @@ namespace Application.Composers
                         ValueType = ModifierDefenitionValueType.Percent,
                         Precision = 2,
                         IsCore = true,
-                        FilePath = Data.DataDefaultValues.ItemCreatedDynamically,
+                        FileFullPath = Data.DataDefaultValues.ItemCreatedDynamically,
                         Gfx = new SpriteType(Data.DataDefaultValues.ItemWithNoGfxImage, Data.DataDefaultValues.ItemWithNoGfx),
 
                     };

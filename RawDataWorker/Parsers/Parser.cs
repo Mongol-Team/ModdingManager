@@ -13,10 +13,10 @@ namespace RawDataWorker.Parsers
         {
             if (content.Length < 300 && File.Exists(content))
             {
-                string filePath = content;
+                string FileFullPath = content;
                 content = File.ReadAllText(content);
                 var result = ParseRealization(content);
-                result.FilePath = filePath;
+                result.FileFullPath = FileFullPath;
                 return result;
             }
 

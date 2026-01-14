@@ -13,6 +13,9 @@ namespace Models.Configs
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; } = new ConfigLocalisation();
         public TechTreeOrientationType Orientation { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public string Available { get; set; }
         public List<TechTreeItemConfig> Items { get; set; } = new List<TechTreeItemConfig>();
         public TechTreeLedgerType Ledger { get; set; }

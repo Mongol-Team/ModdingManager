@@ -38,6 +38,10 @@ namespace Application.Composers
                         {
                             HoiFuncFile parsedfile = new TxtParser(new TxtPattern()).Parse(file) as HoiFuncFile;
                             var parsed = ParseFile(parsedfile);
+                            foreach(var cfg in parsed)
+                            {
+                                cfg.FileFullPath = file;
+                            }
                             if (parsed != null)
                                 res.AddRange(parsed);
                         }

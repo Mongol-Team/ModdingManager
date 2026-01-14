@@ -2,6 +2,6 @@
 {
     public interface IHoiData
     {
-        string FilePath { get; set; }
+        string FileFullPath { get; set; }
     }
 }

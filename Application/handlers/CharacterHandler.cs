@@ -17,9 +17,9 @@ namespace ModdingManager.classes.handlers
         {
             string guiDirectory = Path.Combine(ModManagerSettings.ModDirectory, "interface");
             Directory.CreateDirectory(guiDirectory);
-            string filePath = Path.Combine(guiDirectory, $"{CurrentConfig.Tag}.gfx");
+            string FileFullPath = Path.Combine(guiDirectory, $"{CurrentConfig.Tag}.gfx");
 
-            using (StreamWriter writer = new StreamWriter(filePath))
+            using (StreamWriter writer = new StreamWriter(FileFullPath))
             {
                 writer.WriteLine("spriteTypes = {");
                 writer.WriteLine("\tspriteType = {");
@@ -105,8 +105,8 @@ namespace ModdingManager.classes.handlers
                 Directory.CreateDirectory(ruLocPath);
                 Directory.CreateDirectory(enLocPath);
 
-                string ruFilePath = Path.Combine(ruLocPath, $"{CurrentConfig.Tag}_characters_l_russian.yml");
-                string enFilePath = Path.Combine(enLocPath, $"{CurrentConfig.Tag}_characters_l_english.yml");
+                string ruFileFullPath = Path.Combine(ruLocPath, $"{CurrentConfig.Tag}_characters_l_russian.yml");
+                string enFileFullPath = Path.Combine(enLocPath, $"{CurrentConfig.Tag}_characters_l_english.yml");
 
                 string ruEntries = GenerateLocalizationEntries(
                     CurrentConfig.Id.ToString(), CurrentConfig.Localisation.Data.GetValueSafe(CurrentConfig.Id.ToString()), CurrentConfig.Localisation.Data.GetValueSafe($"{CurrentConfig.Id.ToString()}_desc"),
@@ -116,8 +116,8 @@ namespace ModdingManager.classes.handlers
                     CurrentConfig.Id.ToString(), "", "",
                    CurrentConfig.Types.Any(t => t.GetType() == typeof(CountryLeaderCharacterType)), true);
 
-                ProcessLocalizationFile(ruFilePath, "l_russian", ruEntries);
-                ProcessLocalizationFile(enFilePath, "l_english", enEntries);
+                ProcessLocalizationFile(ruFileFullPath, "l_russian", ruEntries);
+                ProcessLocalizationFile(enFileFullPath, "l_english", enEntries);
 
                 MessageBox.Show("Файлы локализации созданы успешно!", "Успех",
                               MessageBoxButton.OK, MessageBoxImage.Information);
@@ -146,14 +146,14 @@ namespace ModdingManager.classes.handlers
             return sb.ToString();
         }
 
-        private static void ProcessLocalizationFile(string filePath, string languageKey, string newEntries)
+        private static void ProcessLocalizationFile(string FileFullPath, string languageKey, string newEntries)
         {
             string finalContent;
             Encoding utf8WithBom = new UTF8Encoding(true);
 
-            if (File.Exists(filePath))
+            if (File.Exists(FileFullPath))
             {
-                string existingContent = File.ReadAllText(filePath, utf8WithBom);
+                string existingContent = File.ReadAllText(FileFullPath, utf8WithBom);
 
                 finalContent = $"{existingContent}{newEntries}";
             }
@@ -162,7 +162,7 @@ namespace ModdingManager.classes.handlers
                 finalContent = $"{languageKey}:0\n{newEntries}";
             }
 
-            File.WriteAllText(filePath, finalContent, utf8WithBom);
+            File.WriteAllText(FileFullPath, finalContent, utf8WithBom);
         }
         public void SaveCharacterPortraits()
         {
@@ -201,7 +201,7 @@ namespace ModdingManager.classes.handlers
                 string charactersDir = Path.Combine(ModManagerSettings.ModDirectory, "common", "characters");
                 Directory.CreateDirectory(charactersDir);
 
-                string filePath = Path.Combine(charactersDir, $"{CurrentConfig.Tag}.txt");
+                string FileFullPath = Path.Combine(charactersDir, $"{CurrentConfig.Tag}.txt");
                 StringBuilder content = new StringBuilder();
 
                 content.AppendLine($"\t{CurrentConfig.Id} = {{");
@@ -296,9 +296,9 @@ namespace ModdingManager.classes.handlers
 
                 //// Запись в файл
                 //string finalContent;
-                //if (File.Exists(filePath))
+                //if (File.Exists(FileFullPath))
                 //{
-                //    string existingContent = File.ReadAllText(filePath);
+                //    string existingContent = File.ReadAllText(FileFullPath);
                 //    if (existingContent.TrimEnd().EndsWith("}"))
                 //    {
                 //        existingContent = existingContent.TrimEnd()[..^1];
@@ -310,7 +310,7 @@ namespace ModdingManager.classes.handlers
                 //    finalContent = $"characters = {{\n{content}\n}}";
                 //}
 
-                //File.WriteAllText(filePath, finalContent, new UTF8Encoding(false));
+                //File.WriteAllText(FileFullPath, finalContent, new UTF8Encoding(false));
                 //MessageBox.Show("Файл персонажа успешно создан/обновлен!", "Успех",
                 //              MessageBoxButton.OK, MessageBoxImage.Information);
             }

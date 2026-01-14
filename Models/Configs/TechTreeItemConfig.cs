@@ -9,6 +9,9 @@ namespace Models.Configs
     {
         public Identifier Id { get; set; } //+
         public ConfigLocalisation Localisation { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
         public Identifier OldId { get; set; }
         public int GridX { get; set; } //+
         public int GridY { get; set; }//+
