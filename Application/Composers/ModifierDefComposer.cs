@@ -16,11 +16,15 @@ namespace Application.Composers
         {
             string[] possibleDefPaths = {
                 ModPathes.ModifierDefFirstPath,
-                GamePathes.ModifierDefSecondPath,
+                GamePathes.ModifierHtmlPath,
             };
-            string[] possibleDocPaths = {
-                ModPathes.ModifierDefSecondPath,
-                GamePathes.ModifierDefSecondPath,
+            string[] possibleHtmlPaths = {
+                ModPathes.ModifierHtmlPath,
+                GamePathes.ModifierHtmlPath,
+            };
+            string[] possibleMdPaths = {
+                ModPathes.ModifiersMdPath,
+                GamePathes.ModifiersMdPath,
             };
             List<IConfig> res = new List<IConfig>();
             foreach (string defPath in possibleDefPaths)
@@ -51,12 +55,12 @@ namespace Application.Composers
                     break;
             }
             List<ModifierDefinitionConfig> docmodif = new List<ModifierDefinitionConfig>();
-            ModifierParser parser = new ModifierParser();
-            foreach (string path in possibleDocPaths)
+            HtmlModifierParser parser = new HtmlModifierParser();
+            foreach (string path in possibleHtmlPaths)
             {
                 if (!File.Exists(path))
                     continue;
-                docmodif = (parser.Parse(path) as ModifierDefinitionFile).ModifierDefinitions;
+                docmodif = (parser.Parse(File.ReadAllText(path)) as ModifierDefinitionFile).ModifierDefinitions;
                 foreach (var modifier in docmodif)
                 {
                     var corecfg = modifier;
@@ -67,8 +71,28 @@ namespace Application.Composers
                 {
                     break;
                 }
+                
             }
-
+            if(docmodif.Count == 0 || !docmodif.Any(m => m.IsCore == true))
+            {
+                MdModifierParser mdparser = new MdModifierParser();
+                foreach (string path in possibleMdPaths)
+                {
+                    if (!File.Exists(path))
+                        continue;
+                    docmodif = (mdparser.Parse(File.ReadAllText(path)) as ModifierDefinitionFile).ModifierDefinitions;
+                    foreach (var modifier in docmodif)
+                    {
+                        var corecfg = modifier;
+                        corecfg.IsCore = true;
+                        res.Add(corecfg);
+                    }
+                    if (docmodif.Count != 0)
+                    {
+                        break;
+                    }
+                }
+            }
             return res;
         }
         public static ModifierDefinitionConfig ParseModifierDefConfig(Bracket bracket)

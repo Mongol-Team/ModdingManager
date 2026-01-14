@@ -7,9 +7,9 @@ using Models.Types.Utils;
 using System.Text.RegularExpressions;
 using Models.Configs;
 
-public class ModifierParser : Parser
+public class HtmlModifierParser : Parser
 {
-    public ModifierParser() : base() { }
+    public HtmlModifierParser() : base() { }
 
     protected override void Normalize(ref string content) { }
 
@@ -81,7 +81,8 @@ public class ModifierParser : Parser
                 var cfg = new ModifierDefinitionConfig
                 {
                     Id = new Identifier(key),
-                    ScopeType = modifierToScope.TryGetValue(key, out var st) ? st : ScopeTypes.Country
+                    ScopeType = modifierToScope.TryGetValue(key, out var st) ? st : ScopeTypes.Country,
+                    IsCore = true
                 };
 
                 var ul = h3.SelectSingleNode("following-sibling::ul[1]");

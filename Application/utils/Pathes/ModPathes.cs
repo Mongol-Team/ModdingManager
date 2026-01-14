@@ -20,7 +20,8 @@ namespace Application.utils.Pathes
         public static string HistoryPath => Combine("history");
         public static string StatesPath => Combine("history", "states");
         public static string ModifierDefFirstPath => Combine("common", "modifier_definitions");
-        public static string ModifierDefSecondPath => Combine("documentation", "modifiers_documentation.html");
+        public static string ModifierHtmlPath => Combine("documentation", "modifiers_documentation.html");
+        public static string ModifiersMdPath => Combine("documentation", "modifiers_documentation.md");
         public static string IdeasPath => Combine("common", "ideas");
         public static string InterfacePath => Combine("interface");
         public static string StateCathegoryPath => Combine("common", "state_category");
