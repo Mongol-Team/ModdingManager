@@ -1,4 +1,5 @@
 ﻿using Data;
+using Models.Attributes;
 using Models.Enums;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class OpinionModifierConfig : IModifier, IConfig
     {
         public IGfx Gfx { get; set; }

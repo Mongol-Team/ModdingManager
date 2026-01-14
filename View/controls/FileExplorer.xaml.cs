@@ -1,38 +1,51 @@
-using System;
-using System.Collections.Generic;
+using Application;
+using Models.Attributes;
+using Models.Configs;
+using Models.Interfaces;
+using System.Collections;
 using System.IO;
-using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using View.Utils;
+using Brush = System.Windows.Media.Brush;
+using Clipboard = System.Windows.Clipboard;
+using FontFamily = System.Windows.Media.FontFamily;
 using Orientation = System.Windows.Controls.Orientation;
 using TreeView = System.Windows.Controls.TreeView;
 using TreeViewItem = System.Windows.Controls.TreeViewItem;
-using MessageBox = System.Windows.MessageBox;
-using Clipboard = System.Windows.Clipboard;
-using FontFamily = System.Windows.Media.FontFamily;
-using Brush = System.Windows.Media.Brush;
 
 namespace ViewControls
 {
+    public class ModCategoryNode
+    {
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+        public IList Items { get; set; }
+        public Type ItemType { get; set; }
+    }
+
+    public class ModItemNode
+    {
+        public object Item { get; set; }
+        public string DisplayName { get; set; }
+        public string Id { get; set; }
+    }
+
     public partial class FileExplorer : System.Windows.Controls.UserControl
     {
         public static readonly DependencyProperty TitleProperty =
             DependencyProperty.Register(nameof(Title), typeof(string), typeof(FileExplorer),
-                new PropertyMetadata("File Explorer", OnTitleChanged));
+                new PropertyMetadata("Mod Explorer", OnTitleChanged));
 
-        public static readonly DependencyProperty RootPathProperty =
-            DependencyProperty.Register(nameof(RootPath), typeof(string), typeof(FileExplorer),
-                new PropertyMetadata(null, OnRootPathChanged));
-
-        public static readonly DependencyProperty SelectedPathProperty =
-            DependencyProperty.Register(nameof(SelectedPath), typeof(string), typeof(FileExplorer),
+        public static readonly DependencyProperty SelectedItemProperty =
+            DependencyProperty.Register(nameof(SelectedItem), typeof(object), typeof(FileExplorer),
                 new PropertyMetadata(null));
 
-        public static readonly RoutedEvent PathSelectedEvent =
-            EventManager.RegisterRoutedEvent(nameof(PathSelected), RoutingStrategy.Bubble,
+        public static readonly RoutedEvent ItemSelectedEvent =
+            EventManager.RegisterRoutedEvent(nameof(ItemSelected), RoutingStrategy.Bubble,
                 typeof(RoutedEventHandler), typeof(FileExplorer));
 
         public string Title
@@ -41,22 +54,16 @@ namespace ViewControls
             set => SetValue(TitleProperty, value);
         }
 
-        public string RootPath
+        public object SelectedItem
         {
-            get => (string)GetValue(RootPathProperty);
-            set => SetValue(RootPathProperty, value);
+            get => GetValue(SelectedItemProperty);
+            private set => SetValue(SelectedItemProperty, value);
         }
 
-        public string SelectedPath
+        public event RoutedEventHandler ItemSelected
         {
-            get => (string)GetValue(SelectedPathProperty);
-            private set => SetValue(SelectedPathProperty, value);
-        }
-
-        public event RoutedEventHandler PathSelected
-        {
-            add => AddHandler(PathSelectedEvent, value);
-            remove => RemoveHandler(PathSelectedEvent, value);
+            add => AddHandler(ItemSelectedEvent, value);
+            remove => RemoveHandler(ItemSelectedEvent, value);
         }
 
         private TreeViewItem _selectedItem;
@@ -70,6 +77,7 @@ namespace ViewControls
             LoadContextMenuLocalization();
             SetupSearchPlaceholder();
             UpdateTitle();
+            LoadModData();
         }
 
         private void InitializeContextMenu()
@@ -101,12 +109,12 @@ namespace ViewControls
 
         private void UpdateTitle()
         {
-            TitleTextBlock.Text = Title?.ToUpperInvariant() ?? "FILE EXPLORER";
+            //TitleTextBlock.Text = Title?.ToUpperInvariant() ?? "FILE EXPLORER";
         }
 
         private void SetupSearchPlaceholder()
         {
-            var placeholderText = UILocalization.GetString("Message.SearchFiles");
+            var placeholderText = "Поиск объектов мода...";
             var placeholderColor = System.Windows.Media.Color.FromRgb(133, 133, 133);
             var normalColor = System.Windows.Media.Color.FromRgb(204, 204, 204);
 
@@ -149,13 +157,6 @@ namespace ViewControls
             }
         }
 
-        private static void OnRootPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is FileExplorer explorer)
-            {
-                explorer.LoadDirectory(e.NewValue as string);
-            }
-        }
 
         private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -165,34 +166,147 @@ namespace ViewControls
             }
         }
 
-        public void LoadDirectory(string path)
+        public void LoadModData()
         {
             FileTreeView.Items.Clear();
 
-            if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+            if (ModDataStorage.Mod == null)
             {
                 return;
             }
 
-            var rootItem = CreateTreeViewItem(path, Path.GetFileName(path) ?? path, true);
-            FileTreeView.Items.Add(rootItem);
-            rootItem.IsExpanded = true;
+            var modConfig = ModDataStorage.Mod;
+            var categories = GetModCategories(modConfig);
+
+            foreach (var category in categories)
+            {
+                if (category.Items != null && category.Items.Count > 0)
+                {
+                    var categoryItem = CreateCategoryTreeViewItem(category);
+                    FileTreeView.Items.Add(categoryItem);
+                }
+            }
         }
 
-        private TreeViewItem CreateTreeViewItem(string fullPath, string displayName, bool isDirectory)
+        private List<ModCategoryNode> GetModCategories(ModConfig modConfig)
+        {
+            var categories = new List<ModCategoryNode>();
+
+            // Получаем все типы конфигов из сборки Models
+            var configTypes = GetConfigTypesFromAssembly();
+            var modType = typeof(ModConfig);
+            var properties = modType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            // Создаем словарь для быстрого поиска свойств по типу элемента
+            var propertyMap = new Dictionary<Type, PropertyInfo>();
+            foreach (var prop in properties)
+            {
+                if (prop.PropertyType.IsGenericType &&
+                    prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    var itemType = prop.PropertyType.GetGenericArguments()[0];
+                    propertyMap[itemType] = prop;
+                }
+                else if (prop.PropertyType == typeof(MapConfig))
+                {
+                    propertyMap[typeof(MapConfig)] = prop;
+                }
+            }
+
+            // Обрабатываем только те конфиги, которые есть в списке типов
+            foreach (var configType in configTypes)
+            {
+                if (propertyMap.TryGetValue(configType, out var prop))
+                {
+                    if (prop.PropertyType.IsGenericType &&
+                        prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+                    {
+                        if (prop.GetValue(modConfig) is IList value && value.Count > 0)
+                        {
+                            categories.Add(new ModCategoryNode
+                            {
+                                Name = prop.Name,
+                                DisplayName = FormatCategoryName(prop.Name),
+                                Items = value,
+                                ItemType = configType
+                            });
+                        }
+                    }
+                    else if (prop.PropertyType == typeof(MapConfig))
+                    {
+                        if (prop.GetValue(modConfig) is MapConfig map)
+                        {
+                            var mapCategory = new ModCategoryNode
+                            {
+                                Name = "Map",
+                                DisplayName = "Map",
+                                Items = new List<object> { map },
+                                ItemType = typeof(MapConfig)
+                            };
+                            categories.Add(mapCategory);
+                        }
+                    }
+                }
+            }
+
+            return categories.OrderBy(c => c.DisplayName).ToList();
+        }
+
+        private List<Type> GetConfigTypesFromAssembly()
+        {
+            var configTypes = new List<Type>();
+            try
+            {
+                var assembly = typeof(ModConfig).Assembly;
+                var allTypes = assembly.GetTypes()
+                    .Where(t => t.Namespace == "Models.Configs")
+                    .Where(t => t.IsClass && !t.IsAbstract)
+                    .Where(t => typeof(IConfig).IsAssignableFrom(t) || t == typeof(MapConfig))
+                    .Where(t => t.Name.EndsWith("Config"))
+                    .Where(t => t != typeof(ModConfig) && t != typeof(BaseConfig) && t != typeof(IConfig))
+                    .Where(t => !t.Name.StartsWith("I")) // Исключаем интерфейсы
+                    .ToList();
+
+                configTypes.AddRange(allTypes);
+            }
+            catch
+            {
+                // Если не удалось получить список типов, используем все свойства ModConfig
+            }
+
+            return configTypes;
+        }
+
+        private string FormatCategoryName(string name)
+        {
+            // Преобразуем "IdeaSlots" в "Idea Slots" и т.д.
+            var result = System.Text.RegularExpressions.Regex.Replace(name, "([A-Z])", " $1").Trim();
+            return result;
+        }
+
+        private TreeViewItem CreateCategoryTreeViewItem(ModCategoryNode category)
         {
             var item = new TreeViewItem
             {
-                Header = CreateHeader(displayName, isDirectory),
-                Tag = fullPath,
+                Header = CreateHeader(category.DisplayName, true),
+                Tag = category,
                 IsExpanded = false
             };
 
-            if (isDirectory)
+            item.Items.Add(new TreeViewItem { Header = "Loading...", IsEnabled = false });
+            item.Expanded += CategoryItem_Expanded;
+
+            return item;
+        }
+
+        private TreeViewItem CreateModItemTreeViewItem(ModItemNode modItem)
+        {
+            var item = new TreeViewItem
             {
-                item.Items.Add(new TreeViewItem { Header = "Loading...", IsEnabled = false });
-                item.Expanded += DirectoryItem_Expanded;
-            }
+                Header = CreateHeader(modItem.DisplayName, false),
+                Tag = modItem,
+                IsExpanded = false
+            };
 
             return item;
         }
@@ -248,86 +362,166 @@ namespace ViewControls
             };
         }
 
-        private void DirectoryItem_Expanded(object sender, RoutedEventArgs e)
+        private void CategoryItem_Expanded(object sender, RoutedEventArgs e)
         {
-            if (sender is TreeViewItem item && item.Tag is string path)
+            if (sender is TreeViewItem item && item.Tag is ModCategoryNode category)
             {
                 if (item.Items.Count == 1 && item.Items[0] is TreeViewItem loadingItem && !loadingItem.IsEnabled)
                 {
                     item.Items.Clear();
-                    LoadDirectoryContents(item, path);
+                    LoadCategoryContents(item, category);
                 }
             }
         }
 
-        private void LoadDirectoryContents(TreeViewItem parentItem, string directoryPath)
+        private void LoadCategoryContents(TreeViewItem parentItem, ModCategoryNode category)
         {
             try
             {
-                var directories = Directory.GetDirectories(directoryPath)
-                    .OrderBy(d => Path.GetFileName(d))
-                    .ToList();
+                if (category.Items == null)
+                    return;
 
-                var files = Directory.GetFiles(directoryPath)
-                    .OrderBy(f => Path.GetFileName(f))
-                    .ToList();
-
-                foreach (var dir in directories)
+                // Особый случай для MapConfig - показываем вложенные списки
+                if (category.ItemType == typeof(MapConfig) && category.Items.Count > 0 && category.Items[0] is MapConfig map)
                 {
-                    var dirName = Path.GetFileName(dir);
-                    if (ShouldShowItem(dirName))
+                    LoadMapContents(parentItem, map);
+                    return;
+                }
+
+                var items = new List<ModItemNode>();
+
+                foreach (var obj in category.Items)
+                {
+                    if (obj == null)
+                        continue;
+
+                    string displayName = GetItemDisplayName(obj);
+                    string id = GetItemId(obj);
+
+                    if (ShouldShowItem(displayName) || ShouldShowItem(id))
                     {
-                        var dirItem = CreateTreeViewItem(dir, dirName, true);
-                        parentItem.Items.Add(dirItem);
+                        items.Add(new ModItemNode
+                        {
+                            Item = obj,
+                            DisplayName = displayName,
+                            Id = id
+                        });
                     }
                 }
 
-                foreach (var file in files)
+                foreach (var modItem in items.OrderBy(i => i.DisplayName))
                 {
-                    var fileName = Path.GetFileName(file);
-                    if (ShouldShowItem(fileName))
-                    {
-                        var fileItem = CreateTreeViewItem(file, fileName, false);
-                        parentItem.Items.Add(fileItem);
-                    }
+                    var itemNode = CreateModItemTreeViewItem(modItem);
+                    parentItem.Items.Add(itemNode);
                 }
             }
-            catch (UnauthorizedAccessException)
+            catch (Exception)
             {
             }
-            catch (DirectoryNotFoundException)
+        }
+
+        private void LoadMapContents(TreeViewItem parentItem, MapConfig map)
+        {
+            // Provinces
+            if (map.Provinces != null && map.Provinces.Count > 0)
             {
+                var provincesCategory = CreateCategoryTreeViewItem(new ModCategoryNode
+                {
+                    Name = "Provinces",
+                    DisplayName = "Provinces",
+                    Items = map.Provinces.Cast<object>().ToList(),
+                    ItemType = typeof(ProvinceConfig)
+                });
+                parentItem.Items.Add(provincesCategory);
             }
+
+            // States
+            if (map.States != null && map.States.Count > 0)
+            {
+                var statesCategory = CreateCategoryTreeViewItem(new ModCategoryNode
+                {
+                    Name = "States",
+                    DisplayName = "States",
+                    Items = map.States.Cast<object>().ToList(),
+                    ItemType = typeof(StateConfig)
+                });
+                parentItem.Items.Add(statesCategory);
+            }
+
+            // StrategicRegions
+            if (map.StrategicRegions != null && map.StrategicRegions.Count > 0)
+            {
+                var regionsCategory = CreateCategoryTreeViewItem(new ModCategoryNode
+                {
+                    Name = "StrategicRegions",
+                    DisplayName = "Strategic Regions",
+                    Items = map.StrategicRegions.Cast<object>().ToList(),
+                    ItemType = typeof(StrategicRegionConfig)
+                });
+                parentItem.Items.Add(regionsCategory);
+            }
+        }
+
+        private string GetItemDisplayName(object item)
+        {
+            if (item is IConfig config && config.Id != null)
+            {
+                return config.Id.ToString();
+            }
+            else if (item is IGfx gfx && gfx.Id != null)
+            {
+                return gfx.Id.ToString();
+            }
+            else if (item is MapConfig map)
+            {
+                return "Map";
+            }
+
+            return item.GetType().Name;
+        }
+
+        private string GetItemId(object item)
+        {
+            if (item is IConfig config && config.Id != null)
+            {
+                return config.Id.ToString();
+            }
+            else if (item is IGfx gfx && gfx.Id != null)
+            {
+                return gfx.Id.ToString();
+            }
+
+            return item.GetType().Name;
         }
 
         private bool ShouldShowItem(string name)
         {
             var searchText = SearchTextBox.Text;
-            var placeholderText = UILocalization.GetString("Message.SearchFiles");
+            var placeholderText = "Поиск объектов мода...";
 
             if (string.IsNullOrEmpty(searchText) || searchText == placeholderText)
                 return true;
+
+            if (string.IsNullOrEmpty(name))
+                return false;
 
             return name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (string.IsNullOrEmpty(RootPath))
-                return;
-
             var searchText = SearchTextBox.Text;
-            var placeholderText = UILocalization.GetString("Message.SearchFiles");
+            var placeholderText = "Поиск объектов мода...";
 
             if (string.IsNullOrEmpty(searchText) || searchText == placeholderText)
             {
                 FileTreeView.Items.Clear();
-                LoadDirectory(RootPath);
+                LoadModData();
                 return;
             }
 
             FileTreeView.Items.Clear();
-            LoadDirectory(RootPath);
+            LoadModData();
             ExpandAllMatchingItems(FileTreeView.Items, searchText);
         }
 
@@ -335,9 +529,22 @@ namespace ViewControls
         {
             foreach (TreeViewItem item in items)
             {
-                if (item.Tag is string path)
+                if (item.Tag is ModCategoryNode category)
                 {
-                    var name = Path.GetFileName(path);
+                    var name = category.DisplayName;
+                    if (name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        item.IsExpanded = true;
+                    }
+
+                    if (item.Items.Count > 0)
+                    {
+                        ExpandAllMatchingItems(item.Items, searchText);
+                    }
+                }
+                else if (item.Tag is ModItemNode modItem)
+                {
+                    var name = modItem.DisplayName;
                     if (name.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         item.IsExpanded = true;
@@ -348,22 +555,26 @@ namespace ViewControls
                             parent = parent.Parent as TreeViewItem;
                         }
                     }
-
-                    if (item.Items.Count > 0)
-                    {
-                        ExpandAllMatchingItems(item.Items, searchText);
-                    }
                 }
             }
         }
 
         private void FileTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (e.NewValue is TreeViewItem item && item.Tag is string path)
+            if (e.NewValue is TreeViewItem item)
             {
                 _selectedItem = item;
-                SelectedPath = path;
-                RaiseEvent(new RoutedEventArgs(PathSelectedEvent));
+
+                if (item.Tag is ModItemNode modItem)
+                {
+                    SelectedItem = modItem.Item;
+                    RaiseEvent(new RoutedEventArgs(ItemSelectedEvent));
+                }
+                else if (item.Tag is ModCategoryNode category)
+                {
+                    SelectedItem = category;
+                    RaiseEvent(new RoutedEventArgs(ItemSelectedEvent));
+                }
             }
         }
 
@@ -377,6 +588,18 @@ namespace ViewControls
                 {
                     item.IsSelected = true;
                     item.ContextMenu = _fileContextMenu;
+                }
+            }
+        }
+
+        private void FileTreeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is DependencyObject source)
+            {
+                var item = FindAncestor<TreeViewItem>(source);
+                if (item != null && item.Tag is ModItemNode modItem)
+                {
+                    OpenCreatorForItem(modItem.Item);
                 }
             }
         }
@@ -400,88 +623,108 @@ namespace ViewControls
             return null;
         }
 
-        private void OpenMenuItem_Click(object sender, RoutedEventArgs e)
+        private void OpenCreatorForItem(object item)
         {
-            if (!string.IsNullOrEmpty(SelectedPath))
+            if (item == null) return;
+
+            var itemType = item.GetType();
+            var creatorAttribute = itemType.GetCustomAttribute<ConfigCreatorAttribute>();
+
+            if (creatorAttribute == null)
             {
-                if (File.Exists(SelectedPath))
+                CustomMessageBox.Show(
+                    $"Для типа {itemType.Name} не указан атрибут ConfigCreatorAttribute",
+                    "Ошибка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                switch (creatorAttribute.CreatorType)
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = SelectedPath,
-                        UseShellExecute = true
-                    });
+                    case ConfigCreatorType.GenericCreator:
+                        var viewer = new GenericViewer(itemType, item);
+                        var mainWindow = System.Windows.Application.Current.MainWindow as View.MainWindow;
+                        if (mainWindow?.DockManager != null)
+                        {
+                            mainWindow.DockManager.SetContent(viewer);
+                        }
+                        return;
+
+                    case ConfigCreatorType.CountryCreator:
+                        CustomMessageBox.Show(
+                            "CountryCreator пока не реализован",
+                            "Информация",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                        return;
+
+                    case ConfigCreatorType.MapCreator:
+                        CustomMessageBox.Show(
+                            "MapCreator пока не реализован",
+                            "Информация",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                        return;
+
+                    case ConfigCreatorType.GenericGuiCreator:
+                        CustomMessageBox.Show(
+                            $"GenericGuiCreator для типа {itemType.Name} пока не реализован",
+                            "Информация",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                        return;
+
+                    default:
+                        CustomMessageBox.Show(
+                            $"Неизвестный тип Creator: {creatorAttribute.CreatorType}",
+                            "Ошибка",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        return;
                 }
             }
+            catch (Exception ex)
+            {
+                CustomMessageBox.Show(
+                    $"Ошибка при открытии Creator: {ex.Message}",
+                    "Ошибка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void OpenMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            // Можно добавить логику открытия объекта мода
         }
 
         private void OpenInExplorerMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(SelectedPath))
-            {
-                var path = File.Exists(SelectedPath) ? SelectedPath : Path.GetDirectoryName(SelectedPath);
-                if (!string.IsNullOrEmpty(path))
-                {
-                    System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{path}\"");
-                }
-            }
+            // Можно добавить логику открытия файла объекта в проводнике
         }
 
         private void CopyPathMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(SelectedPath))
+            if (SelectedItem != null)
             {
-                Clipboard.SetText(SelectedPath);
+                var id = GetItemId(SelectedItem);
+                Clipboard.SetText(id);
             }
         }
 
         private void RenameMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            // Можно добавить логику переименования объекта
         }
 
         private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(SelectedPath))
-            {
-                var result = MessageBox.Show(
-                    string.Format(UILocalization.GetString("Message.ConfirmDelete"), Path.GetFileName(SelectedPath)),
-                    UILocalization.GetString("Message.ConfirmDeleteTitle"),
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    try
-                    {
-                        if (File.Exists(SelectedPath))
-                        {
-                            File.Delete(SelectedPath);
-                        }
-                        else if (Directory.Exists(SelectedPath))
-                        {
-                            Directory.Delete(SelectedPath, true);
-                        }
-
-                        if (_selectedItem?.Parent is TreeViewItem parent)
-                        {
-                            parent.Items.Remove(_selectedItem);
-                        }
-                        else if (_selectedItem != null)
-                        {
-                            FileTreeView.Items.Remove(_selectedItem);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(
-                            string.Format(UILocalization.GetString("Error.DeleteFailed"), ex.Message),
-                            UILocalization.GetString("Error.Error"),
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-                    }
-                }
-            }
+            // Можно добавить логику удаления объекта из мода
         }
     }
 }
+
 

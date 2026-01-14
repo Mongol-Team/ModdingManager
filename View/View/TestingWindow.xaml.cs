@@ -10,7 +10,7 @@ namespace View
     /// <summary>
     /// Логика взаимодействия для TestingWindow.xaml
     /// </summary>
-    public partial class TestingWindow : Window
+    public partial class TestingWindow : BaseWindow
     {
         public TestingWindow()
         {

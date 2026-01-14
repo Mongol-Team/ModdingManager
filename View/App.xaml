@@ -11,6 +11,9 @@
                 <ResourceDictionary Source="Themes/ButtonStyles.xaml"/>
                 <ResourceDictionary Source="Themes/InputStyles.xaml"/>
                 <ResourceDictionary Source="Themes/WindowStyles.xaml"/>
+                <ResourceDictionary Source="Themes/ScrollBarStyles.xaml"/>
+                <ResourceDictionary Source="Themes/DockingStyles.xaml"/>
+                <ResourceDictionary Source="Themes/GenericViewerStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

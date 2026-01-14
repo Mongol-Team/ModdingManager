@@ -1,10 +1,11 @@
-﻿<Window x:Class="View.TechTreeCreator"
+﻿<base:BaseWindow x:Class="View.TechTreeCreator"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cntrls="clr-namespace:ViewControls"
         xmlns:local="clr-namespace:View"
+        xmlns:base="clr-namespace:View"
         mc:Ignorable="d"
         xmlns:controls="clr-namespace:ViewControls"
         Title="TechCreator" Height="820" Width="1500"
@@ -185,4 +186,4 @@
             </cntrls:TechnologyGrid >
         </Grid>
     </Grid>
-</Window>
+</base:BaseWindow>

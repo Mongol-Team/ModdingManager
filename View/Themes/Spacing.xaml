@@ -28,9 +28,7 @@
     <Thickness x:Key="PaddingModalTop">16,64,16,16</Thickness>
     
     <CornerRadius x:Key="BorderRadiusSmall">2</CornerRadius>
-    <CornerRadius x:Key="BorderRadiusMedium">2</CornerRadius>
-    <CornerRadius x:Key="BorderRadiusLarge">4</CornerRadius>
-    <CornerRadius x:Key="BorderRadiusXLarge">4</CornerRadius>
+    <CornerRadius x:Key="BorderRadiusMedium">4</CornerRadius>
     <CornerRadius x:Key="BorderRadiusCircle">999</CornerRadius>
     <CornerRadius x:Key="BorderRadiusModalTop">4,4,0,0</CornerRadius>
 

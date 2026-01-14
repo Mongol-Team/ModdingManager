@@ -1,15 +1,15 @@
 ﻿using Application.Debugging;
 using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
 using Models.GfxTypes;
 using Models.Interfaces;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
+using System.Collections.Concurrent;
 using System.Drawing;
-using System.Linq;
-using System.Windows.Controls;
 using DDF = Data.DataDefaultValues;
 using System.Windows;
 namespace Application.Loaders
@@ -19,38 +19,50 @@ namespace Application.Loaders
         public static List<IGfx> LoadAll()
         {
             string[] possiblePaths = {
-                GamePathes.InterfacePath,  // Load game paths first to allow mod overrides
+                GamePathes.InterfacePath,
                 ModPathes.InterfacePath,
             };
-            Dictionary<string, IGfx> gfxDictionary = new Dictionary<string, IGfx>();
+            ConcurrentDictionary<string, IGfx> gfxDictionary = new();
             int totalLoaded = 0;
+
+            int maxDegreeOfParallelism = Math.Max(1, (Environment.ProcessorCount * ModManagerSettings.MaxPercentForParallelUsage) / 100);
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism };
 
             foreach (string path in possiblePaths)
             {
                 if (System.IO.Directory.Exists(path))
                 {
                     var files = System.IO.Directory.GetFiles(path, "*.gfx", System.IO.SearchOption.AllDirectories);
-                    foreach (var file in files)
+
+                    Parallel.ForEach(files, parallelOptions, file =>
                     {
-                        var gfxs = LoadFromFile(file);
-                        foreach (var gfx in gfxs)
+                        try
                         {
-                            if (gfx != null && gfx.Id != null)
+                            var gfxs = LoadFromFile(file);
+                            foreach (var gfx in gfxs)
                             {
-                                string idKey = gfx.Id.ToString().ToLower();  // Normalize for case-insensitive uniqueness
-                                if (gfxDictionary.ContainsKey(idKey))
+                                if (gfx != null && gfx.Id != null)
                                 {
-                                    Logger.AddDbgLog($"Overriding GFX with ID '{idKey}' from path: {path}");
+                                    string idKey = gfx.Id.ToString().ToLower();
+                                    bool wasAdded = gfxDictionary.TryAdd(idKey, gfx);
+                                    if (!wasAdded)
+                                    {
+                                        Logger.AddDbgLog($"Overriding GFX with ID '{idKey}' from path: {path}");
+                                        gfxDictionary[idKey] = gfx;
+                                    }
+                                    else
+                                    {
+                                        Logger.AddDbgLog($"Adding new GFX with ID '{idKey}' from path: {path}");
+                                    }
+                                    Interlocked.Increment(ref totalLoaded);
                                 }
-                                else
-                                {
-                                    Logger.AddDbgLog($"Adding new GFX with ID '{idKey}' from path: {path}");
-                                }
-                                gfxDictionary[idKey] = gfx;
-                                totalLoaded++;
                             }
                         }
-                    }
+                        catch (Exception ex)
+                        {
+                            Logger.AddDbgLog($"Error loading GFX file '{file}': {ex.Message}");
+                        }
+                    });
                 }
             }
 
@@ -69,7 +81,7 @@ namespace Application.Loaders
                 MessageBox.Show($"Не удалось распарсить GFX файл: {gfxFileFullPath}");
             }
             List<IGfx> result = new();
-            if (parser == null) return result;
+            if (new TxtParser(new TxtPattern()).Parse(gfxFilePath) is not HoiFuncFile parser) return result;
             if (parser.Brackets.Count == 0) return result;
             foreach (Bracket defineBr in parser.Brackets)
             {
@@ -122,10 +134,10 @@ namespace Application.Loaders
                     {
                         string textureFile = gfxBracket.GetVarString("textureFile").Replace("/", "\\");
                         string name = gfxBracket.GetVarString("name");
-                        
+
                         string modPath = Path.Combine(ModPathes.RootPath, textureFile);
                         string gamePath = Path.Combine(GamePathes.RootPath, textureFile);
-                       
+
                         var res = new SpriteType()
                         {
                             Id = new Identifier(name),

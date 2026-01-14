@@ -3,7 +3,6 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <FontFamily x:Key="FontFamilyBase">Segoe UI, Roboto</FontFamily>
-    <FontFamily x:Key="FontFamilyAccent">Segoe UI, Roboto</FontFamily>
     <FontFamily x:Key="FontFamilyMono">Consolas, Courier New</FontFamily>
     
     <sys:Double x:Key="FontSizeLargeTitle">32</sys:Double>
@@ -20,21 +19,21 @@
     <sys:Double x:Key="FontSizeCardSubtitle">12</sys:Double>
     
     <Style x:Key="TextLargeTitle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource FontFamilyAccent}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeLargeTitle}"/>
         <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
     </Style>
     
     <Style x:Key="TextPageTitle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource FontFamilyAccent}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizePageTitle}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
     </Style>
     
     <Style x:Key="TextSectionTitle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource FontFamilyAccent}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeSectionTitle}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
@@ -44,11 +43,11 @@
         <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeModalTitle}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
     </Style>
     
     <Style x:Key="TextSubtitle" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource FontFamilyAccent}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeSubtitle}"/>
         <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="Foreground" Value="{StaticResource TextTertiary}"/>

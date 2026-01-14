@@ -119,45 +119,45 @@
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="color_spectrum" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Controls\color_spectrum.jpg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Embedded\Images\Controls\color_spectrum.jpg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="err" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Controls\err.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Embedded\Images\Controls\err.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="healer" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Interface\healer.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Embedded\Images\Interface\healer.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="item_with_no_gfx_image" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\item_with_no_gfx_image.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\item_with_no_gfx_image.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="new_regiment_slot_support" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Interface\new_regiment_slot_support.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\Interface\new_regiment_slot_support.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="null_item_image" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\null_item_image.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\Interface\null_item_image.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="superevent_bg_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Interface\superevent_bg_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\Interface\superevent_bg_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="superevent_button_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Interface\superevent_button_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\Interface\superevent_button_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tech_industry_available_item_bg" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Interface\tech_industry_available_item_bg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\Interface\tech_industry_available_item_bg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="technology_available_item_bg" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Interface\technology_available_item_bg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\Interface\technology_available_item_bg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="techtree_tabs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Interface\techtree_tabs.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\Interface\techtree_tabs.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="techtree_tabs_shadowing" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Interface\techtree_tabs_shadowing.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\Interface\techtree_tabs_shadowing.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tiled_plain_bg" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Interface\tiled_plain_bg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Embedded\Images\Interface\tiled_plain_bg.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="warn" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Images\Controls\warn.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Embedded\Images\Controls\warn.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

@@ -3,7 +3,7 @@ using System.Windows;
 
 namespace View
 {
-    public partial class PlaceholderWindow : Window
+    public partial class PlaceholderWindow : BaseWindow
     {
         public PlaceholderWindow()
         {

@@ -1,0 +1,109 @@
+<UserControl x:Class="ViewControls.GenericViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:controls="clr-namespace:ViewControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid Background="{StaticResource BackgroundApp}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="300"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*" MinWidth="300"/>
+        </Grid.ColumnDefinitions>
+        
+        <Border Grid.Column="0"
+                Background="{StaticResource BackgroundCard}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="0,0,1,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="20">
+                <controls:ClassViewer x:Name="ConfigViewer" 
+                                      ElementOrientation="Left"
+                                      FontSize="14"
+                                      ElementMargin="5"/>
+            </ScrollViewer>
+        </Border>
+        
+        <GridSplitter Grid.Column="1"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Background="{StaticResource BorderColor}"
+                      Width="5"
+                      ResizeDirection="Columns"
+                      ResizeBehavior="PreviousAndNext"
+                      ShowsPreview="False"/>
+        
+        <Border Grid.Column="2"
+                Background="{StaticResource BackgroundCard}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="1,0,0,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="20">
+                <StackPanel>
+                    <TextBlock Text="Примеры контролов, которые могут отображаться:"
+                               Style="{StaticResource GenericViewerSectionTitle}"/>
+                    
+                    <!-- TextBox для string -->
+                    <TextBox Tag="TextBox (string)" Style="{StaticResource GenericViewerTextBox}"/>
+                    
+                    <!-- TextBox для int -->
+                    <TextBox Tag="TextBox (int)" Style="{StaticResource GenericViewerTextBox}"/>
+                    
+                    <!-- TextBox для double -->
+                    <TextBox Tag="TextBox (double)" Style="{StaticResource GenericViewerTextBox}"/>
+                    
+                    <!-- ComboBox для enum -->
+                    <ComboBox Style="{StaticResource GenericViewerComboBox}">
+                        <ComboBoxItem Content="ComboBox (enum)" IsEnabled="False" Foreground="{StaticResource InputPlaceholder}"/>
+                        <ComboBoxItem Content="Option 1"/>
+                        <ComboBoxItem Content="Option 2"/>
+                        <ComboBoxItem Content="Option 3"/>
+                    </ComboBox>
+                    
+                    <!-- CheckBox для bool -->
+                    <CheckBox Content="CheckBox (bool)" IsChecked="True" Style="{StaticResource GenericViewerCheckBox}"/>
+                    
+                    <!-- DatePicker для DateTime -->
+                    <controls:CustomDatePicker Tag="DatePicker (DateTime)" Margin="0,0,0,10"/>
+                    
+                    <!-- ColorPickerDropdown для Color -->
+                    <controls:ColorPickerDropdown Width="120" Margin="0,0,0,10" Tag="ColorPickerDropdown (Color)"/>
+                    
+                    <!-- SearchableComboBox для IConfig -->
+                    <controls:SearchableComboBox Width="200" Margin="0,0,0,10" Tag="SearchableComboBox (IConfig)"/>
+                    
+                    <!-- LocalisationDisplay для ConfigLocalisation -->
+                    <controls:LocalisationDisplay Margin="0,0,0,10" Tag="LocalisationDisplay (ConfigLocalisation)"/>
+                    
+                    <!-- Expander для List -->
+                    <Expander Header="Expander (List&lt;T&gt;)" IsExpanded="False" Style="{StaticResource GenericViewerExpander}">
+                        <StackPanel>
+                            <TextBox Tag="Элемент списка" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                            <TextBox Tag="Элемент списка" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                            <TextBox Tag="Элемент списка" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                            <Button Content="Add" Style="{StaticResource GenericViewerButton}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Expander>
+                    
+                    <!-- TextBox для List<Var> (многострочный) -->
+                    <TextBox Tag="TextBox (List&lt;Var&gt; - многострочный)"
+                             Height="100"
+                             Style="{StaticResource GenericViewerMultilineTextBox}"/>
+                    
+                    <!-- Expander для Dictionary -->
+                    <Expander Header="Expander (Dictionary&lt;K,V&gt;)" IsExpanded="False" Style="{StaticResource GenericViewerExpander}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                <TextBox Tag="Key" Width="100" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                                <TextBox Tag="Value" Width="100" Margin="10,0,0,0" Style="{StaticResource GenericViewerExpanderTextBox}"/>
+                                <Button Content="Remove" Style="{StaticResource GenericViewerButton}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                            <Button Content="Add" Style="{StaticResource GenericViewerButton}" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
+

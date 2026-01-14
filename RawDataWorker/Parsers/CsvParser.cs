@@ -4,7 +4,6 @@ using Models.Types.TableCacheData;
 using RawDataWorker.Interfaces;
 using System.Drawing;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Rx = RawDataWorker.Regexes;
 
 namespace RawDataWorker.Parsers
@@ -47,9 +46,9 @@ namespace RawDataWorker.Parsers
         {
             content = content.Replace("\r\n", "\n");
             if (pattern.Separator == " ")
-                content.Replace(" ", ";");
+                content = content.Replace(" ", ";");
             else
-                content.Replace(" ", "");
+                content = content.Replace(" ", "");
             content = Rx.FileComment.Replace(content, "");
             content = Rx.EmptyLine.Replace(content, "");
             content = content.Replace($"{pattern.Separator}{pattern.Separator}", $"{pattern.Separator} {pattern.Separator}");

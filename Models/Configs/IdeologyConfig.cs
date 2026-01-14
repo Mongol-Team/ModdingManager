@@ -1,4 +1,5 @@
-﻿using Models.Enums;
+﻿using Models.Attributes;
+using Models.Enums;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.ObectCacheData;
@@ -7,6 +8,7 @@ using System.Drawing;
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class IdeologyConfig : IConfig
     {
         public IGfx Gfx { get; set; }

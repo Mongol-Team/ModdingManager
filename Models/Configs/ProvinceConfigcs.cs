@@ -1,4 +1,5 @@
 ﻿using Models.Args;
+using Models.Attributes;
 using Models.Enums;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
@@ -8,6 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class ProvinceConfig : IConfig
     {
         [JsonIgnore]

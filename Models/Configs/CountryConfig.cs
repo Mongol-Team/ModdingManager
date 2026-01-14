@@ -1,4 +1,5 @@
-﻿using Models.Interfaces;
+﻿using Models.Attributes;
+using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 using System.Drawing;
@@ -6,6 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.CountryCreator)]
     public class CountryConfig : IConfig
     {
         public IGfx Gfx { get; set; }

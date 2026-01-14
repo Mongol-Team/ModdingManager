@@ -21,7 +21,7 @@ using Data.Properties;
 
 namespace View
 {
-    public partial class SupereventCreator : Window
+    public partial class SupereventCreator : BaseWindow
     {
         private UIElement selectedElement;
         private System.Windows.Point startPoint;
@@ -617,7 +617,7 @@ namespace View
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show($"Ошибка при загрузке изображения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ShowError($"Ошибка при загрузке изображения: {ex.Message}", NotificationCorner.TopRight);
                 }
             }
         }
@@ -629,7 +629,7 @@ namespace View
             if (dialog.ShowDialog() == true)
             {
                 selectedAudioPath = dialog.FileName;
-                System.Windows.MessageBox.Show($"Выбран файл: {System.IO.Path.GetFileName(selectedAudioPath)}");
+                ShowInfo($"Выбран файл: {System.IO.Path.GetFileName(selectedAudioPath)}", NotificationCorner.TopRight);
             }
         }
 
@@ -668,7 +668,7 @@ namespace View
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Ошибка при воспроизведении: " + ex.Message);
+                ShowError("Ошибка при воспроизведении: " + ex.Message, NotificationCorner.TopRight);
                 button.Content = "▶";
             }
         }
@@ -752,7 +752,7 @@ namespace View
                     }
                     catch (Exception ex)
                     {
-                        System.Windows.MessageBox.Show($"Ошибка при загрузке изображения: {ex.Message}");
+                        ShowError($"Ошибка при загрузке изображения: {ex.Message}", NotificationCorner.TopRight);
                     }
                 }
             }
@@ -791,7 +791,7 @@ namespace View
             }
             else
             {
-                System.Windows.MessageBox.Show("Заполните все необходимые поля!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowWarning("Заполните все необходимые поля!", NotificationCorner.TopRight);
             }
         }
         private void AddOptionButtonEvent()

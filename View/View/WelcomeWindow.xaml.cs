@@ -1,27 +1,30 @@
 using Application;
 using Application.Settings;
+using Models.Enums;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Forms;
 using View.Utils;
 
 namespace View
 {
-    public partial class SettingsWindow : Window
+    public partial class WelcomeWindow : BaseWindow
     {
         public string SelectedProjectPath { get; private set; } = string.Empty;
         private List<RecentProject> _allProjects = new();
 
-        public SettingsWindow()
+        public WelcomeWindow()
         {
             InitializeComponent();
             LoadRecentProjects();
             SetupSearchPlaceholder();
             UpdateGameDirectoryDisplay();
+            LoadSettings();
         }
 
-        private void SettingsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void WelcomeWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (DialogResult != true && string.IsNullOrEmpty(SelectedProjectPath))
             {
@@ -159,19 +162,17 @@ namespace View
                 try
                 {
                     await LoadModData();
-                    var mainWindow = new MainWindow();
+                    MainWindow mainWindow = new MainWindow();
                     System.Windows.Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
                     mainWindow.Activate();
-                    Close();
+                    this.Close();
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show(
+                    ShowError(
                         string.Format(UILocalization.GetString("Error.LoadModDataFailed"), ex.Message),
-                        UILocalization.GetString("Error.Error"),
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                        NotificationCorner.TopRight);
                 }
             }
         }
@@ -244,20 +245,18 @@ namespace View
                     try
                     {
                         await LoadModData();
-                        DialogResult = true;
+                        ((Window)this).DialogResult = true;
                         var mainWindow = new MainWindow();
-                        System.Windows.Application.Current.MainWindow = mainWindow;
+                        System.Windows.Application.Current.MainWindow = (Window)mainWindow;
                         mainWindow.Show();
-                        Close();
+                        this.Close();
                     }
                     catch (Exception ex)
                     {
-                        System.Windows.MessageBox.Show(
+                        ShowError(
                             $"Ошибка при загрузке данных мода: {ex.Message}",
-                            "Ошибка",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-                        DialogResult = false;
+                            NotificationCorner.TopRight);
+                        ((Window)this).DialogResult = false;
                     }
                 }
             }
@@ -282,23 +281,74 @@ namespace View
                     try
                     {
                         await LoadModData();
-                        DialogResult = true;
+                        ((Window)this).DialogResult = true;
                         var mainWindow = new MainWindow();
-                        System.Windows.Application.Current.MainWindow = mainWindow;
+                        System.Windows.Application.Current.MainWindow = (Window)mainWindow;
                         mainWindow.Show();
-                        Close();
+                        this.Close();
                     }
                     catch (Exception ex)
                     {
-                        System.Windows.MessageBox.Show(
+                        ShowError(
                             $"Ошибка при загрузке данных мода: {ex.Message}",
-                            "Ошибка",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
-                        DialogResult = false;
+                            NotificationCorner.TopRight);
+                        ((Window)this).DialogResult = false;
                     }
                 }
             }
+        }
+
+        private void LoadSettings()
+        {
+            ParallelismSlider.Value = ModManagerSettings.MaxPercentForParallelUsage;
+            ParallelismValueText.Text = $"{ModManagerSettings.MaxPercentForParallelUsage}%";
+            DebugModeCheckBox.IsChecked = ModManagerSettings.IsDebugRunning;
+
+            LanguageComboBox.ItemsSource = Enum.GetValues(typeof(Language)).Cast<Language>();
+            LanguageComboBox.SelectedItem = ModManagerSettings.CurrentLanguage;
+        }
+
+        private void ParallelismSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (ParallelismValueText != null)
+            {
+                ParallelismValueText.Text = $"{(int)e.NewValue}%";
+            }
+        }
+
+        private void DebugModeCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            ModManagerSettings.IsDebugRunning = true;
+        }
+
+        private void DebugModeCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ModManagerSettings.IsDebugRunning = false;
+        }
+
+        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LanguageComboBox.SelectedItem is Language language)
+            {
+                ModManagerSettings.CurrentLanguage = language;
+            }
+        }
+
+        private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ModManagerSettings.MaxPercentForParallelUsage = (int)ParallelismSlider.Value;
+            ModManagerSettings.IsDebugRunning = DebugModeCheckBox.IsChecked ?? false;
+
+            if (LanguageComboBox.SelectedItem is Language language)
+            {
+                ModManagerSettings.CurrentLanguage = language;
+            }
+
+            ModManagerSettingsLoader.Save(ModManagerSettings.ModDirectory ?? string.Empty, ModManagerSettings.GameDirectory ?? string.Empty);
+
+            ShowSuccess(
+                "Настройки сохранены",
+                NotificationCorner.TopRight);
         }
 
     }

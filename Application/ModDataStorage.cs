@@ -1,9 +1,9 @@
 using Application.Composers;
 using Application.Debugging;
 using Application.Extentions;
-using Application.Loaders;
 using Application.utils;
 using Models.Configs;
+using System.Diagnostics;
 
 namespace Application;
 
@@ -103,17 +103,21 @@ public static class ModDataStorage
         }
 
         Mod = new ModConfig();
+        var sw = Stopwatch.StartNew();
         Localisation = new LocalisationRegistry();
+        sw.Stop();
         ReportProgress("Инициализация локализации...");
         
         Mod.Gfxes = GfxLoader.LoadAll();
         ReportProgress("Загрузка графики...");
        
         Mod.ModifierDefinitions = ModifierDefComposer.Parse().Cast<ModifierDefinitionConfig>().ToList();
+        sw.Stop();
         ReportProgress("Загрузка определений модификаторов...");
         var customMods = Mod.ModifierDefinitions.Where(m => m.IsCore == false).ToList();
        
         Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToList();
+        sw.Stop();
         ReportProgress("Загрузка идеологий...");
 
         OverrideManager.HandleOverride();

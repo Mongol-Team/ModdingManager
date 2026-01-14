@@ -1,4 +1,4 @@
-﻿<Window x:Class="View.SupereventCreator"
+﻿<base:BaseWindow x:Class="View.SupereventCreator"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:View"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:cntrls ="clr-namespace:ViewControls"
+        xmlns:base="clr-namespace:View"
         mc:Ignorable="d"
         xmlns:controls="clr-namespace:ViewControls"
         Title="Создатель суперивентов" Height="650" Width="900"
@@ -82,4 +83,4 @@
         </StackPanel>
         </Grid>
     </Grid>
-</Window>
+</base:BaseWindow>
