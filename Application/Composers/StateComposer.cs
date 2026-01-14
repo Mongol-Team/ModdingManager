@@ -39,6 +39,9 @@ namespace Application.Composers
                 foreach (var file in files)
                 {
                     var stateConfig = ParseFile(file);
+                    if (stateConfig == null)
+                        continue;
+
                     stateConfig.FileFullPath = file;
                     result.Add(stateConfig);
                 }
