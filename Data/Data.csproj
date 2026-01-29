@@ -7,11 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Embedded\JSON\ErrorTypesDefenitions.json" />
     <EmbeddedResource Include="Embedded\Text\BaisicUnitGroupsDefenitions.txt" />
+    <EmbeddedResource Include="Embedded\Text\OtherModifierDefenitions.txt" />
     <EmbeddedResource Include="Embedded\Text\RulesCoreDefenitions.txt" />
     <EmbeddedResource Include="Resources\Localizations\english.loc" />
     <EmbeddedResource Include="Resources\Localizations\russian.loc" />
     <None Remove="Data\Text\OtherModifierDefenitions.txt" />
+    <None Remove="Embedded\JSON\ErrorTypesDefenitions.json" />
+    <None Remove="Embedded\Text\OtherModifierDefenitions.txt" />
   </ItemGroup>
 
   <ItemGroup>

@@ -19,5 +19,10 @@ namespace Models.GfxTypes
         public Bitmap? NormalContent { get; set; }
         public string SpecularPath { get; set; }
         public Bitmap? SpecularContent { get; set; }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }

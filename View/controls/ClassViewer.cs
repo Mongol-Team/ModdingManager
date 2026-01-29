@@ -1,28 +1,42 @@
 ﻿using Application;
+using Application.Debugging;
+using Application.Extentions;
+using Data;
 using ModdingManager.classes.utils;
 using Models.Args;
 using Models.Configs;
 using Models.Enums;
+using Models.GfxTypes;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using System;
 using System.Collections;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using View.Utils;
+using Brushes = System.Windows.Media.Brushes;
+using Button = System.Windows.Controls.Button;
 using CheckBox = System.Windows.Controls.CheckBox;
 using Color = System.Windows.Media.Color;
+using ComboBox = System.Windows.Controls.ComboBox;
+using DataFormats = System.Windows.DataFormats;
+using Image = System.Windows.Controls.Image;
 using Label = System.Windows.Controls.Label;
+using Orientation = System.Windows.Controls.Orientation;
+using Panel = System.Windows.Controls.Panel;
 using Size = System.Windows.Size;
 using TextBox = System.Windows.Controls.TextBox;
-using ComboBox = System.Windows.Controls.ComboBox;
-using Button = System.Windows.Controls.Button;
-using Orientation = System.Windows.Controls.Orientation;
 
 namespace ViewControls
 {
@@ -101,77 +115,7 @@ namespace ViewControls
             }
         }
 
-        protected override Size MeasureOverride(Size constraint)
-        {
-            double availableWidth = _isWidthExplicitlySet
-                ? Width
-                : (Parent is FrameworkElement parent ? parent.ActualWidth : 200);
 
-            if (!_isHeightExplicitlySet)
-            {
-                base.MeasureOverride(new Size(availableWidth, double.PositiveInfinity));
-
-                double totalHeight = 0;
-                foreach (UIElement child in Children)
-                {
-                    child.Measure(new Size(availableWidth, double.PositiveInfinity));
-                    double marginTop = 0, marginBottom = 0;
-                    if (child is FrameworkElement fe)
-                    {
-                        marginTop = fe.Margin.Top;
-                        marginBottom = fe.Margin.Bottom;
-                    }
-                    totalHeight += child.DesiredSize.Height + marginTop + marginBottom;
-                }
-
-                return new Size(availableWidth, totalHeight);
-            }
-
-            return base.MeasureOverride(constraint);
-        }
-
-        protected override Size ArrangeOverride(Size arrangeBounds)
-        {
-            if (!_isHeightExplicitlySet)
-            {
-                double y = 0;
-                foreach (UIElement child in Children)
-                {
-                    double childHeight = child.DesiredSize.Height;
-                    double marginTop = 0, marginBottom = 0;
-                    if (child is FrameworkElement fe)
-                    {
-                        marginTop = fe.Margin.Top;
-                        marginBottom = fe.Margin.Bottom;
-                    }
-
-                    double x = 0;
-                    if (child is FrameworkElement element)
-                    {
-                        switch (element.HorizontalAlignment)
-                        {
-                            case System.Windows.HorizontalAlignment.Center:
-                                x = (arrangeBounds.Width - child.DesiredSize.Width) / 2;
-                                break;
-                            case System.Windows.HorizontalAlignment.Right:
-                                x = arrangeBounds.Width - child.DesiredSize.Width;
-                                break;
-                            case System.Windows.HorizontalAlignment.Stretch:
-                            case System.Windows.HorizontalAlignment.Left:
-                            default:
-                                x = 0;
-                                break;
-                        }
-                    }
-
-                    child.Arrange(new Rect(x, y + marginTop, child.DesiredSize.Width, childHeight));
-                    y += childHeight + marginTop + marginBottom;
-                }
-                return new Size(arrangeBounds.Width, y);
-            }
-
-            return base.ArrangeOverride(arrangeBounds);
-        }
 
         private void RaisePropertyChanged(PropertyInfo prop, object oldValue, object newValue)
         {
@@ -200,7 +144,7 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
@@ -220,7 +164,7 @@ namespace ViewControls
                         Text = identifier?.ToString() ?? string.Empty,
                         Margin = ElementMargin,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
@@ -240,7 +184,7 @@ namespace ViewControls
                         Text = identifier?.ToString() ?? string.Empty,
                         Margin = ElementMargin,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
@@ -262,13 +206,13 @@ namespace ViewControls
                 {
                     Type enumType = prop.PropertyType.IsEnum ? prop.PropertyType : prop.PropertyType.GetGenericArguments()[0];
                     var enumValues = Enum.GetValues(enumType);
-                    var comboBox = new ComboBox
+                    var comboBox = new SearchableComboBox
                     {
                         ItemsSource = enumValues,
                         SelectedItem = value,
                         Margin = ElementMargin,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("ComboBoxDark")
+                        Style = (Style)TryFindResource("GenericViewerSearchableComboBox")
                     };
                     comboBox.SelectionChanged += (s, e) =>
                     {
@@ -294,13 +238,13 @@ namespace ViewControls
                         Width = this.Width,
                     };
                     
-                    var languageComboBox = new ComboBox
+                    var languageComboBox = new SearchableComboBox
                     {
                         ItemsSource = Enum.GetValues(typeof(Models.Enums.Language)).Cast<Models.Enums.Language>(),
                         SelectedItem = localisation.Language,
                         Margin = ElementMargin,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("ComboBoxDark")
+                        Style = (Style)TryFindResource("GenericViewerSearchableComboBox")
                     };
                     languageComboBox.SelectionChanged += (s, e) =>
                     {
@@ -328,7 +272,7 @@ namespace ViewControls
                     var languageLabel = new TextBlock
                     {
                         Text = "Language",
-                        Style = (Style)TryFindResource("TextSmall"),
+                        Style = (Style)TryFindResource("GenericViewerSectionTitle"),
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
                         Margin = new Thickness(ElementMargin.Left, 0, 10, 0)
@@ -361,7 +305,7 @@ namespace ViewControls
                     var localisationLabel = new TextBlock
                     {
                         Text = "Localisation",
-                        Style = (Style)TryFindResource("TextSmall"),
+                        Style = (Style)TryFindResource("GenericViewerSectionTitle"),
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
                         Margin = new Thickness(ElementMargin.Left, 0, 10, 0)
@@ -407,7 +351,7 @@ namespace ViewControls
                         Height = 100,
                         TextWrapping = TextWrapping.Wrap,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
 
@@ -475,7 +419,7 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
@@ -493,7 +437,8 @@ namespace ViewControls
                 {
                     var t = prop.PropertyType;
                     var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p => p.PropertyType.IsGenericType &&
-                        p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) &&
+                        (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
+                        p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
                         p.PropertyType.GetGenericArguments()[0] == t);
                     if (listProp != null)
                     {
@@ -574,7 +519,7 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
@@ -595,7 +540,7 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
@@ -616,7 +561,7 @@ namespace ViewControls
                         Text = value?.ToString(),
                         Margin = ElementMargin,
                         Width = this.Width,
-                        Style = (Style)TryFindResource("TextBoxDark"),
+                        Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
                     textBox.TextChanged += (s, e) =>
@@ -656,6 +601,46 @@ namespace ViewControls
                     };
                     inputControl = datePicker;
                 }
+                else if (prop.PropertyType == typeof(object))
+                {
+                    var currentValue = prop.GetValue(_buildingContent);
+                    var textBox = new TextBox
+                    {
+                        Text = currentValue?.ToString() ?? string.Empty,
+                        Margin = ElementMargin,
+                        Width = this.Width,
+                        Style = (Style)TryFindResource("GenericViewerTextBox"),
+                        Tag = prop.Name
+                    };
+
+                    textBox.TextChanged += (s, e) =>
+                    {
+                        var oldValue = prop.GetValue(_buildingContent);
+                        string newText = textBox.Text;
+
+                        object newValue = newText;  // по умолчанию просто строка
+
+                        // Если текст выглядит как число — пытаемся привести
+                        if (int.TryParse(newText, out int intVal))
+                        {
+                            newValue = intVal;
+                        }
+                        else if (double.TryParse(newText, out double doubleVal))
+                        {
+                            newValue = doubleVal;
+                        }
+                        else if (bool.TryParse(newText, out bool boolVal))
+                        {
+                            newValue = boolVal;
+                        }
+                        // можно добавить другие примитивы, если нужно (DateTime, Guid и т.д.)
+
+                        prop.SetValue(_buildingContent, newValue);
+                        RaisePropertyChanged(prop, oldValue, newValue);
+                    };
+
+                    inputControl = textBox;
+                }
                 else if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
                 {
                     var itemType = prop.PropertyType.GetGenericArguments()[0];
@@ -666,7 +651,7 @@ namespace ViewControls
                         list = (IList)Activator.CreateInstance(listType);
                         prop.SetValue(_buildingContent, list);
                     }
-                    
+
                     if (itemType == typeof(Var))
                     {
                         var sb = new StringBuilder();
@@ -687,7 +672,7 @@ namespace ViewControls
                             Height = 100,
                             TextWrapping = TextWrapping.Wrap,
                             Width = this.Width,
-                            Style = (Style)TryFindResource("TextBoxDark"),
+                            Style = (Style)TryFindResource("GenericViewerMultilineTextBox"),
                             Tag = prop.Name
                         };
                         textBox.TextChanged += (s, e) =>
@@ -725,6 +710,7 @@ namespace ViewControls
                             IsExpanded = false,
                             Margin = ElementMargin,
                             Width = this.Width,
+                            Style = (Style)TryFindResource("GenericViewerExpander"),
                         };
                         var itemsPanel = new StackPanel { Orientation = Orientation.Vertical };
                         foreach (var item in list)
@@ -744,6 +730,7 @@ namespace ViewControls
                                 {
                                     Content = "Remove",
                                     Margin = new Thickness(0, 2, 0, 2),
+                                    Style = (Style)TryFindResource("GenericViewerButton")
                                 };
                                 removeButton.Click += (s, e) =>
                                 {
@@ -762,6 +749,7 @@ namespace ViewControls
                         {
                             Content = "Add",
                             Margin = new Thickness(0, 5, 0, 0),
+                            Style = (Style)TryFindResource("GenericViewerButton")
                         };
                         addButton.Click += (s, e) =>
                         {
@@ -797,6 +785,7 @@ namespace ViewControls
                                     {
                                         Content = "Remove",
                                         Margin = new Thickness(0, 2, 0, 2),
+                                        Style = (Style)TryFindResource("GenericViewerButton")
                                     };
                                     removeButton.Click += (s2, e2) =>
                                     {
@@ -821,7 +810,8 @@ namespace ViewControls
                     else if (itemType.GetInterface("IConfig") != null)
                     {
                         var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p => p.PropertyType.IsGenericType &&
-                            p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) &&
+                            (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
+                            p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
                             p.PropertyType.GetGenericArguments()[0] == itemType);
                         if (listProp != null)
                         {
@@ -830,6 +820,7 @@ namespace ViewControls
                             {
                                 Header = $"{prop.Name} ({list.Count} items)",
                                 IsExpanded = false,
+                                Style = (Style)TryFindResource("GenericViewerExpander"),
                                 Margin = ElementMargin,
                                 Width = this.Width,
                             };
@@ -841,6 +832,7 @@ namespace ViewControls
                                     ItemsSource = availableItems,
                                     SelectedItem = item,
                                     Margin = new Thickness(0, 2, 0, 2),
+                                    Style = (Style)TryFindResource("GenericViewerSearchableComboBox")
                                 };
                                 searchCm.SelectionChanged += (s, e) =>
                                 {
@@ -855,6 +847,7 @@ namespace ViewControls
                                 {
                                     Content = "Remove",
                                     Margin = new Thickness(0, 2, 0, 2),
+                                    Style = (Style)TryFindResource("GenericViewerButton")
                                 };
                                 removeButton.Click += (s, e) =>
                                 {
@@ -872,6 +865,7 @@ namespace ViewControls
                             {
                                 Content = "Add",
                                 Margin = new Thickness(0, 5, 0, 0),
+                                Style = (Style)TryFindResource("GenericViewerButton")
                             };
                             addButton.Click += (s, e) =>
                             {
@@ -884,6 +878,7 @@ namespace ViewControls
                                         ItemsSource = availableItems,
                                         SelectedItem = firstItem,
                                         Margin = new Thickness(0, 2, 0, 2),
+                                        Style = (Style)TryFindResource("GenericViewerSearchableComboBox")
                                     };
                                     searchCm.SelectionChanged += (s2, e2) =>
                                     {
@@ -898,6 +893,7 @@ namespace ViewControls
                                     {
                                         Content = "Remove",
                                         Margin = new Thickness(0, 2, 0, 2),
+                                        Style = (Style)TryFindResource("GenericViewerButton")
                                     };
                                     removeButton.Click += (s2, e2) =>
                                     {
@@ -931,16 +927,17 @@ namespace ViewControls
                         dictionary = (IDictionary)Activator.CreateInstance(dictType);
                         prop.SetValue(_buildingContent, dictionary);
                     }
-                    
+
                     var expander = new Expander
                     {
                         Header = $"{prop.Name} ({dictionary.Count} items)",
                         IsExpanded = false,
                         Margin = ElementMargin,
-                        Width = this.Width,
+                        Style = (Style)TryFindResource("GenericViewerExpander"),
                     };
+
                     var itemsPanel = new StackPanel { Orientation = Orientation.Vertical };
-                    
+
                     foreach (DictionaryEntry entry in dictionary)
                     {
                         var keyControl = CreateControlForType(keyType, entry.Key, null);
@@ -949,19 +946,37 @@ namespace ViewControls
                             dictionary[entry.Key] = newValue;
                             RaisePropertyChanged(prop, entry.Value, newValue);
                         });
-                        
+
                         if (keyControl != null && valueControl != null)
                         {
-                            var itemContainer = new StackPanel { Orientation = Orientation.Horizontal };
-                            itemContainer.Children.Add(new Label { Content = "Key:", Margin = new Thickness(0, 2, 5, 2) });
-                            itemContainer.Children.Add(keyControl);
-                            itemContainer.Children.Add(new Label { Content = "Value:", Margin = new Thickness(10, 2, 5, 2) });
-                            itemContainer.Children.Add(valueControl);
-                            
+                            // фиксированные размеры и стили — оставляем как было
+                            if (keyControl is FrameworkElement keyFe)
+                            {
+                                keyFe.Width = 100;
+                                keyFe.Margin = new Thickness(0);
+                                if (keyType == typeof(string) && keyFe is TextBox tbk)
+                                {
+                                    tbk.Style = (Style)TryFindResource("GenericViewerExpanderTextBox");
+                                    tbk.Tag = "Key";
+                                }
+                            }
+                            if (valueControl is FrameworkElement valueFe)
+                            {
+                                valueFe.Width = 100;
+                                valueFe.Margin = new Thickness(10, 0, 0, 0);
+                                if (valueType == typeof(string) && valueFe is TextBox tbv)
+                                {
+                                    tbv.Style = (Style)TryFindResource("GenericViewerExpanderTextBox");
+                                    tbv.Tag = "Value";
+                                }
+                            }
+
+                            var itemContainer = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 2) };
                             var removeButton = new Button
                             {
                                 Content = "Remove",
-                                Margin = new Thickness(5, 2, 0, 2),
+                                Margin = new Thickness(5, 0, 0, 0),
+                                Style = (Style)TryFindResource("GenericViewerButton")
                             };
                             removeButton.Click += (s, e) =>
                             {
@@ -970,130 +985,213 @@ namespace ViewControls
                                 expander.Header = $"{prop.Name} ({dictionary.Count} items)";
                                 RaisePropertyChanged(prop, dictionary, dictionary);
                             };
+
+                            itemContainer.Children.Add(keyControl);
+                            itemContainer.Children.Add(valueControl);
                             itemContainer.Children.Add(removeButton);
                             itemsPanel.Children.Add(itemContainer);
                         }
                     }
-                    
+
                     var addButton = new Button
                     {
                         Content = "Add",
                         Margin = new Thickness(0, 5, 0, 0),
+                        Style = (Style)TryFindResource("GenericViewerButton")
                     };
+
                     addButton.Click += (s, e) =>
                     {
                         object newKey = null;
                         object newValue = null;
-                        
-                        if (keyType.GetInterface("IConfig") != null)
+
+                        // ─── Ключ ───────────────────────────────────────────────────────
+                        if (keyType.GetInterface("IGfx") != null || keyType.GetInterface("IConfig") != null)
                         {
-                            var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p => p.PropertyType.IsGenericType &&
-                                p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) &&
+                            var collectionProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                                p.PropertyType.IsGenericType &&
+                                (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
+                                 p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
                                 p.PropertyType.GetGenericArguments()[0] == keyType);
-                            if (listProp != null)
+
+                            if (collectionProp != null)
                             {
-                                var availableKeys = (IEnumerable)listProp.GetValue(ModDataStorage.Mod);
-                                if (availableKeys != null && availableKeys.Cast<object>().Any())
+                                var available = (IEnumerable)collectionProp.GetValue(ModDataStorage.Mod);
+                                if (available != null && available.Cast<object>().Any())
                                 {
-                                    newKey = availableKeys.Cast<object>().First();
+                                    newKey = available.Cast<object>().First();
                                 }
                             }
                         }
-                        
-                        if (valueType == typeof(object))
+                        else if (keyType == typeof(string))
                         {
-                            newValue = null;
+                            newKey = string.Empty;
                         }
-                        else if (valueType == typeof(int) || valueType == typeof(int?))
+                        else if (keyType == typeof(int) || keyType == typeof(int?))
                         {
-                            newValue = 0;
+                            newKey = 0;
+                        }
+                        else if (keyType == typeof(double) || keyType == typeof(double?))
+                        {
+                            newKey = 0.0;
+                        }
+                        else if (keyType == typeof(float) || keyType == typeof(float?))
+                        {
+                            newKey = 0.0f;
+                        }
+                        else if (keyType == typeof(decimal) || keyType == typeof(decimal?))
+                        {
+                            newKey = 0.0m;
+                        }
+                        else if (keyType == typeof(bool))
+                        {
+                            newKey = false;
+                        }
+                        else if (keyType.IsEnum)
+                        {
+                            var vals = Enum.GetValues(keyType);
+                            newKey = vals.Length > 0 ? vals.GetValue(0) : null;
+                        }
+                        else if (keyType == typeof(object))
+                        {
+                            newKey = string.Empty;  // по умолчанию пустая строка
+                        }
+                        else
+                        {
+                            itemsPanel.Children.Add(new Label
+                            {
+                                Content = $"Type without support (key): {keyType.FullName}",
+                                Foreground = Brushes.Red
+                            });
+                            return;
+                        }
+
+                        // ─── Значение ───────────────────────────────────────────────────
+                        if (valueType.GetInterface("IGfx") != null || valueType.GetInterface("IConfig") != null)
+                        {
+                            var collectionProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                                p.PropertyType.IsGenericType &&
+                                (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
+                                 p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
+                                p.PropertyType.GetGenericArguments()[0] == valueType);
+
+                            if (collectionProp != null)
+                            {
+                                var available = (IEnumerable)collectionProp.GetValue(ModDataStorage.Mod);
+                                if (available != null && available.Cast<object>().Any())
+                                {
+                                    newValue = available.Cast<object>().First();
+                                }
+                            }
                         }
                         else if (valueType == typeof(string))
                         {
                             newValue = string.Empty;
                         }
+                        else if (valueType == typeof(int) || valueType == typeof(int?))
+                        {
+                            newValue = 0;
+                        }
+                        else if (valueType == typeof(double) || valueType == typeof(double?))
+                        {
+                            newValue = 0.0;
+                        }
+                        else if (valueType == typeof(float) || valueType == typeof(float?))
+                        {
+                            newValue = 0.0f;
+                        }
+                        else if (valueType == typeof(decimal) || valueType == typeof(decimal?))
+                        {
+                            newValue = 0.0m;
+                        }
+                        else if (valueType == typeof(bool))
+                        {
+                            newValue = false;
+                        }
                         else if (valueType.IsEnum)
                         {
-                            var enumValues = Enum.GetValues(valueType);
-                            newValue = enumValues.Length > 0 ? enumValues.GetValue(0) : null;
+                            var vals = Enum.GetValues(valueType);
+                            newValue = vals.Length > 0 ? vals.GetValue(0) : null;
                         }
-                        
+                        else if (valueType == typeof(object))
+                        {
+                            newValue = string.Empty;  // по умолчанию пустая строка
+                        }
+                        else
+                        {
+                            itemsPanel.Children.Add(new Label
+                            {
+                                Content = $"Type without support (value): {valueType.FullName}",
+                                Foreground = Brushes.Red
+                            });
+                            return;
+                        }
+
                         if (newKey != null)
                         {
                             dictionary[newKey] = newValue;
+
                             var keyControl = CreateControlForType(keyType, newKey, null);
                             var valueControl = CreateControlForType(valueType, newValue, (updatedValue) =>
                             {
                                 dictionary[newKey] = updatedValue;
                                 RaisePropertyChanged(prop, newValue, updatedValue);
                             });
-                            
+
                             if (keyControl != null && valueControl != null)
                             {
-                                var itemContainer = new StackPanel { Orientation = Orientation.Horizontal };
-                                itemContainer.Children.Add(new Label { Content = "Key:", Margin = new Thickness(0, 2, 5, 2) });
-                                itemContainer.Children.Add(keyControl);
-                                itemContainer.Children.Add(new Label { Content = "Value:", Margin = new Thickness(10, 2, 5, 2) });
-                                itemContainer.Children.Add(valueControl);
-                                
-                                var removeButton = new Button
+                                // фиксированные размеры и стили (как было)
+                                if (keyControl is FrameworkElement kf) { kf.Width = 100; kf.Margin = new Thickness(0); }
+                                if (valueControl is FrameworkElement vf) { vf.Width = 100; vf.Margin = new Thickness(10, 0, 0, 0); }
+
+                                var itemContainer = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 2) };
+                                var removeBtn = new Button
                                 {
                                     Content = "Remove",
-                                    Margin = new Thickness(5, 2, 0, 2),
+                                    Margin = new Thickness(5, 0, 0, 0),
+                                    Style = (Style)TryFindResource("GenericViewerButton")
                                 };
-                                removeButton.Click += (s2, e2) =>
+                                removeBtn.Click += (s2, e2) =>
                                 {
                                     dictionary.Remove(newKey);
                                     itemsPanel.Children.Remove(itemContainer);
                                     expander.Header = $"{prop.Name} ({dictionary.Count} items)";
                                     RaisePropertyChanged(prop, dictionary, dictionary);
                                 };
-                                itemContainer.Children.Add(removeButton);
+
+                                itemContainer.Children.Add(keyControl);
+                                itemContainer.Children.Add(valueControl);
+                                itemContainer.Children.Add(removeBtn);
                                 itemsPanel.Children.Add(itemContainer);
+
                                 expander.Header = $"{prop.Name} ({dictionary.Count} items)";
                                 RaisePropertyChanged(prop, dictionary, dictionary);
                             }
                         }
                     };
+
                     itemsPanel.Children.Add(addButton);
                     expander.Content = itemsPanel;
                     inputControl = expander;
                 }
-                else if (prop.PropertyType.GetInterface("IGfx") != null)
+                else if ((prop.PropertyType.GetInterface(nameof(IGfx)) != null ||
+                         typeof(IGfx).IsAssignableFrom(prop.PropertyType)))
                 {
-                    var t = prop.PropertyType;
-                    var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p => p.PropertyType.IsGenericType &&
-                        p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) &&
-                        p.PropertyType.GetGenericArguments()[0] == t);
-                    if (listProp != null)
+                    // Получаем текущее значение свойства
+                    var currentValue = prop.GetValue(_buildingContent);
+
+                    // Создаём контрол через CreateControlForType
+                    var gfxControl = CreateControlForType(prop.PropertyType, currentValue, (newValue) =>
                     {
-                        var list = (IEnumerable)listProp.GetValue(ModDataStorage.Mod);
-                        var currentValue = prop.GetValue(_buildingContent);
-                        object selected = null;
-                        if (currentValue != null)
-                        {
-                            foreach (var item in list)
-                            {
-                                if (item.Equals(currentValue))
-                                {
-                                    selected = currentValue;
-                                    break;
-                                }
-                            }
-                        }
-                        var searchCm = new SearchableComboBox()
-                        {
-                            ItemsSource = list,
-                            SelectedItem = selected
-                        };
-                        inputControl = searchCm;
-                        searchCm.SelectionChanged += (s, e) =>
-                        {
-                            var old = prop.GetValue(_buildingContent);
-                            var newValue = searchCm.SelectedItem;
-                            prop.SetValue(_buildingContent, newValue);
-                            RaisePropertyChanged(prop, old, newValue);
-                        };
+                        // При изменении значения — сохраняем в объект и поднимаем событие
+                        var old = prop.GetValue(_buildingContent);
+                        prop.SetValue(_buildingContent, newValue);
+                        RaisePropertyChanged(prop, old, newValue);
+                    });
+
+                    if (gfxControl != null)
+                    {
+                        inputControl = gfxControl;
                     }
                 }
 
@@ -1102,7 +1200,7 @@ namespace ViewControls
                     var label = new TextBlock
                     {
                         Text = prop.Name,
-                        Style = (Style)TryFindResource("TextSmall"),
+                        Style = (Style)TryFindResource("GenericViewerSectionTitle"),
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
                         Margin = new Thickness(ElementMargin.Left, 0, 10, 0)
@@ -1160,7 +1258,72 @@ namespace ViewControls
             }
             return null;
         }
+        private void ApplyGenericViewerStyle(FrameworkElement control)
+        {
+            var controlTypeName = control.GetType().Name;  // Для отладки
 
+            if (control is TextBox tb)
+            {
+                tb.Style = (Style)TryFindResource("GenericViewerTextBox");  // Стиль с CornerRadius=2, Margin=0,0,0,10
+                tb.Width = 200;  // Фиксированный размер
+            }
+            else if (control is SearchableComboBox cb)
+            {
+                cb.Style = (Style)TryFindResource("GenericViewerSearchableComboBox");  // BasedOn="ComboBoxDark", Margin=0,0,0,10
+                cb.Width = 200;
+            }
+            else if (control is CheckBox chb)
+            {
+                chb.Style = (Style)TryFindResource("GenericViewerCheckBox");  // BasedOn="CheckBoxDark", Margin=0,0,0,10
+            }
+            else if (control is Expander exp)
+            {
+                exp.Style = (Style)TryFindResource("GenericViewerExpander");  // Foreground="#ffffff", Margin=0,0,0,10 — исправление применения к Expander
+                exp.Width = 200;  // Фиксированный размер для списков
+
+                // Рекурсия для внутренних элементов списков (стилизация списков интерфейсов: SearchableComboBox, TextBox, Button)
+                if (exp.Content is Panel panel)
+                {
+                    foreach (var child in panel.Children.OfType<FrameworkElement>())
+                    {
+                        ApplyGenericViewerStyle(child);  // Рекурсивно
+                        if (child is Button btn)
+                        {
+                            btn.Style = (Style)TryFindResource("GenericViewerButton");  // BasedOn="ButtonBase", Margin=0,5,0,0
+                            btn.Width = 100;
+                        }
+                        else if (child is TextBox innerTb)
+                        {
+                            innerTb.Style = (Style)TryFindResource("GenericViewerExpanderTextBox");  // Для элементов в Expander, Margin=0,2
+                            innerTb.Width = 100;
+                        }
+                        else if (child is SearchableComboBox scb)  // Для списков IConfig/IGfx
+                        {
+                            scb.Style = (Style)TryFindResource("GenericViewerSearchableComboBox");  // Адаптация для SearchableComboBox
+                            scb.Width = 200;
+                        }
+                    }
+                }
+            }
+            else if (control is CustomDatePicker dp)
+            {
+                dp.Margin = new Thickness(0, 0, 0, 10);  // Как в примерах
+                dp.Width = 200;
+            }
+            else if (control is ColorPickerDropdown cpd)
+            {
+                cpd.Width = 120;  // Как в примерах
+                cpd.Margin = new Thickness(0, 0, 0, 10);
+            }
+            else if (control is LocalisationDisplay ld)
+            {
+                ld.Margin = new Thickness(0, 0, 0, 10);  // Как в примерах
+                ld.Width = 200;
+            }
+
+            // Подробная отладка: Детали применения стиля
+            Logger.AddDbgLog($"Применён стиль GenericViewer к элементу типа {controlTypeName} с Width={control.Width}.");
+        }
         private FrameworkElement CreateControlForType(Type type, object value, Action<object> onValueChanged)
         {
             if (type == typeof(string))
@@ -1169,8 +1332,9 @@ namespace ViewControls
                 {
                     Text = value?.ToString() ?? string.Empty,
                     Width = 200,
-                    Style = (Style)FindResource("TextBoxDark")
+                    Style = (Style)TryFindResource("GenericViewerTextBox")
                 };
+                ApplyGenericViewerStyle(textBox);
                 if (onValueChanged != null)
                 {
                     textBox.TextChanged += (s, e) => onValueChanged(textBox.Text);
@@ -1183,8 +1347,10 @@ namespace ViewControls
                 {
                     Text = value?.ToString() ?? "0",
                     Width = 200,
-                    Style = (Style)FindResource("TextBoxDark")
+                    Style = (Style)TryFindResource("GenericViewerTextBox")
                 };
+
+                ApplyGenericViewerStyle(textBox);
                 if (onValueChanged != null)
                 {
                     textBox.TextChanged += (s, e) =>
@@ -1200,13 +1366,15 @@ namespace ViewControls
             else if (type.IsEnum)
             {
                 var enumValues = Enum.GetValues(type);
-                var comboBox = new ComboBox
+                var comboBox = new SearchableComboBox
                 {
                     ItemsSource = enumValues,
                     SelectedItem = value,
                     Width = 200,
-                    Style = (Style)FindResource("ComboBoxDark")
+                    Style = (Style)TryFindResource("GenericViewerSearchableComboBox")
                 };
+
+                ApplyGenericViewerStyle(comboBox);
                 if (onValueChanged != null)
                 {
                     comboBox.SelectionChanged += (s, e) => onValueChanged(comboBox.SelectedItem);
@@ -1216,7 +1384,8 @@ namespace ViewControls
             else if (type.GetInterface("IConfig") != null)
             {
                 var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p => p.PropertyType.IsGenericType &&
-                    p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) &&
+                    (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
+                    p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
                     p.PropertyType.GetGenericArguments()[0] == type);
                 if (listProp != null)
                 {
@@ -1227,6 +1396,8 @@ namespace ViewControls
                         SelectedItem = value,
                         Width = 200,
                     };
+
+                    ApplyGenericViewerStyle(searchCm);
                     if (onValueChanged != null)
                     {
                         searchCm.SelectionChanged += (s, e) => onValueChanged(searchCm.SelectedItem);
@@ -1241,22 +1412,275 @@ namespace ViewControls
                 {
                     Text = identifier?.ToString() ?? string.Empty,
                     Width = 200,
-                    Style = (Style)FindResource("TextBoxDark")
+                    Style = (Style)TryFindResource("GenericViewerTextBox")
                 };
+
+                ApplyGenericViewerStyle(textBox);
                 if (onValueChanged != null)
                 {
                     textBox.TextChanged += (s, e) => onValueChanged(new Identifier(textBox.Text));
                 }
                 return textBox;
             }
-            
+            else if (typeof(IGfx).IsAssignableFrom(type))
+            {
+                var currentGfx = value as IGfx;
+
+                var rootStack = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
+
+                // ─── Выбор существующего gfx ───────────────────────────────────
+                var combo = new SearchableComboBox
+                {
+                    ItemsSource = ModDataStorage.Mod?.Gfxes ?? new ObservableCollection<IGfx>(),
+                    SelectedItem = currentGfx,
+                    Name = "GfxesComboBox",               // или "Id", "DisplayName" — подставь своё
+                    Width = 240,
+                    Margin = new Thickness(0, 0, 0, 8),
+                    IsEnabled = true
+                };
+
+                combo.SelectionChanged += (s, e) =>
+                {
+                    onValueChanged?.Invoke(combo.SelectedItem);
+                };
+
+                // ─── Expander только для создания нового ───────────────────────
+                var expander = new Expander
+                {
+                    Header = "Создать новую графику",
+                    IsExpanded = false,
+                    Margin = new Thickness(0, 8, 0, 0)
+                };
+
+                expander.Expanded += (s, e) => combo.IsEnabled = false;
+                expander.Collapsed += (s, e) => combo.IsEnabled = true;
+
+                // Содержимое экспандера
+                var createPanel = new StackPanel { Margin = new Thickness(10, 6, 10, 10) };
+
+                var lblName = new TextBlock
+                {
+                    Text = "Имя:",
+                    Margin = new Thickness(0, 0, 0, 4)
+                };
+
+                var tbName = new TextBox
+                {
+                    Width = 220,
+                    Margin = new Thickness(0, 0, 0, 12)
+                };
+
+                var lblImage = new TextBlock
+                {
+                    Text = "Изображение (перетащите файл или нажмите Обзор):",
+                    Margin = new Thickness(0, 0, 0, 6)
+                };
+
+                // ─── Область drag-and-drop + превью ────────────────────────────
+                var imageBorder = new Border
+                {
+                    Width = 180,
+                    Height = 180,
+                    Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255)),
+                    BorderBrush = Brushes.Gray,
+                    BorderThickness = new Thickness(2),
+                    CornerRadius = new CornerRadius(4),
+                    Margin = new Thickness(0, 0, 0, 12),
+                    AllowDrop = true
+                };
+
+                var dropImage = new Image
+                {
+                    Stretch = Stretch.Uniform,
+                    Visibility = Visibility.Collapsed
+                };
+
+                var dropText = new TextBlock
+                {
+                    Text = "Перетащите изображение сюда\nили нажмите Обзор...",
+                    TextAlignment = TextAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Foreground = Brushes.Gray,
+                    TextWrapping = TextWrapping.Wrap
+                };
+
+                var dropGrid = new Grid();
+                dropGrid.Children.Add(dropText);
+                dropGrid.Children.Add(dropImage);
+
+                imageBorder.Child = dropGrid;
+
+                // ─── Drag & Drop события ───────────────────────────────────────
+                imageBorder.DragEnter += (s, e) =>
+                {
+                    if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                    {
+                        imageBorder.BorderBrush = Brushes.DodgerBlue;
+                        imageBorder.Background = new SolidColorBrush(Color.FromArgb(80, 0, 120, 215));
+                        e.Handled = true;
+                    }
+                };
+
+                imageBorder.DragLeave += (s, e) =>
+                {
+                    imageBorder.BorderBrush = Brushes.Gray;
+                    imageBorder.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
+                };
+
+                imageBorder.Drop += (s, e) =>
+                {
+                    imageBorder.BorderBrush = Brushes.Gray;
+                    imageBorder.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
+
+                    if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                    {
+                        string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                        if (files.Length > 0)
+                        {
+                            string filePath = files[0];
+                            if (IsImageFile(filePath))
+                            {
+                                try
+                                {
+                                    dropImage.Source = new BitmapImage(new Uri(filePath));
+                                    dropImage.Visibility = Visibility.Visible;
+                                    dropText.Visibility = Visibility.Collapsed;
+                                    imageBorder.Tag = filePath;  // сохраняем путь
+                                }
+                                catch
+                                {
+                                    CustomMessageBox.Show("Не удалось загрузить изображение", "Ошибка");
+                                }
+                            }
+                            else
+                            {
+                                CustomMessageBox.Show("Поддерживаются только изображения (png, jpg, jpeg, bmp)", "Неверный формат");
+                            }
+                        }
+                    }
+                    e.Handled = true;
+                };
+
+                // ─── Кнопка Обзор ──────────────────────────────────────────────
+                var btnBrowse = new Button
+                {
+                    Content = "Обзор...",
+                    Width = 80,
+                    Margin = new Thickness(0, 0, 0, 12)
+                };
+
+                btnBrowse.Click += (s, e) =>
+                {
+                    var ofd = new Microsoft.Win32.OpenFileDialog
+                    {
+                        Filter = "Изображения (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|Все файлы|*.*"
+                    };
+
+                    if (ofd.ShowDialog() == true)
+                    {
+                        string filePath = ofd.FileName;
+                        try
+                        {
+                            dropImage.Source = new BitmapImage(new Uri(filePath));
+                            dropImage.Visibility = Visibility.Visible;
+                            dropText.Visibility = Visibility.Collapsed;
+                            imageBorder.Tag = filePath;
+                        }
+                        catch
+                        {
+                            CustomMessageBox.Show("Не удалось загрузить изображение", "Ошибка");
+                        }
+                    }
+                };
+
+                // ─── Кнопка создания ───────────────────────────────────────────
+                var btnCreate = new Button
+                {
+                    Content = "Создать и выбрать",
+                    Padding = new Thickness(16, 8, 16, 8),
+                    Margin = new Thickness(0, 8, 0, 0),
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Left
+                };
+
+                btnCreate.Click += (s, e) =>
+                {
+                    var name = tbName.Text?.Trim();
+                    var path = imageBorder.Tag as string;
+
+                    if (string.IsNullOrWhiteSpace(name))
+                    {
+                        CustomMessageBox.Show("Укажите имя", "Ошибка");
+                        return;
+                    }
+
+                    if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                    {
+                        CustomMessageBox.Show("Выберите изображение", "Ошибка");
+                        return;
+                    }
+
+                    var newGfx = new SpriteType()
+                    {
+                        Id = new(name),
+                        Content = dropImage.Source.ToBitmap(),
+                        TexturePath = DataDefaultValues.NeedToHandle,
+                    };
+                    if (newGfx != null)
+                    {
+                        ModDataStorage.Mod.Gfxes.Add(newGfx);
+
+                        var oldSource = combo.ItemsSource;
+                        combo.ItemsSource = null;
+                        combo.ItemsSource = oldSource;
+                        combo.SelectedItem = newGfx;
+
+                        expander.IsExpanded = false;
+
+                        // сброс формы
+                        tbName.Text = "";
+                        dropImage.Source = null;
+                        dropImage.Visibility = Visibility.Collapsed;
+                        dropText.Visibility = Visibility.Visible;
+                        imageBorder.Tag = null;
+                    }
+                };
+
+                // собираем содержимое экспандера
+                createPanel.Children.Add(lblName);
+                createPanel.Children.Add(tbName);
+                createPanel.Children.Add(lblImage);
+                createPanel.Children.Add(imageBorder);
+                createPanel.Children.Add(btnBrowse);
+                createPanel.Children.Add(btnCreate);
+
+                expander.Content = createPanel;
+
+                // ─── Итоговая сборка ───────────────────────────────────────────
+                rootStack.Children.Add(new TextBlock
+                {
+                    Text = "Графика (IGfx)",
+                    FontWeight = FontWeights.SemiBold,
+                    Margin = new Thickness(0, 0, 0, 4)
+                });
+                rootStack.Children.Add(combo);
+                rootStack.Children.Add(expander);
+
+                return rootStack;
+            }
+
             return new TextBox
             {
                 Text = value?.ToString() ?? string.Empty,
                 IsReadOnly = true,
                 Width = 200,
-                Style = (Style)FindResource("TextBoxDark")
+                Style = (Style)TryFindResource("GenericViewerTextBox")
             };
+
+        }
+        private bool IsImageFile(string path)
+        {
+            var ext = Path.GetExtension(path)?.ToLowerInvariant();
+            return ext is ".png" or ".jpg" or ".jpeg" or ".bmp";
         }
     }
 }

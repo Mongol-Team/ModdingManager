@@ -50,6 +50,9 @@ namespace Models.Configs
         public bool HasDestroyedMesh { get; set; }
         public bool Centered { get; set; }
         public IGfx Gfx { get; set; }
-
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

@@ -51,5 +51,9 @@ namespace Models.Configs
         public string GainXpLeader { get; set; } //triggers
         public double GainXpOnSpotting { get; set; }
         public string TraitXpFactor { get; set; } //triggers
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

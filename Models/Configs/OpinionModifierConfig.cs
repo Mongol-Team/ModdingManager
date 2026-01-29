@@ -29,5 +29,9 @@ namespace Models.Configs
         public Dictionary<TimeUnit, int> RemovalTime { get; set; } = new Dictionary<TimeUnit, int> { { TimeUnit.Day, DataDefaultValues.NullInt } };
         public int MinTrust { get; set; }
         public int MaxTrust { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

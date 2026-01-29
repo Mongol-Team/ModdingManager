@@ -16,5 +16,10 @@ namespace Models.GfxTypes
         public Bitmap? Content { get; set; }
         public int NoOfFrames { get; set; }
         public string EffectFile { get; set; }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }

@@ -1,10 +1,11 @@
-﻿using RawDataWorker.Interfaces;
+﻿
 using Models.Enums;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.LochalizationData;
 using System.Text.RegularExpressions;
 using Rx = RawDataWorker.Regexes;
+using Models.Interfaces.RawDataWorkerInterfaces;
 
 namespace RawDataWorker.Parsers
 {

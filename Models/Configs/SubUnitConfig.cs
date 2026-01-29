@@ -37,5 +37,9 @@ namespace Models.Configs
         public Dictionary<EquipmentConfig, int> Need { get; set; } = [];
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; } = [];
         public Dictionary<ProvinceTerrain, Dictionary<ModifierDefinitionConfig, object>> TerrainModifiers { get; set; } = [];
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        } 
     }
 }

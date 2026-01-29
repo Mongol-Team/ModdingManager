@@ -1,4 +1,4 @@
-﻿namespace RawDataWorker.Interfaces
+﻿namespace Models.Interfaces.RawDataWorkerInterfaces
 {
     public interface IParsingPattern
     {

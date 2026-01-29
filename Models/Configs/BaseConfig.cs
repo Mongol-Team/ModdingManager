@@ -12,5 +12,10 @@ namespace Models.Configs
         public bool IsCore { get; set; }
         public bool IsOverride { get; set; }
         public string FileFullPath { get; set; }
+
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

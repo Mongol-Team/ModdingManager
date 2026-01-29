@@ -1,5 +1,6 @@
 ﻿using Models.Configs;
 using Models.Interfaces;
+using System.Collections.ObjectModel;
 
 namespace Application.Extentions
 {
@@ -7,6 +8,16 @@ namespace Application.Extentions
     {
         #region TechTreeMethods
         public static TechTreeItemConfig GetTreeItem(this List<TechTreeConfig> config, string id)
+        {
+            foreach (var cfg in config)
+            {
+                var item = cfg.Items.FirstOrDefault(i => i.Id.ToString() == id);
+                if (item != null)
+                    return item;
+            }
+            return null;
+        }
+        public static TechTreeItemConfig GetTreeItem(this ObservableCollection<TechTreeConfig> config, string id)
         {
             foreach (var cfg in config)
             {

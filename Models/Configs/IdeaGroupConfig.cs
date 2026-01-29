@@ -18,5 +18,9 @@ namespace Models.Configs
         public bool IsDesigner { get; set; }
         public List<IdeaConfig> Ideas { get; set; } = new List<IdeaConfig>();
         public ConfigLocalisation Localisation { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

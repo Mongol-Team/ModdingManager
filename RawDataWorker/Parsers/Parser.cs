@@ -1,5 +1,6 @@
-﻿using RawDataWorker.Interfaces;
+﻿
 using Models.Interfaces;
+using Models.Interfaces.RawDataWorkerInterfaces;
 
 namespace RawDataWorker.Parsers
 {

@@ -1,4 +1,4 @@
-﻿using RawDataWorker.Interfaces;
+﻿
 using Models.Interfaces;
 using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Rx = RawDataWorker.Regexes;
 using Data;
+using Models.Interfaces.RawDataWorkerInterfaces;
 
 namespace RawDataWorker.Parsers
 {

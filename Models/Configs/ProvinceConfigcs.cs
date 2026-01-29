@@ -27,5 +27,9 @@ namespace Models.Configs
         public int VictoryPoints { get; set; }
         public string Terrain { get; set; }
         public ProvinceShapeArg Shape { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

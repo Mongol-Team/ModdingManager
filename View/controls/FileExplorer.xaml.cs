@@ -3,6 +3,7 @@ using Models.Attributes;
 using Models.Configs;
 using Models.Interfaces;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -201,11 +202,14 @@ namespace ViewControls
             var propertyMap = new Dictionary<Type, PropertyInfo>();
             foreach (var prop in properties)
             {
-                if (prop.PropertyType.IsGenericType &&
-                    prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+                if (prop.PropertyType.IsGenericType)
                 {
-                    var itemType = prop.PropertyType.GetGenericArguments()[0];
-                    propertyMap[itemType] = prop;
+                    var genericDef = prop.PropertyType.GetGenericTypeDefinition();
+                    if (genericDef == typeof(List<>) || genericDef == typeof(ObservableCollection<>))
+                    {
+                        var itemType = prop.PropertyType.GetGenericArguments()[0];
+                        propertyMap[itemType] = prop;
+                    }
                 }
                 else if (prop.PropertyType == typeof(MapConfig))
                 {
@@ -218,18 +222,21 @@ namespace ViewControls
             {
                 if (propertyMap.TryGetValue(configType, out var prop))
                 {
-                    if (prop.PropertyType.IsGenericType &&
-                        prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+                    if (prop.PropertyType.IsGenericType)
                     {
-                        if (prop.GetValue(modConfig) is IList value && value.Count > 0)
+                        var genericDef = prop.PropertyType.GetGenericTypeDefinition();
+                        if (genericDef == typeof(List<>) || genericDef == typeof(ObservableCollection<>))
                         {
-                            categories.Add(new ModCategoryNode
+                            if (prop.GetValue(modConfig) is IList value && value.Count > 0)
                             {
-                                Name = prop.Name,
-                                DisplayName = FormatCategoryName(prop.Name),
-                                Items = value,
-                                ItemType = configType
-                            });
+                                categories.Add(new ModCategoryNode
+                                {
+                                    Name = prop.Name,
+                                    DisplayName = FormatCategoryName(prop.Name),
+                                    Items = value,
+                                    ItemType = configType
+                                });
+                            }
                         }
                     }
                     else if (prop.PropertyType == typeof(MapConfig))
@@ -257,17 +264,37 @@ namespace ViewControls
             var configTypes = new List<Type>();
             try
             {
-                var assembly = typeof(ModConfig).Assembly;
-                var allTypes = assembly.GetTypes()
-                    .Where(t => t.Namespace == "Models.Configs")
-                    .Where(t => t.IsClass && !t.IsAbstract)
-                    .Where(t => typeof(IConfig).IsAssignableFrom(t) || t == typeof(MapConfig))
-                    .Where(t => t.Name.EndsWith("Config"))
-                    .Where(t => t != typeof(ModConfig) && t != typeof(BaseConfig) && t != typeof(IConfig))
-                    .Where(t => !t.Name.StartsWith("I")) // Исключаем интерфейсы
-                    .ToList();
 
-                configTypes.AddRange(allTypes);
+                var types = new List<Type>();
+
+                foreach (var prop in typeof(ModConfig).GetProperties())
+                {
+                    var type = prop.PropertyType;
+
+                    var genericDef = type.GetGenericTypeDefinition(); 
+                    if (genericDef == typeof(List<>) || genericDef == typeof(ObservableCollection<>))
+                    {
+                        var elementType = type.GetGenericArguments()[0];
+
+                        if (typeof(IGfx).IsAssignableFrom(elementType) ||
+                            typeof(IConfig).IsAssignableFrom(elementType))
+                        {
+                            configTypes.Add(elementType);
+                        }
+                    }
+                    else
+                    {
+                        // Если не список, проверяем сам тип
+                        if (typeof(IGfx).IsAssignableFrom(type) ||
+                            typeof(IConfig).IsAssignableFrom(type))
+                        {
+                            configTypes.Add(type);
+                        }
+                    }
+                }
+
+
+                configTypes.AddRange(types);
             }
             catch
             {

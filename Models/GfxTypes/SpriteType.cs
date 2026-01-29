@@ -27,6 +27,11 @@ namespace Models.GfxTypes
             LegacyLazyLoad = false;
             TransparenceCheck = false;
         }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 
 }

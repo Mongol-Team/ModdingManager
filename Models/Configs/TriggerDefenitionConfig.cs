@@ -21,5 +21,9 @@ namespace Models.Configs
         public string FileFullPath { get; set; }
         public List<TargetType> Target { get; set; }
         public Identifier Id { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

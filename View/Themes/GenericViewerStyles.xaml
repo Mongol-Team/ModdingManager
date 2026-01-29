@@ -71,7 +71,23 @@
     <Style x:Key="GenericViewerComboBox" TargetType="ComboBox" BasedOn="{StaticResource ComboBoxDark}">
         <Setter Property="Margin" Value="0,0,0,10"/>
     </Style>
-    
+    <Style x:Key="GenericViewerSearchableComboBox" TargetType="controls:SearchableComboBox">
+        <Setter Property="ComboWidth" Value="200"/>
+        <Setter Property="Margin" Value="0,0,0,10"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:SearchableComboBox">
+                    <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="2">
+                        <ContentPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <!-- Стиль для CheckBox в примерах -->
     <Style x:Key="GenericViewerCheckBox" TargetType="CheckBox" BasedOn="{StaticResource CheckBoxDark}">
         <Setter Property="Margin" Value="0,0,0,10"/>
@@ -161,7 +177,18 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+    <!-- Стиль для горизонтального контейнера элементов в Expander -->
+    <Style x:Key="GenericViewerExpanderItemContainer" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="Margin" Value="0,2,0,2"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Стиль для вертикальной панели элементов -->
+    <Style x:Key="GenericViewerExpanderItemsPanel" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Vertical"/>
+        <Setter Property="Margin" Value="0"/>
+    </Style>
     <!-- Стиль для многострочного TextBox (List<Var>) с placeholder -->
     <Style x:Key="GenericViewerMultilineTextBox" TargetType="TextBox" BasedOn="{StaticResource GenericViewerTextBox}">
         <Setter Property="AcceptsReturn" Value="True"/>

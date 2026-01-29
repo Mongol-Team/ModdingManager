@@ -21,6 +21,9 @@ namespace Models.Configs
         public List<ICharacterType> Types { get; set; } = [];
         public string Tag { get; set; } = DataDefaultValues.Null;
         public string AiWillDo { get; set; } = DataDefaultValues.Null;
-
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

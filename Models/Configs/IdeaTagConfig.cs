@@ -28,5 +28,9 @@ namespace Models.Configs
         public IdeaType Type { get; set; }
         public bool Hidden { get; set; }
         public bool PoliticsTab { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

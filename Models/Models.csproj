@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Enums\NewFile1.txt" />
     <None Remove="Interfaces\NewFile1.txt" />
     <None Remove="Types\ObectCacheData\NewFile1.txt" />
   </ItemGroup>
@@ -24,6 +25,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Data\Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Enums\GameEnums\" />
   </ItemGroup>
 
 </Project>

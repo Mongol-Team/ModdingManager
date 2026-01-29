@@ -37,6 +37,10 @@ namespace Models.Configs
         public List<IdeaConfig>? Ideas { get; set; } = new List<IdeaConfig>();
         public List<CountryCharacterConfig>? Characters { get; set; } = new List<CountryCharacterConfig>();
         public Dictionary<StateConfig, bool>? StateCores { get; set; } = new Dictionary<StateConfig, bool>();
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 
 }

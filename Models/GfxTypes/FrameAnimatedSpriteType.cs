@@ -17,5 +17,10 @@ namespace Models.GfxTypes
         public bool PlayOnShow { get; set; }             // <bool>
         public double PauseOnLoop { get; set; }
         public bool AllwaysTransparent { get; set; }    // <bool>
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }

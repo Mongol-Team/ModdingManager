@@ -18,5 +18,9 @@ namespace Models.GfxTypes
         public string EffectFile { get; set; }        // "<path>"
         public bool IsHorisontal { get; set; }          // <bool>
         public int Steps { get; set; }                // <int>
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }

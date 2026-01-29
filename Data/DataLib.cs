@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace Data
 {
@@ -6,6 +8,7 @@ namespace Data
     {
         public static readonly string RulesCoreDefenitions;
         public static readonly string BaisicUnitGroupsDefenitions;
+        public static readonly string ErrorTypesDefenitions;
         static DataLib()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -13,27 +16,38 @@ namespace Data
 
             foreach (var resourceName in resources)
             {
-                if (!resourceName.StartsWith("Data.Embedded.Text.", StringComparison.Ordinal))
-                    continue;
-
-                if (!resourceName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                var fileName = resourceName.Substring(
-                    "Data.Embedded.Text.".Length
-                );
-
-                switch (fileName)
+                if (resourceName.StartsWith("Data.Embedded.Text.", StringComparison.Ordinal) &&
+                    resourceName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
                 {
-                    case "RulesCoreDefenitions.txt":
-                        RulesCoreDefenitions = ReadResource(assembly, resourceName);
-                        break;
-                    case "BaisicUnitGroupsDefenitions.txt":
-                        BaisicUnitGroupsDefenitions = ReadResource(assembly, resourceName);
-                        break;
+                    var fileName = resourceName.Substring("Data.Embedded.Text.".Length);
+
+                    switch (fileName)
+                    {
+                        case "RulesCoreDefenitions.txt":
+                            RulesCoreDefenitions = ReadResource(assembly, resourceName);
+                            break;
+                        case "BaisicUnitGroupsDefenitions.txt":
+                            BaisicUnitGroupsDefenitions = ReadResource(assembly, resourceName);
+                            break;
+                    }
+                }
+
+                if (resourceName.StartsWith("Data.Embedded.JSON.", StringComparison.Ordinal) &&
+                    resourceName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                {
+                    var fileName = resourceName.Substring("Data.Embedded.JSON.".Length);
+
+                    switch (fileName)
+                    {
+                        case "ErrorTypesDefenitions.json":
+                            ErrorTypesDefenitions = ReadResource(assembly, resourceName);
+                            break;
+                        
+                    }
                 }
             }
         }
+
 
         private static string ReadResource(Assembly assembly, string resourceName)
         {

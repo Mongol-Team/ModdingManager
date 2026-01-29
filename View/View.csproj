@@ -39,4 +39,10 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="controls\GenericViewer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
 </Project>

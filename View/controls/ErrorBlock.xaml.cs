@@ -1,118 +1,120 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Models.Enums;
+using Models.Interfaces;           // здесь находится IError
+using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Brushes = System.Windows.Media.Brushes;
+using Color = System.Windows.Media.Color;
 using MessageBox = System.Windows.MessageBox;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace ViewControls
 {
     /// <summary>
-    /// Логика взаимодействия для ErrorBlock.xaml
+    /// Контрол для отображения одной ошибки, совместимый с интерфейсом Models.Interfaces.IError
     /// </summary>
-    public enum ErrorType
-    {
-        Warning,
-        Critical
-    }
-
     public partial class ErrorBlock : UserControl
     {
-        public static readonly DependencyProperty ErrorTypeProperty =
-            DependencyProperty.Register("ErrorType", typeof(ErrorType), typeof(ErrorBlock),
-            new PropertyMetadata(ErrorType.Warning, OnErrorTypeChanged));
+        public static readonly DependencyProperty ErrorProperty =
+            DependencyProperty.Register(
+                nameof(Error),
+                typeof(IError),
+                typeof(ErrorBlock),
+                new PropertyMetadata(null, OnErrorChanged));
 
-        public static readonly DependencyProperty SourcePathProperty =
-            DependencyProperty.Register("SourcePath", typeof(string), typeof(ErrorBlock));
-
-        public static readonly DependencyProperty ErrorMessageProperty =
-            DependencyProperty.Register("ErrorMessage", typeof(string), typeof(ErrorBlock),
-            new PropertyMetadata(string.Empty, OnErrorMessageChanged));
+        public IError? Error
+        {
+            get => (IError?)GetValue(ErrorProperty);
+            set => SetValue(ErrorProperty, value);
+        }
 
         public ErrorBlock()
         {
             InitializeComponent();
-            UpdateErrorIcon();
             SizeChanged += OnSizeChanged;
         }
 
-        public ErrorType ErrorType
+        private static void OnErrorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            get => (ErrorType)GetValue(ErrorTypeProperty);
-            set => SetValue(ErrorTypeProperty, value);
-        }
+            if (d is not ErrorBlock errorBlock)
+                return;
 
-        public string SourcePath
-        {
-            get => (string)GetValue(SourcePathProperty);
-            set => SetValue(SourcePathProperty, value);
-        }
-
-        public string ErrorMessage
-        {
-            get => (string)GetValue(ErrorMessageProperty);
-            set => SetValue(ErrorMessageProperty, value);
-        }
-
-        private static void OnErrorTypeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is ErrorBlock errorBlock)
+            if (e.NewValue is not IError error)
             {
-                errorBlock.UpdateErrorIcon();
+                errorBlock.Clear();
+                return;
             }
-        }
 
-        private static void OnErrorMessageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is ErrorBlock errorBlock)
-            {
-                errorBlock.ErrorText.Text = e.NewValue as string;
-            }
-        }
+            // Обновляем содержимое
+            errorBlock.ErrorText.Text = error.Message ?? string.Empty;
 
-        private void UpdateErrorIcon()
-        {
-            var icon = ErrorType switch
+            // Определяем тип иконки
+            var iconUri = error.Type switch
             {
-                ErrorType.Warning => new Uri("pack://application:,,,/ModdingManager;component/graphics/controls/warn.png", UriKind.Absolute),
+                ErrorType.Warn => new Uri("pack://application:,,,/ModdingManager;component/graphics/controls/warn.png", UriKind.Absolute),
                 ErrorType.Critical => new Uri("pack://application:,,,/ModdingManager;component/graphics/controls/err.png", UriKind.Absolute),
-                _ => throw new ArgumentOutOfRangeException()
+                ErrorType.Fatal => new Uri("pack://application:,,,/ModdingManager;component/graphics/controls/err.png", UriKind.Absolute), // если есть отдельная иконка
+                ErrorType.Info => new Uri("pack://application:,,,/ModdingManager;component/graphics/controls/info.png", UriKind.Absolute),
+                _ => new Uri("pack://application:,,,/ModdingManager;component/graphics/controls/info.png", UriKind.Absolute),
             };
-            ErrorIcon.Source = ErrorIcon.Source = new BitmapImage(icon);
+
+            errorBlock.ErrorIcon.Source = new BitmapImage(iconUri);
+
+            // Можно также использовать IsFatal для визуального выделения, если хотите
+            // Например: более яркий фон или красная рамка
+            if (error.Type == ErrorType.Fatal)
+            {
+                errorBlock.Background = new SolidColorBrush(Color.FromArgb(40, 255, 0, 0));
+            }
+            else
+            {
+                errorBlock.Background = Brushes.Transparent;
+            }
+
+            // Подсказка/тултип с дополнительной информацией
+            errorBlock.ToolTip = $"Type: {error.Type}\n" +
+                                $"File: {error.Path}\n" +
+                                $"Line: {error.Line}\n" +
+                                (error.IsGameError ? "Game-related error" : "");
         }
+
+        private void Clear()
+        {
+            ErrorText.Text = string.Empty;
+            ErrorIcon.Source = null;
+            Background = Brushes.Transparent;
+            ToolTip = null;
+        }
+
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
             double imageTotalHeight = ErrorIcon.ActualHeight + ErrorIcon.Margin.Top + ErrorIcon.Margin.Bottom;
             double textTotalHeight = ErrorText.ActualHeight + ErrorText.Margin.Top + ErrorText.Margin.Bottom;
-            Height = Math.Max(imageTotalHeight, textTotalHeight);
+            Height = Math.Max(imageTotalHeight, textTotalHeight) + 4; // небольшой запас
         }
 
-        private void UserControl_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void UserControl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (!string.IsNullOrEmpty(SourcePath))
+            if (Error?.Path is { Length: > 0 } path)
             {
                 try
                 {
                     Process.Start(new ProcessStartInfo
                     {
-                        FileName = SourcePath,
+                        FileName = path,
                         UseShellExecute = true
                     });
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Failed to open file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Не удалось открыть файл:\n{path}\n\n{ex.Message}",
+                        "Ошибка открытия файла",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
                 }
             }
         }

@@ -1,4 +1,5 @@
 ﻿
+using Application.Extensions;
 using Application.Extentions;
 using Application.utils.Pathes;
 using Models.Configs;
@@ -37,6 +38,8 @@ namespace Application.Composers
                         string tag = var.Name;
                         string countryFileName = var.Value?.ToString() ?? string.Empty;
                         CountryConfig countryConfig = ParseCountryConfig(tag, countryFileName);
+                        if (countryConfig == null)
+                            continue;
                         countryConfig.FileFullPath = file;
                         if (countryConfig != null && !configs.Any(c => c.Id.ToString() == countryConfig.Id.ToString()))
                         {
@@ -51,14 +54,29 @@ namespace Application.Composers
         {
             string[] possibleHistoryPaths =
             {
-                Path.Combine(ModPathes.HistoryPath, path),
-                Path.Combine(GamePathes.HistoryPath, path)
+                Path.Combine(ModPathes.HistoryPath, path.Replace("/", "\\")),
+                Path.Combine(GamePathes.HistoryPath, path.Replace("/", "\\"))
             };
 
-            foreach (var fullpath in possibleHistoryPaths)
+            foreach (var pts in possibleHistoryPaths)
             {
+                string fullpath = pts;
                 if (!File.Exists(fullpath))
-                    continue;
+                {
+                    string[] files = Directory.GetFiles(Path.Combine(ModPathes.HistoryCountriesPath));
+                    foreach (string healf in files)
+                    {
+                        if (healf.Contains(tag, StringComparison.Ordinal))
+                        {
+                            fullpath = healf;
+                            //todo: healer error log
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                }
 
                 if (new TxtParser(new TxtPattern()).Parse(fullpath) is not HoiFuncFile file)
                     continue;

@@ -34,12 +34,7 @@
             CornerRadius="4"
             Padding="16"
             Opacity="0">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="8" 
-                              ShadowDepth="2" 
-                              Color="Black" 
-                              Opacity="0.3"/>
-        </Border.Effect>
+        
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>

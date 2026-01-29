@@ -35,5 +35,9 @@ namespace Models.Configs
         public Dictionary<TechTreeItemConfig, int> Dependencies { get; set; } //+
         [JsonIgnore]
         public IGfx Gfx { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

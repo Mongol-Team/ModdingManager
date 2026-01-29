@@ -23,5 +23,9 @@ namespace Models.Configs
         public int? CustomIconId { get; set; }
         public string OOBFileName { get; set; }
         public int OOBFileYear { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

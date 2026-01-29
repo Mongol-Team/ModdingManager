@@ -20,5 +20,9 @@ namespace Models.Configs
         public ModifierDefinitionCathegoryType Cathegory { get; set; } = ModifierDefinitionCathegoryType.Country;
         public ModifierDefenitionColorType ColorType { get; set; } = ModifierDefenitionColorType.Good;
         public ScopeTypes ScopeType { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

@@ -19,5 +19,9 @@ namespace Models.Configs
         public string Available { get; set; }
         public List<TechTreeItemConfig> Items { get; set; } = new List<TechTreeItemConfig>();
         public TechTreeLedgerType Ledger { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

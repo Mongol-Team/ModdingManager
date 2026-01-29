@@ -19,11 +19,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using DDF = Data.DataDefaultValues;
 using Models.Configs;
+using RawDataWorker.Healers;
+using Application.Extensions;
 
 namespace Application.Composers
 {
     public class RuleComposer : IComposer
     {
+        public static CsvHealer OnParsingHealer = new CsvHealer(new RulesDataPattern());
         public static List<IConfig> Parse()
         {
             string[] possiblePaths = {
@@ -62,7 +65,7 @@ namespace Application.Composers
         public static List<RuleConfig> ParseCoreRules()
         {
             List<RuleConfig> configs = new List<RuleConfig>();
-            HoiTable tbl = new CsvParser(new RulesDataPattern()).Parse(DataLib.RulesCoreDefenitions) as HoiTable;
+            HoiTable tbl = new CsvParser(new RulesDataPattern(), OnParsingHealer).Parse(DataLib.RulesCoreDefenitions) as HoiTable;
             foreach (List<object> row in tbl.Values)
             {
                 RuleConfig cfg = new()

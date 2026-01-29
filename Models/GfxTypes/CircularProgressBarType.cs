@@ -19,5 +19,10 @@ namespace Models.GfxTypes
         public int Size { get; set; }
         public int Rotation { get; set; }
         public int Amount { get; set; }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }

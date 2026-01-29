@@ -17,6 +17,7 @@ using Data;
 using Models.GfxTypes;
 using Models.Types.Utils;
 using Application.Settings;
+using Application.Extensions;
 
 namespace Application.Composers
 {

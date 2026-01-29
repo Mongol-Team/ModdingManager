@@ -68,11 +68,13 @@ namespace RawDataWorker
         public static bool TryParseHoiReference(string text, out HoiReference result)
         {
             result = null;
-            //if (text.Contains("\""))
-            //    return false;
+            if (string.IsNullOrEmpty(text) || text.Contains("\""))
+                return false;
+
             result = new HoiReference() { Value = text };
             return true;
         }
+
 
         public static bool TryParseAny(string data, out object? value)
         {

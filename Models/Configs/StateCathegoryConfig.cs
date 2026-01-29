@@ -22,5 +22,9 @@ namespace Models.Configs
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; } = new();
         public ConfigLocalisation Localisation { get; set; }
         public Identifier Id { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

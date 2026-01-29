@@ -15,5 +15,10 @@ namespace Models.GfxTypes
         public Identifier Id { get; set; }
         public Point Size { get; set; }
         public double LineWidth { get; set; }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }

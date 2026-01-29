@@ -14,6 +14,11 @@ namespace Models.GfxTypes
         public string EffectFile { get; set; }
         public Bitmap? Content { get; set; }
         public Bitmap MaskContent { get; set; }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }
 

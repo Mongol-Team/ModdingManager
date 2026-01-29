@@ -1,6 +1,7 @@
-﻿using RawDataWorker.Interfaces;
+﻿
 using Models.Enums;
 using System.Drawing;
+using Models.Interfaces.RawDataWorkerInterfaces;
 
 namespace RawDataWorker.Parsers.Patterns
 {

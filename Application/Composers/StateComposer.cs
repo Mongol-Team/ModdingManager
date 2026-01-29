@@ -39,6 +39,8 @@ namespace Application.Composers
                 foreach (var file in files)
                 {
                     var stateConfig = ParseFile(file);
+                    if(stateConfig == null)
+                        continue;
                     stateConfig.FileFullPath = file;
                     result.Add(stateConfig);
                 }
@@ -140,7 +142,10 @@ namespace Application.Composers
             }
 
             // Category
-            string categoryStr = stateBracket.SubVars.FirstOrDefault(v => v.Name == "category")?.Value as string ?? string.Empty;
+            string categoryStr = stateBracket.SubVars
+                .FirstOrDefault(v => v.Name == "state_category")
+                ?.Value?.ToString() ?? string.Empty;
+
             var category = ModDataStorage.Mod?.StateCathegories?.FirstOrDefault(s => s.Id.ToString() == categoryStr);
 
             if (category == null)

@@ -1,5 +1,6 @@
 ﻿using Models.Types.Utils;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace Models.Interfaces
 {

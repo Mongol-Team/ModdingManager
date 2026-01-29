@@ -1,42 +1,54 @@
 ﻿<UserControl x:Class="ViewControls.ErrorPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:ViewControls"
-             mc:Ignorable="d">
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="600">
     <Grid Background="{StaticResource BackgroundCard}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" Margin="0,0,0,5">
+        <!-- Область зі списком помилок -->
+        <Border Grid.Row="0" 
+                BorderBrush="{StaticResource BorderColor}" 
+                BorderThickness="1" 
+                Margin="0,0,0,5">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="ErrorDisplayPnl" Background="{StaticResource BackgroundCard}"/>
+                <StackPanel x:Name="ErrorDisplayPnl" 
+                            Background="{StaticResource BackgroundCard}"
+                            Orientation="Vertical"/>
             </ScrollViewer>
         </Border>
 
+        <!-- Панель фільтрів/лічильників -->
         <Grid Grid.Row="1" Height="55">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" Margin="0,0,1,0">
+            <!-- Critical + Fatal (разом) -->
+            <Border Grid.Column="0" 
+                    BorderBrush="{StaticResource BorderColor}" 
+                    BorderThickness="1" 
+                    Margin="0,0,1,0">
                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-
-                    <local:ImageButton x:Name="CriticalFiler" 
+                    <local:ImageButton x:Name="CriticalFilter"
                                      Grid.Column="0"
-                                     ImageSource="/graphics/controls/err.png" 
-                                     Width="45" 
+                                     ImageSource="/graphics/controls/err.png"
+                                     Width="45"
                                      Height="45"
-                                     VerticalAlignment="Center"/>
-
+                                     VerticalAlignment="Center"
+                                     ToolTip="Critical and Fatal errors"/>
                     <Label x:Name="CriticalCounter"
                            Grid.Column="1"
                            Content="0"
@@ -44,26 +56,29 @@
                            VerticalAlignment="Center"
                            Margin="10,0,0,0"
                            Padding="5,0"
-                           MinWidth="40"
+                           MinWidth="50"
                            HorizontalContentAlignment="Center"
                            Foreground="{StaticResource TextPrimary}"/>
                 </Grid>
             </Border>
 
-            <Border Grid.Column="1" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" Margin="1,0,0,0">
+            <!-- Warnings -->
+            <Border Grid.Column="1" 
+                    BorderBrush="{StaticResource BorderColor}" 
+                    BorderThickness="1" 
+                    Margin="1,0,1,0">
                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-
-                    <local:ImageButton x:Name="WarnFiler" 
+                    <local:ImageButton x:Name="WarnFilter"
                                      Grid.Column="0"
-                                     ImageSource="/graphics/controls/warn.png" 
-                                     Width="45" 
+                                     ImageSource="/graphics/controls/warn.png"
+                                     Width="45"
                                      Height="45"
-                                     VerticalAlignment="Center"/>
-
+                                     VerticalAlignment="Center"
+                                     ToolTip="Warnings"/>
                     <Label x:Name="WarnCounter"
                            Grid.Column="1"
                            Content="0"
@@ -71,7 +86,39 @@
                            VerticalAlignment="Center"
                            Margin="10,0,0,0"
                            Padding="5,0"
-                           MinWidth="40"
+                           MinWidth="50"
+                           HorizontalContentAlignment="Center"
+                           Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+            </Border>
+
+            <!-- Fatal (окремий лічильник, але та ж іконка, що й у Critical) -->
+            <Border Grid.Column="2" 
+                    BorderBrush="{StaticResource BorderColor}" 
+                    BorderThickness="1" 
+                    Margin="1,0,0,0">
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <local:ImageButton x:Name="FatalFilter"
+                                     Grid.Column="0"
+                                     ImageSource="/graphics/controls/err.png"
+                                     Width="45"
+                                     Height="45"
+                                     VerticalAlignment="Center"
+                                     ToolTip="Fatal errors only"
+                                     Opacity="0.85"/>
+                    <!-- трохи тьмяніший, щоб підкреслити, що це підкатегорія -->
+                    <Label x:Name="FatalCounter"
+                           Grid.Column="1"
+                           Content="0"
+                           FontSize="20"
+                           VerticalAlignment="Center"
+                           Margin="10,0,0,0"
+                           Padding="5,0"
+                           MinWidth="50"
                            HorizontalContentAlignment="Center"
                            Foreground="{StaticResource TextPrimary}"/>
                 </Grid>

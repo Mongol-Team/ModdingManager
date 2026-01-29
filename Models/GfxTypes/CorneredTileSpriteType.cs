@@ -17,6 +17,11 @@ namespace Models.GfxTypes
         public int AnimationRateSpf { get; set; }
         public Identifier Id { get; set; }
         public Bitmap? Content { get; set; }
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }
 

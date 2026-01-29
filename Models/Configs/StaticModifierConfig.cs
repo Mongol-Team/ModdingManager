@@ -21,6 +21,9 @@ namespace Models.Configs
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public bool HasAttackerEffect { get; set; }
-
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

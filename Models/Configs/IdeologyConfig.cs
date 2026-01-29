@@ -35,22 +35,7 @@ namespace Models.Configs
 
         public override string ToString()
         {
-            return $"IdeologyConfig:\n" +
-                   $"- Id: {Id}\n" +
-                   $"- Name: {Name}\n" +
-                   $"- Noun: {Noun}\n" +
-                   $"- Description: {Description}\n" +
-                   $"- Color: {Color}\n" +
-                   $"- CanFormExileGoverment: {CanFormExileGoverment}\n" +
-                   $"- WarImpactOnTension: {WarImpactOnTension}\n" +
-                   $"- FactionImpactOnTension: {FactionImpactOnTension}\n" +
-                   $"- CanBeBoosted: {CanBeBoosted}\n" +
-                   $"- CanColaborate: {CanColaborate}\n" +
-                   $"- AiIdeologyName: {AiIdeologyName}\n" +
-                   $"- SubTypes: [{string.Join(", ", SubTypes?.Select(s => s.ToString()) ?? Enumerable.Empty<string>())}]\n" +
-                   $"- Rules: [{string.Join(", ", Rules?.Select(kv => $"{kv.Key}={kv.Value}") ?? Enumerable.Empty<string>())}]\n" +
-                   $"- Modifiers: [{string.Join(", ", Modifiers?.Select(kv => $"{kv.Key}={kv.Value:F2}") ?? Enumerable.Empty<string>())}]\n" +
-                   $"- FactionModifiers: [{string.Join(", ", FactionModifiers?.Select(kv => $"{kv.Key}={kv.Value:F2}") ?? Enumerable.Empty<string>())}]\n";
+            return this.Id.ToString();
         }
     }
 }

@@ -15,5 +15,9 @@ namespace Models.GfxTypes
         public Identifier Id { get; set; }
         public int Size { get; set; }
         public List<Color> Colors { get; set; }
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }

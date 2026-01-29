@@ -28,6 +28,9 @@ namespace Models.Configs
 
             return province.Shape.Pos;
         }
-
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

@@ -24,6 +24,9 @@ namespace Models.Configs
         public ConfigLocalisation Localisation { get; set; }
         public Identifier Id { get; set; }
         public IGfx Gfx { get; set; }
-
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

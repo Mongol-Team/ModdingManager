@@ -20,5 +20,9 @@ namespace Models.Configs
         public string FileFullPath { get; set; }
         public ConfigLocalisation ConfigLocalisation { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

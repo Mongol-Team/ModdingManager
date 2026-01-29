@@ -19,5 +19,9 @@ namespace Models.Configs
         public string FileFullPath { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public IGfx Gfx { get; set; }
+        public override string ToString()
+        {
+            return this.Id.ToString();
+        }
     }
 }

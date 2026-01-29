@@ -1,5 +1,6 @@
-﻿using RawDataWorker.Interfaces;
+﻿
 using Models.Enums;
+using Models.Interfaces.RawDataWorkerInterfaces;
 using Models.Types;
 using System.Drawing;
 

@@ -12,18 +12,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Models.Configs;
+using RawDataWorker.Healers;
 
 namespace Application.Composers
 {
     public class ProvinceComposer : IComposer
     {
+        public static CsvHealer OnParsingHealer = new CsvHealer(new CsvDefinitionsPattern());
         public ProvinceComposer() { }
         public static List<IConfig> Parse()
         {
             List<IConfig> res = new List<IConfig>();
             List<IConfig> seaProvinces = new List<IConfig>();
             List<IConfig> otherProvinces = new List<IConfig>();
-            CsvParser csvParser = new CsvParser(new CsvDefinitionsPattern());
+            CsvParser csvParser = new CsvParser(new CsvDefinitionsPattern(), OnParsingHealer);
             HoiTable defFile = csvParser.Parse(ModPathes.DefinitionPath) as HoiTable;
             foreach (var line in defFile.Values)
             {
@@ -61,6 +63,8 @@ namespace Application.Composers
             }
 
             res = seaProvinces.Concat(otherProvinces).ToList();
+
+            ModDataStorage.CsvErross = OnParsingHealer.Errors;
             return res;
         }
     }
