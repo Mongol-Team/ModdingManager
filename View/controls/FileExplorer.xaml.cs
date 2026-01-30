@@ -262,46 +262,44 @@ namespace ViewControls
         private List<Type> GetConfigTypesFromAssembly()
         {
             var configTypes = new List<Type>();
-            try
+
+            foreach (var prop in typeof(ModConfig).GetProperties())
             {
+                var type = prop.PropertyType;
 
-                var types = new List<Type>();
-
-                foreach (var prop in typeof(ModConfig).GetProperties())
+                // Проверяем, является ли тип открытым generic перед вызовом
+                if (type.IsGenericType)
                 {
-                    var type = prop.PropertyType;
-
-                    var genericDef = type.GetGenericTypeDefinition(); 
-                    if (genericDef == typeof(List<>) || genericDef == typeof(ObservableCollection<>))
+                    try
                     {
-                        var elementType = type.GetGenericArguments()[0];
-
-                        if (typeof(IGfx).IsAssignableFrom(elementType) ||
-                            typeof(IConfig).IsAssignableFrom(elementType))
+                        var genericDef = type.GetGenericTypeDefinition();
+                        if (genericDef == typeof(List<>) || genericDef == typeof(ObservableCollection<>))
                         {
-                            configTypes.Add(elementType);
+                            var elementType = type.GetGenericArguments()[0];
+                            if (typeof(IGfx).IsAssignableFrom(elementType) ||
+                                typeof(IConfig).IsAssignableFrom(elementType))
+                            {
+                                configTypes.Add(elementType);
+                            }
                         }
                     }
-                    else
+                    catch
                     {
-                        // Если не список, проверяем сам тип
-                        if (typeof(IGfx).IsAssignableFrom(type) ||
-                            typeof(IConfig).IsAssignableFrom(type))
-                        {
-                            configTypes.Add(type);
-                        }
+                        // игнорируем, если тип не generic
                     }
                 }
-
-
-                configTypes.AddRange(types);
+                else
+                {
+                    // не-generic типы
+                    if (typeof(IGfx).IsAssignableFrom(type) ||
+                        typeof(IConfig).IsAssignableFrom(type))
+                    {
+                        configTypes.Add(type);
+                    }
+                }
             }
-            catch
-            {
-                // Если не удалось получить список типов, используем все свойства ModConfig
-            }
 
-            return configTypes;
+            return configTypes.Distinct().ToList(); // на всякий случай убираем дубли
         }
 
         private string FormatCategoryName(string name)
