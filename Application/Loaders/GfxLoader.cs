@@ -12,6 +12,7 @@ using System.Collections.Concurrent;
 using System.Drawing;
 using DDF = Data.DataDefaultValues;
 using System.Windows;
+using Application.utils.Math;
 namespace Application.Loaders
 {
     public static class GfxLoader
@@ -25,7 +26,7 @@ namespace Application.Loaders
             ConcurrentDictionary<string, IGfx> gfxDictionary = new();
             int totalLoaded = 0;
 
-            int maxDegreeOfParallelism = Math.Max(1, (Environment.ProcessorCount * ModManagerSettings.MaxPercentForParallelUsage) / 100);
+            int maxDegreeOfParallelism = ParallelTheadCounter.CalculateMaxDegreeOfParallelism();
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism };
 
             foreach (string path in possiblePaths)

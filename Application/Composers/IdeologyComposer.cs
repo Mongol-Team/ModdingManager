@@ -23,9 +23,9 @@ namespace Application.Composers
         {
             List<IConfig> res = new();
             string[] possiblePaths = {
-        ModPathes.IdeologyPath,
-        GamePathes.IdeologyPath
-    };
+                ModPathes.IdeologyPath,
+                GamePathes.IdeologyPath
+            };
             foreach (string path in possiblePaths)
             {
                 if (!Directory.Exists(path))

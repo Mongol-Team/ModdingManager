@@ -23,6 +23,7 @@ public static class ModDataStorage
         {
             (() => { Mod = new ModConfig(); Localisation = new LocalisationRegistry(); }, "Инициализация локализации..."),
             (() => { Mod.Gfxes = GfxLoader.LoadAll().ToObservableCollection(); }, "Загрузка графики..."),
+            (() => { Mod.Resources = ResourceComposer.Parse().Cast<ResourceConfig>().ToObservableCollection();; }, "Загрузка ресурсов..."),
             (() => { Mod.ModifierDefinitions = ModifierDefComposer.Parse().Cast<ModifierDefinitionConfig>().ToObservableCollection(); }, "Загрузка определений модификаторов..."),
             (() => { Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToObservableCollection(); }, "Загрузка идеологий..."),
 
@@ -31,8 +32,9 @@ public static class ModDataStorage
             (() => { Mod.Rules = RuleComposer.Parse().Cast<RuleConfig>().ToObservableCollection(); }, "Загрузка правил..."),
             (() => { Mod.StaticModifiers = StaticModifierComposer.Parse().Cast<StaticModifierConfig>().ToObservableCollection(); }, "Загрузка статических модификаторов..."),
             (() => { Mod.DynamicModifiers = DynamicModifierComposer.Parse().Cast<DynamicModifierConfig>().ToObservableCollection(); }, "Загрузка динамических модификаторов..."),
-            (() => { Mod.IdeaSlots = IdeaGroupComposer.Parse().Cast<IdeaGroupConfig>().ToObservableCollection(); }, "Загрузка слотов идей..."),
+            
             (() => { Mod.Ideas = IdeaComposer.Parse().Cast<IdeaConfig>().ToObservableCollection(); }, "Загрузка идей..."),
+            (() => { Mod.IdeaSlots = IdeaGroupComposer.Parse().Cast<IdeaGroupConfig>().ToObservableCollection(); }, "Загрузка слотов идей..."),
             (() => { Mod.IdeaTags = IdeaTagComposer.Parse().Cast<IdeaTagConfig>().ToObservableCollection(); }, "Загрузка тегов идей..."),
             (() => { Mod.TechTreeLedgers = TechnologyComposer.Parse().Cast<TechTreeConfig>().ToObservableCollection(); }, "Загрузка технологий..."),
             (() => { Mod.CharacterTraits = CharacterTraitComposer.Parse().Cast<CharacterTraitConfig>().ToObservableCollection(); }, "Загрузка черт персонажей..."),
@@ -40,7 +42,14 @@ public static class ModDataStorage
             (() => { Mod.SubUnitGroups = SubUnitGroupComposer.Parse().Cast<SubUnitGroupConfig>().ToObservableCollection(); }, "Загрузка групп подразделений..."),
             (() => { Mod.SubUnits = SubUnitComposer.Parse().Cast<SubUnitConfig>().ToObservableCollection(); }, "Загрузка подразделений..."),
             (() => { Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToObservableCollection(); }, "Загрузка модификаторов мнений..."),
-            //(() => { Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToObservableCollection(); }, "Загрузка стран..."),
+            (() => { Mod.Buildings = BuildingComposer.Parse().Cast<BuildingConfig>().ToObservableCollection(); }, "Загрузка построек..."),
+            //(() => { Mod.Equipments = EquipmentComposer.Parse().Cast<EquipmentConfig>().ToObservableCollection(); }, "Загрузка снаряжения..."),
+            (() => { Mod.Characters = CharacterComposer.Parse().Cast<CountryCharacterConfig>().ToObservableCollection(); }, "Загрузка модификаторов мнений..."),
+            (() => { Mod.TechCategories = TechCategoryComposer.Parse().Cast<TechCategoryConfig>().ToObservableCollection(); }, "Категорії технологій"),
+
+            (() => { Mod.TechTreeLedgers = TechnologyComposer.Parse().Cast<TechTreeConfig>().ToObservableCollection(); }, "Дерева технологій"),
+
+            (() => { Mod.TechTreeItems = TechTreeItemComposer.Parse().Cast<TechTreeItemConfig>().ToObservableCollection(); }, "Технології"),//(() => { Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToObservableCollection(); }, "Загрузка стран..."),
             
 
             (() => { OverrideManager.HandleOverride(); }, "Обрабатоваем реплейс ресурсы..."),

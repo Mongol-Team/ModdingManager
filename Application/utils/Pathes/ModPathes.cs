@@ -44,6 +44,7 @@ namespace Application.utils.Pathes
         public static string TechDefPath => Combine("common", "technology_tags");
         public static string TraitsPath => Combine("common", "country_leader");
         public static string BuildingsPath => Combine("common", "buildings");
+        public static string ResourcesPath => Combine("common", "resources");
     }
 }
 

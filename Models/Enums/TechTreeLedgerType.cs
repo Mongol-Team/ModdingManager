@@ -4,9 +4,10 @@
     {
         Army,
         Military,
+        
         Air,
         Navy,
-        Cilvilian,
+        Civilian,
         All,
         Hidden,
         Null

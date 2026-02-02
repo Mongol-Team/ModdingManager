@@ -11,6 +11,7 @@ using System.Globalization;
 using System.Text;
 using Path = System.IO.Path;
 using Models.Configs;
+using Application.utils.Math;
 
 
 public class StateWorkerHandler
@@ -26,7 +27,7 @@ public class StateWorkerHandler
         int successCount = 0;
         var timer = System.Diagnostics.Stopwatch.StartNew();
 
-        int maxThreads = Math.Max(1, Environment.ProcessorCount / 3);
+        int maxThreads = ParallelTheadCounter.CalculateMaxDegreeOfParallelism();
         var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxThreads };
 
         Parallel.ForEach(ModDataStorage.Mod.Map.Provinces, parallelOptions, province =>

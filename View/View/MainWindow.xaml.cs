@@ -1,16 +1,20 @@
-﻿using Application.Utils;
+﻿using Application.Debugging;
+using Application.Settings;
+using Application.Utils;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using View.Utils;
 using ViewControls;
 using ViewControls.Docking;
-
+using Button = System.Windows.Controls.Button;
 namespace View
 {
     public partial class MainWindow : BaseWindow
     {
         private FileExplorer _fileExplorerControl;
-
+        [DllImport("kernel32.dll")] private static extern bool AllocConsole(); 
+        [DllImport("kernel32.dll")] private static extern bool FreeConsole();
 
         public MainWindow()
         {
@@ -24,7 +28,25 @@ namespace View
 
             var solutionExplorerTitle = UILocalization.GetString("Window.SolutionExplorer");
             var existingPanel = FindPanelWithTitle(solutionExplorerTitle);
+            Topbar.AddButton(new Button
+            {
+                Content = "Настройки",
+                Name = "SettingsButton"
 
+            }, PanelSide.Left);
+            if (ModManagerSettings.IsDebugRunning)
+            {
+                var debugButton = new Button
+                {
+                    Content = "Отладка",
+                    Name = "DebugButton"
+                };
+                debugButton.Click += (s, e) =>
+                {
+                    Logger.Open();
+                };
+                Topbar.AddButton(debugButton, PanelSide.Left);
+            }
             if (existingPanel == null)
             {
                 _fileExplorerControl = new FileExplorer

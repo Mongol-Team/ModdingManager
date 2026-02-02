@@ -23,7 +23,6 @@ namespace Application.Composers
                 GamePathes.TechTreePath
             };
             HashSet<string> seenIds = new();
-            List<TechTreeItemConfig> allTechsItems = new();
             foreach (string path in possiblePathes)
             {
                 string[] files = Directory.GetFiles(path);
@@ -44,7 +43,7 @@ namespace Application.Composers
                                 string id = config.Id.ToString();
                                 if (!seenIds.Contains(id))
                                 {
-                                    allTechsItems.Add(config);
+                                    configs.Add(config);
                                     seenIds.Add(id);
                                 }
                             }
@@ -61,7 +60,7 @@ namespace Application.Composers
 
             foreach (Bracket techBr in bracket.SubBrackets)
             {
-                string id = bracket.Name;
+                string id = techBr.Name;
                 TechTreeItemConfig item = ModDataStorage.Mod.TechTreeItems.FindById(id);
                 if (item == null)
                 {
@@ -134,6 +133,10 @@ namespace Application.Composers
                                 if (fl == null)
                                 {
                                     Logger.AddLog($"[Warning] Item {item.Id.ToString} has null folder.");
+                                }
+                                else
+                                {
+                                    fl.Items.AddSafe(item);
                                 }
                             }
 
@@ -265,6 +268,7 @@ namespace Application.Composers
                             break;
                     }
                 }
+                res.Add(item);
             }
             return res;
         }

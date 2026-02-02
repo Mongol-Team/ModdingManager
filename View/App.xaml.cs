@@ -1,6 +1,7 @@
 using Application.Settings;
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
 using View.Utils;
 
 namespace View

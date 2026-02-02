@@ -1,4 +1,5 @@
 ﻿using Models.Attributes;
+using Models.Enums;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
@@ -19,6 +20,16 @@ namespace Models.Configs
         public bool IsCore { get; set; }
         public bool IsOverride { get; set; }
         public string FileFullPath { get; set; }
+        public int Year { get; set; }
+        public string CanBeProduced { get; set; } //todo: raw trigger data
+        public bool IsArchetype { get; set; }
+        public bool IsBuidable { get; set; }
+        public bool IsActive { get; set; }
+        public string Type { get; set; }
+        public string GroupBy { get; set; }
+        public EquipmentInterfaceCategory InterfaceType { get; set; }
+        public Dictionary<ResourceConfig, int> Cost { get; set; }
+        public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }
         public override string ToString()
         {
             return this.Id.ToString();

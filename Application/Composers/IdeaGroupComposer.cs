@@ -84,7 +84,7 @@ namespace Application.Composers
                             foreach (Bracket idea in slot.SubBrackets)
                             {
                                 IdeaConfig parsedIdea = ModDataStorage.Mod.Ideas.FindById(idea.Name);
-                                ModDataStorage.Mod.Ideas = new();
+                               
                                 if (parsedIdea == null)
                                 {
                                     parsedIdea = IdeaComposer.ParseSingleIdea(idea) as IdeaConfig;
@@ -102,10 +102,10 @@ namespace Application.Composers
                                 }
                             }
                             result.Add(slotConfig);
-                            //Logger.AddDbgLog($"Idea slot is added {slotConfig}");
+                            Logger.AddDbgLog($"Idea slot is added {slotConfig}");
 
                         }
-                        //Logger.AddDbgLog($"Slot is already exist:{slot.Name}");
+                        Logger.AddDbgLog($"Slot is already exist:{slot.Name}");
                     }
                 }
             }

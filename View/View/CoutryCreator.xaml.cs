@@ -6,6 +6,7 @@ using Data.Properties;
 using Models.Configs;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
+using System.Drawing;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;

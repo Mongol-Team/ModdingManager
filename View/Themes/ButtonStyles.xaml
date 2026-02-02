@@ -43,7 +43,24 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
+    <Style x:Key="TitlebarButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource BackgroundHover}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource ButtonDarkBackgroundPressed}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
     <Style x:Key="ButtonDarkSmall" TargetType="Button" BasedOn="{StaticResource ButtonDark}">
         <Setter Property="Padding" Value="6,6"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeButtonSmall}"/>

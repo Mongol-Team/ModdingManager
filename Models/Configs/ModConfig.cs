@@ -30,6 +30,6 @@ namespace Models.Configs
         public ObservableCollection<CharacterTraitConfig> CharacterTraits { get; set; } = new();
         public ObservableCollection<SubUnitGroupConfig> SubUnitGroups { get; set; } = new();
         public ObservableCollection<SubUnitCategoryConfig> SubUnitChategories { get; set; } = new();
-        
+        public ObservableCollection<ResourceConfig> Resources { get; set; } = new();
     }
 }

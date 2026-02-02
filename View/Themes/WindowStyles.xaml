@@ -75,7 +75,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style x:Key="ModalWindowDark" TargetType="Window">
         <Setter Property="Background" Value="#252526"/>
         <Setter Property="Foreground" Value="#cccccc"/>
@@ -84,6 +84,6 @@
         <Setter Property="AllowsTransparency" Value="True"/>
         <Setter Property="ResizeMode" Value="NoResize"/>
     </Style>
-
+    
 </ResourceDictionary>
 

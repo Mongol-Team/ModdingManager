@@ -53,14 +53,18 @@ namespace Application.Composers
 
                     foreach (Bracket defbr in funcFile.Brackets.Where(b => b.Name == "technology_folders"))
                     {
-                        TechTreeConfig tree = ParseTechnologyConfig(defbr);
-                        if (tree == null) continue;
+                        foreach (Bracket legBr in defbr.SubBrackets)
+                        {
+                            TechTreeConfig tree = ParseTechnologyConfig(legBr);
+                            if (tree == null) continue;
 
-                        string id = tree.Id.ToString();
-                        if (seenDefIds.Contains(id)) continue;
-                        tree.FileFullPath = file;
-                        seenDefIds.Add(id);
-                        configs.Add(tree);
+                            string id = tree.Id.ToString();
+                            if (seenDefIds.Contains(id)) continue;
+                            tree.FileFullPath = file;
+                            seenDefIds.Add(id);
+                            configs.Add(tree);
+                        }
+                       
                     }
                 }
             }
@@ -74,7 +78,7 @@ namespace Application.Composers
             Var leger = bracket.SubVars.FirstOrDefault(v => v.Name == "ledger");
             if (leger != null)
             {
-                config.Ledger = (TechTreeLedgerType)Enum.Parse(typeof(TechTreeLedgerType), leger.Value.ToString());
+                config.Ledger = (TechTreeLedgerType)Enum.Parse(typeof(TechTreeLedgerType), leger.Value.ToString(), ignoreCase: true);
 
             }
             else

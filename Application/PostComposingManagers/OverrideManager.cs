@@ -1,5 +1,6 @@
 ﻿using Application;
 using Application.Settings;
+using Application.utils.Math;
 using Application.utils.Pathes;
 using Models.Configs;
 using Models.Types.ObjectCacheData;
@@ -21,7 +22,7 @@ public static class OverrideManager
             .ToList();
 
         // Определяем максимальное количество потоков в процентах от доступных
-        int maxDegree = CalculateMaxDegreeOfParallelism();
+        int maxDegree = ParallelTheadCounter.CalculateMaxDegreeOfParallelism();
 
         foreach (var prop in listProperties)
         {
@@ -79,17 +80,5 @@ public static class OverrideManager
         }
     }
 
-    private static int CalculateMaxDegreeOfParallelism()
-    {
-        if (ModManagerSettings.MaxPercentForParallelUsage <= 0)
-            return 1;
-
-        if (ModManagerSettings.MaxPercentForParallelUsage >= 100)
-            return Environment.ProcessorCount;
-
-        double percent = ModManagerSettings.MaxPercentForParallelUsage / 100.0;
-        int threads = (int)Math.Max(1, Math.Round(Environment.ProcessorCount * percent));
-
-        return Math.Min(threads, Environment.ProcessorCount);
-    }
+    
 }
