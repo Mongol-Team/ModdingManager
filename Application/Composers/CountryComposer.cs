@@ -35,6 +35,13 @@ namespace Application.Composers
                     HoiFuncFile tagFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(file);
                     foreach (var var in tagFile.Vars)
                     {
+                        if (var.Name == "dynamic_tags")
+                        {
+                            if (var.Value.ToBool() == true)
+                            {
+                                break;
+                            }
+                        }
                         string tag = var.Name;
                         string countryFileName = var.Value?.ToString() ?? string.Empty;
                         CountryConfig countryConfig = ParseCountryConfig(tag, countryFileName);

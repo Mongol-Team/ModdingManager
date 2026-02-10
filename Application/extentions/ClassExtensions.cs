@@ -1,4 +1,5 @@
 ﻿using Application.Composers;
+using Application.Debugging;
 using Data;
 using System.Drawing;
 using System.Reflection;
@@ -32,27 +33,52 @@ namespace Application.Extentions
             if (id == null)
                 return -1;
 
-            var str = id.ToString();
-
-            return int.TryParse(str, out int result) ? result : -1;
-        }
-        public static bool ToBool<TClass>(this TClass input) where TClass : class
-        {
-            if (input == null)
-                return false;
-
-            var str = input.ToString();
-            if (str.ToLower() == "yes") return true;
-            else if (str.ToLower() == "no") return false;
-            else { return bool.TryParse(str, out bool result) && result; }
+            try
+            {
+                var str = id.ToString();
+                return int.TryParse(str, out int result) ? result : -1;
+            }
+            catch (FormatException ex)
+            {
+                Logger.AddLog($"[ToInt] Cannot convert value '{id}' ({id?.GetType().FullName ?? "null"}) to int: {ex.Message}");
+                return -1;
+            }
         }
 
         public static double ToDouble<TClass>(this TClass id) where TClass : class
         {
             if (id == null)
                 return -1;
-            var str = id.ToString();
-            return double.TryParse(str, out double result) ? result : -1;
+
+            try
+            {
+                var str = id.ToString();
+                return double.TryParse(str, out double result) ? result : -1;
+            }
+            catch (FormatException ex)
+            {
+                Logger.AddLog($"[ToDouble] Cannot convert value '{id}' ({id?.GetType().FullName ?? "null"}) to double: {ex.Message}");
+                return -1;
+            }
+        }
+
+        public static bool ToBool<TClass>(this TClass input) where TClass : class
+        {
+            if (input == null)
+                return false;
+
+            try
+            {
+                var str = input.ToString()?.Trim().ToLowerInvariant();
+                if (str == "yes") return true;
+                if (str == "no") return false;
+                return bool.TryParse(str, out bool result) && result;
+            }
+            catch (FormatException ex)
+            {
+                Logger.AddLog($"[ToBool] Cannot convert value '{input}' ({input?.GetType().FullName ?? "null"}) to bool: {ex.Message}");
+                return false;
+            }
         }
 
         public static bool IsUndefined<TClass>(this TClass input) where TClass : class

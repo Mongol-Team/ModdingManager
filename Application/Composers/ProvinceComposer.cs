@@ -64,7 +64,7 @@ namespace Application.Composers
 
             res = seaProvinces.Concat(otherProvinces).ToList();
 
-            ModDataStorage.CsvErross = OnParsingHealer.Errors;
+            ModDataStorage.CsvErrors = OnParsingHealer.Errors;
             return res;
         }
     }

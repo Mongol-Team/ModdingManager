@@ -1,3 +1,4 @@
+using Application.utils;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -128,7 +129,7 @@ namespace ViewControls.Docking
         {
             UIElement content = null;
 
-            var solutionExplorerTitle = UILocalization.GetString("Window.SolutionExplorer");
+            var solutionExplorerTitle = StaticLocalisation.GetString("Window.EntityExplorer");
             if (info.Title == solutionExplorerTitle || info.Title == "Обозреватель решений" || info.Title.Contains("Solution Explorer"))
             {
                 var fileExplorer = new FileExplorer

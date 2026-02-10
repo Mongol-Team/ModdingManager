@@ -76,19 +76,19 @@ namespace Application.Composers
                         config.EntitySprite = var.Value as string; //todo: entity sprite class
                         break;
                     case "active":
-                        config.Active = Convert.ToBoolean(var.Value);
+                        config.Active = var.Value.ToBool();
                         break;
                     case "priority":
-                        config.Priority = Convert.ToInt32(var.Value);
+                        config.Priority = var.Value.ToInt();
                         break;
                     case "map_icon_category":
-                        if (Enum.TryParse<UnitMapIconType>(var.Value as string, true, out var mapIconType))
+                        if (Enum.TryParse<UnitMapIconType>(var.Value.ToString().SnakeToPascal(), true, out var mapIconType))
                         {
                             config.MapIconCategory = mapIconType;
                         }
                         break;
                     case "affects_speed":
-                        config.AffectsSpeed = Convert.ToBoolean(var.Value);
+                        config.AffectsSpeed = var.Value.ToBool();
                         break;
                     case "use_transport_speed":
                         var equipment = ModDataStorage.Mod.Equipments.FirstOrDefault(e => e.Id.ToString() == var.Value as string);
@@ -130,10 +130,10 @@ namespace Application.Composers
                         }
                         break;
                     case "ai_priority":
-                        config.AiPriority = Convert.ToInt32(var.Value);
+                        config.AiPriority = var.Value.ToInt();
                         break;
                     case "can_exfiltrate_from_coast":
-                        config.CanExfiltrateFromCoast = Convert.ToBoolean(var.Value);
+                        config.CanExfiltrateFromCoast = var.Value.ToBool();
                         break;
 
                     default:
@@ -163,12 +163,12 @@ namespace Application.Composers
                             var equipment = ModDataStorage.Mod.Equipments.FirstOrDefault(e => e.Id.ToString() == needVar.Name);
                             if (equipment != null)
                             {
-                                config.Need.Add(equipment, Convert.ToInt32(needVar.Value));
+                                config.Need.Add(equipment, needVar.Value.ToInt());
                             }
                         }
                         break;
                     default:
-                        bool isTerrainModifier = Enum.TryParse<ProvinceTerrain>(subb.Name, out var terrMod);
+                        bool isTerrainModifier = Enum.TryParse<ProvinceTerrain>(subb.Name.SnakeToPascal(), out var terrMod);
                         if (isTerrainModifier)
                         {
                             Dictionary<ModifierDefinitionConfig, object> terrModDict = new();
@@ -195,7 +195,7 @@ namespace Application.Composers
                         List<IternalUnitType> types = new();
                         foreach (var typeObj in arr.Values)
                         {
-                            if (Enum.TryParse<IternalUnitType>(typeObj.ToString(), true, out var unitType))
+                            if (Enum.TryParse<IternalUnitType>(typeObj.ToString().SnakeToPascal(), true, out var unitType))
                             {
                                 types.Add(unitType);
                             }

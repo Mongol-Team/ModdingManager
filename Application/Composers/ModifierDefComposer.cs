@@ -1,11 +1,12 @@
-﻿using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
+﻿using Application.Extentions;
+using Application.utils.Pathes;
+using Models.Configs;
 using Models.Enums;
 using Models.Types.HtmlFilesData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
-using Models.Configs;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 
 namespace Application.Composers
 {
@@ -104,7 +105,7 @@ namespace Application.Composers
                 switch (var.Name)
                 {
                     case "value_type":
-                        if (Enum.TryParse<ModifierDefenitionValueType>(var.Value.ToString(), true, out var valueType))
+                        if (Enum.TryParse<ModifierDefenitionValueType>(var.Value.ToString().SnakeToPascal(), true, out var valueType))
                             config.ValueType = valueType;
                         break;
                     case "precision":
@@ -112,11 +113,11 @@ namespace Application.Composers
                             config.Precision = precision;
                         break;
                     case "cathegory":
-                        if (Enum.TryParse<ModifierDefinitionCathegoryType>(var.Value.ToString(), true, out var cathegory))
+                        if (Enum.TryParse<ModifierDefinitionCathegoryType>(var.Value.ToString().SnakeToPascal(), true, out var cathegory))
                             config.Cathegory = cathegory;
                         break;
                     case "color_type":
-                        if (Enum.TryParse<ModifierDefenitionColorType>(var.Value.ToString(), true, out var colorType))
+                        if (Enum.TryParse<ModifierDefenitionColorType>(var.Value.ToString().SnakeToPascal(), true, out var colorType))
                             config.ColorType = colorType;
                         break;
                 }

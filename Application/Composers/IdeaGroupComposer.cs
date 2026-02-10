@@ -81,24 +81,33 @@ namespace Application.Composers
                             };
 
 
+                            // В IdeaGroupComposer.ParseSingleFile
                             foreach (Bracket idea in slot.SubBrackets)
                             {
-                                IdeaConfig parsedIdea = ModDataStorage.Mod.Ideas.FindById(idea.Name);
-                               
+                                string ideaId = idea.Name;
+
+                                // Ищем уже существующий IdeaConfig (должен быть создан IdeaComposer раньше)
+                                IdeaConfig parsedIdea = ModDataStorage.Mod.Ideas.FindById(ideaId);
+
                                 if (parsedIdea == null)
                                 {
+                                    // Это аварийный fallback — только если по какой-то причине идея не была спарсена раньше
+                                    Logger.AddDbgLog($"Idea {ideaId} not found in storage, creating on-the-fly in IdeaGroupComposer", "IdeaGroupComposer");
                                     parsedIdea = IdeaComposer.ParseSingleIdea(idea) as IdeaConfig;
+
+                                    // Важно: устанавливаем FileFullPath здесь, если создаём
+                                    parsedIdea.FileFullPath = file.FileFullPath;
 
                                     ModDataStorage.Mod.Ideas.Add(parsedIdea);
                                 }
-                                ;
+
                                 try
                                 {
                                     slotConfig.Ideas.Add(parsedIdea);
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger.AddLog($"[⚠️]Error adding idea {parsedIdea.Id} to slot {slotConfig.Id}: {ex.Message}");
+                                    Logger.AddLog($"Error adding idea {ideaId} to slot {slotConfig.Id}: {ex.Message}");
                                 }
                             }
                             result.Add(slotConfig);

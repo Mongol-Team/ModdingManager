@@ -45,5 +45,6 @@ namespace Application.utils.Pathes
         public static string TraitsPath => Combine("common", "country_leader");
         public static string BuildingsPath => Combine("common", "buildings");
         public static string ResourcesPath => Combine("common", "resources");
+        public static string EquipmentsPath => Combine("common", "units", "equipment");
     }
 }

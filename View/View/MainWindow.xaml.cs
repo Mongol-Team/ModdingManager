@@ -1,9 +1,13 @@
 ﻿using Application.Debugging;
 using Application.Settings;
+using Application.utils;
 using Application.Utils;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using View.Controls;
 using View.Utils;
 using ViewControls;
 using ViewControls.Docking;
@@ -26,7 +30,7 @@ namespace View
         {
             LoadLayout();
 
-            var solutionExplorerTitle = UILocalization.GetString("Window.SolutionExplorer");
+            var solutionExplorerTitle = StaticLocalisation.GetString("Window.EntityExplorer");
             var existingPanel = FindPanelWithTitle(solutionExplorerTitle);
             Topbar.AddButton(new Button
             {
@@ -43,9 +47,46 @@ namespace View
                 };
                 debugButton.Click += (s, e) =>
                 {
-                    Logger.Open();
+                    var window = new Window
+                    {
+                        Title = "Debug / Лог",
+                        Width = 1000,
+                        Height = 500,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        WindowStyle = WindowStyle.None, 
+                        Background = Brushes.Black
+                    };
+
+                    var grid = new Grid();
+                    grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(30) });
+                    grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+                    var titleBar = new WindowTitleBar();
+                    Grid.SetRow(titleBar, 0);
+                    grid.Children.Add(titleBar);
+
+                    var debugControl = new DebugControl();
+                    Grid.SetRow(debugControl, 1);
+                    grid.Children.Add(debugControl);
+
+                    window.Content = grid;
+
+                    window.Show();
+
+
                 };
                 Topbar.AddButton(debugButton, PanelSide.Left);
+                var testingButton = new Button
+                {
+                    Content = "Тест",
+                    Name = "TestingButton"
+                };
+                testingButton.Click += (s, e) =>
+                {
+                    var testWindow = new TestingWindow();
+                    testWindow.ShowDialog();
+                };
+                Topbar.AddButton(testingButton, PanelSide.Left);
             }
             if (existingPanel == null)
             {

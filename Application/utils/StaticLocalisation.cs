@@ -1,3 +1,4 @@
+using Application.Debugging;
 using Application.Settings;
 using Models.Enums;
 using System.Collections.Generic;
@@ -6,9 +7,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 
-namespace View.Utils
+namespace Application.utils
 {
-    public static class UILocalization
+    public static class StaticLocalisation
     {
         private static Dictionary<Language, Dictionary<string, string>> _localizations = new Dictionary<Language, Dictionary<string, string>>();
         private static bool _isLoaded = false;
@@ -25,7 +26,6 @@ namespace View.Utils
             if (dataAssembly != null)
                 return dataAssembly;
 
-            // Если не найдена, попробовать загрузить явно
             try
             {
                 return Assembly.Load("Data");
@@ -75,9 +75,9 @@ namespace View.Utils
                                 }
                             }
                         }
-                        catch
+                        catch(Exception ex) 
                         {
-
+                            Logger.AddLog($"[MODING MANAGAER] Eternal error: {ex} trying parsing app localisation.");
                         }
                     }
                 }
@@ -86,12 +86,20 @@ namespace View.Utils
             }
         }
 
-        public static string GetString(string key)
+        public static string GetString(string key, params object[] args)
         {
             if (!_isLoaded)
             {
                 LoadLocalizations();
             }
+            if (args != null && args.Length > 0)
+            {
+                var template = GetString(key);
+                return args == null || args.Length == 0
+                    ? template
+                    : string.Format(template, args);
+            }
+           
 
             var language = ModManagerSettings.CurrentLanguage;
             

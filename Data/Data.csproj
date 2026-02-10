@@ -12,7 +12,9 @@
     <EmbeddedResource Include="Embedded\Text\OtherModifierDefenitions.txt" />
     <EmbeddedResource Include="Embedded\Text\RulesCoreDefenitions.txt" />
     <EmbeddedResource Include="Resources\Localizations\english.loc" />
-    <EmbeddedResource Include="Resources\Localizations\russian.loc" />
+    <EmbeddedResource Include="Resources\Localizations\russian.loc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Remove="Data\Text\OtherModifierDefenitions.txt" />
     <None Remove="Embedded\JSON\ErrorTypesDefenitions.json" />
     <None Remove="Embedded\Text\OtherModifierDefenitions.txt" />

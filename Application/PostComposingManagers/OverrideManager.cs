@@ -7,6 +7,7 @@ using Models.Types.ObjectCacheData;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,24 +15,24 @@ public static class OverrideManager
 {
     public static void HandleOverride()
     {
+        int maxDegree = ParallelTheadCounter.CalculateMaxDegreeOfParallelism();
         var modType = typeof(ModConfig);
         var listProperties = modType.GetProperties()
-            .Where(p => p.PropertyType.IsGenericType &&
-                        p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) &&
-                        typeof(IConfig).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0]))
-            .ToList();
-
-        // Определяем максимальное количество потоков в процентах от доступных
-        int maxDegree = ParallelTheadCounter.CalculateMaxDegreeOfParallelism();
+      .Where(p => p.PropertyType.IsGenericType &&
+                  typeof(IEnumerable).IsAssignableFrom(p.PropertyType) &&
+                  typeof(IConfig).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0]))
+      .ToList();
 
         foreach (var prop in listProperties)
         {
-            var listValue = prop.GetValue(ModDataStorage.Mod) as IList;
-            if (listValue == null || listValue.Count == 0) continue;
+            var value = prop.GetValue(ModDataStorage.Mod);
 
-            var configs = listValue.Cast<IConfig>().ToList();
+            // Приводим к IEnumerable<IConfig>
+            var configs = (value as IEnumerable)?.Cast<IConfig>().ToList();
+            if (configs == null || configs.Count == 0) continue;
 
-            // Собираем относительные пути модов
+
+
             var modRelatives = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var config in configs)
@@ -72,11 +73,18 @@ public static class OverrideManager
                 }
             });
 
-            // Удаляем найденные оверрайды
             foreach (var item in toRemove)
             {
-                listValue.Remove(item);
+                if (value is IList list)
+                {
+                    list.Remove(item);
+                }
+                else if (value is ICollection<IConfig> coll)
+                {
+                    coll.Remove(item);
+                }
             }
+
         }
     }
 

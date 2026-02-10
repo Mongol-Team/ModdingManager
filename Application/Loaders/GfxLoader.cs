@@ -72,19 +72,21 @@ namespace Application.Loaders
         }
         public static List<IGfx> LoadFromFile(string gfxFilePath)
         {
-            HoiFuncFile parser = new();
+            HoiFuncFile fcfile = new();
             try
             {
-                parser = new TxtParser(new TxtPattern()).Parse(gfxFilePath) as HoiFuncFile;
+                var parser = new TxtParser(new TxtPattern());
+                fcfile = new TxtParser(new TxtPattern()).Parse(gfxFilePath) as HoiFuncFile;
+                ModDataStorage.TxtErrors.AddRangeSafe(parser.healer.Errors);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Не удалось распарсить GFX файл: {gfxFilePath}");
+                
             }
             List<IGfx> result = new();
             if (new TxtParser(new TxtPattern()).Parse(gfxFilePath) is not HoiFuncFile funcFile) return result;
-            if (parser.Brackets.Count == 0) return result;
-            foreach (Bracket defineBr in parser.Brackets)
+            if (fcfile.Brackets.Count == 0) return result;
+            foreach (Bracket defineBr in fcfile.Brackets)
             {
                 if (defineBr.Name == "spriteTypes")
                 {

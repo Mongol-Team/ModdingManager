@@ -81,11 +81,11 @@ namespace Application.Composers
                         characterTrait.Sprite = var.Value.ToInt();
                         break;
                     case "trait_type":
-                        Enum.TryParse<TraitType>(var.Value?.ToString(), out var traitType);
+                        Enum.TryParse<TraitType>(var.Value?.ToString().SnakeToPascal(), out var traitType);
                         characterTrait.TraitType = traitType;
                         break;
                     case "show_in_combat":
-                        characterTrait.ShowInCombat = (bool)var.Value;
+                        characterTrait.ShowInCombat =  var.Value.ToBool();
                         break;
                     case "slot":
                         characterTrait.CharacterSlot = ModDataStorage.Mod.IdeaSlots.FirstOrDefault(isl => isl.Id.ToString() == var.Value.ToString());
@@ -111,19 +111,19 @@ namespace Application.Composers
                         characterTrait.Parents.AddRange(var.Value.ToString().Split(',').Select(p => ModDataStorage.Mod.CharacterTraits.FirstOrDefault(ct => ct.Id.ToString() == p.Trim())));
                         break;
                     case "num_parents_needed":
-                        characterTrait.NumParentsRequired = (int)var.Value;
+                        characterTrait.NumParentsRequired = var.Value.ToInt();
                         break;
                     case "gui_row":
-                        characterTrait.GuiRow = (int)var.Value;
+                        characterTrait.GuiRow = var.Value.ToInt();
                         break;
                     case "gui_column":
-                        characterTrait.GuiColumn = (int)var.Value;
+                        characterTrait.GuiColumn = var.Value.ToInt();
                         break;
                     case "cost":
-                        characterTrait.Cost = (double)var.Value;
+                        characterTrait.Cost = var.Value.ToDouble();
                         break;
                     case "gain_xp_on_spotting":
-                        characterTrait.GainXpOnSpotting = (double)var.Value;
+                        characterTrait.GainXpOnSpotting = var.Value.ToDouble();
                         break;
                     default:
                         ModifierDefinitionConfig modifierDefinitionConfig = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
@@ -136,22 +136,22 @@ namespace Application.Composers
                             switch (var.Name)
                             {
                                 case "skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Skill, (int)var.Value);
+                                    characterTrait.SkillTypes.Add(CharacterSkillType.Skill, var.Value.ToInt());
                                     break;
                                 case "attack_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Attack, (int)var.Value);
+                                    characterTrait.SkillTypes.Add(CharacterSkillType.Attack, var.Value.ToInt());
                                     break;
                                 case "defense_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Defense, (int)var.Value);
+                                    characterTrait.SkillTypes.Add(CharacterSkillType.Defense, var.Value.ToInt());
                                     break;
                                 case "planning_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Planning, (int)var.Value);
+                                    characterTrait.SkillTypes.Add(CharacterSkillType.Planning, var.Value.ToInt());
                                     break;
                                 case "logistics_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Logistics, (int)var.Value);
+                                    characterTrait.SkillTypes.Add(CharacterSkillType.Logistics, var.Value.ToInt());
                                     break;
                                 case "maneuvering_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Maneuvering, (int)var.Value);
+                                    characterTrait.SkillTypes.Add(CharacterSkillType.Maneuvering, var.Value.ToInt());
                                     break;
 
                             }
@@ -274,9 +274,12 @@ namespace Application.Composers
                     case "type":
                         foreach (var value in array.Values)
                         {
-                            if (Enum.TryParse<CharacterType>(value.ToString(), out var characterType))
+                            if (value != null)
                             {
-                                characterTrait.CharacterTypes.Add(characterType);
+                                if (Enum.TryParse<CharacterType>(value.ToString().SnakeToPascal(), out var characterType))
+                                {
+                                    characterTrait.CharacterTypes.Add(characterType);
+                                }
                             }
                         }
                         break;

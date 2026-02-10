@@ -146,7 +146,7 @@ namespace Application.Composers
                                     }
                                     break;
                                 case "ledger":
-                                    advisor.IdeaLedgerType = Enum.TryParse<IdeaLedgerType>(advVar.Value.ToString(), out var ledgerType) ? ledgerType : IdeaLedgerType.All;
+                                    advisor.IdeaLedgerType = Enum.TryParse<IdeaLedgerType>(advVar.Value.ToString().SnakeToPascal(), out var ledgerType) ? ledgerType : IdeaLedgerType.All;
                                     break;
                             }
                         }

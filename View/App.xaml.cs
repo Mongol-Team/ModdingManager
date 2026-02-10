@@ -1,4 +1,5 @@
 using Application.Settings;
+using Application.utils;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
@@ -19,14 +20,14 @@ namespace View
             if (string.IsNullOrWhiteSpace(gameDirectory) || !Directory.Exists(gameDirectory))
             {
                 System.Windows.MessageBox.Show(
-                    UILocalization.GetString("Error.GameDirectoryNotFound"),
-                    UILocalization.GetString("Error.Error"),
+                    StaticLocalisation.GetString("Error.GameDirectoryNotFound"),
+                    StaticLocalisation.GetString("Error.Error"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
 
                 using (var dialog = new FolderBrowserDialog())
                 {
-                    dialog.Description = UILocalization.GetString("Label.GameDirectory");
+                    dialog.Description = StaticLocalisation.GetString("Label.GameDirectory");
                     dialog.ShowNewFolderButton = false;
 
                     if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -39,8 +40,8 @@ namespace View
                     else
                     {
                         System.Windows.MessageBox.Show(
-                            UILocalization.GetString("Error.GameDirectoryNotSelected"),
-                            UILocalization.GetString("Error.Error"),
+                            StaticLocalisation.GetString("Error.GameDirectoryNotSelected"),
+                            StaticLocalisation.GetString("Error.Error"),
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
                         Shutdown();

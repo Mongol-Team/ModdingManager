@@ -1,3 +1,4 @@
+using Application.utils;
 using System.Windows.Markup;
 
 namespace View.Utils
@@ -20,7 +21,7 @@ namespace View.Utils
             if (string.IsNullOrEmpty(Key))
                 return string.Empty;
 
-            return UILocalization.GetString(Key);
+            return StaticLocalisation.GetString(Key);
         }
     }
 }

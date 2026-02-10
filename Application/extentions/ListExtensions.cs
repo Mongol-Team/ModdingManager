@@ -65,12 +65,36 @@
         public static void AddSafe<T>(this ICollection<T> collection, T item)
         {
             if (collection == null || item == null) return;
+
             collection.Add(item);
         }
         public static void AddSafe<TKey, TValue>(this ICollection<KeyValuePair<TKey, TValue>> collection, KeyValuePair<TKey, TValue> item)
         {
             if (collection == null || item.Key == null) return;
             collection.Add(item);
+        }
+        public static void AddRangeSafe<T>(this ICollection<T> collection, IEnumerable<T> items)
+        {
+            if (collection == null || items == null) return;
+
+            foreach (var item in items)
+            {
+                if (item != null)
+                    collection.Add(item);
+            }
+        }
+
+        public static void AddRangeSafe<TKey, TValue>(
+            this ICollection<KeyValuePair<TKey, TValue>> collection,
+            IEnumerable<KeyValuePair<TKey, TValue>> items)
+        {
+            if (collection == null || items == null) return;
+
+            foreach (var item in items)
+            {
+                if (item.Key != null)
+                    collection.Add(item);
+            }
         }
 
         public static T Random<T>(this List<T> list)

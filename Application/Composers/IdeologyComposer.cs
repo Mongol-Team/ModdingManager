@@ -233,34 +233,49 @@ namespace Application.Composers
         {
             foreach (var ideology in defs)
             {
-                ModifierDefinitionConfig dynDriftMod = new();
-                dynDriftMod.Id = new Identifier($"{ideology.Id}_drift");
-                dynDriftMod.IsCore = true;
-                dynDriftMod.Cathegory = ModifierDefinitionCathegoryType.Country;
-                dynDriftMod.ValueType = ModifierDefenitionValueType.Number;
-                dynDriftMod.ScopeType = ScopeTypes.Country;
-                dynDriftMod.ColorType = ModifierDefenitionColorType.Good;
-                dynDriftMod.Precision = 2;
-                dynDriftMod.FileFullPath = DataDefaultValues.ItemCreatedDynamically;
-                dynDriftMod.Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx);
-                ModDataStorage.Mod.ModifierDefinitions.Add(dynDriftMod);
-                dynDriftMod.Localisation = new ConfigLocalisation()
+                // ───────────── drift ─────────────
+                var drift = new ModifierDefinitionConfig
+                {
+                    Id = new Identifier($"{ideology.Id}_drift"),
+                    IsCore = true,
+                    Cathegory = ModifierDefinitionCathegoryType.Country,
+                    ValueType = ModifierDefenitionValueType.Number,
+                    ScopeType = ScopeTypes.Country,
+                    ColorType = ModifierDefenitionColorType.Good,
+                    Precision = 2,
+                    FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                    Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                };
+
+                drift.Localisation = new ConfigLocalisation
                 {
                     Language = ModManagerSettings.CurrentLanguage,
                 };
-                dynDriftMod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(dynDriftMod.Id.ToString()));
+                drift.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(drift.Id.ToString()));
 
-                ModifierDefinitionConfig dynAcceptanceMod = dynDriftMod;
+                ModDataStorage.Mod.ModifierDefinitions.Add(drift);
 
-                dynAcceptanceMod.Id = new Identifier($"{ideology.Id}_acceptance");
-                dynAcceptanceMod.Localisation = new ConfigLocalisation()
+                // ───────────── acceptance ─────────────
+                var acceptance = new ModifierDefinitionConfig
+                {
+                    Id = new Identifier($"{ideology.Id}_acceptance"),
+                    IsCore = true,
+                    Cathegory = ModifierDefinitionCathegoryType.Country,
+                    ValueType = ModifierDefenitionValueType.Number,
+                    ScopeType = ScopeTypes.Country,
+                    ColorType = ModifierDefenitionColorType.Good,
+                    Precision = 2,
+                    FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                    Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                };
+
+                acceptance.Localisation = new ConfigLocalisation
                 {
                     Language = ModManagerSettings.CurrentLanguage,
                 };
-                dynAcceptanceMod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(dynAcceptanceMod.Id.ToString()));
+                acceptance.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(acceptance.Id.ToString()));
 
-                ModDataStorage.Mod.ModifierDefinitions.Add(dynAcceptanceMod);
-                return;
+                ModDataStorage.Mod.ModifierDefinitions.Add(acceptance);
             }
         }
     }

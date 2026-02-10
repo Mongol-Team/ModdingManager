@@ -7,13 +7,11 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="300">
     <Grid ClipToBounds="True">
-        
-        <TabControl x:Name="PanelsTabControl"
-                    Visibility="{Binding HasPanels, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Background="{StaticResource BackgroundCard}"
 
-                    BorderThickness="0">
-            
+        <TabControl x:Name="PanelsTabControl"
+            Background="{StaticResource BackgroundCard}"
+            BorderThickness="0">
+
             <TabControl.ItemContainerStyle>
                 <Style TargetType="TabItem">
                     <Setter Property="Background" Value="{StaticResource BackgroundElement}"/>

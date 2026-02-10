@@ -1,4 +1,5 @@
-﻿using Application.Extentions;
+﻿using Application.Debugging;
+using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
@@ -86,8 +87,15 @@ namespace Application.Composers
                                 buildingConfig.NeedsDetection = buidVar.Value.ToBool();
                                 break;
                             case "detecting_intel_type":
-                                Enum.TryParse<IntelegenceType>(buidVar.Value.ToString(), out var intelRes);
-                                buildingConfig.IntelType = intelRes;
+                                try
+                                {
+                                    buildingConfig.IntelType = Enum.Parse<IntelegenceType>(buidVar.Value.ToString().SnakeToPascal());
+                                }
+                                catch (Exception ex)
+                                {
+                                    Logger.AddLog($"[ParseFile] Cannot parse IntelType: '{buidVar.Value}' ({buidVar.Value?.GetType().Name}): {ex.Message}");
+                                    buildingConfig.IntelType = default; // или null если nullable
+                                }
                                 break;
                             case "only_display_if_exists":
                                 buildingConfig.OnlyDisplayIfExists = buidVar.Value.ToBool();

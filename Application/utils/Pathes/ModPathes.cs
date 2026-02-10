@@ -13,7 +13,8 @@ namespace Application.utils.Pathes
             var relativePath = Path.Combine(paths);
             return Path.Combine(BaseDirectory, relativePath);
         }
-
+        public static string EquipmentsPath => Combine("common", "units", "equipment");
+        
         public static string IdeologyPath => Combine("common", "ideologies");
         public static string CommonCountriesPath => Combine("common", "countries");
         public static string HistoryCountriesPath => Combine("history", "countries");

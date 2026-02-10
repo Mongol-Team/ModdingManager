@@ -37,7 +37,7 @@ namespace Application.Debugging
     {
         private static readonly object _logLock = new object();
         public static bool IsDebug = false;
-        private class LogEntry
+        public class LogEntry
         {
             public string Message { get; set; } = "";
             public ConsoleColor Color { get; set; }
@@ -78,6 +78,29 @@ namespace Application.Debugging
                 _buffer.Clear();
             }
         }
+        public static IEnumerable<(string LogLine, ConsoleColor Color)> GetBufferedLogs()
+        {
+            lock (_logLock)
+            {
+                return _buffer.Select(entry =>
+                {
+                    string time = entry.Time.ToString("yyyy-MM-dd HH:mm:ss");
+                    string offset = "";
+
+                    for (int q = 0; q < entry.Depth; q++)
+                        offset += " |";
+                    if (entry.Depth > 0)
+                        offset += "->";
+
+                    string logLine = $"[{time}]{offset}{entry.Message} " +
+                                     $"[{entry.MessageType}][{entry.ThreadId}][{entry.Caller} @ {entry.File}:{entry.Line}]]";
+
+                    return (logLine, entry.Color);
+                }).ToList();
+            }
+        }
+
+
 
         private static void PrintToConsole(LogEntry entry)
         {

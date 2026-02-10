@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Forms;
 using View.Utils;
+using Application.utils;
 
 namespace View
 {
@@ -41,14 +42,14 @@ namespace View
             }
             else
             {
-                var format = UILocalization.GetString("Message.CurrentGameDirectory");
+                var format = StaticLocalisation.GetString("Message.CurrentGameDirectory");
                 GameDirectoryTextBlock.Text = string.Format(format, gameDir);
             }
         }
 
         private void SetupSearchPlaceholder()
         {
-            var placeholderText = UILocalization.GetString("Message.SearchRecent");
+            var placeholderText = StaticLocalisation.GetString("Message.SearchRecent");
             var placeholderColor = System.Windows.Media.Color.FromRgb(133, 133, 133);
             var normalColor = System.Windows.Media.Color.FromRgb(204, 204, 204);
 
@@ -102,19 +103,19 @@ namespace View
 
             if (todayProjects.Any())
             {
-                grouped.Add(new ProjectGroup { Key = UILocalization.GetString("Message.Today"), Value = todayProjects });
+                grouped.Add(new ProjectGroup { Key = StaticLocalisation.GetString("Message.Today"), Value = todayProjects });
             }
             if (yesterdayProjects.Any())
             {
-                grouped.Add(new ProjectGroup { Key = UILocalization.GetString("Message.Yesterday"), Value = yesterdayProjects });
+                grouped.Add(new ProjectGroup { Key = StaticLocalisation.GetString("Message.Yesterday"), Value = yesterdayProjects });
             }
             if (thisMonthProjects.Any())
             {
-                grouped.Add(new ProjectGroup { Key = UILocalization.GetString("Message.ThisMonth"), Value = thisMonthProjects });
+                grouped.Add(new ProjectGroup { Key = StaticLocalisation.GetString("Message.ThisMonth"), Value = thisMonthProjects });
             }
             if (olderProjects.Any())
             {
-                grouped.Add(new ProjectGroup { Key = UILocalization.GetString("Message.Older"), Value = olderProjects });
+                grouped.Add(new ProjectGroup { Key = StaticLocalisation.GetString("Message.Older"), Value = olderProjects });
             }
 
             ProjectsItemsControl.ItemsSource = grouped;
@@ -138,7 +139,7 @@ namespace View
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var searchText = SearchTextBox.Text;
-            var placeholderText = UILocalization.GetString("Message.SearchRecent");
+            var placeholderText = StaticLocalisation.GetString("Message.SearchRecent");
 
             if (searchText == placeholderText || string.IsNullOrWhiteSpace(searchText))
             {
@@ -171,7 +172,7 @@ namespace View
                 catch (Exception ex)
                 {
                     ShowError(
-                        string.Format(UILocalization.GetString("Error.LoadModDataFailed"), ex.Message),
+                        string.Format(StaticLocalisation.GetString("Error.LoadModDataFailed"), ex.Message),
                         NotificationCorner.TopRight);
                 }
             }
@@ -230,7 +231,7 @@ namespace View
         {
             using (var dialog = new FolderBrowserDialog())
             {
-                dialog.Description = UILocalization.GetString("Button.CreateNewProject");
+                dialog.Description = StaticLocalisation.GetString("Button.CreateNewProject");
                 dialog.ShowNewFolderButton = true;
 
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -266,7 +267,7 @@ namespace View
         {
             using (var dialog = new FolderBrowserDialog())
             {
-                dialog.Description = UILocalization.GetString("Button.OpenProject");
+                dialog.Description = StaticLocalisation.GetString("Button.OpenProject");
                 dialog.ShowNewFolderButton = false;
 
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)

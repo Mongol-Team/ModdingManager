@@ -33,5 +33,14 @@ namespace Models.Enums
         Mechanized,
         Flame,
         Amphibious,
+        FloatingHarbor,
+        RailwayGun,
+        EmplacementGunAmmo,
+        NuclearMissile,
+        SupportShip,
+        SamMissile,
+        Train,
+        BallisticMissile,
+        Convoy
     }
 }

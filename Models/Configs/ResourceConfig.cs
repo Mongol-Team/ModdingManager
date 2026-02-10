@@ -1,4 +1,5 @@
-﻿using Models.Configs;
+﻿using Models.Attributes;
+using Models.Configs;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Models.Configs
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class ResourceConfig : IConfig
     {
         public Identifier Id { get; set; }

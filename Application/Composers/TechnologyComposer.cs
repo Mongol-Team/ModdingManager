@@ -78,7 +78,7 @@ namespace Application.Composers
             Var leger = bracket.SubVars.FirstOrDefault(v => v.Name == "ledger");
             if (leger != null)
             {
-                config.Ledger = (TechTreeLedgerType)Enum.Parse(typeof(TechTreeLedgerType), leger.Value.ToString(), ignoreCase: true);
+                config.Ledger = (TechTreeLedgerType)Enum.Parse(typeof(TechTreeLedgerType), leger.Value.ToString().SnakeToPascal(), ignoreCase: true);
 
             }
             else

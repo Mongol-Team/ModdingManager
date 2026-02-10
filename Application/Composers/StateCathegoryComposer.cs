@@ -52,7 +52,7 @@ namespace Application.Composers
         public static List<StateCathegoryConfig> ParseStateCathegoryFile(string FileFullPath)
         {
             List<StateCathegoryConfig> result = new();
-            HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(FileFullPath) as HoiFuncFile;
+            HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(File.ReadAllText(FileFullPath)) as HoiFuncFile;
             foreach (var bracket in file.Brackets.FirstOrDefault(b => b.Name == "state_categories").SubBrackets)
             {
                 if (bracket.Name != null)

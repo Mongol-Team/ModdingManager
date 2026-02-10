@@ -34,7 +34,6 @@ namespace RawDataWorker.Healers
 
                 case ErrorType.Fatal:
                     return (originalLine, false);
-
                 default:
                     return (originalLine, true);
             }

@@ -37,8 +37,8 @@ namespace Models.Types.Utils
 
             try
             {
-                int thisValue = ToInt();
-                int otherValue = other.ToInt();
+                string thisValue = ToString();
+                string otherValue = other.ToString();
                 return thisValue.CompareTo(otherValue);
             }
             catch

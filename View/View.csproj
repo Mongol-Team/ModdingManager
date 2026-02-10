@@ -11,6 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="graphics\controls\color_spectrum.jpg" />
+    <None Remove="graphics\controls\err.png" />
+    <None Remove="graphics\controls\warn.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCnEncoder.Net" Version="2.2.1" />
     <PackageReference Include="ColorFontPickerWPF" Version="2.0.1" />
     <PackageReference Include="HarfBuzzSharp" Version="8.3.1.2" />
@@ -34,6 +40,9 @@
 	<ProjectReference Include="..\RawDataWorker\RawDataWorker.csproj" />
 	<ProjectReference Include="..\Models\Models.csproj" />
 	<ProjectReference Include="..\Data\Data.csproj" />
+	<Resource Include="graphics\controls\color_spectrum.jpg" />
+	<Resource Include="graphics\controls\err.png" />
+	<Resource Include="graphics\controls\warn.png" />
     <Compile Update="View\TechTreeCreator.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -2,7 +2,7 @@
   "Window.InDevelopment": "In Development",
   "Window.GameDirectorySettings": "Game Directory Settings",
   "Window.ModdingManager": "Modding Manager",
-  "Window.SolutionExplorer": "Solution Explorer",
+  "Window.EntityExplorer": "Entity Explorer",
   "Window.GetStarted": "Get started",
   "Window.Actions": "Actions",
   "Button.Close": "Close",
@@ -43,6 +43,25 @@
   "Info.Info": "Information",
   "Info.LoadingSettings": "Loading settings...",
   "Info.InitializingData": "Initializing application data...",
-  "Info.AppNotInitialized": "Application is not initialized yet. Please wait."
+  "Info.AppNotInitialized": "Application is not initialized yet. Please wait.",
+
+
+  "Log.IdeologiesInitialized": "Ideologies initialized: {0}, example: {1}",
+  "Log.ModifierDefsInitialized": "Modifier definitions initialized: {0}, example: {1}, has custom?: {2}, custom example: {3}",
+  "Log.GfxInitialized": "GFXes initialized: {0}, example: {1}",
+  "Log.LocalisationInitialized": "Localisation initialized: other = {0}, vp = {1}",
+  "Log.ProvincesInitialized": "Provinces initialized: {0}, example: {1}",
+  "Log.StateCategoriesInitialized": "State categories initialized: {0}, example: {1}",
+  "Log.RulesInitialized": "Rules initialized: {0}, example: {1}",
+  "Log.StaticModifiersInitialized": "Static modifiers initialized: {0}, example: {1}",
+  "Log.DynamicModifiersInitialized": "Dynamic modifiers initialized: {0}, example: {1}",
+  "Log.IdeaSlotsInitialized": "Idea slots initialized: {0}, example: {1}",
+  "Log.IdeaTagsInitialized": "Idea tags initialized: {0}, example: {1}",
+  "Log.TechTreeLedgersInitialized": "Tech tree ledgers initialized: {0}, example: {1}",
+  "Log.CharacterTraitsInitialized": "Character traits initialized: {0}, example: {1}",
+  "Log.CharactersInitialized": "Characters initialized: {0}, example: {1}",
+  "Log.SubUnitsInitialized": "Sub units initialized: {0}, example: {1}",
+  "Log.OpinionModifiersInitialized": "Opinion modifiers initialized: {0}, example: {1}",
+  "Log.CountriesInitialized": "Countries initialized: {0}, example: {1}"
 }
 

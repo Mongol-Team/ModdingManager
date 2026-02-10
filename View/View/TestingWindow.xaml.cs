@@ -16,11 +16,19 @@ namespace View
         public TestingWindow()
         {
             InitializeComponent();
+            JUDES();
         }
 
-        private void ConfigListViewer_Loaded(object sender, RoutedEventArgs e)
+        private void JUDES()
         {
-            errTest.AddErrors(ModDataStorage.CsvErross);
+            errTest.AddErrors(ModDataStorage.CsvErrors);
+            errTest.AddErrors(ModDataStorage.TxtErrors);
+            Logger.AddLog("------------------------------------------------"); 
+            var md = ModDataStorage.Mod.ModifierDefinitions
+                .FirstOrDefault(md => md.ToString() == "build_cost_ic");
+
+            Logger.AddLog(md?.ToString() ?? "govno");
+
         }
     }
 }

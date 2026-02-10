@@ -111,6 +111,16 @@ namespace RawDataWorker
         public static readonly Regex BracketContent =
             new Regex(bracketContent, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline, Timeout);
 
+        private static string bracketInBracket = @"\{\s*\{";
+
+        public static readonly Regex BracketInBracket =
+            new Regex(
+                bracketInBracket,
+                RegexOptions.Compiled |
+                RegexOptions.CultureInvariant |
+                RegexOptions.Singleline,
+                Timeout
+            );
 
 
         private static string victoryPoint = @"\w+\s*=\s*{(?!\s*(\d+\s+){2}\d+)(?:[^{}=])+?\s*}";
@@ -138,9 +148,10 @@ namespace RawDataWorker
             new Regex(arrayElement, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
         #endregion
         // Misc
-        private static string fileComment = @"#.*(?=\s)";
+        private static string fileComment = @"^\s*#.*(?:\r?\n)?";
         public static readonly Regex FileComment =
-            new Regex(fileComment, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(fileComment, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline, Timeout);
+
 
         private static string escapeCharsAroundAssignChar = @"\s*=\s*";
         public static readonly Regex EscapeCharsAroundAssignChar =

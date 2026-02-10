@@ -45,7 +45,8 @@ namespace Application.Extentions
 
             try
             {
-                return Convert.ToInt32(val);
+                return 
+                    val.ToInt();
             }
             catch
             {
@@ -63,10 +64,10 @@ namespace Application.Extentions
 
             try
             {
-                int r = Convert.ToInt32(arr.Values[0]);
-                int g = Convert.ToInt32(arr.Values[1]);
-                int b = Convert.ToInt32(arr.Values[2]);
-                int a = arr.Values.Count > 3 ? Convert.ToInt32(arr.Values[3]) : 255;
+                int r = arr.Values[0].ToInt();
+                int g = arr.Values[1].ToInt();
+                int b = arr.Values[2].ToInt();
+                int a = arr.Values.Count > 3 ? arr.Values[3].ToInt() : 255;
 
                 return Color.FromArgb(a, r, g, b);
             }

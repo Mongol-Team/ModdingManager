@@ -1,4 +1,5 @@
 using Application;
+using Application.utils;
 using Models.Attributes;
 using Models.Configs;
 using Models.Interfaces;
@@ -146,15 +147,15 @@ namespace ViewControls
             if (_fileContextMenu?.Items.Count >= 5)
             {
                 if (_fileContextMenu.Items[0] is MenuItem openMenuItem)
-                    openMenuItem.Header = UILocalization.GetString("Menu.Open");
+                    openMenuItem.Header = StaticLocalisation.GetString("Menu.Open");
                 if (_fileContextMenu.Items[1] is MenuItem openInExplorerMenuItem)
-                    openInExplorerMenuItem.Header = UILocalization.GetString("Menu.OpenInExplorer");
+                    openInExplorerMenuItem.Header = StaticLocalisation.GetString("Menu.OpenInExplorer");
                 if (_fileContextMenu.Items[3] is MenuItem copyPathMenuItem)
-                    copyPathMenuItem.Header = UILocalization.GetString("Menu.CopyFullPath");
+                    copyPathMenuItem.Header = StaticLocalisation.GetString("Menu.CopyFullPath");
                 if (_fileContextMenu.Items[4] is MenuItem renameMenuItem)
-                    renameMenuItem.Header = UILocalization.GetString("Menu.Rename");
+                    renameMenuItem.Header = StaticLocalisation.GetString("Menu.Rename");
                 if (_fileContextMenu.Items[5] is MenuItem deleteMenuItem)
-                    deleteMenuItem.Header = UILocalization.GetString("Menu.Delete");
+                    deleteMenuItem.Header = StaticLocalisation.GetString("Menu.Delete");
             }
         }
 

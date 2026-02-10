@@ -1,4 +1,5 @@
 ﻿using Application.Settings;
+using Application.utils;
 using global::View;
 using System.Windows;
 using View.Utils;
@@ -47,7 +48,7 @@ namespace ViewPresenters
         {
             if (!_isApplicationInitialized)
             {
-                MessageBox.Show(UILocalization.GetString("Info.AppNotInitialized"), UILocalization.GetString("Info.Info"), MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(StaticLocalisation.GetString("Info.AppNotInitialized"), StaticLocalisation.GetString("Info.Info"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
         }

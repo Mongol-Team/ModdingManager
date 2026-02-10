@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Forms;
 using Application.Settings;
+using Application.utils;
 
 namespace View
 {
@@ -24,7 +25,7 @@ namespace View
         {
             using (var dialog = new FolderBrowserDialog())
             {
-                dialog.Description = UILocalization.GetString("Label.GameDirectory");
+                dialog.Description = StaticLocalisation.GetString("Label.GameDirectory");
                 dialog.ShowNewFolderButton = false;
                 if (!string.IsNullOrEmpty(GameDirBox.Text))
                 {
@@ -43,7 +44,7 @@ namespace View
             if (string.IsNullOrWhiteSpace(GameDirBox.Text))
             {
                 ShowWarning(
-                    UILocalization.GetString("Error.PleaseSpecifyDirectory"),
+                    StaticLocalisation.GetString("Error.PleaseSpecifyDirectory"),
                     NotificationCorner.TopRight);
                 return;
             }
@@ -51,7 +52,7 @@ namespace View
             if (!Directory.Exists(GameDirBox.Text))
             {
                 ShowWarning(
-                    UILocalization.GetString("Error.DirectoryNotExists"),
+                    StaticLocalisation.GetString("Error.DirectoryNotExists"),
                     NotificationCorner.TopRight);
                 return;
             }

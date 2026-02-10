@@ -12,7 +12,12 @@ public class HtmlModifierParser : Parser
     public HtmlModifierParser() : base() { }
 
     protected override void Normalize(ref string content) { }
-
+    public static string SnakeToPascal(string input)
+    {
+        return string.Join("", input
+            .Split('_', StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => char.ToUpperInvariant(s[0]) + s.Substring(1)));
+    }
     protected override IHoiData ParseRealization(string content)
     {
         var doc = new HtmlDocument { OptionFixNestedTags = true };
@@ -27,7 +32,7 @@ public class HtmlModifierParser : Parser
 
             var target = norm(raw);
 
-            if (Enum.TryParse<ScopeTypes>(target, out scope))
+            if (Enum.TryParse<ScopeTypes>(SnakeToPascal(target), out scope))
             {
                 return true;
             }
@@ -110,7 +115,7 @@ public class HtmlModifierParser : Parser
                                             .Select(s => s.Trim())
                                             .FirstOrDefault();
                             if (!string.IsNullOrWhiteSpace(first) &&
-                                Enum.TryParse<ModifierDefinitionCathegoryType>(first, true, out var cat))
+                                Enum.TryParse<ModifierDefinitionCathegoryType>(SnakeToPascal(first), true, out var cat))
                             {
                                 cfg.Cathegory = cat;
                             }

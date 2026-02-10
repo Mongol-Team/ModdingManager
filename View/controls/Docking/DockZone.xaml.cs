@@ -156,7 +156,9 @@ namespace ViewControls.Docking
 
         private void UpdateVisibility()
         {
-            Visibility = (HasPanels && !IsCollapsed) ? Visibility.Visible : Visibility.Collapsed;
+            Visibility = (HasPanels && !IsCollapsed)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
     }
 }

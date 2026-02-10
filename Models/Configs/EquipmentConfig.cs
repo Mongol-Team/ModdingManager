@@ -25,8 +25,9 @@ namespace Models.Configs
         public bool IsArchetype { get; set; }
         public bool IsBuidable { get; set; }
         public bool IsActive { get; set; }
-        public string Type { get; set; }
+        public List<IternalUnitType> Type { get; set; }
         public string GroupBy { get; set; }
+        public EquipmentConfig Archetype { get; set; }
         public EquipmentInterfaceCategory InterfaceType { get; set; }
         public Dictionary<ResourceConfig, int> Cost { get; set; }
         public Dictionary<ModifierDefinitionConfig, object> Modifiers { get; set; }

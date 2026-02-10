@@ -1,5 +1,6 @@
 using View.Utils;
 using System.Windows;
+using Application.utils;
 
 namespace View
 {
@@ -27,7 +28,7 @@ namespace View
         {
             if (string.IsNullOrEmpty(message))
             {
-                message = UILocalization.GetString("Message.PageNotReady");
+                message = StaticLocalisation.GetString("Message.PageNotReady");
             }
             var window = new PlaceholderWindow(message);
             if (owner != null)
