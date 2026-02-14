@@ -20,35 +20,33 @@ public static class ModDataStorage
 
     public static void ComposeMod(Action<int, int, string>? progressCallback = null)
     {
-        var steps = new List<(Action action, string locKey)>
-        {
-            (() => { Mod = new ModConfig(); Localisation = new LocalisationRegistry(); }, "Progress.InitLocalisation"),
-            (() => { Mod.Gfxes      = GfxLoader.LoadAll().ToObservableCollection();          }, "Progress.LoadingGraphics"),
-            (() => { Mod.Resources  = ResourceComposer.Parse().Cast<ResourceConfig>().ToObservableCollection(); }, "Progress.LoadingResources"),
-            (() => { Mod.ModifierDefinitions = ModifierDefComposer.Parse().Cast<ModifierDefinitionConfig>().ToObservableCollection(); }, "Progress.LoadingModifierDefs"),
-            (() => { Mod.Ideologies = IdeologyComposer.Parse().Cast<IdeologyConfig>().ToObservableCollection(); }, "Progress.LoadingIdeologies"),
-            (() => { Mod.Map.Provinces = ProvinceComposer.Parse().Cast<ProvinceConfig>().ToList(); }, "Progress.LoadingProvinces"),
-            (() => { Mod.StateCathegories = StateCathegoryComposer.Parse().Cast<StateCathegoryConfig>().ToObservableCollection(); }, "Progress.LoadingStateCategories"),
-            (() => { Mod.Rules = RuleComposer.Parse().Cast<RuleConfig>().ToObservableCollection(); }, "Progress.LoadingRules"),
-            (() => { Mod.StaticModifiers = StaticModifierComposer.Parse().Cast<StaticModifierConfig>().ToObservableCollection(); }, "Progress.LoadingStaticModifiers"),
-            (() => { Mod.DynamicModifiers = DynamicModifierComposer.Parse().Cast<DynamicModifierConfig>().ToObservableCollection(); }, "Progress.LoadingDynamicModifiers"),
-          
-            (() => { Mod.IdeaSlots = IdeaGroupComposer.Parse().Cast<IdeaGroupConfig>().ToObservableCollection(); }, "Progress.LoadingIdeaSlots"),
-            (() => { Mod.IdeaTags  = IdeaTagComposer.Parse().Cast<IdeaTagConfig>().ToObservableCollection();  }, "Progress.LoadingIdeaTags"),
-            (() => { Mod.TechTreeLedgers = TechnologyComposer.Parse().Cast<TechTreeConfig>().ToObservableCollection(); }, "Progress.LoadingTechnologies"),
-            (() => { Mod.CharacterTraits = CharacterTraitComposer.Parse().Cast<CharacterTraitConfig>().ToObservableCollection(); }, "Progress.LoadingCharacterTraits"),
-            (() => { Mod.Characters = CharacterComposer.Parse().Cast<CountryCharacterConfig>().ToObservableCollection(); }, "Progress.LoadingCharacters"),
-            (() => { Mod.SubUnitGroups = SubUnitGroupComposer.Parse().Cast<SubUnitGroupConfig>().ToObservableCollection(); }, "Progress.LoadingSubUnitGroups"),
-            (() => { Mod.SubUnits  = SubUnitComposer.Parse().Cast<SubUnitConfig>().ToObservableCollection();  }, "Progress.LoadingSubUnits"),
-            (() => { Mod.OpinionModifiers = OpinionModifierComposer.Parse().Cast<OpinionModifierConfig>().ToObservableCollection(); }, "Progress.LoadingOpinionModifiers"),
-            (() => { Mod.Buildings = BuildingComposer.Parse().Cast<BuildingConfig>().ToObservableCollection(); }, "Progress.LoadingBuildings"),
-            (() => { Mod.Equipments = EquipmentComposer.Parse().Cast<EquipmentConfig>().ToObservableCollection(); }, "Progress.LoadingEquipments"),
-            (() => { Mod.TechCategories = TechCategoryComposer.Parse().Cast<TechCategoryConfig>().ToObservableCollection(); }, "Progress.LoadingTechCategories"),
-            (() => { Mod.TechTreeItems = TechTreeItemComposer.Parse().Cast<TechTreeItemConfig>().ToObservableCollection(); }, "Progress.LoadingTechTreeDefinitions"),
-            (() => { Mod.Countries = CountryComposer.Parse().Cast<CountryConfig>().ToObservableCollection(); }, "Progress.LoadingCountries"),
-            (() => { Mod.Map = MapComposer.Parse().FirstOrDefault() as MapConfig; }, "Progress.LoadingMap"),
-            (() => { OverrideManager.HandleOverride(); }, "Progress.HandlingOverrides"),
-        };
+        var steps = new List<(Action action, string locKey)>();
+        steps.Add((() => { Mod = new ModConfig(); Localisation = new LocalisationRegistry(); }, "Progress.InitLocalisation"));
+        steps.Add((() => { Mod.Gfxes = GfxLoader.LoadAll().ToObservableCollection(); }, "Progress.LoadingGraphics"));
+        steps.Add((() => { Mod.Resources = ResourceComposer.Parse().ToObservableCollection(); }, "Progress.LoadingResources"));
+        steps.Add((() => { Mod.ModifierDefinitions = ModifierDefComposer.Parse().ToObservableCollection(); }, "Progress.LoadingModifierDefs"));
+        steps.Add((() => { Mod.Buildings = BuildingComposer.Parse().ToObservableCollection(); }, "Progress.LoadingBuildings"));
+        steps.Add((() => { Mod.Ideologies = IdeologyComposer.Parse().ToObservableCollection(); }, "Progress.LoadingIdeologies"));
+        steps.Add((() => { Mod.Map.Provinces = ProvinceComposer.Parse().ToList(); }, "Progress.LoadingProvinces"));
+        steps.Add((() => { Mod.StateCathegories = StateCathegoryComposer.Parse().ToObservableCollection(); }, "Progress.LoadingStateCategories"));
+        steps.Add((() => { Mod.Rules = RuleComposer.Parse().ToObservableCollection(); }, "Progress.LoadingRules"));
+        steps.Add((() => { Mod.SubUnits = SubUnitComposer.Parse().ToObservableCollection(); }, "Progress.LoadingSubUnits"));
+        steps.Add((() => { Mod.Ideas = IdeaComposer.Parse().ToObservableCollection(); }, "Progress.LoadingIdeas"));
+        steps.Add((() => { Mod.IdeaSlots = IdeaGroupComposer.Parse().ToObservableCollection(); }, "Progress.LoadingIdeaSlots"));
+        steps.Add((() => { Mod.StaticModifiers = StaticModifierComposer.Parse().ToObservableCollection(); }, "Progress.LoadingStaticModifiers"));
+        steps.Add((() => { Mod.DynamicModifiers = DynamicModifierComposer.Parse().ToObservableCollection(); }, "Progress.LoadingDynamicModifiers"));
+        steps.Add((() => { Mod.IdeaTags = IdeaTagComposer.Parse().ToObservableCollection(); }, "Progress.LoadingIdeaTags"));
+        steps.Add((() => { Mod.TechTreeLedgers = TechnologyComposer.Parse().ToObservableCollection(); }, "Progress.LoadingTechnologies"));
+        steps.Add((() => { Mod.CharacterTraits = CharacterTraitComposer.Parse().ToObservableCollection(); }, "Progress.LoadingCharacterTraits"));
+        steps.Add((() => { Mod.Characters = CharacterComposer.Parse().ToObservableCollection(); }, "Progress.LoadingCharacters"));
+        
+        steps.Add((() => { Mod.OpinionModifiers = OpinionModifierComposer.Parse().ToObservableCollection(); }, "Progress.LoadingOpinionModifiers"));
+        steps.Add((() => { Mod.Equipments = EquipmentComposer.Parse().ToObservableCollection(); }, "Progress.LoadingEquipments"));
+        steps.Add((() => { Mod.TechCategories = TechCategoryComposer.Parse().ToObservableCollection(); }, "Progress.LoadingTechCategories"));
+        steps.Add((() => { Mod.TechTreeItems = TechTreeItemComposer.Parse().ToObservableCollection(); }, "Progress.LoadingTechTreeDefinitions"));
+        steps.Add((() => { Mod.Countries = CountryComposer.Parse().ToObservableCollection(); }, "Progress.LoadingCountries"));
+        steps.Add((() => { Mod.Map = MapComposer.Parse() as MapConfig; }, "Progress.LoadingMap"));
+        steps.Add((() => { OverrideManager.HandleOverride(); }, "Progress.HandlingOverrides"));
 
         int totalSteps = steps.Count;
         int currentStep = 0;
@@ -69,17 +67,17 @@ public static class ModDataStorage
 
         Logger.AddLog(StaticLocalisation.GetString("Log.IdeologiesInitialized",
             Mod.Ideologies.Count,
-            Mod.Ideologies.Count > 0 ? Mod.Ideologies.Random().Id : "none"));
+            Mod.Ideologies.Count > 0 ? Mod.Ideologies.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.ModifierDefsInitialized",
             Mod.ModifierDefinitions.Count,
-            Mod.ModifierDefinitions.Count > 0 ? Mod.ModifierDefinitions.Random().Id : "none",
+            Mod.ModifierDefinitions.Count > 0 ? Mod.ModifierDefinitions.FileEntitiesToList()?.Random().Id : "none",
             Mod.ModifierDefinitions.Any(m => !m.IsCore),
-            customMods.Count > 0 ? customMods.Random().Id : "none"));
+            customMods.Count > 0 ? customMods.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.GfxInitialized",
             Mod.Gfxes.Count,
-            Mod.Gfxes.Count > 0 ? Mod.Gfxes.Random().Id : "none"));
+            Mod.Gfxes.Count > 0 ? Mod.Gfxes.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.LocalisationInitialized",
             Localisation.OtherLocalisation.Data.Count,
@@ -87,55 +85,55 @@ public static class ModDataStorage
 
         Logger.AddLog(StaticLocalisation.GetString("Log.ProvincesInitialized",
             Mod.Map.Provinces.Count,
-            Mod.Map.Provinces.Count > 0 ? Mod.Map.Provinces.Random().Id : "none"));
+            Mod.Map.Provinces.Count > 0 ? Mod.Map.Provinces.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.StateCategoriesInitialized",
             Mod.StateCathegories.Count,
-            Mod.StateCathegories.Count > 0 ? Mod.StateCathegories.Random().Id : "none"));
+            Mod.StateCathegories.Count > 0 ? Mod.StateCathegories.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.RulesInitialized",
             Mod.Rules.Count,
-            Mod.Rules.Count > 0 ? Mod.Rules.Random().Id : "none"));
+            Mod.Rules.Count > 0 ? Mod.Rules.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.StaticModifiersInitialized",
             Mod.StaticModifiers.Count,
-            Mod.StaticModifiers.Count > 0 ? Mod.StaticModifiers.Random().Id : "none"));
+            Mod.StaticModifiers.Count > 0 ? Mod.StaticModifiers.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.DynamicModifiersInitialized",
             Mod.DynamicModifiers.Count,
-            Mod.DynamicModifiers.Count > 0 ? Mod.DynamicModifiers.Random().Id : "none"));
+            Mod.DynamicModifiers.Count > 0 ? Mod.DynamicModifiers.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.IdeaSlotsInitialized",
             Mod.IdeaSlots.Count,
-            Mod.IdeaSlots.Count > 0 ? Mod.IdeaSlots.Random().Id : "none"));
+            Mod.IdeaSlots.Count > 0 ? Mod.IdeaSlots.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.IdeaTagsInitialized",
             Mod.IdeaTags.Count,
-            Mod.IdeaTags.Count > 0 ? Mod.IdeaTags.Random().Id : "none"));
+            Mod.IdeaTags.Count > 0 ? Mod.IdeaTags.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.TechTreeLedgersInitialized",
             Mod.TechTreeLedgers.Count,
-            Mod.TechTreeLedgers.Count > 0 ? Mod.TechTreeLedgers.Random().Id : "none"));
+            Mod.TechTreeLedgers.Count > 0 ? Mod.TechTreeLedgers.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.CharacterTraitsInitialized",
             Mod.CharacterTraits.Count,
-            Mod.CharacterTraits.Count > 0 ? Mod.CharacterTraits.Random().Id : "none"));
+            Mod.CharacterTraits.Count > 0 ? Mod.CharacterTraits.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.CharactersInitialized",
             Mod.Characters.Count,
-            Mod.Characters.Count > 0 ? Mod.Characters.Random().Id : "none"));
+            Mod.Characters.Count > 0 ? Mod.Characters.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.SubUnitsInitialized",
             Mod.SubUnits.Count,
-            Mod.SubUnits.Count > 0 ? Mod.SubUnits.Random().Id : "none"));
+            Mod.SubUnits.Count > 0 ? Mod.SubUnits.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.OpinionModifiersInitialized",
             Mod.OpinionModifiers.Count,
-            Mod.OpinionModifiers.Count > 0 ? Mod.OpinionModifiers.Random().Id : "none"));
+            Mod.OpinionModifiers.Count > 0 ? Mod.OpinionModifiers.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.CountriesInitialized",
             Mod.Countries.Count,
-            Mod.Countries.Count > 0 ? Mod.Countries.Random().Id : "none"));
+            Mod.Countries.Count > 0 ? Mod.Countries.FileEntitiesToList()?.Random().Id : "none"));
     }
 }
 

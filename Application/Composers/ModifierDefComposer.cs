@@ -1,128 +1,237 @@
-﻿using Application.Extentions;
+﻿using Application.Debugging;
+using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
+using Data;
 using Models.Configs;
+using Models.EntityFiles;
 using Models.Enums;
 using Models.Types.HtmlFilesData;
+using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace Application.Composers
 {
-    public class ModifierDefComposer : IComposer
+    public class ModifierDefComposer
     {
-        public ModifierDefComposer() { }
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы определений модификаторов и возвращает список файлов (ConfigFile<ModifierDefinitionConfig>)
+        /// </summary>
+        public static List<ConfigFile<ModifierDefinitionConfig>> Parse()
         {
-            string[] possibleDefPaths = {
-                ModPathes.ModifierDefFirstPath,
-                GamePathes.ModifierHtmlPath,
-            };
-            string[] possibleHtmlPaths = {
-                ModPathes.ModifierHtmlPath,
-                GamePathes.ModifierHtmlPath,
-            };
-            string[] possibleMdPaths = {
-                ModPathes.ModifiersMdPath,
-                GamePathes.ModifiersMdPath,
-            };
-            List<IConfig> res = new List<IConfig>();
-            foreach (string defPath in possibleDefPaths)
+            var stopwatch = Stopwatch.StartNew();
+            var modifierFiles = new List<ConfigFile<ModifierDefinitionConfig>>();
+
+            // 1. Обычные txt-файлы с определениями (01_modifier_definitions и т.п.)
+            string[] possibleDefPaths =
             {
-                List<string> files = null;
+                ModPathes.ModifierDefFirstPath,
+                GamePathes.ModifierHtmlPath   // ← в оригинале был GamePathes.ModifierHtmlPath, но это может быть опечатка — оставил как есть
+            };
+
+            foreach (string path in possibleDefPaths)
+            {
+                if (!Directory.Exists(path)) continue;
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                        bool isOverride = path.StartsWith(ModPathes.ModifierDefFirstPath);
+
+                        var configFile = ParseTxtFile(hoiFuncFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
+                        {
+                            modifierFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл определений модификаторов: {configFile.FileName} → {configFile.Entities.Count} определений");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.AddLog($"Ошибка парсинга файла определений {file}: {ex.Message}");
+                    }
+                }
+
+                if (modifierFiles.Any()) break; // если нашли в моде — не ищем в игре
+            }
+
+            // 2. HTML / MD файлы — обрабатываем как core-определения
+            ProcessDocumentationFiles(modifierFiles);
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг определений модификаторов завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {modifierFiles.Count}, определений всего: {modifierFiles.Sum(f => f.Entities.Count)}");
+
+            return modifierFiles;
+        }
+
+        private static ConfigFile<ModifierDefinitionConfig> ParseTxtFile(HoiFuncFile file, string fileFullPath, bool isOverride)
+        {
+            var configFile = new ConfigFile<ModifierDefinitionConfig>
+            {
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (Bracket bracket in file.Brackets)
+            {
+                var cfg = ParseModifierDefConfig(bracket, fileFullPath, isOverride);
+                if (cfg != null)
+                {
+                    configFile.Entities.Add(cfg);
+                    Logger.AddDbgLog($"  → добавлено определение модификатора: {cfg.Id}");
+                }
+            }
+
+            return configFile;
+        }
+
+        private static ModifierDefinitionConfig ParseModifierDefConfig(Bracket bracket, string fileFullPath, bool isOverride)
+        {
+            var config = new ModifierDefinitionConfig
+            {
+                Id = new Identifier(bracket.Name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (Var v in bracket.SubVars)
+            {
+                switch (v.Name)
+                {
+                    case "value_type":
+                        config.ValueType = v.Value.ToString().SnakeToPascal().ToEnum<ModifierDefenitionValueType>(default);
+                        break;
+
+                    case "precision":
+                        config.Precision = v.Value.ToInt();
+                        break;
+
+                    case "cathegory":
+                        config.Cathegory = v.Value.ToString().SnakeToPascal().ToEnum<ModifierDefinitionCathegoryType>(default);
+                        break;
+
+                    case "color_type":
+                        config.ColorType = v.Value.ToString().SnakeToPascal().ToEnum<ModifierDefenitionColorType>(default);
+                        break;
+                }
+            }
+
+            return config;
+        }
+
+        /// <summary>
+        /// Обрабатывает HTML и MD файлы документации как core-определения
+        /// </summary>
+        private static void ProcessDocumentationFiles(List<ConfigFile<ModifierDefinitionConfig>> modifierFiles)
+        {
+            string[] possibleHtmlPaths =
+            {
+                ModPathes.ModifierHtmlPath,
+                GamePathes.ModifierHtmlPath
+            };
+
+            string[] possibleMdPaths =
+            {
+                ModPathes.ModifiersMdPath,
+                GamePathes.ModifiersMdPath
+            };
+
+            List<ModifierDefinitionConfig> docModifiers = new();
+
+            // Сначала пробуем HTML
+            foreach (string path in possibleHtmlPaths)
+            {
+                if (!File.Exists(path)) continue;
+
                 try
                 {
-                    files = Directory.GetFiles(defPath, "*.txt", SearchOption.AllDirectories).ToList();
+                    string content = File.ReadAllText(path);
+                    var parser = new HtmlModifierParser();
+                    var parsedFile = parser.Parse(content) as ModifierDefinitionFile;
+
+                    if (parsedFile?.ModifierDefinitions?.Any() == true)
+                    {
+                        docModifiers.AddRange(parsedFile.ModifierDefinitions);
+                        Logger.AddDbgLog($"Загружены core-определения из HTML: {path} → {docModifiers.Count} модификаторов");
+                        break;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    files = new List<string>();
+                    Logger.AddLog($"Ошибка парсинга HTML-документации {path}: {ex.Message}");
                 }
-                if (files.Count == 0)
-                    continue;
-                foreach (var file in files)
-                {
-                    HoiFuncFile hoiFuncFile = new TxtParser(new TxtPattern()).Parse(file) as HoiFuncFile;
-                    foreach (var bracket in hoiFuncFile.Brackets)
-                    {
-                        ModifierDefinitionConfig cfg = ParseModifierDefConfig(bracket);
-                        cfg.FileFullPath = file;
-                        if (cfg != null)
-                            res.Add(cfg);
-                    }
-                }
-                if (res.Count > 0)
-                    break;
             }
-            List<ModifierDefinitionConfig> docmodif = new List<ModifierDefinitionConfig>();
-            HtmlModifierParser parser = new HtmlModifierParser();
-            foreach (string path in possibleHtmlPaths)
+
+            // Если HTML не дал результата — пробуем MD
+            if (!docModifiers.Any())
             {
-                if (!File.Exists(path))
-                    continue;
-                docmodif = (parser.Parse(File.ReadAllText(path)) as ModifierDefinitionFile).ModifierDefinitions;
-                foreach (var modifier in docmodif)
-                {
-                    var corecfg = modifier;
-                    corecfg.IsCore = true;
-                    res.Add(corecfg);
-                }
-                if (docmodif.Count != 0)
-                {
-                    break;
-                }
-                
-            }
-            if(docmodif.Count == 0 || !docmodif.Any(m => m.IsCore == true))
-            {
-                MdModifierParser mdparser = new MdModifierParser();
                 foreach (string path in possibleMdPaths)
                 {
-                    if (!File.Exists(path))
-                        continue;
-                    docmodif = (mdparser.Parse(File.ReadAllText(path)) as ModifierDefinitionFile).ModifierDefinitions;
-                    foreach (var modifier in docmodif)
+                    if (!File.Exists(path)) continue;
+
+                    try
                     {
-                        var corecfg = modifier;
-                        corecfg.IsCore = true;
-                        res.Add(corecfg);
+                        string content = File.ReadAllText(path);
+                        var parser = new MdModifierParser();
+                        var parsedFile = parser.Parse(content) as ModifierDefinitionFile;
+
+                        if (parsedFile?.ModifierDefinitions?.Any() == true)
+                        {
+                            docModifiers.AddRange(parsedFile.ModifierDefinitions);
+                            Logger.AddDbgLog($"Загружены core-определения из MD: {path} → {docModifiers.Count} модификаторов");
+                            break;
+                        }
                     }
-                    if (docmodif.Count != 0)
+                    catch (Exception ex)
                     {
-                        break;
+                        Logger.AddLog($"Ошибка парсинга MD-документации {path}: {ex.Message}");
                     }
                 }
             }
-            return res;
-        }
-        public static ModifierDefinitionConfig ParseModifierDefConfig(Bracket bracket)
-        {
-            ModifierDefinitionConfig config = new ModifierDefinitionConfig();
-            config.Id = new Identifier(bracket.Name);
-            foreach (var var in bracket.SubVars)
+
+            if (!docModifiers.Any())
             {
-                switch (var.Name)
-                {
-                    case "value_type":
-                        if (Enum.TryParse<ModifierDefenitionValueType>(var.Value.ToString().SnakeToPascal(), true, out var valueType))
-                            config.ValueType = valueType;
-                        break;
-                    case "precision":
-                        if (int.TryParse(var.Value.ToString(), out var precision))
-                            config.Precision = precision;
-                        break;
-                    case "cathegory":
-                        if (Enum.TryParse<ModifierDefinitionCathegoryType>(var.Value.ToString().SnakeToPascal(), true, out var cathegory))
-                            config.Cathegory = cathegory;
-                        break;
-                    case "color_type":
-                        if (Enum.TryParse<ModifierDefenitionColorType>(var.Value.ToString().SnakeToPascal(), true, out var colorType))
-                            config.ColorType = colorType;
-                        break;
-                }
+                Logger.AddLog("Не найдены валидные core-определения модификаторов в HTML/MD файлах");
+                return;
             }
-            return config;
+
+            var coreFile = ModDataStorage.Mod.ModifierDefinitions?.FirstOrDefault(f => f.FileName == "core_objects");
+
+            if (coreFile == null)
+            {
+                coreFile = new ConfigFile<ModifierDefinitionConfig>
+                {
+                    FileFullPath = "core_objects",
+                    IsCore = true,
+                    IsOverride = false
+                };
+                ModDataStorage.Mod.ModifierDefinitions.Add(coreFile); // Если коллекции нет - невозможно, добавить по рекомендации
+                Logger.AddDbgLog("Создан core_objects файл для динамических модификаторов.");
+            }
+
+            foreach (var mod in docModifiers)
+            {
+                mod.IsCore = true;
+                mod.FileFullPath = "core_objects"; // или оставить оригинальный путь, если важно
+                coreFile.Entities.Add(mod);
+            }
+
+            modifierFiles.Add(coreFile);
+            Logger.AddDbgLog($"Добавлен виртуальный core_objects с {coreFile.Entities.Count} core-определениями модификаторов");
         }
     }
 }

@@ -1,8 +1,12 @@
 ﻿using Application.Debugging;
+using Application.Extensions;
+using Application.extentions;
 using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
+using Data;
 using Models.Configs;
+using Models.EntityFiles;
 using Models.GfxTypes;
 using Models.Interfaces;
 using Models.Types.LocalizationData;
@@ -10,158 +14,187 @@ using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using DDF = Data.DataDefaultValues;
 
 namespace Application.Composers
 {
-    internal class IdeaComposer : IComposer
+    internal class IdeaComposer
     {
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы идей и возвращает список файлов (ConfigFile<IdeaConfig>)
+        /// </summary>
+        public static List<ConfigFile<IdeaConfig>> Parse()
         {
-            List<IConfig> result = new();
-            string[] possiblePathes = {
+            var stopwatch = Stopwatch.StartNew();
+            var ideaFiles = new List<ConfigFile<IdeaConfig>>();
+
+            string[] possiblePathes =
+            {
                 ModPathes.IdeasPath,
-                GamePathes.IdeasPath,
+                GamePathes.IdeasPath
             };
-            foreach (string possiblePath in possiblePathes)
-            {
-                string[] fileStrs = Directory.GetFiles(possiblePath);
-                foreach (string fileStr in fileStrs)
-                {
-                    List<IConfig> cfgs = ParseFile(fileStr);
-                    foreach (IConfig cf in cfgs)
-                    {
-                        cf.FileFullPath = fileStr;
-                    }
-                    if (cfgs != null && cfgs.Count > 0)
-                    {
-                        result.AddRange(cfgs);
-                    }
-                }
 
-            }
-            return result;
-        }
-        public static List<IConfig> ParseFile(string path)
-        {
-            HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(path) as HoiFuncFile;
-            List<Bracket> ideaBrs = file.Brackets.Where(b => b.Name == "ideas").ToList();
-            List<IConfig> res = new();
-            foreach (Bracket ideabr in ideaBrs)
+            foreach (string path in possiblePathes)
             {
-                foreach (Bracket slotbr in ideabr.SubBrackets)
+                if (!Directory.Exists(path)) continue;
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
+                foreach (string file in files)
                 {
-                    foreach (Bracket sideabr in slotbr.SubBrackets)
+                    string content = File.ReadAllText(file);
+                    HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                    bool isOverride = path.StartsWith(ModPathes.IdeasPath);
+
+                    var configFile = ParseFile(hoiFuncFile, file, isOverride);
+
+                    if (configFile.Entities.Any())
                     {
-                        IConfig cfg = ParseSingleIdea(sideabr);
-                        res.Add(cfg);
+                        ideaFiles.Add(configFile);
+                        Logger.AddDbgLog($"Добавлен файл идей: {configFile.FileName} → {configFile.Entities.Count} идей");
                     }
                 }
             }
-            return res;
 
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг идей завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {ideaFiles.Count}, идей всего: {ideaFiles.Sum(f => f.Entities.Count)}");
+
+            return ideaFiles;
         }
-        public static IConfig ParseSingleIdea(Bracket ideaBr)
+
+        private static ConfigFile<IdeaConfig> ParseFile(HoiFuncFile file, string fileFullPath, bool isOverride)
         {
-            IdeaConfig idea = new()
+            var configFile = new ConfigFile<IdeaConfig>
+            {
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (Bracket ideaBrTop in file.Brackets.Where(b => b.Name == "ideas"))
+            {
+                // Обычно структура: ideas → slot → idea
+                foreach (Bracket slotBr in ideaBrTop.SubBrackets)
+                {
+                    foreach (Bracket ideaBr in slotBr.SubBrackets)
+                    {
+                        var idea = ParseSingleIdea(ideaBr, fileFullPath, isOverride);
+                        if (idea != null)
+                        {
+                            configFile.Entities.Add(idea);
+                            Logger.AddDbgLog($"  → добавлена идея: {idea.Id}");
+                        }
+                    }
+                }
+            }
+
+            return configFile;
+        }
+
+        private static IdeaConfig ParseSingleIdea(Bracket ideaBr, string fileFullPath, bool isOverride)
+        {
+            var idea = new IdeaConfig
             {
                 Id = new Identifier(ideaBr.Name),
-                Localisation = new ConfigLocalisation() { Language = ModManagerSettings.CurrentLanguage },
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
+
+                Localisation = new ConfigLocalisation { Language = ModManagerSettings.CurrentLanguage },
                 Modifiers = new Dictionary<ModifierDefinitionConfig, object>(),
                 Gfx = new SpriteType(DDF.NullImageSource, DDF.Null),
+
                 Tag = DDF.Null,
-                RemovalCost = DDF.NullInt, //+
-                Available = DDF.Null, //+
-                AvailableCivilWar = DDF.Null, //+
-                Allowed = DDF.Null, //+
-                AllowedToRemove = DDF.Null, //+
-                Cost = DDF.NullInt, //+
-                OnAdd = DDF.Null, //+
+                RemovalCost = DDF.NullInt,
+                Available = DDF.Null,
+                AvailableCivilWar = DDF.Null,
+                Allowed = DDF.Null,
+                AllowedToRemove = DDF.Null,
+                Cost = DDF.NullInt,
+                OnAdd = DDF.Null
             };
-            foreach (Var var in ideaBr.SubVars)
+
+            // Переменные верхнего уровня
+            foreach (Var v in ideaBr.SubVars)
             {
-                switch (var.Name)
+                switch (v.Name)
                 {
                     case "picture":
-                        idea.PictureName = var.Value.ToString();
+                        idea.PictureName = v.Value?.ToString();
                         break;
+
                     case "cost":
-                        var costVar = ideaBr.SubVars.FirstOrDefault(v => v.Name == "cost");
-                        if (costVar?.Value != null)
-                            idea.Cost = costVar.Value.ToInt();
+                        idea.Cost = v.Value.ToInt();
                         break;
+
                     case "removal_cost":
-                        var removalVar = ideaBr.SubVars.FirstOrDefault(v => v.Name == "removal_cost");
-                        if (removalVar?.Value != null)
-                            idea.RemovalCost = removalVar.Value.ToInt();
+                        idea.RemovalCost = v.Value.ToInt();
                         break;
 
                     case "on_add":
-                        var onAddVar = ideaBr.SubVars.FirstOrDefault(v => v.Name == "on_add");
-                        if (onAddVar?.Value != null)
-                            idea.OnAdd = onAddVar.Value.ToString();
+                        idea.OnAdd = v.Value?.ToString();
                         break;
                 }
             }
 
+            // Подблоки
             foreach (Bracket br in ideaBr.SubBrackets)
             {
                 switch (br.Name)
                 {
                     case "allowed":
-                        var allowedBr = ideaBr.SubBrackets.FirstOrDefault(v => v.Name == "allowed");
-                        if (allowedBr != null)
-                            idea.Allowed = allowedBr.ToString();
+                        idea.Allowed = br.ToString(); // todo: триггеры
                         break;
 
                     case "allowed_to_remove":
-                        var allowedToRemoveBr = ideaBr.SubBrackets.FirstOrDefault(v => v.Name == "allowed_to_remove");
-                        if (allowedToRemoveBr != null)
-                            idea.AllowedToRemove = allowedToRemoveBr.ToString();
+                        idea.AllowedToRemove = br.ToString(); // todo: триггеры
                         break;
 
                     case "available":
-                        var availableBr = ideaBr.SubBrackets.FirstOrDefault(v => v.Name == "available");
-                        if (availableBr != null)
-                            idea.Available = availableBr.ToString();
+                        idea.Available = br.ToString(); // todo: триггеры
                         break;
+
                     case "available_civil_war":
-                        var availableCWBr = ideaBr.SubBrackets.FirstOrDefault(v => v.Name == "available_civil_war");
-                        if (availableCWBr != null)
-                            idea.AvailableCivilWar = availableCWBr.ToString();
+                        idea.AvailableCivilWar = br.ToString(); // todo: триггеры
                         break;
+
                     case "modifier":
                         foreach (Var v in br.SubVars)
                         {
-                            string name = v.Name;
-                            ModifierDefinitionConfig config = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(md => md.Id.ToString() == name);
-                            if (config != null)
+                            var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(v.Name);
+                            if (modDef != null)
                             {
-                                idea.Modifiers.TryAdd(config, v.Value);
-                                Logger.AddDbgLog($"idea: {idea.Id.ToString()}, mod:{config.Id.ToString()}", "IdeaComposer");
+                                idea.Modifiers.TryAdd(modDef, v.Value);
+                                Logger.AddDbgLog($"Идея {idea.Id} → добавлен модификатор {modDef.Id}");
                             }
                         }
                         break;
                 }
             }
-            idea.PictureName = idea.PictureName ?? $"GFX_idea_{idea.Id.ToString()}";
-            string keyname = idea.Id.ToString();
-            KeyValuePair<string, string> idloc = ModDataStorage.Localisation.GetLocalisationByKey(keyname);
-            idea.Localisation.Data.AddPair(idloc);
-            KeyValuePair<string, string> descloc = ModDataStorage.Localisation.GetLocalisationByKey(keyname);
-            idea.Localisation.Data.AddPair<string, string>(descloc);
-            var dfg = idea.Id.ToString();
-            var sdgfg = idea.PictureName;
-            IGfx gfx = ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.PictureName}")
-           ?? ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_idea_{idea.Id.ToString()}") ?? new SpriteType(DDF.NullImageSource, DDF.Null);
 
-            if (gfx.Id.ToString() == "GFX_idea_AZM_anarchist_economics")
-            {
-                float dd = 0;
-            }
-            idea.Gfx = gfx;
+            // Картинка по умолчанию
+            idea.PictureName ??= $"GFX_idea_{idea.Id}";
+
+            // Локализация (имя и описание обычно по одному ключу)
+            var nameLoc = ModDataStorage.Localisation.GetLocalisationByKey(idea.Id.ToString());
+            idea.Localisation.Data.AddPair(nameLoc);
+
+            var descLoc = ModDataStorage.Localisation.GetLocalisationByKey(idea.Id.ToString() + "_desc");
+            if (!string.IsNullOrEmpty(descLoc.Value))
+                idea.Localisation.Data.AddPair(descLoc);
+
+            // Графика
+            string gfxKey1 = $"GFX_idea_{idea.PictureName}";
+            string gfxKey2 = $"GFX_idea_{idea.Id}";
+
+            idea.Gfx = ModDataStorage.Mod.Gfxes.SearchConfigInFile(gfxKey1) ?? ModDataStorage.Mod.Gfxes.SearchConfigInFile(gfxKey2) ?? new SpriteType(DDF.NullImageSource, DDF.Null);
 
             return idea;
         }
+
+       
     }
 }

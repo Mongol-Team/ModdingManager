@@ -1,78 +1,130 @@
-﻿
+﻿using Application.Debugging;
+using Application.Extensions;
+using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
+using Data;
+using Models.Configs;
+using Models.EntityFiles;
+using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Models.Configs;
 
 namespace Application.Composers
 {
-    public class StaticModifierComposer : IComposer
+    public class StaticModifierComposer
     {
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы статических модификаторов и возвращает список файлов (ConfigFile<StaticModifierConfig>)
+        /// </summary>
+        public static List<ConfigFile<StaticModifierConfig>> Parse()
         {
-            string[] possiblePaths = {
+            var stopwatch = Stopwatch.StartNew();
+            var modifierFiles = new List<ConfigFile<StaticModifierConfig>>();
+
+            string[] possiblePaths =
+            {
                 ModPathes.StaticModifiersPath,
                 GamePathes.StaticModifiersPath
             };
-            List<IConfig> configs = new List<IConfig>();
+
             foreach (string path in possiblePaths)
             {
-                if (Directory.Exists(path))
-                {
-                    var files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
-                    foreach (string file in files)
-                    {
-                        HoiFuncFile funcfile = new TxtParser(new TxtPattern()).Parse(file) as HoiFuncFile;
-                        foreach (var bracket in funcfile.Brackets)
-                        {
-                            var cfg = ParseSingleModifer(bracket);
-                            cfg.FileFullPath = file;
-                            if (cfg != null)
-                                configs.Add(cfg);
-                        }
+                if (!Directory.Exists(path)) continue;
 
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                        bool isOverride = path.StartsWith(ModPathes.StaticModifiersPath);
+
+                        var configFile = ParseFile(hoiFuncFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
+                        {
+                            modifierFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл статических модификаторов: {configFile.FileName} → {configFile.Entities.Count} модификаторов");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.AddLog($"[StaticModifierComposer] Ошибка парсинга файла {file}: {ex.Message}");
                     }
                 }
-                if (configs.Count > 0) break;
             }
-            return configs;
-        }
-        public static StaticModifierConfig ParseSingleModifer(Bracket bracket)
-        {
-            StaticModifierConfig cfg = new StaticModifierConfig();
-            cfg.Id = new Identifier(bracket.Name);
-            cfg.Modifiers = new Dictionary<ModifierDefinitionConfig, object>();
-            foreach (var var in bracket.SubVars)
-            {
 
-                var modDef = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг статических модификаторов завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {modifierFiles.Count}, модификаторов всего: {modifierFiles.Sum(f => f.Entities.Count)}");
+
+            return modifierFiles;
+        }
+
+        private static ConfigFile<StaticModifierConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
+        {
+            var configFile = new ConfigFile<StaticModifierConfig>
+            {
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (Bracket bracket in hoiFuncFile.Brackets)
+            {
+                var cfg = ParseSingleModifier(bracket, fileFullPath, isOverride);
+                if (cfg != null)
+                {
+                    configFile.Entities.Add(cfg);
+                    Logger.AddDbgLog($"  → добавлен статический модификатор: {cfg.Id}");
+                }
+            }
+
+            return configFile;
+        }
+
+        private static StaticModifierConfig ParseSingleModifier(Bracket bracket, string fileFullPath, bool isOverride)
+        {
+            var cfg = new StaticModifierConfig
+            {
+                Id = new Identifier(bracket.Name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
+                Modifiers = new Dictionary<ModifierDefinitionConfig, object>()
+            };
+
+            foreach (Var v in bracket.SubVars)
+            {
+                // Используем новый экстеншен SearchConfigInFile для поиска модификатора
+                var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(v.Name);
+
                 if (modDef != null)
                 {
-                    if (var.Value is int intValue)
+                    object value = v.Value switch
                     {
-                        cfg.Modifiers[modDef] = intValue;
-                    }
-                    else if (var.Value is double doubleValue)
-                    {
-                        cfg.Modifiers[modDef] = doubleValue;
-                    }
-                    else if (var.Value is string strValue)
-                    {
-                        cfg.Modifiers[modDef] = strValue;
-                    }
-                    else if (var.Value is bool boolValue)
-                    {
-                        cfg.Modifiers[modDef] = boolValue;
-                    }
+                        int i => i,
+                        double d => d,
+                        bool b => b,
+                        string s => s,
+                        _ => v.Value?.ToString() ?? string.Empty
+                    };
+
+                    cfg.Modifiers[modDef] = value;
+                }
+                else
+                {
+                    Logger.AddDbgLog($"Модификатор {v.Name} не найден для статического модификатора {bracket.Name} (файл: {fileFullPath})");
                 }
             }
+
             return cfg;
         }
     }

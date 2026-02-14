@@ -1,8 +1,11 @@
 ﻿using Application.Debugging;
+using Application.Extensions;
 using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
+using Data;
 using Models.Configs;
+using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
 using Models.Types.LocalizationData;
@@ -11,148 +14,167 @@ using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace Application.Composers
 {
-    public class SubUnitComposer : IComposer
+    public class SubUnitComposer 
     {
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы подтипов подразделений и возвращает список файлов (ConfigFile<SubUnitConfig>)
+        /// </summary>
+        public static List<ConfigFile<SubUnitConfig>> Parse()
         {
-            List<IConfig> configs = new();
+            var stopwatch = Stopwatch.StartNew();
+            var subunitFiles = new List<ConfigFile<SubUnitConfig>>();
+
             string[] possiblePathes =
             {
                 ModPathes.RegimentsPath,
                 GamePathes.RegimentsPath
             };
+
             foreach (string path in possiblePathes)
             {
-                string[] files = Directory.GetFiles(path);
+                if (!Directory.Exists(path)) continue;
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
                 foreach (string file in files)
                 {
-                    if (File.Exists(file))
+                    try
                     {
-                        string fileContent = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
-                        List<SubUnitConfig> traitConfigs = ParseFile(hoiFuncFile);
-                        foreach (SubUnitConfig traitConfig in traitConfigs)
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                        bool isOverride = path.StartsWith(ModPathes.RegimentsPath);
+
+                        var configFile = ParseFile(hoiFuncFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
                         {
-                            traitConfig.FileFullPath = file;
-                            if (!configs.Any(c => c.Id == traitConfig.Id))
-                            {
-                                configs.Add(traitConfig);
-                            }
+                            subunitFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл подтипов подразделений: {configFile.FileName} → {configFile.Entities.Count} подтипов");
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.AddLog($"[SubUnitComposer] Ошибка парсинга файла {file}: {ex.Message}");
                     }
                 }
             }
-            return configs;
+
+            // Динамические модификаторы опыта
+            PaseDynamicModifierDefenitions(subunitFiles);
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг подтипов подразделений завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {subunitFiles.Count}, подтипов всего: {subunitFiles.Sum(f => f.Entities.Count)}");
+
+            return subunitFiles;
         }
 
-        public static List<SubUnitConfig> ParseFile(HoiFuncFile file)
+        private static ConfigFile<SubUnitConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
-            List<SubUnitConfig> configs = new();
-            foreach (Bracket bracket in file.Brackets.Where(b => b.Name == "sub_units"))
+            var configFile = new ConfigFile<SubUnitConfig>
             {
-                SubUnitConfig config = new();
-                foreach (Bracket unitbr in bracket.SubBrackets)
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            var subunitsBracket = hoiFuncFile.Brackets.FirstOrDefault(b => b.Name == "sub_units");
+            if (subunitsBracket == null) return configFile;
+
+            foreach (Bracket unitBr in subunitsBracket.SubBrackets)
+            {
+                var config = ParseSubUnit(unitBr, fileFullPath, isOverride);
+                if (config != null)
                 {
-                    config = ParseObject(unitbr);
+                    configFile.Entities.Add(config);
+                    Logger.AddDbgLog($"  → добавлен подтип подразделения: {config.Id}");
                 }
-                configs.Add(config);
             }
 
-            return configs;
+            return configFile;
         }
 
-        public static SubUnitConfig ParseObject(Bracket bracket)
+        private static SubUnitConfig ParseSubUnit(Bracket bracket, string fileFullPath, bool isOverride)
         {
-            SubUnitConfig config = new();
-            config.Id = new Identifier(bracket.Name);
-            foreach (Var var in bracket.SubVars)
+            var config = new SubUnitConfig
             {
-                switch (var.Name)
+                Id = new Identifier(bracket.Name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
+                Modifiers = new Dictionary<ModifierDefinitionConfig, object>(),
+                TerrainModifiers = new Dictionary<ProvinceTerrain, Dictionary<ModifierDefinitionConfig, object>>(),
+                Need = new Dictionary<EquipmentConfig, int>(),
+                Types = new List<IternalUnitType>(),
+                Chategories = new List<SubUnitCategoryConfig>()
+            };
+
+            foreach (Var v in bracket.SubVars)
+            {
+                switch (v.Name)
                 {
                     case "sprite":
-                        config.EntitySprite = var.Value as string; //todo: entity sprite class
+                        config.EntitySprite = v.Value?.ToString(); // todo: entity sprite class
                         break;
+
                     case "active":
-                        config.Active = var.Value.ToBool();
+                        config.Active = v.Value.ToBool();
                         break;
+
                     case "priority":
-                        config.Priority = var.Value.ToInt();
+                        config.Priority = v.Value.ToInt();
                         break;
+
                     case "map_icon_category":
-                        if (Enum.TryParse<UnitMapIconType>(var.Value.ToString().SnakeToPascal(), true, out var mapIconType))
-                        {
-                            config.MapIconCategory = mapIconType;
-                        }
+                        config.MapIconCategory = v.Value.ToString().SnakeToPascal().ToEnum<UnitMapIconType>(default);
                         break;
+
                     case "affects_speed":
-                        config.AffectsSpeed = var.Value.ToBool();
+                        config.AffectsSpeed = v.Value.ToBool();
                         break;
+
                     case "use_transport_speed":
-                        var equipment = ModDataStorage.Mod.Equipments.FirstOrDefault(e => e.Id.ToString() == var.Value as string);
-                        if (equipment != null)
-                        {
-                            config.UseTransportSpeed = equipment;
-                        }
+                        var transportEq = ModDataStorage.Mod.Equipments.SearchConfigInFile(v.Value?.ToString());
+                        if (transportEq != null)
+                            config.UseTransportSpeed = transportEq;
                         break;
+
                     case "group":
-                        var group = ModDataStorage.Mod.SubUnitGroups.FirstOrDefault(g => g.Id.ToString() == var.Value.ToString());
+                        var group = ModDataStorage.Mod.SubUnitGroups.SearchConfigInFile(v.Value?.ToString());
                         if (group != null)
                         {
                             config.Group = group;
                         }
                         else
                         {
-                            try
-                            {
-                                SubUnitGroupConfig newGroup = new();
-                                newGroup.Id = new Identifier(var.Value.ToString());
-                                newGroup.Gfx = ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_group_{newGroup.Id.ToString()}_name");
-                                Dictionary<string, string> nameData = new();
-                                nameData.AddPair(ModDataStorage.Localisation.GetLocalisationByKey($"group_{newGroup.Id.ToString()}_title"));
-                                newGroup.Localisation = new()
-                                {
-                                    Source = newGroup,
-                                    Language = ModManagerSettings.CurrentLanguage,
-                                    Data = nameData,
-                                    IsConfigLocNull = false,
-                                    ReplacebleResource = false,
-                                };
-                                ModDataStorage.Mod.SubUnitGroups.Add(newGroup);
-                                config.Group = newGroup;
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.AddDbgLog($"Failed to create new SubUnitGroup {var.Value as string} for SubUnit {config.Id.ToString()}: {ex.Message}", "SubUnitComposer");
-                            }
+                            Logger.AddDbgLog($"Группа {v.Value} не найдена для подтипа {config.Id} (файл: {fileFullPath})");
                         }
                         break;
+
                     case "ai_priority":
-                        config.AiPriority = var.Value.ToInt();
+                        config.AiPriority = v.Value.ToInt();
                         break;
+
                     case "can_exfiltrate_from_coast":
-                        config.CanExfiltrateFromCoast = var.Value.ToBool();
+                        config.CanExfiltrateFromCoast = v.Value.ToBool();
                         break;
 
                     default:
-                        var modDef = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
+                        var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(v.Name);
                         if (modDef != null)
                         {
-                            config.Modifiers.Add(modDef, var.Value);
-                        }
-
-                        else
-                        {
-                            //unknown var
+                            config.Modifiers.Add(modDef, v.Value);
                         }
                         break;
-
-
                 }
-
             }
+
+            // Подблоки
             foreach (Bracket subb in bracket.SubBrackets)
             {
                 switch (subb.Name)
@@ -160,74 +182,85 @@ namespace Application.Composers
                     case "need":
                         foreach (Var needVar in subb.SubVars)
                         {
-                            var equipment = ModDataStorage.Mod.Equipments.FirstOrDefault(e => e.Id.ToString() == needVar.Name);
+                            var equipment = ModDataStorage.Mod.Equipments.SearchConfigInFile(needVar.Name);
                             if (equipment != null)
                             {
                                 config.Need.Add(equipment, needVar.Value.ToInt());
                             }
                         }
                         break;
+
                     default:
-                        bool isTerrainModifier = Enum.TryParse<ProvinceTerrain>(subb.Name.SnakeToPascal(), out var terrMod);
-                        if (isTerrainModifier)
+                        if (Enum.TryParse<ProvinceTerrain>(subb.Name.SnakeToPascal(), out var terrain))
                         {
-                            Dictionary<ModifierDefinitionConfig, object> terrModDict = new();
+                            var terrMods = new Dictionary<ModifierDefinitionConfig, object>();
+
                             foreach (Var terrVar in subb.SubVars)
                             {
-                                var modDef = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == terrVar.Name);
-
+                                var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(terrVar.Name);
                                 if (modDef != null)
-                                {
-                                    terrModDict.Add(modDef, terrVar.Value);
-                                }
+                                    terrMods.Add(modDef, terrVar.Value);
                             }
-                            config.TerrainModifiers.TryAdd(terrMod, terrModDict);
+
+                            if (terrMods.Any())
+                                config.TerrainModifiers[terrain] = terrMods;
                         }
                         break;
                 }
             }
 
+            // Массивы
             foreach (HoiArray arr in bracket.Arrays)
             {
                 switch (arr.Name)
                 {
                     case "types":
-                        List<IternalUnitType> types = new();
-                        foreach (var typeObj in arr.Values)
-                        {
-                            if (Enum.TryParse<IternalUnitType>(typeObj.ToString().SnakeToPascal(), true, out var unitType))
-                            {
-                                types.Add(unitType);
-                            }
-                        }
-                        config.Types = types;
-                        break;
-                    case "chategories":
-                        List<SubUnitCategoryConfig> chategories = new();
-                        foreach (var chategoryObj in arr.Values)
-                        {
-                            var chategory = ModDataStorage.Mod.SubUnitChategories.FirstOrDefault(c => c.Id.ToString() == chategoryObj.ToString());
-                            if (chategory != null)
-                            {
-                                chategories.Add(chategory);
-                            }
-                        }
-                        config.Chategories = chategories;
+                        config.Types = arr.Values
+                            .Select(v => v.ToString().SnakeToPascal().ToEnum<IternalUnitType>(default))
+                            .Where(t => t != default)
+                            .ToList();
                         break;
 
+                    case "chategories":
+                        config.Chategories = arr.Values
+                            .Select(v => ModDataStorage.Mod.SubUnitChategories.SearchConfigInFile(v.ToString()))
+                            .Where(c => c != null)
+                            .ToList();
+                        break;
                 }
             }
 
             return config;
         }
 
-        public static void PaseDynamicModifierDefenitions(List<IConfig> configs)
+        public static void PaseDynamicModifierDefenitions(List<ConfigFile<SubUnitConfig>> subunitFiles)
         {
-            foreach (SubUnitConfig config in configs.OfType<SubUnitConfig>())
+            // Ищем или создаём виртуальный файл core_objects
+            var coreFile = ModDataStorage.Mod.ModifierDefinitions?
+                .FirstOrDefault(f => f.FileName == "core_objects");
+
+            if (coreFile == null)
             {
-                if (config.Id != null)
+                coreFile = new ConfigFile<ModifierDefinitionConfig>
                 {
-                    ModifierDefinitionConfig trainingMod = new()
+                    FileFullPath = "core_objects",
+                    IsCore = true,
+                    IsOverride = false,
+                    Entities = new List<ModifierDefinitionConfig>()
+                };
+                Logger.AddDbgLog("Создан виртуальный core_objects для динамических модификаторов подтипов подразделений");
+            }
+
+            int created = 0;
+
+            foreach (var file in subunitFiles)
+            {
+                foreach (SubUnitConfig config in file.Entities)
+                {
+                    if (config.Id == null) continue;
+
+                    // experience_gain_{id}_training_factor
+                    var trainingMod = new ModifierDefinitionConfig
                     {
                         Id = new Identifier($"experience_gain_{config.Id}_training_factor"),
                         Cathegory = ModifierDefinitionCathegoryType.Army,
@@ -236,23 +269,70 @@ namespace Application.Composers
                         ValueType = ModifierDefenitionValueType.Percent,
                         Precision = 2,
                         IsCore = true,
-                        FileFullPath = Data.DataDefaultValues.ItemCreatedDynamically,
-                        Gfx = new SpriteType(Data.DataDefaultValues.ItemWithNoGfxImage, Data.DataDefaultValues.ItemWithNoGfx),
-
+                        FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                        Localisation = new ConfigLocalisation
+                        {
+                            Language = ModManagerSettings.CurrentLanguage
+                        }
                     };
+                    trainingMod.Localisation.Data.AddPair(
+                        ModDataStorage.Localisation.GetLocalisationByKey(trainingMod.Id.ToString())
+                    );
 
-                    trainingMod.Localisation = new ConfigLocalisation()
+                    coreFile.Entities.Add(trainingMod);
+                    created++;
+
+                    // experience_gain_{id}_combat_factor
+                    var combatMod = new ModifierDefinitionConfig
                     {
-                        Language = ModManagerSettings.CurrentLanguage,
+                        Id = new Identifier($"experience_gain_{config.Id}_combat_factor"),
+                        Cathegory = ModifierDefinitionCathegoryType.Army,
+                        ColorType = ModifierDefenitionColorType.Good,
+                        ScopeType = ScopeTypes.Country,
+                        ValueType = ModifierDefenitionValueType.Percent,
+                        Precision = 2,
+                        IsCore = true,
+                        FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                        Localisation = new ConfigLocalisation
+                        {
+                            Language = ModManagerSettings.CurrentLanguage
+                        }
                     };
-                    trainingMod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(trainingMod.Id.ToString()));
+                    combatMod.Localisation.Data.AddPair(
+                        ModDataStorage.Localisation.GetLocalisationByKey(combatMod.Id.ToString())
+                    );
 
-                    ModifierDefinitionConfig combatMod = trainingMod;
-                    combatMod.Id = new($"experience_gain_{config.Id}_combat_factor");
-                    ModDataStorage.Mod.ModifierDefinitions.Add(combatMod);
-                    ModDataStorage.Mod.ModifierDefinitions.Add(trainingMod);
+                    coreFile.Entities.Add(combatMod);
+                    created++;
+
+                    var designcostMod = new ModifierDefinitionConfig
+                    {
+                        Id = new Identifier($"unit_{config.Id}_design_cost_factor"),
+                        Cathegory = ModifierDefinitionCathegoryType.Army,
+                        ColorType = ModifierDefenitionColorType.Bad,
+                        ScopeType = ScopeTypes.Country,
+                        ValueType = ModifierDefenitionValueType.Percent,
+                        Precision = 2,
+                        IsCore = true,
+                        FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                        Localisation = new ConfigLocalisation
+                        {
+                            Language = ModManagerSettings.CurrentLanguage
+                        }
+                    };
+                    designcostMod.Localisation.Data.AddPair(
+                        ModDataStorage.Localisation.GetLocalisationByKey(designcostMod.Id.ToString())
+                    );
+
+                    coreFile.Entities.Add(designcostMod);
+                    created++;
                 }
             }
+
+            Logger.AddLog($"Создано {created} динамических модификаторов опыта для подтипов подразделений");
         }
     }
 }

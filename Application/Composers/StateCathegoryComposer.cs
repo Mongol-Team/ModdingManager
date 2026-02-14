@@ -1,79 +1,140 @@
-﻿
+﻿using Application.Debugging;
+using Application.Extensions;
 using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
-using Models.Interfaces;
+using Data;
+using Models.Configs;
+using Models.EntityFiles;
+using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Models.Configs;
 
 namespace Application.Composers
 {
-    public class StateCathegoryComposer : IComposer
+    public class StateCathegoryComposer 
     {
-        public StateCathegoryComposer() { }
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы категорий штатов и возвращает список файлов (ConfigFile<StateCathegoryConfig>)
+        /// </summary>
+        public static List<ConfigFile<StateCathegoryConfig>> Parse()
         {
-            List<IConfig> res = new List<IConfig>();
-            string[] possiblePaths = {
+            var stopwatch = Stopwatch.StartNew();
+            var categoryFiles = new List<ConfigFile<StateCathegoryConfig>>();
+
+            string[] possiblePaths =
+            {
                 ModPathes.StateCathegoryPath,
                 GamePathes.StateCathegoryPath
             };
+
             foreach (string path in possiblePaths)
             {
                 if (!Directory.Exists(path))
+                {
+                    Logger.AddLog($"Директория категорий штатов не найдена: {path}", LogLevel.Info);
                     continue;
-                string[] files = Directory.GetFiles(path, "*.txt");
-                if (files.Length == 0)
-                    continue;
+                }
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
                 foreach (string file in files)
                 {
-                    res.AddRange(ParseStateCathegoryFile(file).Cast<IConfig>().ToList());
-                    foreach (var cfg in res)
+                    try
                     {
-                        cfg.FileFullPath = file;
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                        bool isOverride = path.StartsWith(ModPathes.StateCathegoryPath);
+
+                        var configFile = ParseFile(hoiFuncFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
+                        {
+                            categoryFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл категорий штатов: {configFile.FileName} → {configFile.Entities.Count} категорий");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.AddLog($"[StateCathegoryComposer] Ошибка парсинга файла {file}: {ex.Message}");
                     }
                 }
-                if (res.Count != 0)
-                {
-                    break;
-                }
-
             }
-            return res;
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг категорий штатов завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {categoryFiles.Count}, категорий всего: {categoryFiles.Sum(f => f.Entities.Count)}");
+
+            return categoryFiles;
         }
-        public static List<StateCathegoryConfig> ParseStateCathegoryFile(string FileFullPath)
+
+        private static ConfigFile<StateCathegoryConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
-            List<StateCathegoryConfig> result = new();
-            HoiFuncFile file = new TxtParser(new TxtPattern()).Parse(File.ReadAllText(FileFullPath)) as HoiFuncFile;
-            foreach (var bracket in file.Brackets.FirstOrDefault(b => b.Name == "state_categories").SubBrackets)
+            var configFile = new ConfigFile<StateCathegoryConfig>
             {
-                if (bracket.Name != null)
-                {
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
 
-                    StateCathegoryConfig cfg = new()
-                    {
-                        Color = bracket.Arrays.FirstOrDefault(a => a.Name == "color").AsColor(),
-                        Id = new Identifier(bracket.Name as string) ?? new("unknown"),
-
-                    };
-                    foreach (Var mod in bracket.SubVars)
-                    {
-                        ModifierDefinitionConfig? modDef = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == mod.Name);
-                        cfg.Modifiers.Add(modDef, mod.Value);
-                    }
-                    result.Add(cfg);
-                }
-
+            var categoriesBracket = hoiFuncFile.Brackets.FirstOrDefault(b => b.Name == "state_categories");
+            if (categoriesBracket == null)
+            {
+                Logger.AddDbgLog($"Блок 'state_categories' не найден в файле: {fileFullPath}");
+                return configFile;
             }
-            return result;
+
+            foreach (Bracket catBr in categoriesBracket.SubBrackets)
+            {
+                var cfg = ParseCategory(catBr, fileFullPath, isOverride);
+                if (cfg != null)
+                {
+                    configFile.Entities.Add(cfg);
+                    Logger.AddDbgLog($"  → добавлена категория штата: {cfg.Id}");
+                }
+            }
+
+            return configFile;
+        }
+
+        private static StateCathegoryConfig ParseCategory(Bracket bracket, string fileFullPath, bool isOverride)
+        {
+            var cfg = new StateCathegoryConfig
+            {
+                Id = new Identifier(bracket.Name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
+                Modifiers = new Dictionary<ModifierDefinitionConfig, object>()
+            };
+
+            // Цвет категории
+            var colorArray = bracket.Arrays.FirstOrDefault(a => a.Name == "color");
+            if (colorArray != null)
+            {
+                cfg.Color = colorArray.AsColor();
+            }
+
+            // Модификаторы — ищем через новый экстеншен SearchConfigInFile
+            foreach (Var modVar in bracket.SubVars)
+            {
+                var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(modVar.Name);
+
+                if (modDef != null)
+                {
+                    cfg.Modifiers.Add(modDef, modVar.Value);
+                }
+                else
+                {
+                    Logger.AddDbgLog($"Модификатор {modVar.Name} не найден для категории {bracket.Name} (файл: {fileFullPath})");
+                }
+            }
+
+            return cfg;
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Models.Configs;
+using Models.EntityFiles;
+using Models.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -117,6 +120,41 @@ namespace Application.Extensions
                 result.Add(item?.ToString() ?? string.Empty);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Перегрузка для поиска по строковому Id.
+        /// </summary>
+        public static T? SearchConfigInFile<T>(
+            this ObservableCollection<ConfigFile<T>> configs,
+            string id) where T : IConfig
+        {
+            return configs
+                .SelectMany(cf => cf.Entities)
+                .FirstOrDefault(e => e.Id.ToString() == id);
+        }
+        public static T? SearchConfigInFile<T>(
+            this ObservableCollection<GfxFile<T>> configs,
+            string id) where T : IGfx
+        {
+            return configs
+                .SelectMany(cf => cf.Entities)
+                .FirstOrDefault(e => e.Id.ToString() == id);
+        }
+        public static List<T> FileEntitiesToList<T>(
+     this ObservableCollection<ConfigFile<T>> configs) where T : IConfig
+        {
+            return configs
+                .SelectMany(cf => cf.Entities)
+                .ToList();
+        }
+
+        public static List<T> FileEntitiesToList<T>(
+    this ObservableCollection<GfxFile<T>> configs) where T : IGfx
+        {
+            return configs
+                .SelectMany(cf => cf.Entities)
+                .ToList();
         }
     }
 }

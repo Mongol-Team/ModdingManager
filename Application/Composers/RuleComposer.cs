@@ -1,146 +1,235 @@
-﻿
-using Application.Debugging;
+﻿using Application.Debugging;
+using Application.Extensions;
 using Application.Extentions;
-using Application.utils;
+using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
+using Models.Configs;
+using Models.EntityFiles;
 using Models.GfxTypes;
 using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.TableCacheData;
 using Models.Types.Utils;
+using Pfim;
+using RawDataWorker.Healers;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using DDF = Data.DataDefaultValues;
-using Models.Configs;
-using RawDataWorker.Healers;
-using Application.Extensions;
 
 namespace Application.Composers
 {
-    public class RuleComposer : IComposer
+    public class RuleComposer 
     {
         public static CsvHealer OnParsingHealer = new CsvHealer(new RulesDataPattern());
-        public static List<IConfig> Parse()
+
+        /// <summary>
+        /// Парсит все файлы правил и возвращает список файлов (ConfigFile<RuleConfig>)
+        /// </summary>
+        public static List<ConfigFile<RuleConfig>> Parse()
         {
-            string[] possiblePaths = {
+            var stopwatch = Stopwatch.StartNew();
+            var ruleFiles = new List<ConfigFile<RuleConfig>>();
+
+            // 1. Core-правила из CSV (всегда добавляем как core_objects)
+            var coreFile = ParseCoreRules();
+            if (coreFile.Entities.Any())
+            {
+                ruleFiles.Add(coreFile);
+                Logger.AddDbgLog($"Добавлен виртуальный core_objects с {coreFile.Entities.Count} core-правилами");
+            }
+
+            // 2. Обычные txt-файлы из модов и игры
+            string[] possiblePaths =
+            {
                 ModPathes.RulesPath,
                 GamePathes.RulesPath
             };
-            List<IConfig> configs = new List<IConfig>();
-            configs.AddRange(ParseCoreRules());
+
             foreach (string path in possiblePaths)
             {
-                List<string> files = null;
-                try
-                {
-                    files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories).ToList();
-                }
-                catch (Exception ex)
-                {
-                    files = new List<string>();
-                }
+                if (!Directory.Exists(path)) continue;
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
                 foreach (string file in files)
                 {
-                    var funcfile = new TxtParser(new TxtPattern()).Parse(file) as HoiFuncFile;
-                    foreach (var br in funcfile.Brackets)
+                    try
                     {
-                        var cfg = ParseSingleRule(br);
-                        cfg.FileFullPath = file;
-                        if (cfg != null)
-                            configs.Add(cfg);
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                        bool isOverride = path.StartsWith(ModPathes.RulesPath);
+
+                        var configFile = ParseTxtFile(hoiFuncFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
+                        {
+                            ruleFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл правил: {configFile.FileName} → {configFile.Entities.Count} правил");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.AddLog($"[RuleComposer] Ошибка парсинга файла {file}: {ex.Message}");
                     }
                 }
-                if (configs.Count > 0) break;
-
-            }
-            return configs;
-        }
-        public static List<RuleConfig> ParseCoreRules()
-        {
-            List<RuleConfig> configs = new List<RuleConfig>();
-            HoiTable tbl = new CsvParser(new RulesDataPattern(), OnParsingHealer).Parse(DataLib.RulesCoreDefenitions) as HoiTable;
-            foreach (List<object> row in tbl.Values)
-            {
-                RuleConfig cfg = new()
-                {
-                    Id = new(row[0].ToString())
-                };
-                configs.Add(cfg);
             }
 
-            return configs;
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг правил завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {ruleFiles.Count}, правил всего: {ruleFiles.Sum(f => f.Entities.Count)}");
+
+            return ruleFiles;
         }
-        public static RuleConfig ParseSingleRule(Bracket ruleBr)
+
+        /// <summary>
+        /// Парсит core-правила из CSV и возвращает виртуальный файл core_objects
+        /// </summary>
+        private static ConfigFile<RuleConfig> ParseCoreRules()
         {
-            if (ruleBr == null)
+            var coreFile = new ConfigFile<RuleConfig>
             {
-                return null;
-            }
-            RuleConfig res = new RuleConfig();
+                FileFullPath = "core_objects",
+                IsCore = true,
+                IsOverride = false,
+                Entities = new List<RuleConfig>()
+            };
+
             try
             {
-                res = new RuleConfig
-                {
-                    Id = new(ruleBr.Name),
-                    GroupId = ruleBr.SubVars.FirstOrDefault(v => v.Name == "group") == null ? DDF.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "group").Value.ToString(),
-                    RequiredDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc") == null ? DDF.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc").Value.ToString(),
-                    ExcludedDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc") == null ? DDF.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc").Value.ToString(),
-                    Options = new List<BaseConfig>(),
-                    Gfx = ruleBr.SubVars.FirstOrDefault(v => v.Name == "icon")?.Value is var val && val != null ? ModDataStorage.Mod.Gfxes.FindById(val.ToString()) ?? new SpriteType() : new SpriteType(),
-                    Default = new BaseConfig(),
-                    IsCore = false
-                };
-                res.Localisation = new ConfigLocalisation();
-                string locKey = ruleBr.SubVars.FirstOrDefault(v => v.Name == "name") == null ? DDF.Null : ruleBr.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString();
-                KeyValuePair<string, string> loc = ModDataStorage.Localisation.GetLocalisationByKey(locKey);
+                HoiTable tbl = new CsvParser(new RulesDataPattern(), OnParsingHealer)
+                    .Parse(DataLib.RulesCoreDefenitions) as HoiTable;
 
-                res.Localisation.Data.Add(loc.Key, loc.Value);
+                foreach (List<object> row in tbl.Values)
+                {
+                    var cfg = new RuleConfig
+                    {
+                        Id = new Identifier(row[0].ToString()),
+                        IsCore = true,
+                        FileFullPath = "core_objects"
+                    };
+
+                    coreFile.Entities.Add(cfg);
+                    Logger.AddDbgLog($"  → добавлено core-правило: {cfg.Id}");
+                }
             }
             catch (Exception ex)
             {
-                return null;
+                Logger.AddLog($"Ошибка парсинга core-правил из CSV: {ex.Message}");
             }
-            foreach (Bracket br in ruleBr.SubBrackets)
+
+            return coreFile;
+        }
+
+        private static ConfigFile<RuleConfig> ParseTxtFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
+        {
+            var configFile = new ConfigFile<RuleConfig>
             {
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
 
-                if (br.Name == "option")
+            foreach (Bracket br in hoiFuncFile.Brackets)
+            {
+                var cfg = ParseSingleRule(br, fileFullPath, isOverride);
+                if (cfg != null)
                 {
-                    var option = new BaseConfig
-                    {
-                        Id = new Identifier(br.SubVars.FirstOrDefault(v => v.Name == "name").Value.ToString()) ?? new(DDF.Null),
-                        Localisation = new ConfigLocalisation()
-                    };
-
-                    var nameloc = ModDataStorage.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "text").Value.ToString());
-                    var descloc = ModDataStorage.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "desc").Value.ToString());
-                    option.Localisation.Data.Add(nameloc.Key, nameloc.Value);
-                    option.Localisation.Data.Add(descloc.Key, descloc.Value);
-                    res.Options.Add(option);
+                    configFile.Entities.Add(cfg);
+                    Logger.AddDbgLog($"  → добавлено правило: {cfg.Id}");
                 }
-                else if (br.Name == "default")
-                {
-                    res.Default = new BaseConfig
-                    {
-                        Id = new Identifier(br.SubVars.First(v => v.Name == "name").Value.ToString()) ?? new(DDF.Null),
-                        Localisation = new ConfigLocalisation()
-                    };
+            }
 
-                    var nameloc = ModDataStorage.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "text").Value.ToString());
-                    var descloc = ModDataStorage.Localisation.GetLocalisationByKey(br.SubVars.FirstOrDefault(v => v.Name == "desc").Value.ToString());
-                    res.Default.Localisation.Data.Add(nameloc.Key, nameloc.Value);
-                    res.Default.Localisation.Data.Add(descloc.Key, descloc.Value);
+            return configFile;
+        }
+
+        private static RuleConfig ParseSingleRule(Bracket ruleBr, string fileFullPath, bool isOverride)
+        {
+            if (ruleBr == null) return null;
+
+            var res = new RuleConfig
+            {
+                Id = new Identifier(ruleBr.Name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
+                IsCore = false,
+
+                GroupId = ruleBr.SubVars.FirstOrDefault(v => v.Name == "group")?.Value?.ToString() ?? DDF.Null,
+                RequiredDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "required_dlc")?.Value?.ToString() ?? DDF.Null,
+                ExcludedDlc = ruleBr.SubVars.FirstOrDefault(v => v.Name == "excluded_dlc")?.Value?.ToString() ?? DDF.Null,
+
+                Options = new List<BaseConfig>(),
+                Localisation = new ConfigLocalisation { Language = ModManagerSettings.CurrentLanguage }
+            };
+
+            // Иконка правила
+            var iconVar = ruleBr.SubVars.FirstOrDefault(v => v.Name == "icon");
+            if (iconVar?.Value != null)
+            {
+                string iconId = iconVar.Value.ToString();
+                res.Gfx = ModDataStorage.Mod.Gfxes.SearchConfigInFile(iconId) ?? new SpriteType();
+            }
+            else
+            {
+                res.Gfx = new SpriteType();
+            }
+
+            // Локализация имени правила
+            string locKey = ruleBr.SubVars.FirstOrDefault(v => v.Name == "name")?.Value?.ToString() ?? DDF.Null;
+            if (locKey != DDF.Null)
+            {
+                var loc = ModDataStorage.Localisation.GetLocalisationByKey(locKey);
+                res.Localisation.Data.AddPair(loc);
+            }
+
+            // Опции и default
+            foreach (Bracket subBr in ruleBr.SubBrackets)
+            {
+                if (subBr.Name == "option")
+                {
+                    var option = ParseOption(subBr);
+                    if (option != null)
+                        res.Options.Add(option);
+                }
+                else if (subBr.Name == "default")
+                {
+                    var defaultOpt = ParseOption(subBr);
+                    if (defaultOpt != null)
+                        res.Default = defaultOpt;
                 }
             }
 
             return res;
+        }
 
+        private static BaseConfig ParseOption(Bracket br)
+        {
+            var option = new BaseConfig
+            {
+                Id = new Identifier(br.SubVars.FirstOrDefault(v => v.Name == "name")?.Value?.ToString() ?? DDF.Null),
+                Localisation = new ConfigLocalisation { Language = ModManagerSettings.CurrentLanguage }
+            };
+
+            var textKey = br.SubVars.FirstOrDefault(v => v.Name == "text")?.Value?.ToString();
+            var descKey = br.SubVars.FirstOrDefault(v => v.Name == "desc")?.Value?.ToString();
+
+            if (textKey != null)
+            {
+                var nameLoc = ModDataStorage.Localisation.GetLocalisationByKey(textKey);
+                option.Localisation.Data.AddPair(nameLoc);
+            }
+
+            if (descKey != null)
+            {
+                var descLoc = ModDataStorage.Localisation.GetLocalisationByKey(descKey);
+                option.Localisation.Data.AddPair(descLoc);
+            }
+
+            return option;
         }
     }
 }

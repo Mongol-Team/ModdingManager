@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Matematics = System.Math;
 namespace Application.utils.Math
 {
-    public static class ParallelTheadCounter
+    public static class ParallelTaskCounter
     {
         public static int CalculateMaxDegreeOfParallelism()
         {

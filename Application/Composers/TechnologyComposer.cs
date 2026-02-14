@@ -1,119 +1,152 @@
-﻿
-using Application.Debugging;
+﻿using Application.Debugging;
+using Application.Extensions;
 using Application.Extentions;
 using Application.Settings;
-using Application.utils;
 using Application.utils.Pathes;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
+using Data;
+using Models.Configs;
+using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
-using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
+using Pfim;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.IO;
 using DDF = Data.DataDefaultValues;
-using Models.Configs;
-
-
+using System.Linq;
 
 namespace Application.Composers
 {
-    public class TechnologyComposer : IComposer
+    public class TechnologyComposer 
     {
-        public TechnologyComposer() { }
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы папок технологий (technology folders) и возвращает список файлов (ConfigFile<TechTreeConfig>)
+        /// </summary>
+        public static List<ConfigFile<TechTreeConfig>> Parse()
         {
-            List<IConfig> configs = new List<IConfig>();
+            var stopwatch = Stopwatch.StartNew();
+            var techTreeFiles = new List<ConfigFile<TechTreeConfig>>();
+
             string[] possiblePathes =
             {
                 ModPathes.TechTreePath,
                 GamePathes.TechTreePath
             };
+
             string[] possibleDefPathes =
             {
                 ModPathes.TechDefPath,
                 GamePathes.TechDefPath
             };
-            HashSet<string> seenDefIds = new();
 
-            foreach (string path in possibleDefPathes)
+            // 1. Парсим определения папок технологий (обычно из common/technology_folders/*.txt)
+            foreach (string defPath in possibleDefPathes)
             {
-                string[] files = Directory.GetFiles(path);
+                if (!Directory.Exists(defPath)) continue;
+
+                string[] files = Directory.GetFiles(defPath, "*.txt", SearchOption.AllDirectories);
                 foreach (string file in files)
                 {
-                    HoiFuncFile funcFile = new TxtParser(new TxtPattern()).Parse(file) as HoiFuncFile;
-                    if (funcFile == null) continue;
-
-                    foreach (Bracket defbr in funcFile.Brackets.Where(b => b.Name == "technology_folders"))
+                    try
                     {
-                        foreach (Bracket legBr in defbr.SubBrackets)
-                        {
-                            TechTreeConfig tree = ParseTechnologyConfig(legBr);
-                            if (tree == null) continue;
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
-                            string id = tree.Id.ToString();
-                            if (seenDefIds.Contains(id)) continue;
-                            tree.FileFullPath = file;
-                            seenDefIds.Add(id);
-                            configs.Add(tree);
+                        bool isOverride = defPath.StartsWith(ModPathes.TechDefPath);
+
+                        var configFile = ParseDefFile(hoiFuncFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
+                        {
+                            techTreeFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл определений папок технологий: {configFile.FileName} → {configFile.Entities.Count} папок");
                         }
-                       
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.AddLog($"[TechnologyComposer] Ошибка парсинга файла определений {file}: {ex.Message}");
                     }
                 }
             }
 
-            return configs;
-        }
-        public static TechTreeConfig ParseTechnologyConfig(Bracket bracket)
-        {
-            TechTreeConfig config = new TechTreeConfig();
-            config.Id = new Identifier(bracket.Name);
-            Var leger = bracket.SubVars.FirstOrDefault(v => v.Name == "ledger");
-            if (leger != null)
-            {
-                config.Ledger = (TechTreeLedgerType)Enum.Parse(typeof(TechTreeLedgerType), leger.Value.ToString().SnakeToPascal(), ignoreCase: true);
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг папок технологий завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {techTreeFiles.Count}, папок всего: {techTreeFiles.Sum(f => f.Entities.Count)}");
 
-            }
-            else
+            return techTreeFiles;
+        }
+
+        private static ConfigFile<TechTreeConfig> ParseDefFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
+        {
+            var configFile = new ConfigFile<TechTreeConfig>
             {
-                config.Ledger = TechTreeLedgerType.Null;
-            }
-            Bracket allowed = bracket.SubBrackets.FirstOrDefault(v => v.Name == "available");
-            if (allowed != null)
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            // Обычно структура: technology_folders → folder_name → свойства
+            foreach (Bracket topBr in hoiFuncFile.Brackets.Where(b => b.Name == "technology_folders"))
             {
-                config.Available = allowed.ToString();
+                foreach (Bracket folderBr in topBr.SubBrackets)
+                {
+                    var config = ParseTechnologyFolder(folderBr, fileFullPath, isOverride);
+                    if (config != null)
+                    {
+                        configFile.Entities.Add(config);
+                        Logger.AddDbgLog($"  → добавлена папка технологий: {config.Id}");
+                    }
+                }
             }
-            else
+
+            return configFile;
+        }
+
+        private static TechTreeConfig ParseTechnologyFolder(Bracket bracket, string fileFullPath, bool isOverride)
+        {
+            var config = new TechTreeConfig
             {
-                config.Available = DDF.Null;
-            }
-            IGfx gfx = ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == $"GFX_{config.Id.ToString()}_tab");
-            if (gfx != null)
-            {
-                config.Gfx = gfx;
-            }
-            else
-            {
-                config.Gfx = new SpriteType(DDF.NullImageSource, DDF.Null);
-            }
-            KeyValuePair<string, string> nameloc = ModDataStorage.Localisation.GetLocalisationByKey(config.Id.ToString());
-            KeyValuePair<string, string> descloc = ModDataStorage.Localisation.GetLocalisationByKey(config.Id.ToString() + "_desc");
-            if (nameloc.Equals(DDF.NullLocalistion) && descloc.Equals(DDF.NullLocalistion))
+                Id = new Identifier(bracket.Name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
+
+                Localisation = new ConfigLocalisation { Language = ModManagerSettings.CurrentLanguage }
+            };
+
+            // ledger
+            var ledgerVar = bracket.SubVars.FirstOrDefault(v => v.Name == "ledger");
+            config.Ledger = ledgerVar != null
+                ? ledgerVar.Value.ToString().SnakeToPascal().ToEnum<TechTreeLedgerType>(TechTreeLedgerType.Null)
+                : TechTreeLedgerType.Null;
+
+            // available (триггер)
+            var availableBr = bracket.SubBrackets.FirstOrDefault(b => b.Name == "available");
+            config.Available = availableBr?.ToString() ?? DDF.Null;
+
+            // Иконка папки (обычно GFX_{id}_tab)
+            string gfxKey = $"GFX_{config.Id}_tab";
+            config.Gfx = ModDataStorage.Mod.Gfxes.SearchConfigInFile(gfxKey)
+                         ?? new SpriteType(DDF.NullImageSource, DDF.Null);
+
+            // Локализация
+            var nameLoc = ModDataStorage.Localisation.GetLocalisationByKey(config.Id.ToString());
+            config.Localisation.Data.AddPair(nameLoc);
+
+            var descLoc = ModDataStorage.Localisation.GetLocalisationByKey(config.Id.ToString() + "_desc");
+            config.Localisation.Data.AddPair(descLoc);
+
+            // Если локализация пустая — помечаем
+            if (!config.Localisation.Data.Any())
             {
                 config.Localisation.IsConfigLocNull = true;
             }
-            config.Localisation.Data.AddPair(nameloc);
-            config.Localisation.Data.AddPair(descloc);
 
             return config;
         }
-        
     }
 }

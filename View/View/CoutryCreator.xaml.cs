@@ -78,7 +78,7 @@ namespace View
                     var parts = i.Split(':');
                     if (parts.Length == 2 && int.TryParse(parts[1], out int value))
                     {
-                        result[ModDataStorage.Mod.TechTreeLedgers.GetTreeItem(parts[0])] = value;
+                        result[ModDataStorage.Mod.TechTreeLedgers.FileEntitiesToList().GetTreeItem(parts[0])] = value;
                     }
 
                 }
@@ -179,7 +179,7 @@ namespace View
                 List<IdeaConfig> result = new();
                 foreach (string ideo in StartingIdeasBox.GetLines())
                 {
-                    IdeaConfig cfg = ModDataStorage.Mod.Ideas.FindById(ideo);
+                    IdeaConfig cfg = ModDataStorage.Mod.Ideas.FileEntitiesToList().FindById(ideo);
                     result.Add(cfg);
                 }
                 return result;
@@ -201,7 +201,7 @@ namespace View
                 List<CountryCharacterConfig> result = new();
                 foreach (var line in RecruitingCharactersBox.GetLines())
                 {
-                    CountryCharacterConfig cfg = ModDataStorage.Mod.Characters.FindById(line);
+                    CountryCharacterConfig cfg = ModDataStorage.Mod.Characters.FileEntitiesToList().FindById(line);
                     result.Add(cfg);
                 }
                 return result;
@@ -348,7 +348,7 @@ namespace View
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             List<string> lines = new();
-            foreach (var i in ModDataStorage.Mod.Ideologies)
+            foreach (var i in ModDataStorage.Mod.Ideologies.FileEntitiesToList())
             {
                 // Создаём контейнер Canvas, аналогичный XAML
                 Canvas wrap = new()
@@ -432,7 +432,7 @@ namespace View
         private void RullingPartyBox_Loaded(object sender, RoutedEventArgs e)
         {
             List<string> strings = new();
-            foreach (var ideo in ModDataStorage.Mod.Ideologies)
+            foreach (var ideo in ModDataStorage.Mod.Ideologies.FileEntitiesToList())
             {
                 strings.Add(ideo.Id.ToString());
             }

@@ -1,4 +1,5 @@
 ﻿using Application;
+using Application.Extensions;
 using Application.Settings;
 using Models.Configs;
 using Models.Types.LocalizationData;
@@ -46,7 +47,7 @@ namespace ViewControls
                 case CountryConfig country:
                     _localisation.Data.Add($"{country.Id}_ADJ:", "");
                     _localisation.Data.Add($"{country.Id}:", "");
-                    foreach (IdeologyConfig cfg in ModDataStorage.Mod.Ideologies)
+                    foreach (IdeologyConfig cfg in ModDataStorage.Mod.Ideologies.FileEntitiesToList())
                     {
                         _localisation.Data.Add($"{country.Id}_{cfg.Id}_DEF:", "");
                         _localisation.Data.Add($"{country.Id}_{cfg.Id}:", "");

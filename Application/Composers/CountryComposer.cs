@@ -1,219 +1,257 @@
-﻿
+﻿using Application.Debugging;
 using Application.Extensions;
+using Application.extentions;
 using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
+using Data;
 using Models.Configs;
+using Models.EntityFiles;
+using Models.Enums;
+using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using System.Drawing;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace Application.Composers
 {
-    public class CountryComposer : IComposer
+    public class CountryComposer
     {
-        public CountryComposer() { }
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит теги стран и соответствующие файлы истории → возвращает список файлов с конфигами стран
+        /// </summary>
+        public static List<ConfigFile<CountryConfig>> Parse()
         {
-            List<IConfig> configs = new();
-            string[] possibleHistoryPathes =
-            {
-                ModPathes.HistoryCountriesPath,
-                GamePathes.HistoryCountriesPath
-            };
+            var stopwatch = Stopwatch.StartNew();
+            var countryFiles = new List<ConfigFile<CountryConfig>>();
+
             string[] possibleTagPathes =
             {
                 ModPathes.CountryTagsPath,
                 GamePathes.CountryTagsPath
             };
-            foreach (string path in possibleTagPathes)
+
+            foreach (string tagPath in possibleTagPathes)
             {
-                string[] files = Directory.GetFiles(path);
-                foreach (string file in files)
+                if (!Directory.Exists(tagPath)) continue;
+
+                string[] tagFiles = Directory.GetFiles(tagPath, "*.txt", SearchOption.AllDirectories);
+                foreach (string tagFilePath in tagFiles)
                 {
-                    HoiFuncFile tagFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(file);
-                    foreach (var var in tagFile.Vars)
+                    string content = File.ReadAllText(tagFilePath);
+                    HoiFuncFile tagFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                    bool isOverride = tagPath.StartsWith(ModPathes.CountryTagsPath);
+
+                    foreach (Var tagVar in tagFile.Vars)
                     {
-                        if (var.Name == "dynamic_tags")
+                        if (tagVar.Name == "dynamic_tags" && tagVar.Value.ToBool())
                         {
-                            if (var.Value.ToBool() == true)
-                            {
-                                break;
-                            }
-                        }
-                        string tag = var.Name;
-                        string countryFileName = var.Value?.ToString() ?? string.Empty;
-                        CountryConfig countryConfig = ParseCountryConfig(tag, countryFileName);
-                        if (countryConfig == null)
+                            // динамические теги пока пропускаем
                             continue;
-                        countryConfig.FileFullPath = file;
-                        if (countryConfig != null && !configs.Any(c => c.Id.ToString() == countryConfig.Id.ToString()))
-                        {
-                            configs.Add(countryConfig);
                         }
+
+                        string tag = tagVar.Name;
+                        string countryFileRelative = tagVar.Value?.ToString() ?? string.Empty;
+
+                        if (string.IsNullOrWhiteSpace(countryFileRelative))
+                            continue;
+
+                        CountryConfig country = ParseCountryHistory(tag, countryFileRelative, tagFilePath);
+                        if (country == null)
+                            continue;
+
+                        // Создаём "виртуальный" файл, т.к. у страны обычно один конфиг на файл
+                        var configFile = new ConfigFile<CountryConfig>
+                        {
+                            FileFullPath = tagFilePath,  // или путь к файлу истории, если важно
+                            IsOverride = isOverride,
+                            Entities = { country }
+                        };
+
+                        countryFiles.Add(configFile);
+                        Logger.AddDbgLog($"Добавлена страна: {tag} ({country.Id}) из {Path.GetFileName(tagFilePath)}");
                     }
                 }
             }
-            return configs;
+
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг стран завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Стран: {countryFiles.Sum(f => f.Entities.Count)} (файлов: {countryFiles.Count})");
+
+            return countryFiles;
         }
-        public static CountryConfig ParseCountryConfig(string tag, string path)
+
+        /// <summary>
+        /// Парсит файл истории одной страны по относительному пути из tags
+        /// </summary>
+        private static CountryConfig ParseCountryHistory(string tag, string relativePath, string tagFilePath)
         {
             string[] possibleHistoryPaths =
             {
-                Path.Combine(ModPathes.HistoryPath, path.Replace("/", "\\")),
-                Path.Combine(GamePathes.HistoryPath, path.Replace("/", "\\"))
+                Path.Combine(ModPathes.HistoryPath, relativePath.Replace("/", "\\")),
+                Path.Combine(GamePathes.HistoryPath, relativePath.Replace("/", "\\")),
+                Path.Combine(ModPathes.HistoryCountriesPath, relativePath.Replace("/", "\\")),
+                Path.Combine(GamePathes.HistoryCountriesPath, relativePath.Replace("/", "\\"))
             };
 
-            foreach (var pts in possibleHistoryPaths)
+            string actualHistoryPath = null;
+
+            foreach (string candidate in possibleHistoryPaths)
             {
-                string fullpath = pts;
-                if (!File.Exists(fullpath))
+                if (File.Exists(candidate))
                 {
-                    string[] files = Directory.GetFiles(Path.Combine(ModPathes.HistoryCountriesPath));
-                    foreach (string healf in files)
-                    {
-                        if (healf.Contains(tag, StringComparison.Ordinal))
-                        {
-                            fullpath = healf;
-                            //todo: healer error log
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
+                    actualHistoryPath = candidate;
+                    break;
                 }
-
-                if (new TxtParser(new TxtPattern()).Parse(fullpath) is not HoiFuncFile file)
-                    continue;
-
-                var techs = new Dictionary<TechTreeItemConfig, int>();
-                foreach (var var in file.Brackets.FindById("set_technology")?.SubVars ?? Enumerable.Empty<Var>())
-                {
-                    if (var?.Name == null || var.Name.Length < 4)
-                        continue;
-
-                    string techId = var.Name.Substring(4);
-                    var techItem = ModDataStorage.Mod.TechTreeLedgers.GetTreeItem(techId);
-                    if (techItem == null)
-                        continue;
-
-                    if (int.TryParse(var.Value?.ToString(), out int level))
-                        techs.SumToKey(techItem, level);
-                }
-
-                var states = new List<StateConfig>();
-                var countryFlags = new Dictionary<IdeologyConfig, Bitmap>();
-                var partyPopularities = new Dictionary<IdeologyConfig, int>();
-                foreach (var var in file.Brackets.FindById("set_popularities")?.SubVars ?? Enumerable.Empty<Var>())
-                {
-                    if (var?.Name == null)
-                        continue;
-
-                    var ideology = ModDataStorage.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == var.Name);
-                    if (ideology != null && int.TryParse(var.Value?.ToString(), out int popularity))
-                        partyPopularities[ideology] = popularity;
-                }
-
-                var ideas = new List<IdeaConfig>();
-                foreach (var var in file.Brackets.FindById("add_ideas")?.SubVars ?? Enumerable.Empty<Var>())
-                {
-                    if (var?.Name == null)
-                        continue;
-
-                    var idea = ModDataStorage.Mod.Ideas.FindById(var.Name);
-                    if (idea != null)
-                        ideas.Add(idea);
-                }
-
-                var characters = new List<CountryCharacterConfig>();
-                foreach (var var in file.Brackets.FindById("add_character")?.SubVars ?? Enumerable.Empty<Var>())
-                {
-                    if (var?.Name == null)
-                        continue;
-
-                    var character = ModDataStorage.Mod.Characters.FindById(var.Name);
-                    if (character != null)
-                        characters.Add(character);
-                }
-
-                var stateCores = new Dictionary<StateConfig, bool>();
-                foreach (var var in file.Brackets.FindById("add_core")?.SubVars ?? Enumerable.Empty<Var>())
-                {
-                    if (var?.Name == null || !int.TryParse(var.Value?.ToString(), out int isCore))
-                        continue;
-
-                    if (int.TryParse(var.Name, out int stateId))
-                    {
-                        var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == stateId);
-                        if (state != null)
-                            stateCores[state] = isCore != 0;
-                    }
-                }
-
-                int convoys = int.TryParse(file.Vars.FindById("set_convoys")?.Value?.ToString(), out int resultConvoys) ? resultConvoys : 0;
-                double stab = double.TryParse(file.Vars.FindById("set_stability")?.Value?.ToString(), out double resultStab) ? resultStab : 0;
-                double ws = double.TryParse(file.Vars.FindById("set_war_support")?.Value?.ToString(), out double resultWs) ? resultWs : 0;
-                int resSlots = int.TryParse(file.Vars.FindById("set_research_slots")?.Value?.ToString(), out int resultSlots) ? resultSlots : 1;
-
-                IdeologyConfig rulingParty = null;
-                DateOnly? lastElection = null;
-                int? electionFrequency = null;
-                bool? electionsAllowed = null;
-                foreach (var politicsvar in file.Brackets.FindById("set_politics")?.SubVars ?? Enumerable.Empty<Var>())
-                {
-                    switch (politicsvar?.Name)
-                    {
-                        case "ruling_party":
-                            rulingParty = ModDataStorage.Mod.Ideologies.FirstOrDefault(i => i.Id.ToString() == politicsvar.Value?.ToString());
-                            break;
-                        case "last_election":
-                            if (DateOnly.TryParse(politicsvar.Value?.ToString(), out DateOnly dt))
-                                lastElection = dt;
-                            break;
-                        case "election_frequency":
-                            if (int.TryParse(politicsvar.Value?.ToString(), out int ef))
-                                electionFrequency = ef;
-                            break;
-                        case "elections_allowed":
-                            if (int.TryParse(politicsvar.Value?.ToString(), out int ea))
-                                electionsAllowed = ea != 0;
-                            break;
-                    }
-                }
-
-                var capitalVar = file.Vars.FindById("capital");
-                int capital = capitalVar != null && int.TryParse(capitalVar.Value?.ToString(), out int cap) ? cap : -1;
-
-                var oobVar = file.Vars.FindById("oob");
-                string oob = oobVar?.Value?.ToString() ?? string.Empty;
-
-                return new CountryConfig
-                {
-                    Id = new Identifier(tag),
-                    Capital = capital,
-                    CountryFileName = Path.GetFileName(path),
-                    Technologies = techs,
-                    Convoys = convoys,
-                    OOB = oob,
-                    Stab = stab,
-                    WarSup = ws,
-                    ResearchSlots = resSlots,
-                    RulingParty = rulingParty,
-                    LastElection = lastElection,
-                    ElectionFrequency = electionFrequency,
-                    ElectionsAllowed = electionsAllowed,
-                    States = states,
-                    CountryFlags = countryFlags,
-                    PartyPopularities = partyPopularities,
-                    Ideas = ideas,
-                    Characters = characters,
-                    StateCores = stateCores
-                };
             }
 
-            return null;
+            // Если не нашли по точному пути — ищем по тегу в папке (старое поведение)
+            if (actualHistoryPath == null)
+            {
+                string[] filesInFolder = Directory.GetFiles(ModPathes.HistoryCountriesPath).Concat(Directory.GetFiles(GamePathes.HistoryCountriesPath)).ToArray();
+                actualHistoryPath = filesInFolder
+                    .FirstOrDefault(f => Path.GetFileNameWithoutExtension(f).Contains(tag, StringComparison.OrdinalIgnoreCase));
+
+                if (actualHistoryPath == null)
+                {
+                    Logger.AddLog($"Не найден файл истории для страны {tag} (тег-файл: {tagFilePath}), возможно ето динамик - страна. ");
+                    return null;
+                }
+            }
+
+            string content = File.ReadAllText(actualHistoryPath);
+            HoiFuncFile file = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+            var country = new CountryConfig
+            {
+                Id = new Identifier(tag),
+                FileFullPath = actualHistoryPath,
+                CountryFileName = Path.GetFileName(relativePath)
+            };
+
+            // set_technology
+            var techBracket = file.Brackets.FirstOrDefault(b => b.Name == "set_technology");
+            if (techBracket != null)
+            {
+                foreach (Var v in techBracket.SubVars)
+                {
+                    if (string.IsNullOrEmpty(v.Name) || v.Name.Length < 4) continue;
+
+                    string techId = v.Name.Substring(4);
+                    var techItem = ModDataStorage.Mod.TechTreeItems.SearchConfigInFile(techId);
+                    if (techItem != null && int.TryParse(v.Value?.ToString(), out int level))
+                    {
+                        country.Technologies[techItem] = level;
+                    }
+                }
+            }
+
+            // set_popularities
+            var popBracket = file.Brackets.FirstOrDefault(b => b.Name == "set_popularities");
+            if (popBracket != null)
+            {
+                foreach (Var v in popBracket.SubVars)
+                {
+                    var ideology = ModDataStorage.Mod.Ideologies.SearchConfigInFile(v.Name);
+                    if (ideology != null && int.TryParse(v.Value?.ToString(), out int pop))
+                    {
+                        country.PartyPopularities[ideology] = pop;
+                    }
+                }
+            }
+
+            // add_ideas
+            var ideasBracket = file.Brackets.FirstOrDefault(b => b.Name == "add_ideas");
+            if (ideasBracket != null)
+            {
+                foreach (Var v in ideasBracket.SubVars)
+                {
+                    var idea = ModDataStorage.Mod.Ideas.SearchConfigInFile(v.Name);
+                    if (idea != null)
+                        country.Ideas.Add(idea);
+                }
+            }
+
+            // add_character
+            var charBracket = file.Brackets.FirstOrDefault(b => b.Name == "add_character");
+            if (charBracket != null)
+            {
+                foreach (Var v in charBracket.SubVars)
+                {
+                    var character = ModDataStorage.Mod.Characters.SearchConfigInFile(v.Name);
+                    if (character != null)
+                        country.Characters.Add(character);
+                }
+            }
+
+            // add_core / set_owner / set_controller и т.д. — здесь только add_core как в оригинале
+            var coreBracket = file.Brackets.FirstOrDefault(b => b.Name == "add_core");
+            if (coreBracket != null)
+            {
+                foreach (Var v in coreBracket.SubVars)
+                {
+                    if (int.TryParse(v.Name, out int stateId) &&
+                        int.TryParse(v.Value?.ToString(), out int isCore))
+                    {
+                        var state = ModDataStorage.Mod.Map.States.FileEntitiesToList().FindById(stateId.ToString());
+                        if (state != null)
+                            country.StateCores[state] = isCore != 0;
+                    }
+                }
+            }
+
+            // Простые переменные
+            country.Convoys = file.Vars.FirstOrDefault(v => v.Name == "set_convoys")?.Value.ToInt() ?? 0;
+            country.Stab = file.Vars.FirstOrDefault(v => v.Name == "set_stability")?.Value.ToDouble() ?? 0.0;
+            country.WarSup = file.Vars.FirstOrDefault(v => v.Name == "set_war_support")?.Value.ToDouble() ?? 0.0;
+            country.ResearchSlots = file.Vars.FirstOrDefault(v => v.Name == "set_research_slots")?.Value.ToInt() ?? 1;
+
+            // set_politics
+            var politics = file.Brackets.FirstOrDefault(b => b.Name == "set_politics");
+            if (politics != null)
+            {
+                foreach (Var v in politics.SubVars)
+                {
+                    switch (v.Name)
+                    {
+                        case "ruling_party":
+                            country.RulingParty = ModDataStorage.Mod.Ideologies.SearchConfigInFile(v.Value?.ToString());
+                            break;
+                        case "last_election":
+                            if (DateOnly.TryParse(v.Value?.ToString(), out DateOnly dt))
+                                country.LastElection = dt;
+                            break;
+                        case "election_frequency":
+                            country.ElectionFrequency = v.Value.ToInt();
+                            break;
+                        case "elections_allowed":
+                            country.ElectionsAllowed = v.Value.ToBool();
+                            break;
+                    }
+                }
+            }
+
+            // capital
+            var capitalVar = file.Vars.FirstOrDefault(v => v.Name == "capital");
+            country.Capital = capitalVar?.Value.ToInt() ?? -1;
+
+            // oob
+            var oobVar = file.Vars.FirstOrDefault(v => v.Name == "oob");
+            country.OOB = oobVar?.Value?.ToString() ?? string.Empty;
+
+            return country;
         }
+
+       
+
+        
     }
 }

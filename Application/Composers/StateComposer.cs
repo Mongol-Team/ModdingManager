@@ -1,175 +1,214 @@
 ﻿using Application.Debugging;
+using Application.Extensions;
+using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
+using Data;
 using Models.Configs;
-using Models.Types;
+using Models.EntityFiles;
+using Models.GfxTypes;
+using Models.Types.LocalizationData;
+using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using System.Collections.Concurrent;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using Application.Extentions;
+using System.Drawing;
+using System.IO;
 using System.Linq;
-using Models.Types.ObectCacheData;
-using Data;
-using Models.GfxTypes;
 
 namespace Application.Composers
 {
-    public class StateComposer : IComposer
+    public class StateComposer
     {
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы штатов и возвращает список файлов (ConfigFile<StateConfig>)
+        /// </summary>
+        public static List<ConfigFile<StateConfig>> Parse()
         {
-            var watch = Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew();
+            var stateFiles = new List<ConfigFile<StateConfig>>();
 
-            var result = new ConcurrentBag<IConfig>();
-
-            string[] priorityFolders = {
+            string[] priorityFolders =
+            {
                 ModPathes.StatesPath,
-                GamePathes.StatesPath,
+                GamePathes.StatesPath
             };
 
             foreach (string folder in priorityFolders)
             {
                 if (!Directory.Exists(folder))
+                {
+                    Logger.AddLog($"Директория штатов не найдена: {folder}", LogLevel.Info);
                     continue;
-
-                var files = Directory.GetFiles(folder);
-
-                foreach (var file in files)
-                {
-                    var stateConfig = ParseFile(file);
-                    if(stateConfig == null)
-                        continue;
-                    stateConfig.FileFullPath = file;
-                    result.Add(stateConfig);
                 }
 
-                if (!result.IsEmpty)
-                    break;
-                else
+                string[] files = Directory.GetFiles(folder, "*.txt", SearchOption.AllDirectories);
+                foreach (string file in files)
                 {
-                    Logger.AddDbgLog($"[⚠️] No state files found in mod folder: {folder}", "IdeologyComposer");
+                    try
+                    {
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                        bool isOverride = folder.StartsWith(ModPathes.StatesPath);
+
+                        var configFile = ParseFile(hoiFuncFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
+                        {
+                            stateFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл штатов: {configFile.FileName} → {configFile.Entities.Count} штатов");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.AddLog($"[StateComposer] Ошибка парсинга файла {file}: {ex.Message}");
+                    }
                 }
+
+                // Если в моде что-то нашли — не ищем в игре
+                if (stateFiles.Any()) break;
             }
-            watch.Stop();
-            return result.ToList();
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг штатов завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {stateFiles.Count}, штатов всего: {stateFiles.Sum(f => f.Entities.Count)}");
+
+            return stateFiles;
         }
-        public static StateConfig? ParseFile(string FileFullPath)
+
+        /// <summary>
+        /// Парсит один файл штатов (принимает HoiFuncFile)
+        /// </summary>
+        public static ConfigFile<StateConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
-            if (string.IsNullOrWhiteSpace(FileFullPath) || !File.Exists(FileFullPath))
+            var configFile = new ConfigFile<StateConfig>
             {
-                Logger.AddDbgLog($"Файл не найден или путь пуст: {FileFullPath}", "IdeologyComposer");
-                return null;
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            if (hoiFuncFile == null || hoiFuncFile.Brackets.Count == 0)
+            {
+                Logger.AddDbgLog($"Файл пуст или не распарсился: {fileFullPath}");
+                return configFile;
             }
 
-            if (!(new TxtParser(new TxtPattern()).Parse(FileFullPath) is HoiFuncFile file) || file.Brackets.Count == 0)
+            foreach (Bracket stateBracket in hoiFuncFile.Brackets)
             {
-                Logger.AddDbgLog($"Не удалось распарсить файл: {FileFullPath}", "IdeologyComposer");
-                return null;
+                var state = ParseState(stateBracket, fileFullPath, isOverride);
+                if (state != null)
+                {
+                    configFile.Entities.Add(state);
+                    Logger.AddDbgLog($"  → добавлен штат: {state.Id}");
+                }
             }
 
-            var stateBracket = file.Brackets.FirstOrDefault();
-            if (stateBracket == null)
-            {
-                Logger.AddDbgLog($"Нет корневого блока в файле: {FileFullPath}", "IdeologyComposer");
-                return null;
-            }
+            return configFile;
+        }
 
+        private static StateConfig? ParseState(Bracket stateBracket, string fileFullPath, bool isOverride)
+        {
             var idVar = stateBracket.SubVars.FirstOrDefault(v => v.Name == "id");
             if (idVar?.Value == null || !int.TryParse(idVar.Value.ToString(), out int id))
             {
-                Logger.AddDbgLog($"Не удалось извлечь ID из файла: {FileFullPath}", "IdeologyComposer");
+                Logger.AddDbgLog($"Штат без валидного id в файле: {fileFullPath}");
                 return null;
             }
 
-            // Provinces
-            var provincesArray = stateBracket.Arrays.FirstOrDefault(a => a.Name == "provinces");
-            var provinceIds = provincesArray?.Values?
-                .Select(v => v is HoiReference hr ? hr.Value : v)
-                .OfType<int>()
-                .ToList() ?? new List<int>();
-
-            var matchedProvinces = ModDataStorage.Mod?.Map?.Provinces?
-                .Where(p => provinceIds.Contains(p.Id.ToInt()))
-                .ToList() ?? new List<ProvinceConfig>();
-
-            // History
-            var historyBra = stateBracket.SubBrackets.FirstOrDefault(v => v.Name == "history");
-            string ownerTag = historyBra?.SubVars.FirstOrDefault(v => v.Name == "owner")?.Value as string ?? string.Empty;
-
-            var cores = historyBra?.SubVars
-                .Where(a => a.Name == "add_core")
-                .Select(a => a.Value?.ToString() ?? string.Empty)
-                .Where(s => !string.IsNullOrEmpty(s))
-                .ToList() ?? new List<string>();
-
-            // Victory Points
-            var victoryPoints = new Dictionary<int, int>();
-            if (historyBra != null)
-            {
-                foreach (HoiArray hoiArray in historyBra.Arrays.Where(a => a.Name == "victory_points"))
-                {
-                    if (hoiArray.Values.Count == 2)
-                    {
-                        int key = hoiArray.Values[0].ToInt();
-                        int val = hoiArray.Values[1].ToInt();
-                        victoryPoints[key] = val;
-                    }
-                    else
-                    {
-                        Logger.AddDbgLog($"Неверный формат victory_points в штате {id} в файле {FileFullPath}", "StateComposer");
-                    }
-                }
-            }
-
-            // Buildings
-            var buildings = new Dictionary<BuildingConfig, int>();
-            foreach (var buildingBr in stateBracket.SubBrackets.Where(b => b.Name == "buildings"))
-            {
-                foreach (var buildingVar in buildingBr.SubVars)
-                {
-                    var buildingConfig = ModDataStorage.Mod?.Buildings?.FirstOrDefault(b => b.Id.ToString() == buildingVar.Name);
-                    if (buildingConfig != null)
-                    {
-                        buildings[buildingConfig] = buildingVar.Value.ToInt();
-                    }
-                    else
-                    {
-                        Logger.AddDbgLog($"Неизвестное здание {buildingVar.Name} в штате {id} в файле {FileFullPath}", "StateComposer");
-                    }
-                }
-            }
-
-            // Category
-            string categoryStr = stateBracket.SubVars
-                .FirstOrDefault(v => v.Name == "state_category")
-                ?.Value?.ToString() ?? string.Empty;
-
-            var category = ModDataStorage.Mod?.StateCathegories?.FirstOrDefault(s => s.Id.ToString() == categoryStr);
-
-            if (category == null)
-            {
-                Logger.AddDbgLog($"Не найдена категория '{categoryStr}' для штата {id} в файле {FileFullPath}", "StateComposer");
-                return null; // или можно вернуть дефолтную категорию
-            }
-
-            return new StateConfig
+            var state = new StateConfig
             {
                 Id = new Identifier(id),
-                Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
-                Provinces = matchedProvinces,
-                OwnerTag = ownerTag,
-                CoresTag = cores,
-                FileFullPath = file.FileFullPath,
-                VictoryPoints = victoryPoints,
-                Buildings = buildings,
-                Color = System.Drawing.Color.FromArgb((byte)((id * 53) % 255), (byte)((id * 97) % 255), (byte)((id * 151) % 255)),
-                Manpower = stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower")?.Value?.ToInt() ?? DataDefaultValues.NullInt,
-                LocalSupply = stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supply")?.Value?.ToDouble() ?? DataDefaultValues.NullInt,
-                Cathegory = category,
-            };
-        }
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
 
+                Provinces = new List<ProvinceConfig>(),
+                VictoryPoints = new Dictionary<int, int>(),
+                Buildings = new Dictionary<BuildingConfig, int>(),
+                CoresTag = new List<string>(),
+                Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                Manpower = DataDefaultValues.NullInt,
+                LocalSupply = DataDefaultValues.NullInt
+            };
+
+            // Провинции
+            var provincesArray = stateBracket.Arrays.FirstOrDefault(a => a.Name == "provinces");
+            if (provincesArray?.Values != null)
+            {
+                foreach (var provIdObj in provincesArray.Values)
+                {
+                    if (provIdObj == null) continue;
+
+                    string provIdStr = provIdObj.ToString();
+                    if (!int.TryParse(provIdStr, out int provId)) continue;
+
+                    var province = ModDataStorage.Mod.Map.Provinces.SearchConfigInFile(provId.ToString());
+                    if (province != null)
+                        state.Provinces.Add(province);
+                    else
+                        Logger.AddDbgLog($"Провинция {provId} не найдена для штата {id} (файл: {fileFullPath})");
+                }
+            }
+
+            // История (owner, cores, victory_points, buildings)
+            var historyBr = stateBracket.SubBrackets.FirstOrDefault(b => b.Name == "history");
+            if (historyBr != null)
+            {
+                // Owner
+                state.OwnerTag = historyBr.SubVars.FirstOrDefault(v => v.Name == "owner")?.Value?.ToString() ?? string.Empty;
+
+                // Cores
+                var coreVars = historyBr.SubVars.Where(v => v.Name == "add_core");
+                state.CoresTag = coreVars.Select(v => v.Value?.ToString() ?? string.Empty)
+                                        .Where(s => !string.IsNullOrEmpty(s))
+                                        .ToList();
+
+                // Victory Points
+                foreach (HoiArray vpArray in historyBr.Arrays.Where(a => a.Name == "victory_points"))
+                {
+                    if (vpArray.Values.Count >= 2)
+                    {
+                        int provId = vpArray.Values[0].ToInt();
+                        int points = vpArray.Values[1].ToInt();
+                        state.VictoryPoints[provId] = points;
+                    }
+                    else
+                    {
+                        Logger.AddDbgLog($"Неверный формат victory_points в штате {id} (файл: {fileFullPath})");
+                    }
+                }
+
+                // Buildings
+                foreach (Bracket buildingBr in historyBr.SubBrackets.Where(b => b.Name == "buildings"))
+                {
+                    foreach (Var buildingVar in buildingBr.SubVars)
+                    {
+                        var building = ModDataStorage.Mod.Buildings.SearchConfigInFile(buildingVar.Name);
+                        if (building != null)
+                            state.Buildings.Add(building, buildingVar.Value.ToInt());
+                        else
+                            Logger.AddDbgLog($"Неизвестное здание {buildingVar.Name} в штате {id} (файл: {fileFullPath})");
+                    }
+                }
+            }
+
+            // Категория штата
+            string categoryStr = stateBracket.SubVars.FirstOrDefault(v => v.Name == "state_category")?.Value?.ToString() ?? string.Empty;
+            var category = ModDataStorage.Mod.StateCathegories.SearchConfigInFile(categoryStr);
+            if (category != null)
+                state.Cathegory = category;
+            else
+                Logger.AddDbgLog($"Категория '{categoryStr}' не найдена для штата {id} (файл: {fileFullPath})");
+
+            // Manpower и Local Supply
+            state.Manpower = stateBracket.SubVars.FirstOrDefault(v => v.Name == "manpower")?.Value.ToInt() ?? DataDefaultValues.NullInt;
+            state.LocalSupply = stateBracket.SubVars.FirstOrDefault(v => v.Name == "local_supply")?.Value.ToDouble() ?? DataDefaultValues.NullInt;
+
+            return state;
+        }
     }
 }

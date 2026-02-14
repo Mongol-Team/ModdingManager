@@ -1,28 +1,36 @@
 ﻿using Application.Debugging;
+using Application.Extensions;
+using Application.extentions;
 using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
 using Models.Configs;
+using Models.EntityFiles; // Добавлен для ConfigFile<T>
 using Models.Enums;
 using Models.GfxTypes;
 using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
+using System.Diagnostics;
+using System.Windows.Input; // Для Stopwatch в отладке
 
 namespace Application.Composers
 {
-    public class BuildingComposer : IComposer
+    public class BuildingComposer
     {
-        public static List<IConfig> Parse()
+        public static List<ConfigFile<BuildingConfig>> Parse()
         {
-            List<IConfig> configs = new();
+            var stopwatch = Stopwatch.StartNew(); // Для отладки времени
+            List<ConfigFile<BuildingConfig>> buildingFiles = new();
             string[] possiblePathes =
             {
                 ModPathes.BuildingsPath,
                 GamePathes.BuildingsPath
             };
+
             foreach (string path in possiblePathes)
             {
                 string[] files = Directory.GetFiles(path);
@@ -32,32 +40,39 @@ namespace Application.Composers
                     {
                         string fileContent = File.ReadAllText(file);
                         HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
-                        List<IConfig> buildingConfigs = ParseFile(hoiFuncFile);
-                        foreach (BuildingConfig buildingConfig in buildingConfigs)
-                        {
-                            buildingConfig.FileFullPath = file;
-                            if (!configs.Any(c => c.Id == buildingConfig.Id))
-                            {
-                                configs.Add(buildingConfig);
-                            }
-                        }
+                        ConfigFile<BuildingConfig> configFile = ParseFile(hoiFuncFile, file, path == ModPathes.BuildingsPath); // Передаем путь для определения IsOverride
+                        buildingFiles.Add(configFile);
+                        Logger.AddDbgLog($"Добавлен файл: {configFile.FileName} с {configFile.Entities.Count} конфигами.");
                     }
                 }
             }
-            PaseDynamicModifierDefenitions(configs);
-            return configs;
+
+
+            PaseDynamicModifierDefenitions(buildingFiles); // Адаптировано под новую логику
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг зданий завершен. Время: {stopwatch.ElapsedMilliseconds} мс. Файлов: {buildingFiles.Count}, Конфигов всего: {buildingFiles.Sum(f => f.Entities.Count)}.");
+
+            return buildingFiles; // Теперь возвращаем список файлов, а не конфигов
         }
 
-        public static List<IConfig> ParseFile(HoiFuncFile hoiFuncFil)
+        public static ConfigFile<BuildingConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
-            List<IConfig> cfgs = new();
-            foreach (Bracket buildsBrk in hoiFuncFil.Brackets.Where(b => b.Name == "buildings"))
+            ConfigFile<BuildingConfig> configFile = new ConfigFile<BuildingConfig>
             {
-                
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (Bracket buildsBrk in hoiFuncFile.Brackets.Where(b => b.Name == "buildings"))
+            {
                 foreach (Bracket bracket in buildsBrk.SubBrackets)
                 {
-                    BuildingConfig buildingConfig = new();
-                    buildingConfig.Id = new(bracket.Name);
+                    BuildingConfig buildingConfig = new BuildingConfig();
+                    buildingConfig.Id = new Identifier(bracket.Name);
+                    buildingConfig.FileFullPath = fileFullPath; // Устанавливаем путь для конфига
+                    buildingConfig.IsOverride = isOverride;
+
                     foreach (Var buidVar in bracket.SubVars)
                     {
                         switch (buidVar.Name)
@@ -94,7 +109,7 @@ namespace Application.Composers
                                 catch (Exception ex)
                                 {
                                     Logger.AddLog($"[ParseFile] Cannot parse IntelType: '{buidVar.Value}' ({buidVar.Value?.GetType().Name}): {ex.Message}");
-                                    buildingConfig.IntelType = default; // или null если nullable
+                                    buildingConfig.IntelType = default;
                                 }
                                 break;
                             case "only_display_if_exists":
@@ -136,37 +151,41 @@ namespace Application.Composers
                             case "hide_if_missing_tech":
                                 buildingConfig.HideIfMissingTech = buidVar.Value.ToBool();
                                 break;
-
-
                         }
                     }
+
                     foreach (Bracket buildBr in bracket.SubBrackets)
                     {
                         switch (buildBr.Name)
                         {
                             case "dlc_allowed":
-                                //todo: understand what the fuck is this
+                                // TODO: understand what the fuck is this
                                 break;
                             case "missing_tech_loc":
-                                //todo: same as prev
+                                // TODO: same as prev
                                 break;
                             case "specialization":
-                                //todo: special project, gotendamerung handling
+                                // TODO: special project, gotendamerung handling
                                 break;
                             case "tags":
-                                //todo: same as one before the previous
+                                // TODO: same as one before the previous
                                 break;
                             case "province_damage_modifiers":
                                 foreach (Var pdm in buildBr.SubVars)
                                 {
-                                    ModifierDefinitionConfig modifierDefcon = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(x => x.Id.ToString() == pdm.Name);
+                                    var file = ModDataStorage.Mod.ModifierDefinitions.
+                                       FirstOrDefault(x => x.Entities.Any(e => e.Id.ToString() == pdm.Value.ToString()));
+                                    ModifierDefinitionConfig modifierDefcon = file.FindById(pdm.Value.ToString());
                                     buildingConfig.ProvineDamageModifiers.AddSafe(modifierDefcon, pdm.Value);
                                 }
                                 break;
                             case "state_damage_modifier":
                                 foreach (Var pdm in buildBr.SubVars)
                                 {
-                                    ModifierDefinitionConfig modifierDefcon = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(x => x.Id.ToString() == pdm.Name);
+                                    var file = ModDataStorage.Mod.ModifierDefinitions.
+                                        FirstOrDefault(x => x.Entities.Any(e => e.Id.ToString() == pdm.Value.ToString()));
+                                    ModifierDefinitionConfig modifierDefcon = file.FindById(pdm.Value.ToString());
+
                                     buildingConfig.StateDamageModifiers.AddSafe(modifierDefcon, pdm.Value);
                                 }
                                 break;
@@ -188,64 +207,120 @@ namespace Application.Composers
                                             buildingConfig.Group = lcvar.Value.ToString();
                                             break;
                                         case "exclusive_with":
-                                            buildingConfig.ExcludeWith = ModDataStorage.Mod.Buildings.FirstOrDefault(b => b.Id.ToString() == lcvar.Value);
-                                            break;
+                                            var building = ModDataStorage.Mod.Buildings
+                                                .FirstOrDefault(b => b.Entities.Any(e => e.Id.ToString() == lcvar.Value));
+                                            var entity = building?.Entities.FindById(lcvar.Value.ToString());
 
+                                            buildingConfig.ExcludeWith = entity;
+                                            break;
                                     }
                                 }
                                 break;
                             case "state_modifiers":
                                 foreach (Var pdm in buildBr.SubVars)
                                 {
-                                    ModifierDefinitionConfig modifierDefcon = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(x => x.Id.ToString() == pdm.Name);
+                                    ModifierDefinitionConfig modifierDefcon =ModDataStorage.Mod.ModifierDefinitions.FileEntitiesToList().FindById(pdm.Value.ToString());
                                     buildingConfig.StateModifiers.AddSafe(modifierDefcon, pdm.Value);
                                 }
                                 break;
                             case "country_modifiers":
                                 foreach (Var pdm in buildBr.SubVars)
                                 {
-                                    ModifierDefinitionConfig modifierDefcon = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(x => x.Id.ToString() == pdm.Name);
+                                    var file = ModDataStorage.Mod.ModifierDefinitions.
+                                        FirstOrDefault(x => x.Entities.Any(e => e.Id.ToString() == pdm.Value.ToString()));
+                                    ModifierDefinitionConfig modifierDefcon = file.FindById(pdm.Value.ToString());
                                     buildingConfig.CountryModifiers.AddSafe(modifierDefcon, pdm.Value);
                                 }
                                 break;
                         }
                     }
-                    cfgs.Add(buildingConfig);
+
+                    configFile.Entities.Add(buildingConfig);
+                    Logger.AddDbgLog($"Добавлен конфиг: {buildingConfig.Id} в файл {configFile.FileName}.");
                 }
             }
 
-            return cfgs;
+            return configFile;
         }
 
-        public static void PaseDynamicModifierDefenitions(List<IConfig> configs)
+        public static void PaseDynamicModifierDefenitions(List<ConfigFile<BuildingConfig>> buildingFiles)
         {
-            foreach (BuildingConfig bc in configs)
+            // Новая логика: добавляем в core_objects файл для модификаторов
+            // Предполагаем, что есть Mod.ModifierDefinitionFiles; если нет - рекомендация: добавить List<ConfigFile<ModifierDefinitionConfig>> ModifierDefinitionFiles в ModDataStorage.Mod
+
+            var coreFile = ModDataStorage.Mod.ModifierDefinitions?.FirstOrDefault(f => f.FileName == "core_objects");
+
+            if (coreFile == null)
             {
-                ModifierDefinitionConfig mdprod = new();
-                mdprod.Id = new($"state_production_speed_{bc.Id}_factor");
-                mdprod.FileFullPath = DataDefaultValues.ItemCreatedDynamically;
-                mdprod.IsCore = true;
-                mdprod.Cathegory = ModifierDefinitionCathegoryType.Country;
-                mdprod.Precision = 2;
-                mdprod.ScopeType = ScopeTypes.Country;
-                mdprod.ColorType = ModifierDefenitionColorType.Good;
-                mdprod.Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx);
-                mdprod.Localisation = new ConfigLocalisation()
+                coreFile = new ConfigFile<ModifierDefinitionConfig>
                 {
-                    Language = ModManagerSettings.CurrentLanguage,
+                    FileFullPath = "core_objects",
+                    IsCore = true
+                };
+                ModDataStorage.Mod.ModifierDefinitions.Add(coreFile); // Если коллекции нет - невозможно, добавить по рекомендации
+                Logger.AddDbgLog("Создан core_objects файл для динамических модификаторов.");
+            }
+
+            foreach (BuildingConfig bc in buildingFiles.SelectMany(f => f.Entities))
+            {
+                ModifierDefinitionConfig mdprod = new ModifierDefinitionConfig
+                {
+                    Id = new Identifier($"state_production_speed_{bc.Id}_factor"),
+                    FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                    IsCore = true,
+                    Cathegory = ModifierDefinitionCathegoryType.Country,
+                    Precision = 2,
+                    ScopeType = ScopeTypes.Country,
+                    ColorType = ModifierDefenitionColorType.Good,
+                    Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                    Localisation = new ConfigLocalisation
+                    {
+                        Language = ModManagerSettings.CurrentLanguage,
+                       
+                    }
+
                 };
                 mdprod.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(mdprod.Id.ToString()));
-
-                ModifierDefinitionConfig mdrepair = mdprod;
-                mdrepair.Id = new($"state_repair_speed_{bc.Id}_factor");
-                mdrepair.Localisation = new ConfigLocalisation()
+                ModifierDefinitionConfig mdbs = new ModifierDefinitionConfig
                 {
-                    Language = ModManagerSettings.CurrentLanguage,
+                    Id = new Identifier($"production_speed_{bc.Id}_factor"),
+                    FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                    IsCore = true,
+                    Cathegory = ModifierDefinitionCathegoryType.Country,
+                    Precision = 2,
+                    ScopeType = ScopeTypes.Country,
+                    ColorType = ModifierDefenitionColorType.Good,
+                    Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                    Localisation = new ConfigLocalisation
+                    {
+                        Language = ModManagerSettings.CurrentLanguage,
+
+                    }
+
+                };
+                mdbs.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(mdbs.Id.ToString()));
+                ModifierDefinitionConfig mdrepair = new ModifierDefinitionConfig
+                {
+                    Id = new Identifier($"state_repair_speed_{bc.Id}_factor"),
+                    FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                    IsCore = true,
+                    Cathegory = ModifierDefinitionCathegoryType.Country,
+                    Precision = 2,
+                    ScopeType = ScopeTypes.Country,
+                    ColorType = ModifierDefenitionColorType.Good,
+                    Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                    Localisation = new ConfigLocalisation
+                    {
+                        Language = ModManagerSettings.CurrentLanguage,
+                        
+                    }
                 };
                 mdrepair.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(mdrepair.Id.ToString()));
 
-                ModDataStorage.Mod.ModifierDefinitions.Add(mdrepair);
-                ModDataStorage.Mod.ModifierDefinitions.Add(mdprod);
+                coreFile.Entities.Add(mdprod);
+                coreFile.Entities.Add(mdrepair);
+                coreFile.Entities.Add(mdbs);
+                Logger.AddDbgLog($"Добавлены определия модификаторов: {mdprod.Id}, {mdrepair.Id}, {mdbs.Id} в core_objects.");
             }
         }
     }

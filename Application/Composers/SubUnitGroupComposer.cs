@@ -2,7 +2,7 @@
 
 namespace Application.Composers
 {
-    public class SubUnitGroupComposer : IComposer
+    public class SubUnitGroupComposer 
     {
         public static List<IConfig> Parse()
         {

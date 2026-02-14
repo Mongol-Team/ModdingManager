@@ -1,382 +1,351 @@
-﻿using Microsoft.Win32.SafeHandles;
+﻿using Application.Debugging;
+using Application.Extensions;
+using Application.extentions;
 using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using RawDataWorker.Parsers;
-using RawDataWorker.Parsers.Patterns;
+using Data.Data;
+using Models.Configs;
+using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
 using Models.Interfaces;
 using Models.SubModels;
 using Models.Types.LocalizationData;
-using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
-using Pfim;
-using System;
-using System.Collections.Generic;
+using RawDataWorker.Parsers;
+using RawDataWorker.Parsers.Patterns;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Models.Configs;
-using Data.Data;
 
 namespace Application.Composers
 {
-    public class CharacterComposer : IComposer
+    public class CharacterComposer
     {
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы персонажей и возвращает список файлов (ConfigFile<CountryCharacterConfig>)
+        /// </summary>
+        public static List<ConfigFile<CountryCharacterConfig>> Parse()
         {
-            List<IConfig> configs = new List<IConfig>();
+            var stopwatch = Stopwatch.StartNew();
+            var characterFiles = new List<ConfigFile<CountryCharacterConfig>>();
+
             string[] possiblePathes =
             {
                 ModPathes.CommonCharacterPath,
-                GamePathes.TraitsPath
+                GamePathes.TraitsPath   // возможно здесь должно быть GamePathes.CommonCharacterPath или CharactersPath — проверь
             };
+
             foreach (string path in possiblePathes)
             {
-                string[] files = Directory.GetFiles(path);
+                if (!Directory.Exists(path)) continue;
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
                 foreach (string file in files)
                 {
-                    if (File.Exists(file))
+                    string fileContent = File.ReadAllText(file);
+                    HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
+
+                    bool isOverride = path.StartsWith(ModPathes.CommonCharacterPath); // или более точная логика
+
+                    var configFile = ParseFile(hoiFuncFile, file, isOverride);
+
+                    if (configFile.Entities.Any())
                     {
-                        string fileContent = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
-                        List<CountryCharacterConfig> charConfigs = ParseFile(hoiFuncFile).Cast<CountryCharacterConfig>().ToList();
-                        foreach (CountryCharacterConfig charConfig in charConfigs)
-                        {
-                            charConfig.FileFullPath = file;
-                            if (!configs.Any(c => c.Id == charConfig.Id))
-                            {
-                                configs.Add(charConfig);
-                            }
-                        }
+                        characterFiles.Add(configFile);
+                        Logger.AddDbgLog($"Добавлен файл персонажей: {configFile.FileName} ({configFile.Entities.Count} шт.)");
                     }
                 }
             }
-            return configs;
+
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг персонажей завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {characterFiles.Count}, персонажей: {characterFiles.Sum(f => f.Entities.Count)}");
+
+            return characterFiles;
         }
 
-        public static IEnumerable<IConfig> ParseFile(HoiFuncFile funcFile)
+        private static ConfigFile<CountryCharacterConfig> ParseFile(HoiFuncFile funcFile, string fileFullPath, bool isOverride)
         {
-            List<CountryCharacterConfig> configs = new List<CountryCharacterConfig>();
-            foreach (Bracket bracket in funcFile.Brackets.Where(b => b.Name == "characters"))
+            var configFile = new ConfigFile<CountryCharacterConfig>
             {
-                foreach (Bracket br in bracket.SubBrackets)
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (var topBracket in funcFile.Brackets.Where(b => b.Name == "characters"))
+            {
+                foreach (var charBr in topBracket.SubBrackets)
                 {
-                    CountryCharacterConfig cfg = (CountryCharacterConfig)ParseObject(br);
-                    configs.AddSafe(cfg);
+                    var cfg = ParseCharacter(charBr, fileFullPath, isOverride);
+                    if (cfg != null)
+                    {
+                        configFile.Entities.Add(cfg);
+                        Logger.AddDbgLog($"  → добавлен персонаж: {cfg.Id}");
+                    }
                 }
             }
-           
-            return configs;
+
+            return configFile;
         }
 
-        public static IConfig ParseObject(Bracket charBr)
+        private static CountryCharacterConfig ParseCharacter(Bracket charBr, string fileFullPath, bool isOverride)
         {
-            CountryCharacterConfig cfg = new CountryCharacterConfig();
-            cfg.Id = new Identifier(charBr.Name);
+            var cfg = new CountryCharacterConfig
+            {
+                Id = new Identifier(charBr.Name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
             string nameKey = string.Empty;
             string descKey = string.Empty;
-            foreach (Var v in charBr.SubVars)
+
+            foreach (var v in charBr.SubVars)
             {
                 switch (v.Name)
                 {
-                    case "name":
-                        nameKey = v.Value.ToString();
-                        break;
-                    case "desc":
-                        descKey = v.Value.ToString();
-                        break;
+                    case "name": nameKey = v.Value.ToString(); break;
+                    case "desc": descKey = v.Value.ToString(); break;
                 }
             }
-            //todo: instance branches implementation https://hoi4.paradoxwikis.com/Character_modding#Instances
-            foreach (Bracket br in charBr.SubBrackets)
+
+            // TODO: реализовать instance branches (см. https://hoi4.paradoxwikis.com/Character_modding#Instances)
+
+            foreach (var br in charBr.SubBrackets)
             {
                 switch (br.Name)
                 {
                     case "portraits":
-                        foreach(Bracket portBr in br.SubBrackets)
-                        { 
-                            if (portBr.Name == "army" || portBr.Name == "civilian")
-                            {
-                                foreach (Var v in br.SubVars)
-                                {
-                                    if (v.Name == "large")
-                                    {
-                                        IGfx gfx = ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == v.Value.ToString());
-                                    }
-                                    else if (v.Name == "small")
-                                    {
-                                        IGfx small = ModDataStorage.Mod.Gfxes.FirstOrDefault(g => g.Id.ToString() == v.Value.ToString());
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                //todo: exception for unknown portrait type
-                            }
-                        }
+                        cfg.Gfx = ParsePortraits(br);
                         break;
-                    case "country_leader":
-                        CountryLeaderCharacterType cleder = (CountryLeaderCharacterType)CreateCharacterType("country_leader", br);
 
-                        cleder.Ideology  = ModDataStorage.Mod.Ideologies
-                         .SelectMany(i => i.SubTypes)
-                         .FirstOrDefault(sub => sub.Name == br.SubVars.FirstOrDefault(v => v.Name == "ideology")?.Value);
-                        cfg.Types.AddSafe(cleder);
+                    case "country_leader":
+                        var leader = CreateCharacterType<CountryLeaderCharacterType>("country_leader", br);
+                        string ideologyKey = br.SubVars.FirstOrDefault(v => v.Name == "ideology")?.Value?.ToString();
+                        leader.Ideology = ModDataStorage.Mod.Ideologies.FileEntitiesToList().SelectMany(t => t.SubTypes).FirstOrDefault(t => t.Id.ToString() == ideologyKey);
+                        cfg.Types.AddSafe(leader);
                         break;
+
                     case "advisor":
-                        AdvisorCharacterType advisor = (AdvisorCharacterType)CreateCharacterType("advisor", br);
-                        foreach(Var advVar in br.SubVars)
-                        {
-                            switch(advVar.Name)
-                            {
-                                case "slot":
-                                    advisor.Slot = ModDataStorage.Mod.IdeaSlots.FirstOrDefault(s => s.Id.ToString() == advVar.Value.ToString());
-                                    break;
-                                case "idea_token":
-                                    advisor.Idea = ModDataStorage.Mod.Ideas.FirstOrDefault(i => i.Id.ToString() == advVar.Value.ToString());
-                                    break;
-                                case "cost":
-                                    if (int.TryParse(advVar.Value.ToString(), out int cost))
-                                    {
-                                        advisor.AdvisorCost = cost;
-                                    }
-                                    break;
-                                case "ledger":
-                                    advisor.IdeaLedgerType = Enum.TryParse<IdeaLedgerType>(advVar.Value.ToString().SnakeToPascal(), out var ledgerType) ? ledgerType : IdeaLedgerType.All;
-                                    break;
-                            }
-                        }
+                        var advisor = CreateCharacterType<AdvisorCharacterType>("advisor", br);
+                        ParseAdvisorData(br, advisor);
                         cfg.Types.AddSafe(advisor);
                         break;
+
                     case "corps_commander":
-                        CorpsCommanderCharacterType corps = (CorpsCommanderCharacterType)CreateCharacterType("corps_commander", br);
-                        CharaterCommanderData corpseData = ParseCommanderData(br);
-                        corps.Skill = corpseData.Skill;
-                        corps.Attack = corpseData.Attack;
-                        corps.Defense = corpseData.Defense;
-                        corps.Supply = corpseData.Supply;
-                        corps.Planning = corpseData.Planning;
+                        var corps = CreateCharacterType<CorpsCommanderCharacterType>("corps_commander", br);
+                        var corpsData = ParseCommanderData(br);
+                        ApplyCommanderData(corps, corpsData);   // ← используем extension-метод ниже
                         cfg.Types.AddSafe(corps);
                         break;
+
                     case "field_marshal":
-                        FieldMarshalCharacterType field = (FieldMarshalCharacterType)CreateCharacterType("field_marshal", br);
-                        CharaterCommanderData fieldData = ParseCommanderData(br);
-                        field.Skill = fieldData.Skill;
-                        field.Attack = fieldData.Attack;
-                        field.Defense = fieldData.Defense;
-                        field.Supply = fieldData.Supply;
-                        field.Planning = fieldData.Planning;
-                        cfg.Types.AddSafe(field);
+                        var marshal = CreateCharacterType<FieldMarshalCharacterType>("field_marshal", br);
+                        var marshalData = ParseCommanderData(br);
+                        ApplyCommanderData(marshal, marshalData);
+                        cfg.Types.AddSafe(marshal);
                         break;
+
                     case "navy_leader":
-                        NavalLeaderCharacterType naval = (NavalLeaderCharacterType)CreateCharacterType("navy_leader", br);
-                        CharaterCommanderData navalData = ParseCommanderData(br);
-                        naval.Skill = navalData.Skill;
-                        naval.Attack = navalData.Attack;
-                        naval.Defense = navalData.Defense;
-                        naval.Maneuver = navalData.Maneuvering;
-                        naval.Coordination = navalData.Coordination;
+                        var naval = CreateCharacterType<NavalLeaderCharacterType>("navy_leader", br);
+                        var navalData = ParseCommanderData(br);
+                        ApplyCommanderData(naval, navalData);
                         cfg.Types.AddSafe(naval);
                         break;
-
                 }
-
             }
-            cfg.Localisation = new ConfigLocalisation()
+
+            cfg.Localisation = new ConfigLocalisation
             {
                 Language = ModManagerSettings.CurrentLanguage,
-                Source = cfg,
-                Data = new Dictionary<string, string>()
+                Source = cfg
             };
             cfg.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(nameKey));
             cfg.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(descKey));
+
             return cfg;
         }
 
-        private static ICharacterType CreateCharacterType(string typeName, Bracket br)
-        {
-            var common = ParseCommonCharacterData(br);
-            Identifier baseId = new Identifier(br.Name);
-            switch (typeName)
-            {
-                case "country_leader":
-                  
-                    return new CountryLeaderCharacterType
-                    {
-                        Id = new Identifier(baseId.ToString() + ClassStaticValues.CountryLeaderTraitPostfix),
-                        Expire = common.Expire,
-                        Traits = common.Traits,
-                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.Null),
-                        Allowed = common.Allowed,
-                        Available = common.Available,
-                        Visible = common.Visible,
-                        Localisation = new()
-                    };
 
-                case "advisor":
-                    return new AdvisorCharacterType
-                    {
-                        Id = new Identifier(baseId.ToString() + ClassStaticValues.AdvisorTraitPostfix),
-                        Expire = common.Expire,
-                        Traits = common.Traits,
-                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.Null),
-                        Allowed = common.Allowed,
-                        Available = common.Available,
-                        Visible = common.Visible,
-                         Localisation = new()
-                    };
-                case "corps_commander":
-                    return new CorpsCommanderCharacterType
-                    {
-                        Id = new Identifier(baseId.ToString() + ClassStaticValues.CorpseTraitPostfix),
-                        Expire = common.Expire,
-                        Traits = common.Traits,
-                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.Null),
-                        Allowed = common.Allowed,
-                        Available = common.Available,
-                        Visible = common.Visible,
-                        Localisation = new()
-                    };
-                case "field_marshal":
-                    return new FieldMarshalCharacterType
-                    {
-                        Id = new Identifier(baseId.ToString() + ClassStaticValues.FieldTraitPostfix),
-                        Expire = common.Expire,
-                        Traits = common.Traits,
-                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.Null),
-                        Allowed = common.Allowed,
-                        Available = common.Available,
-                        Visible = common.Visible,
-                        Localisation = new()
-                    };
-                case "navy_leader":
-                    return new NavalLeaderCharacterType
-                    {
-                        Id = new Identifier(baseId.ToString() + ClassStaticValues.NavyLeaderTraitPostfix),
-                        Expire = common.Expire,
-                        Traits = common.Traits,
-                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.Null),
-                        Allowed = common.Allowed,
-                        Available = common.Available,
-                        Visible = common.Visible,
-                        Localisation = new()
-                    };
-                default:
-                    throw new NotSupportedException($"Unknown character type: {typeName}");
+        private static void ApplyCommanderData(ICharacterType commander, CharaterCommanderData data)
+        {
+            if (commander is CorpsCommanderCharacterType corps)
+            {
+                corps.Skill = data.Skill;
+                corps.Attack = data.Attack;
+                corps.Defense = data.Defense;
+                corps.Supply = data.Supply;
+                corps.Planning = data.Planning;
+            }
+            else if (commander is FieldMarshalCharacterType marshal)
+            {
+                marshal.Skill = data.Skill;
+                marshal.Attack = data.Attack;
+                marshal.Defense = data.Defense;
+                marshal.Supply = data.Supply;
+                marshal.Planning = data.Planning;
+            }
+            else if (commander is NavalLeaderCharacterType naval)
+            {
+                naval.Skill = data.Skill;
+                naval.Attack = data.Attack;
+                naval.Defense = data.Defense;
+                naval.Maneuver = data.Maneuvering;
+                naval.Coordination = data.Coordination;
             }
         }
+
+        private static T CreateCharacterType<T>(string typeName, Bracket br)
+            where T : ICharacterType, new()
+        {
+            var common = ParseCommonCharacterData(br);
+            var baseId = new Identifier(br.Name);
+
+            return new T
+            {
+                Id = new Identifier(baseId + GetTraitPostfix(typeName)),
+                Expire = common.Expire,
+                Traits = common.Traits,
+                Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.Null),
+                Allowed = common.Allowed,
+                Available = common.Available,
+                Visible = common.Visible,
+                Localisation = new ConfigLocalisation()
+            };
+        }
+
+        private static string GetTraitPostfix(string typeName) => typeName switch
+        {
+            "country_leader" => ClassStaticValues.CountryLeaderTraitPostfix,
+            "advisor" => ClassStaticValues.AdvisorTraitPostfix,
+            "corps_commander" => ClassStaticValues.CorpseTraitPostfix,
+            "field_marshal" => ClassStaticValues.FieldTraitPostfix,
+            "navy_leader" => ClassStaticValues.NavyLeaderTraitPostfix,
+            _ => throw new NotSupportedException($"Неизвестный тип персонажа: {typeName}")
+        };
+
+        private static IGfx ParsePortraits(Bracket portraitsBr)
+        {
+            foreach (var portBr in portraitsBr.SubBrackets)
+            {
+                if (portBr.Name is "army" or "civilian")
+                {
+                    var largeVar = portBr.SubVars.FirstOrDefault(v => v.Name == "large");
+                    if (largeVar != null)
+                    {
+                        var file = ModDataStorage.Mod.Gfxes
+                            .FirstOrDefault(f => f.Entities.Any(e => e.Id.ToString() == largeVar.Value.ToString()));
+                        return file?.FindById(largeVar.Value.ToString());
+                    }
+                    // можно добавить обработку small, если нужно
+                }
+            }
+            return null;
+        }
+
+        private static void ParseAdvisorData(Bracket br, AdvisorCharacterType advisor)
+        {
+            foreach (var v in br.SubVars)
+            {
+                switch (v.Name)
+                {
+                    case "slot":
+                        advisor.Slot = ModDataStorage.Mod.IdeaSlots.SearchConfigInFile(v.Value?.ToString());
+                        break;
+                    case "idea_token":
+                        advisor.Idea = ModDataStorage.Mod.Ideas.SearchConfigInFile(v.Value?.ToString());
+                        break;
+                    case "cost":
+                        advisor.AdvisorCost = v.Value.ToInt();
+                        break;
+                    case "ledger":
+                        advisor.IdeaLedgerType = v.Value.ToString().SnakeToPascal().ToEnum(IdeaLedgerType.All);
+                        break;
+                }
+            }
+        }
+
+     
+
         private static CharacterCommonData ParseCommonCharacterData(Bracket br)
         {
-            string expire = DataDefaultValues.Null;
-            string allowed = DataDefaultValues.Null;
-            string available = DataDefaultValues.Null;
-            string visible = DataDefaultValues.Null;
-            List<CharacterTraitConfig> traits = new List<CharacterTraitConfig>();
+            var data = new CharacterCommonData();
 
-            foreach (Var v in br.SubVars)
+            foreach (var v in br.SubVars)
             {
                 if (v.Name == "expire")
-                    expire = v.Value.ToString();
+                    data.Expire = v.Value.ToString();
             }
 
-            foreach (HoiArray arr in br.Arrays)
+            foreach (var arr in br.Arrays)
             {
                 if (arr.Name == "traits")
                 {
-                    var idSet = new HashSet<string>(arr.Values.ToListString());
-                    traits = ModDataStorage.Mod.CharacterTraits
-                        .Where(c => idSet.Contains(c.Id.ToString()))
+                    var traitIds = new HashSet<string>(arr.Values.ToListString());
+                    data.Traits = ModDataStorage.Mod.CharacterTraits
+                        .SelectMany(f => f.Entities)
+                        .Where(t => traitIds.Contains(t.Id.ToString()))
                         .ToList();
                 }
             }
 
-            foreach (Bracket sbr in br.SubBrackets)
+            foreach (var sbr in br.SubBrackets)
             {
                 switch (sbr.Name)
                 {
-                    case "visible": visible = sbr.ToString(); break;
-                    case "available": available = sbr.ToString(); break;
-                    case "allowed": allowed = sbr.ToString(); break;
+                    case "visible": data.Visible = sbr.ToString(); break;
+                    case "available": data.Available = sbr.ToString(); break;
+                    case "allowed": data.Allowed = sbr.ToString(); break;
                 }
             }
 
-            return new CharacterCommonData
-            {
-                Expire = expire,
-                Traits = traits,
-                Allowed = allowed,
-                Available = available,
-                Visible = visible
-            };
+            return data;
         }
+
         private static CharaterCommanderData ParseCommanderData(Bracket br)
         {
-            int skill = 1;
-            int attack = 1;
-            int defense = 1;
-            int supply = 1;
-            int planning = 1;
-            int maneuvering = 1;
-            int coordination = 1;
-            foreach (Var v in br.SubVars)
+            var data = new CharaterCommanderData();
+
+            foreach (var v in br.SubVars)
             {
                 switch (v.Name)
                 {
-                    case "skill":
-                        int.TryParse(v.Value.ToString(), out skill);
-                        break;
-                    case "attack_skill":
-                        int.TryParse(v.Value.ToString(), out attack);
-                        break;
-                    case "defense_skill":
-                        int.TryParse(v.Value.ToString(), out defense);
-                        break;
-                    case "logistics_skill":
-                        int.TryParse(v.Value.ToString(), out supply);
-                        break;
-                    case "planning_skill":
-                        int.TryParse(v.Value.ToString(), out planning);
-                        break;
-                    case "maneuvering_skill":
-                        int.TryParse(v.Value.ToString(), out maneuvering);
-                        break;
-                    case "coordination_skill":
-                        int.TryParse(v.Value.ToString(), out coordination);
-                        break;
+                    case "skill": data.Skill = v.Value.ToInt(); break;
+                    case "attack_skill": data.Attack = v.Value.ToInt(); break;
+                    case "defense_skill": data.Defense = v.Value.ToInt(); break;
+                    case "logistics_skill": data.Supply = v.Value.ToInt(); break;
+                    case "planning_skill": data.Planning = v.Value.ToInt(); break;
+                    case "maneuvering_skill": data.Maneuvering = v.Value.ToInt(); break;
+                    case "coordination_skill": data.Coordination = v.Value.ToInt(); break;
                 }
             }
-            return new CharaterCommanderData
-            {
-                Skill = skill,
-                Attack = attack,
-                Defense = defense,
-                Supply = supply,
-                Planning = planning,
-                Maneuvering = maneuvering,
-                Coordination = coordination
-            };
+
+            return data;
         }
-        class CharaterCommanderData
+
+        // Вспомогательные классы (лучше вынести в отдельные файлы позже)
+        private class CharaterCommanderData
         {
-            public int Skill { get; set; }
-            public int Attack { get; set; }
-            public int Defense { get; set; }
-            public int Supply { get; set; }
-            public int Planning { get; set; }
-            public int Maneuvering { get; set; }
-            public int Coordination { get; set; }
+            public int Skill { get; set; } = 1;
+            public int Attack { get; set; } = 1;
+            public int Defense { get; set; } = 1;
+            public int Supply { get; set; } = 1;
+            public int Planning { get; set; } = 1;
+            public int Maneuvering { get; set; } = 1;
+            public int Coordination { get; set; } = 1;
         }
-        class CharacterCommonData
+
+        private class CharacterCommonData
         {
-            public string Expire { get; set; }
-            public List<CharacterTraitConfig> Traits { get; set; }
-            public string Allowed { get; set; }
-            public string Available { get; set; }
-            public string Visible { get; set; }
+            public string Expire { get; set; } = DataDefaultValues.Null;
+            public List<CharacterTraitConfig> Traits { get; set; } = new();
+            public string Allowed { get; set; } = DataDefaultValues.Null;
+            public string Available { get; set; } = DataDefaultValues.Null;
+            public string Visible { get; set; } = DataDefaultValues.Null;
         }
     }
 }

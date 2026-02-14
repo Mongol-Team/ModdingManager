@@ -1,10 +1,13 @@
 ﻿using Application;
 using Application.Debugging;
+using Application.Extensions;
 using Application.Extentions;
+using Application.utils.Pathes;
 using Data;
 using ModdingManager.classes.utils;
 using Models.Args;
 using Models.Configs;
+using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
 using Models.Interfaces;
@@ -1431,7 +1434,7 @@ namespace ViewControls
                 // ─── Выбор существующего gfx ───────────────────────────────────
                 var combo = new SearchableComboBox
                 {
-                    ItemsSource = ModDataStorage.Mod?.Gfxes ?? new ObservableCollection<IGfx>(),
+                    ItemsSource = ModDataStorage.Mod?.Gfxes.FileEntitiesToList()?.ToObservableCollection() ?? new ObservableCollection<IGfx>(),
                     SelectedItem = currentGfx,
                     Name = "GfxesComboBox",               // или "Id", "DisplayName" — подставь своё
                     Width = 240,
@@ -1627,7 +1630,14 @@ namespace ViewControls
                     };
                     if (newGfx != null)
                     {
-                        ModDataStorage.Mod.Gfxes.Add(newGfx);
+                        GfxFile<IGfx> gfxFile = new GfxFile<IGfx>
+                        {
+                            FileFullPath = Path.Combine(ModPathes.InterfacePath, $"{name}.gfx"),
+                            IsOverride = false,
+                            Entities = new List<IGfx> { newGfx },
+                            IsCore = false
+                        };
+                        ModDataStorage.Mod.Gfxes.Add(gfxFile);
 
                         var oldSource = combo.ItemsSource;
                         combo.ItemsSource = null;

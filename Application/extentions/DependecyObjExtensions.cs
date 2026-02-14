@@ -1,12 +1,13 @@
 ﻿using System.Windows;
 using System.Windows.Media;
+using System.Collections.Generic;
 
 namespace Application.Extentions
 {
-    public static class DependecyObjExtensions
+    public static class DependencyObjExtensions
     {
         public static T FindChild<T>(this DependencyObject parent, string childName)
-    where T : DependencyObject
+            where T : DependencyObject
         {
             if (parent == null) return null;
 
@@ -25,7 +26,6 @@ namespace Application.Extentions
             return null;
         }
 
-        // Вспомогательный метод для поиска всех элементов указанного типа в визуальном дереве
         public static IEnumerable<T> FindVisualChildren<T>(this DependencyObject depObj)
             where T : DependencyObject
         {
@@ -34,17 +34,25 @@ namespace Application.Extentions
                 for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
                 {
                     DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T)
-                    {
+                    if (child is T)
                         yield return (T)child;
-                    }
 
                     foreach (T childOfChild in FindVisualChildren<T>(child))
-                    {
                         yield return childOfChild;
-                    }
                 }
             }
+        }
+
+        public static T FindAncestor<T>(this DependencyObject current)
+            where T : DependencyObject
+        {
+            while (current != null)
+            {
+                if (current is T ancestor)
+                    return ancestor;
+                current = VisualTreeHelper.GetParent(current);
+            }
+            return null;
         }
     }
 }

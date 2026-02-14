@@ -170,7 +170,7 @@ namespace View
                     {
                         continue;
                     }
-                    mods.Add(ModDataStorage.Mod.ModifierDefinitions.FindById(splited[0]), value);
+                    mods.Add(ModDataStorage.Mod.ModifierDefinitions.FileEntitiesToList().FindById(splited[0]), value);
                 }
                 return mods;
             }
@@ -225,7 +225,7 @@ namespace View
         {
             get
             {
-                return ModDataStorage.Mod.TechCategories
+                return ModDataStorage.Mod.TechCategories.FileEntitiesToList()
                 .Where(cat => CathegoryModdifierBox.GetRichTextBoxLines()
                     .Any(line => cat.Id.ToString() == line))
                 .ToList();

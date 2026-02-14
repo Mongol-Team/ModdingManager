@@ -1,8 +1,10 @@
-﻿using ModdingManager.classes.utils;
-
-using Application;
+﻿using Application;
 using Application.Debugging;
+using Application.Extentions;
+using Application.utils.Math;
+using ModdingManager.classes.utils;
 using Models.Args;
+using Models.Configs;
 using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
 using OpenCvSharp;
@@ -10,15 +12,14 @@ using OpenCvSharp.Extensions;
 using System.Globalization;
 using System.Text;
 using Path = System.IO.Path;
-using Models.Configs;
-using Application.utils.Math;
 
 
 public class StateWorkerHandler
 {
     public List<ProvinceConfig> ComputeProvinceShapes()
     {
-        using var mat = ModDataStorage.Mod.Map.Bitmap.ToMat();
+        // Явно указываем нужный метод расширения для преобразования Bitmap в Mat
+        using var mat = Application.Extentions.BitmapExtensions.ToMat(ModDataStorage.Mod.Map.Bitmap);
         if (mat.Empty())
             throw new InvalidOperationException("Не удалось загрузить provinces.bmp");
 
@@ -27,10 +28,10 @@ public class StateWorkerHandler
         int successCount = 0;
         var timer = System.Diagnostics.Stopwatch.StartNew();
 
-        int maxThreads = ParallelTheadCounter.CalculateMaxDegreeOfParallelism();
+        int maxThreads = ParallelTaskCounter.CalculateMaxDegreeOfParallelism();
         var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxThreads };
 
-        Parallel.ForEach(ModDataStorage.Mod.Map.Provinces, parallelOptions, province =>
+        Parallel.ForEach(ModDataStorage.Mod.Map.Provinces.FileEntitiesToList(), parallelOptions, province =>
         {
             try
             {
@@ -99,7 +100,7 @@ public class StateWorkerHandler
         Logger.AddDbgLog($"Успешно: {successCount} | Не удалось: {ModDataStorage.Mod.Map.Provinces.Count - successCount}");
         Logger.AddDbgLog("====================================\n");
 
-        return ModDataStorage.Mod.Map.Provinces;
+        return ModDataStorage.Mod.Map.Provinces.FileEntitiesToList();
     }
 
     public void ChangeState(StateConfig state, string oldName, string newName)

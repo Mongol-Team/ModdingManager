@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Application.Extentions;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,7 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Threading;
+using Path = System.IO.Path;
 
 namespace View.Controls
 {
@@ -21,7 +24,6 @@ namespace View.Controls
     /// </summary>
     public partial class DebugControl : UserControl
     {
-        private const int MAX_LINES = 1000; // Ограничиваем количество строк
         private bool _isInitialized = false;
 
         public DebugControl()
@@ -48,7 +50,7 @@ namespace View.Controls
                 var logs = Application.Debugging.Logger.GetBufferedLogs().ToList();
 
                 // Разбиваем на порции для постепенной загрузки
-                const int BATCH_SIZE = 50;
+                const int BATCH_SIZE = 150;
                 for (int i = 0; i < logs.Count; i += BATCH_SIZE)
                 {
                     var batch = logs.Skip(i).Take(BATCH_SIZE).ToList();
@@ -68,7 +70,7 @@ namespace View.Controls
                     // Маленькая задержка между порциями
                     if (i + BATCH_SIZE < logs.Count)
                     {
-                        await Task.Delay(10);
+                        await Task.Delay(1);
                     }
                 }
             }
@@ -106,12 +108,6 @@ namespace View.Controls
                 });
 
                 DebugBox.Document.Blocks.Add(paragraph);
-
-                // Ограничиваем количество строк
-                if (DebugBox.Document.Blocks.Count > MAX_LINES)
-                {
-                    DebugBox.Document.Blocks.Remove(DebugBox.Document.Blocks.FirstBlock);
-                }
             }
             catch (Exception ex)
             {
@@ -133,7 +129,30 @@ namespace View.Controls
             AddLogFast(message, color);
             ScrollToEndDelayed();
         }
+        public void SendToFile()
+        {
+            try
+            {
+                string projectRoot = AppDomain.CurrentDomain.BaseDirectory;
+                string logsFolder = Path.Combine(projectRoot, "Logs");
 
+                // Создаём папку, если её нет
+                Directory.CreateDirectory(logsFolder);
+
+                string fileName = $"debug_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt";
+                string filePath = Path.Combine(logsFolder, fileName);
+
+                // Получаем строки и объединяем через перевод строки
+                List<string> lines = DebugBox.GetRichTextBoxLines();
+                string logContent = string.Join(Environment.NewLine, lines);
+
+                File.WriteAllText(filePath, logContent);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка сохранения лога");
+            }
+        }
         private async void ScrollToEndDelayed()
         {
             // Небольшая задержка перед скроллом

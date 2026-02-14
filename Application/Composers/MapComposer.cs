@@ -1,5 +1,6 @@
 ﻿using Application.utils.Pathes;
 using Models.Configs;
+using Models.EntityFiles;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,19 +10,18 @@ using System.Threading.Tasks;
 
 namespace Application.Composers
 {
-    public class MapComposer : IComposer
+    public class MapComposer
     {
-        public MapComposer() { }
-        public static List<IConfig> Parse()
+        public static MapConfig Parse()
         {
-            List<StateConfig> stateConfigs = StateComposer.Parse().Cast<StateConfig>().ToList();
-            List<ProvinceConfig> provinceConfigs = ProvinceComposer.Parse().Cast<ProvinceConfig>().ToList();
-            List<StrategicRegionConfig> strategicRegionConfigs = SRegionComposer.Parse().Cast<StrategicRegionConfig>().ToList();
-            List<CountryConfig> countryConfigs = CountryComposer.Parse().Cast<CountryConfig>().ToList();
+            List<ConfigFile<StateConfig>> stateConfigs = StateComposer.Parse();
+            List<ConfigFile<ProvinceConfig>> provinceConfigs = ProvinceComposer.Parse();
+            List<ConfigFile<StrategicRegionConfig>> strategicRegionConfigs = SRegionComposer.Parse();
+            List<ConfigFile<CountryConfig>> countryConfigs = CountryComposer.Parse();
             string bmPath = "";
             if (File.Exists(ModPathes.ProvinceImagePath))
             {
-                bmPath = ModPathes.ProvinceImagePath;
+                bmPath = ModPathes.ProvinceImagePath;   
             }
             else if (File.Exists(GamePathes.ProvinceImagePath))
             {
@@ -40,7 +40,7 @@ namespace Application.Composers
                 Countries = countryConfigs,
                 Bitmap = new Bitmap(bmPath)
             };
-            return new List<IConfig> { mapConfig };
+            return mapConfig;
         }
     }
 }

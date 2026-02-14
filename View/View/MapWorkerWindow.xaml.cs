@@ -1,17 +1,19 @@
 ﻿using Application;
-using ViewControls;
-using ViewInterfaces;
-using ViewPresenters;
+using Application.Extensions;
+using Application.Extentions;
 using Models.Args;
+using Models.Configs;
 using Models.Types.Utils;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using ViewControls;
+using ViewInterfaces;
+using ViewPresenters;
 using Cursors = System.Windows.Input.Cursors;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-using Models.Configs;
 
 
 namespace View
@@ -139,7 +141,7 @@ namespace View
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon polygon && polygon.Tag is int provinceId)
             {
-                _draggedProvince = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == provinceId);
+                _draggedProvince = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().FirstOrDefault(p => p.Id.ToInt() == provinceId);
                 _dragStartPoint = e.GetPosition(Display);
             }
         }
@@ -161,7 +163,7 @@ namespace View
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is int targetProvinceId)
             {
-                var targetProvince = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
+                var targetProvince = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
 
                 switch (CurrentMapLayer)
                 {
@@ -265,7 +267,7 @@ namespace View
             switch (CurrentMapLayer)
             {
                 case "STATE":
-                    var state = ModDataStorage.Mod.Map.States
+                    var state = ModDataStorage.Mod.Map.States.FileEntitiesToList()
                         .FirstOrDefault(s => s.Provinces.Any(p => p.Id.ToInt() == targetProvinceId));
                     if (state != null)
                     {
@@ -274,7 +276,7 @@ namespace View
                     break;
 
                 case "PROVINCE":
-                    var province = ModDataStorage.Mod.Map.Provinces
+                    var province = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList()
                         .FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
                     if (province != null)
                     {
@@ -283,7 +285,7 @@ namespace View
                     break;
 
                 case "STRATEGIC":
-                    var region = ModDataStorage.Mod.Map.StrategicRegions
+                    var region = ModDataStorage.Mod.Map.StrategicRegions.FileEntitiesToList()
                         .FirstOrDefault(r => r.Provinces.Any(p => p.Id.ToInt() == targetProvinceId));
                     if (region != null)
                     {
@@ -292,7 +294,7 @@ namespace View
                     break;
 
                 case "COUNTRY":
-                    var country = ModDataStorage.Mod.Map.Countries
+                    var country = ModDataStorage.Mod.Map.Countries.FileEntitiesToList()
                         .FirstOrDefault(c => c.States.Any(s => s.Provinces.Any(p => p.Id.ToInt() == targetProvinceId)));
                     if (country != null)
                     {
@@ -324,17 +326,17 @@ namespace View
 
         private StateConfig GetStateForProvince(Identifier? provinceId)
         {
-            return ModDataStorage.Mod.Map.States?.FirstOrDefault(s =>
+            return ModDataStorage.Mod.Map.States?.FileEntitiesToList().FirstOrDefault(s =>
                 s.Provinces?.Any(p => p.Id == provinceId) == true);
         }
         private StrategicRegionConfig GetRegionForProvince(Identifier? provinceId)
         {
-            return ModDataStorage.Mod.Map.StrategicRegions?.FirstOrDefault(s =>
+            return ModDataStorage.Mod.Map.StrategicRegions?.FileEntitiesToList().FirstOrDefault(s =>
                 s.Provinces?.Any(p => p.Id == provinceId) == true);
         }
         private CountryConfig GetCountryForState(Identifier? stateId)
         {
-            return ModDataStorage.Mod.Countries?.FirstOrDefault(c =>
+            return ModDataStorage.Mod.Countries?.FileEntitiesToList().FirstOrDefault(c =>
                 c.States?.Any(s => s.Id == stateId) == true);
         }
 

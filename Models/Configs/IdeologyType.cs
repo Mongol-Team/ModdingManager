@@ -9,7 +9,6 @@ namespace Models.Configs
     {
         public string Parrent { get; set; }
         public bool CanBeRandomlySelected { get; set; }
-        public string Name { get; set; }
         public Color Color { get; set; }
         public bool IsCore { get; set; }
         public bool IsOverride { get; set; }
@@ -20,7 +19,7 @@ namespace Models.Configs
 
         public override string ToString()
         {
-            return Name;
+            return Id.ToString();
         }
     }
 }

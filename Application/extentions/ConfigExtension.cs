@@ -1,4 +1,5 @@
-﻿using Models.Configs;
+﻿using Application.Extensions;
+using Models.Configs;
 using Models.Interfaces;
 using System.Collections.ObjectModel;
 
@@ -61,7 +62,7 @@ namespace Application.Extentions
 
         public static TechTreeConfig GetTechTree(this ModConfig mod, string id)
         {
-            return mod.TechTreeLedgers.FirstOrDefault(t => t.Id.ToString() == id);
+            return mod.TechTreeLedgers.FileEntitiesToList()?.FirstOrDefault(t => t.Id.ToString() == id);
         }
         public static TechTreeItemConfig GetTreeItem(this TechTreeConfig config, string id)
         {
@@ -106,29 +107,29 @@ namespace Application.Extentions
         #region ModCfgMethods
         public static CountryConfig GetCountry(this ModConfig mod, string id)
         {
-            return mod.Countries.FirstOrDefault(c => c.Id.ToString() == id);
+            return mod.Countries.FileEntitiesToList()?.FirstOrDefault(c => c.Id.ToString() == id);
         }
         public static IdeaConfig GetIdea(this ModConfig mod, string id)
         {
-            return mod.Ideas.FirstOrDefault(i => i.Id.ToString() == id);
+            return mod.Ideas.FileEntitiesToList()?.FirstOrDefault(i => i.Id.ToString() == id);
         }
         public static IModifier GetModifier(this ModConfig mod, string id)
         {
-            StaticModifierConfig st = mod.StaticModifiers.FirstOrDefault(s => s.Id.ToString() == id);
+            StaticModifierConfig st = mod.StaticModifiers.FileEntitiesToList()?.FirstOrDefault(s => s.Id.ToString() == id);
             if (st != null) return st;
-            OpinionModifierConfig op = mod.OpinionModifiers.FirstOrDefault(o => o.Id.ToString() == id);
+            OpinionModifierConfig op = mod.OpinionModifiers.FileEntitiesToList()?.FirstOrDefault(o => o.Id.ToString() == id);
             if (op != null) return op;
-            DynamicModifierConfig dm = mod.DynamicModifiers.FirstOrDefault(d => d.Id.ToString() == id);
+            DynamicModifierConfig dm = mod.DynamicModifiers.FileEntitiesToList()?.FirstOrDefault(d => d.Id.ToString() == id);
             if (dm != null) return dm;
             return null;
         }
         public static StateConfig GetState(this ModConfig mod, int id)
         {
-            return mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == id);
+            return mod.Map.States.FileEntitiesToList()?.FirstOrDefault(s => s.Id.ToInt() == id);
         }
         public static IdeologyConfig GetIdeology(this ModConfig mod, string id)
         {
-            return mod.Ideologies.FirstOrDefault();
+            return mod.Ideologies.FileEntitiesToList().FirstOrDefault();
         }
         #endregion
     }

@@ -1,4 +1,9 @@
-﻿namespace Application.Extentions
+﻿using Models.Configs;
+using Models.EntityFiles;
+using Models.Interfaces;
+using System.Collections.ObjectModel;
+
+namespace Application.Extentions
 {
     public static class ListExtensions
     {
@@ -96,7 +101,37 @@
                     collection.Add(item);
             }
         }
+        public static T? SearchConfigInFile<T>(
+           this List<ConfigFile<T>> configs,
+           string id) where T : IConfig
+        {
+            return configs
+                .SelectMany(cf => cf.Entities)
+                .FirstOrDefault(e => e.Id.ToString() == id);
+        }
+        public static T? SearchConfigInFile<T>(
+            this List<GfxFile<T>> configs,
+            string id) where T : IGfx
+        {
+            return configs
+                .SelectMany(cf => cf.Entities)
+                .FirstOrDefault(e => e.Id.ToString() == id);
+        }
+        public static List<T> FileEntitiesToList<T>(
+    this List<ConfigFile<T>> configs) where T : IConfig
+        {
+            return configs
+                .SelectMany(cf => cf.Entities)
+                .ToList();
+        }
 
+        public static List<T> FileEntitiesToList<T>(
+    this List<GfxFile<T>> configs) where T : IGfx
+        {
+            return configs
+                .SelectMany(cf => cf.Entities)
+                .ToList();
+        }
         public static T Random<T>(this List<T> list)
         {
             if (list == null || list.Count == 0)

@@ -62,10 +62,22 @@ namespace View
                     grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
                     var titleBar = new WindowTitleBar();
+                    Button saveToFileBtn = new Button
+                    {
+                        Content = "Сорханить в файл",
+                        Name = "CloseButton"
+                    };
+                   
+
                     Grid.SetRow(titleBar, 0);
                     grid.Children.Add(titleBar);
 
                     var debugControl = new DebugControl();
+                    saveToFileBtn.Click += (s, e) =>
+                    {
+                        debugControl.SendToFile();
+                    };
+                    titleBar.AddButton(saveToFileBtn, PanelSide.Left);
                     Grid.SetRow(debugControl, 1);
                     grid.Children.Add(debugControl);
 
@@ -126,6 +138,11 @@ namespace View
                     _fileExplorerControl.ItemSelected += FileExplorerControl_ItemSelected;
                 }
             }
+        }
+
+        private void SaveToFileBtn_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private DockPanelInfo FindPanelWithTitle(string title)

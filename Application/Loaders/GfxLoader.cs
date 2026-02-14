@@ -1,7 +1,9 @@
 ﻿using Application.Debugging;
 using Application.Extentions;
 using Application.Settings;
+using Application.utils.Math;
 using Application.utils.Pathes;
+using Models.EntityFiles;
 using Models.GfxTypes;
 using Models.Interfaces;
 using Models.Types.ObjectCacheData;
@@ -9,92 +11,126 @@ using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Drawing;
-using DDF = Data.DataDefaultValues;
 using System.Windows;
-using Application.utils.Math;
+using DDF = Data.DataDefaultValues;
 namespace Application.Loaders
 {
     public static class GfxLoader
     {
-        public static List<IGfx> LoadAll()
+        public static List<GfxFile<IGfx>> LoadAll()
         {
-            string[] possiblePaths = {
+            var stopwatch = Stopwatch.StartNew();
+            var gfxFiles = new List<GfxFile<IGfx>>();
+
+            string[] possiblePaths =
+            {
                 GamePathes.InterfacePath,
-                ModPathes.InterfacePath,
+                ModPathes.InterfacePath
             };
-            ConcurrentDictionary<string, IGfx> gfxDictionary = new();
+
+            ConcurrentDictionary<string, IGfx> gfxDictionary = new(); // для отслеживания уникальности по id
             int totalLoaded = 0;
 
-            int maxDegreeOfParallelism = ParallelTheadCounter.CalculateMaxDegreeOfParallelism();
+            int maxDegreeOfParallelism = ParallelTaskCounter.CalculateMaxDegreeOfParallelism();
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism };
 
             foreach (string path in possiblePaths)
             {
-                if (System.IO.Directory.Exists(path))
-                {
-                    var files = System.IO.Directory.GetFiles(path, "*.gfx", System.IO.SearchOption.AllDirectories);
+                if (!Directory.Exists(path)) continue;
 
-                    Parallel.ForEach(files, parallelOptions, file =>
+                string[] files = Directory.GetFiles(path, "*.gfx", SearchOption.AllDirectories);
+                Parallel.ForEach(files, parallelOptions, file =>
+                {
+                    try
                     {
-                        try
+                        var configFile = LoadFromFile(file, path.StartsWith(ModPathes.InterfacePath));
+
+                        if (configFile.Entities.Any())
                         {
-                            var gfxs = LoadFromFile(file);
-                            foreach (var gfx in gfxs)
+                            lock (gfxFiles)
                             {
-                                if (gfx != null && gfx.Id != null)
+                                gfxFiles.Add(configFile);
+                            }
+
+                            foreach (var gfx in configFile.Entities)
+                            {
+                                if (gfx == null || gfx.Id == null) continue;
+
+                                string idKey = gfx.Id.ToString().ToLower();
+                                bool wasAdded = gfxDictionary.TryAdd(idKey, gfx);
+                                if (!wasAdded)
                                 {
-                                    string idKey = gfx.Id.ToString().ToLower();
-                                    bool wasAdded = gfxDictionary.TryAdd(idKey, gfx);
-                                    if (!wasAdded)
-                                    {
-                                        Logger.AddDbgLog($"Overriding GFX with ID '{idKey}' from path: {path}");
-                                        gfxDictionary[idKey] = gfx;
-                                    }
-                                    else
-                                    {
-                                        Logger.AddDbgLog($"Adding new GFX with ID '{idKey}' from path: {path}");
-                                    }
-                                    Interlocked.Increment(ref totalLoaded);
+                                    Logger.AddDbgLog($"Переопределение GFX с ID '{idKey}' из файла: {Path.GetFileName(file)}");
+                                    gfxDictionary[idKey] = gfx; // мод переопределяет
                                 }
+                                else
+                                {
+                                    Logger.AddDbgLog($"Добавлен новый GFX с ID '{idKey}' из файла: {Path.GetFileName(file)}");
+                                }
+
+                                Interlocked.Increment(ref totalLoaded);
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            Logger.AddDbgLog($"Error loading GFX file '{file}': {ex.Message}");
-                        }
-                    });
-                }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.AddDbgLog($"Ошибка загрузки GFX-файла '{file}': {ex.Message}");
+                    }
+                });
             }
 
-            Logger.AddLog($"Loaded {gfxDictionary.Count} unique GFX items (total processed: {totalLoaded}), with mod priority overrides applied.");
-            return gfxDictionary.Values.ToList();
+            stopwatch.Stop();
+            Logger.AddLog($"Загрузка GFX завершена. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {gfxFiles.Count}, уникальных GFX: {gfxDictionary.Count}, обработано всего: {totalLoaded}");
+
+            return gfxFiles;
         }
-        public static List<IGfx> LoadFromFile(string gfxFilePath)
+
+        /// <summary>
+        /// Парсит один .gfx файл и возвращает его как ConfigFile<IGfx>
+        /// </summary>
+        public static GfxFile<IGfx> LoadFromFile(string gfxFilePath, bool isOverride)
         {
-            HoiFuncFile fcfile = new();
+            var configFile = new GfxFile<IGfx>
+            {
+                FileFullPath = gfxFilePath,
+                IsOverride = isOverride
+            };
+
+            HoiFuncFile funcFile;
             try
             {
                 var parser = new TxtParser(new TxtPattern());
-                fcfile = new TxtParser(new TxtPattern()).Parse(gfxFilePath) as HoiFuncFile;
-                ModDataStorage.TxtErrors.AddRangeSafe(parser.healer.Errors);
+                funcFile = parser.Parse(gfxFilePath) as HoiFuncFile;
+
+                if (parser.healer?.Errors?.Any() == true)
+                {
+                    ModDataStorage.TxtErrors.AddRangeSafe(parser.healer.Errors);
+                }
             }
             catch (Exception ex)
             {
-                
+                Logger.AddDbgLog($"Не удалось распарсить GFX-файл {gfxFilePath}: {ex.Message}");
+                return configFile;
             }
-            List<IGfx> result = new();
-            if (new TxtParser(new TxtPattern()).Parse(gfxFilePath) is not HoiFuncFile funcFile) return result;
-            if (fcfile.Brackets.Count == 0) return result;
-            foreach (Bracket defineBr in fcfile.Brackets)
+
+            if (funcFile == null || funcFile.Brackets.Count == 0)
+            {
+                Logger.AddDbgLog($"Файл {gfxFilePath} пуст или не содержит блоков");
+                return configFile;
+            }
+
+            foreach (Bracket defineBr in funcFile.Brackets)
             {
                 if (defineBr.Name == "spriteTypes")
                 {
                     foreach (Bracket spriteBr in defineBr.SubBrackets)
                     {
                         IGfx gfx = ParseSingleSpriteGfx(spriteBr);
-
-                        result.AddSafe(gfx);
+                        if (gfx != null)
+                            configFile.Entities.Add(gfx);
                     }
                 }
                 else if (defineBr.Name == "objectTypes")
@@ -102,12 +138,13 @@ namespace Application.Loaders
                     foreach (Bracket spriteBr in defineBr.SubBrackets)
                     {
                         IGfx gfx = ParseSingleObjGfx(spriteBr);
-
-                        result.AddSafe(gfx);
+                        if (gfx != null)
+                            configFile.Entities.Add(gfx);
                     }
                 }
             }
-            return result;
+
+            return configFile;
         }
         public static IGfx? ParseSingleSpriteGfx(Bracket gfxBracket)
         {

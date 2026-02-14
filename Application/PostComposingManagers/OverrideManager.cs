@@ -15,7 +15,7 @@ public static class OverrideManager
 {
     public static void HandleOverride()
     {
-        int maxDegree = ParallelTheadCounter.CalculateMaxDegreeOfParallelism();
+        int maxDegree = ParallelTaskCounter.CalculateMaxDegreeOfParallelism();
         var modType = typeof(ModConfig);
         var listProperties = modType.GetProperties()
       .Where(p => p.PropertyType.IsGenericType &&

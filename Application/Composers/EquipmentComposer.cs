@@ -1,98 +1,134 @@
 ﻿using Application.Debugging;
+using Application.Extensions;
+using Application.extentions;
 using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
 using Models.Configs;
+using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
+using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace Application.Composers
 {
-    public class EquipmentComposer : IComposer
+    public class EquipmentComposer
     {
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы снаряжения и возвращает список файлов (ConfigFile<EquipmentConfig>)
+        /// </summary>
+        public static List<ConfigFile<EquipmentConfig>> Parse()
         {
-            List<IConfig> configs = new();
+            var stopwatch = Stopwatch.StartNew();
+            var equipmentFiles = new List<ConfigFile<EquipmentConfig>>();
+
             string[] possiblePathes =
             {
                 ModPathes.EquipmentsPath,
                 GamePathes.EquipmentsPath
             };
+
             foreach (string path in possiblePathes)
             {
-                string[] files = Directory.GetFiles(path);
+                if (!Directory.Exists(path)) continue;
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
                 foreach (string file in files)
                 {
-                    if (File.Exists(file))
+                    string content = File.ReadAllText(file);
+                    HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                    bool isOverride = path.StartsWith(ModPathes.EquipmentsPath);
+
+                    var configFile = ParseFile(hoiFuncFile, file, isOverride);
+
+                    if (configFile.Entities.Any())
                     {
-                        string fileContent = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
-                        List<IConfig> equipmentConfigs = ParseFile(hoiFuncFile);
-                        foreach (EquipmentConfig equipmentConfig in equipmentConfigs)
-                        {
-                            equipmentConfig.FileFullPath = file;
-                            if (!configs.Any(c => c.Id == equipmentConfig.Id))
-                            {
-                                configs.Add(equipmentConfig);
-                            }
-                        }
+                        equipmentFiles.Add(configFile);
+                        Logger.AddDbgLog($"Добавлен файл снаряжения: {configFile.FileName} → {configFile.Entities.Count} единиц");
                     }
                 }
             }
-            return configs;
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг снаряжения завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {equipmentFiles.Count}, единиц всего: {equipmentFiles.Sum(f => f.Entities.Count)}");
+
+            return equipmentFiles;
         }
 
-        public static List<IConfig> ParseFile(HoiFuncFile hoiFuncFile)
+        private static ConfigFile<EquipmentConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
-            List<IConfig> configs = new();
-            foreach (var bracket in hoiFuncFile.Brackets.Where(b => b.Name == "equipments"))
+            var configFile = new ConfigFile<EquipmentConfig>
             {
-                foreach(Bracket br in bracket.SubBrackets)
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (Bracket equipmentsBr in hoiFuncFile.Brackets.Where(b => b.Name == "equipments"))
+            {
+                foreach (Bracket br in equipmentsBr.SubBrackets)
                 {
-                    EquipmentConfig config = new EquipmentConfig();
-                    config.Id = new(br.Name);
-                    foreach (Bracket b in br.SubBrackets)
+                    var config = new EquipmentConfig
                     {
-                        switch (b.Name)
+                        Id = new Identifier(br.Name),
+                        FileFullPath = fileFullPath,
+                        IsOverride = isOverride
+                    };
+
+                    // Подблоки
+                    foreach (Bracket subBr in br.SubBrackets)
+                    {
+                        switch (subBr.Name)
                         {
                             case "resources":
-                                foreach (Var v in b.SubVars)
+                                foreach (Var v in subBr.SubVars)
                                 {
-                                    ResourceConfig? res = ModDataStorage.Mod.Resources.FirstOrDefault(r => r.Id.ToString() == v.Name);
-                                    if (res != null)
+                                    var resource = ModDataStorage.Mod.Resources.SearchConfigInFile(v.Name);
+                                    if (resource != null)
                                     {
-                                        config.Cost.AddSafe(res, v.Value.ToInt());
+                                        config.Cost.AddSafe(resource, v.Value.ToInt());
                                     }
                                     else
                                     {
-                                        Logger.AddDbgLog($"Неверное имя ресурса в стоимости снаряжения {br.Name}, в {hoiFuncFile.FileFullPath}");
+                                        Logger.AddDbgLog($"Неверное имя ресурса в стоимости {br.Name}: {v.Name} (файл: {fileFullPath})");
                                     }
                                 }
                                 break;
-                            case "can_be_produced":
-                                config.CanBeProduced = b.ToString(); //todo: raw trigger data
-                                break;
 
-                        }
-                    }
-                    foreach (HoiArray a in br.Arrays)
-                    {
-                        switch (a.Name)
-                        {
-                            case "type":
-                                foreach (var item in a.Values)
-                                {
-                                    config.Type.AddSafe(Enum.Parse<IternalUnitType>(item.ToString().SnakeToPascal()));
-                                }
+                            case "can_be_produced":
+                                config.CanBeProduced = subBr.ToString(); // todo: raw trigger data
                                 break;
                         }
                     }
+
+                    // Массивы
+                    foreach (HoiArray arr in br.Arrays)
+                    {
+                        if (arr.Name == "type")
+                        {
+                            foreach (var item in arr.Values)
+                            {
+                                if (Enum.TryParse<IternalUnitType>(item.ToString().SnakeToPascal(), out var unitType))
+                                {
+                                    config.Type.AddSafe(unitType);
+                                }
+                            }
+                        }
+                    }
+
+                    // Переменные
                     foreach (Var v in br.SubVars)
                     {
                         switch (v.Name)
@@ -100,40 +136,55 @@ namespace Application.Composers
                             case "year":
                                 config.Year = v.Value.ToInt();
                                 break;
+
                             case "is_archetype":
                                 config.IsArchetype = v.Value.ToBool();
                                 break;
+
                             case "is_buildable":
                                 config.IsBuidable = v.Value.ToBool();
                                 break;
+
                             case "is_active":
                                 config.IsActive = v.Value.ToBool();
                                 break;
-                            case "type":
-                                config.Type.AddSafe(Enum.Parse<IternalUnitType>(v.Value.ToString().SnakeToPascal()));
-                                break;
-                            case "picture":
-                                config.Gfx = ModDataStorage.Mod.Gfxes.FirstOrDefault(g =>
-                                    g.Id.ToString() == (
-                                        v.Value != null
-                                            ? $"GFX_{v.Value.ToString()}_medium"
-                                            : $"GFX_{v.Value?.ToString() ?? "_small"}"
-                                    )
-                                );
-                                break;
-                            case "archetype":
-                                config.Archetype = ModDataStorage.Mod.Equipments.FirstOrDefault(e => e.Id.ToString() == v.Value.ToString()) ?? configs.FirstOrDefault(e => e.Id.ToString() == v.Value.ToString()) as EquipmentConfig;
-                                break;
-                            case "interface_category":
-                                config.InterfaceType = Enum.Parse<EquipmentInterfaceCategory>(v.Value.ToString().SnakeToPascal());
-                                break;//todo: snake case to pascal case
 
+                            case "type":
+                                if (Enum.TryParse<IternalUnitType>(v.Value.ToString().SnakeToPascal(), out var t))
+                                {
+                                    config.Type.AddSafe(t);
+                                }
+                                break;
+
+                            case "picture":
+                                string gfxName = v.Value != null
+                                    ? $"GFX_{v.Value}_medium"
+                                    : $"GFX_{v.Value?.ToString() ?? "_small"}";
+
+                                config.Gfx = ModDataStorage.Mod.Gfxes.SearchConfigInFile(gfxName);
+                                break;
+
+                            case "archetype":
+                                config.Archetype = ModDataStorage.Mod.Equipments.SearchConfigInFile(v.Value?.ToString());
+                                break;
+
+                            case "interface_category":
+                                if (Enum.TryParse<EquipmentInterfaceCategory>(v.Value.ToString().SnakeToPascal(), out var cat))
+                                {
+                                    config.InterfaceType = cat;
+                                }
+                                break;
                         }
                     }
-                    configs.Add(config);
+
+                    configFile.Entities.Add(config);
+                    Logger.AddDbgLog($"  → добавлено снаряжение: {config.Id}");
                 }
             }
-            return configs;
+
+            return configFile;
         }
+
+     
     }
 }

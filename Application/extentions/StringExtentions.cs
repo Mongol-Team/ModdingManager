@@ -31,7 +31,7 @@ namespace Application.Extentions
             var pascal = input.SnakeToPascal();
             return char.ToLowerInvariant(pascal[0]) + pascal.Substring(1);
         }
-
+        public static TEnum ToEnum<TEnum>(this string value, TEnum defaultValue) where TEnum : struct, Enum { if (string.IsNullOrWhiteSpace(value)) return defaultValue; return Enum.TryParse<TEnum>(value, true, out var result) ? result : defaultValue; }
         public static string CamelToSnake(this string input)
         {
             var sb = new StringBuilder();

@@ -1,291 +1,347 @@
 ﻿using Application.Debugging;
+using Application.Extensions;
+using Application.extentions;
 using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
+using Data;
 using Models.Configs;
+using Models.EntityFiles;
 using Models.Enums;
-using Models.Types.ObectCacheData;
+using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Application.Composers
 {
-    public class CharacterTraitComposer : IComposer
+    public class CharacterTraitComposer 
     {
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы с лидер-трайтами и возвращает список файлов (ConfigFile<CharacterTraitConfig>)
+        /// </summary>
+        public static List<ConfigFile<CharacterTraitConfig>> Parse()
         {
-            List<IConfig> configs = new();
+            var stopwatch = Stopwatch.StartNew();
+            var traitFiles = new List<ConfigFile<CharacterTraitConfig>>();
+
             string[] possiblePathes =
             {
                 ModPathes.TraitsPath,
                 GamePathes.TraitsPath
             };
+
             foreach (string path in possiblePathes)
             {
-                string[] files = Directory.GetFiles(path);
+                if (!Directory.Exists(path)) continue;
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
                 foreach (string file in files)
                 {
-                    if (File.Exists(file))
+                    string fileContent = File.ReadAllText(file);
+                    HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
+
+                    bool isOverride = path.StartsWith(ModPathes.TraitsPath); // или более точная логика
+
+                    var configFile = ParseFile(hoiFuncFile, file, isOverride);
+
+                    if (configFile.Entities.Any())
                     {
-                        string fileContent = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
-                        List<CharacterTraitConfig> traitConfigs = ParseFile(hoiFuncFile);
-                        foreach (CharacterTraitConfig traitConfig in traitConfigs)
-                        {
-                            traitConfig.FileFullPath = file;
-                            if (!configs.Any(c => c.Id.ToString() == traitConfig.Id.ToString()))
-                            {
-                                configs.Add(traitConfig);
-                            }
-                        }
+                        traitFiles.Add(configFile);
+                        Logger.AddDbgLog($"Добавлен файл трейтов: {configFile.FileName} ({configFile.Entities.Count} трейтов)");
                     }
                 }
             }
-            return configs;
+
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг лидер-трейтов завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {traitFiles.Count}, трейтов всего: {traitFiles.Sum(f => f.Entities.Count)}");
+
+            return traitFiles;
         }
 
-        public static List<CharacterTraitConfig> ParseFile(HoiFuncFile file)
+        private static ConfigFile<CharacterTraitConfig> ParseFile(HoiFuncFile file, string fileFullPath, bool isOverride)
         {
-            List<CharacterTraitConfig> traitConfigs = new();
-            foreach (Bracket bracket in file.Brackets)
+            var configFile = new ConfigFile<CharacterTraitConfig>
+            {
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (var bracket in file.Brackets)
             {
                 if (bracket.Name == "leader_traits")
                 {
-                    foreach (Bracket traitBracket in bracket.SubBrackets)
+                    foreach (var traitBracket in bracket.SubBrackets)
                     {
-                        CharacterTraitConfig traitConfig = (CharacterTraitConfig)ParseObject(traitBracket);
-                        traitConfigs.Add(traitConfig);
+                        var traitConfig = ParseTraitObject(traitBracket, fileFullPath, isOverride);
+                        if (traitConfig != null)
+                        {
+                            configFile.Entities.Add(traitConfig);
+                            Logger.AddDbgLog($"  → добавлен трейт: {traitConfig.Id}");
+                        }
                     }
                 }
                 else
                 {
-                    Logger.AddLog($"Unknown braket found: {bracket.Name} when trait parsing {file.FileFullPath}.");
+                    Logger.AddLog($"Неизвестный блок при парсинге трейтов: {bracket.Name} в файле {fileFullPath}");
                 }
             }
 
-            return traitConfigs;
+            return configFile;
         }
-        public static IConfig ParseObject(Bracket bracket)
-        {
-            CharacterTraitConfig characterTrait = new();
 
-            characterTrait.Id = new(bracket.Name);
-            foreach (Var var in bracket.SubVars)
+        private static CharacterTraitConfig ParseTraitObject(Bracket bracket, string fileFullPath, bool isOverride)
+        {
+            var trait = new CharacterTraitConfig
             {
-                switch (var.Name)
+                Id = new Identifier(bracket.Name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (var v in bracket.SubVars)
+            {
+                switch (v.Name)
                 {
                     case "random":
-                        characterTrait.Random = var.Value.ToString().ToLower() == "yes";
+                        trait.Random = v.Value.ToString().ToLower() == "yes";
                         break;
-                    case "sprite":
-                        characterTrait.Sprite = var.Value.ToInt();
-                        break;
-                    case "trait_type":
-                        Enum.TryParse<TraitType>(var.Value?.ToString().SnakeToPascal(), out var traitType);
-                        characterTrait.TraitType = traitType;
-                        break;
-                    case "show_in_combat":
-                        characterTrait.ShowInCombat =  var.Value.ToBool();
-                        break;
-                    case "slot":
-                        characterTrait.CharacterSlot = ModDataStorage.Mod.IdeaSlots.FirstOrDefault(isl => isl.Id.ToString() == var.Value.ToString());
-                        break;
-                    case "specialist_advisor_trait":
-                        characterTrait.SpecialistAdvisorTrait = ModDataStorage.Mod.CharacterTraits.FirstOrDefault(ct => ct.Id.ToString() == var.Value.ToString());
-                        break;
-                    case "expert_advisor_trait":
-                        characterTrait.ExpertAdvisorTrait = ModDataStorage.Mod.CharacterTraits.FirstOrDefault(ct => ct.Id.ToString() == var.Value.ToString());
-                        break;
-                    case "genius_advisor_trait":
-                        characterTrait.GeniusAdvisorTrait = ModDataStorage.Mod.CharacterTraits.FirstOrDefault(ct => ct.Id.ToString() == var.Value.ToString());
-                        break;
-                    case "enable_ability":
-                        //todo: implement ability handling
-                        break;
-                    case "mutually_exclusive":
-                        characterTrait.MutuallyExclusives = new List<CharacterTraitConfig>();
-                        characterTrait.MutuallyExclusives.AddRange(var.Value.ToString().Split(',').Select(me => ModDataStorage.Mod.CharacterTraits.FirstOrDefault(ct => ct.Id.ToString() == me.Trim())));
-                        break;
-                    case "parent":
-                        characterTrait.Parents = new List<CharacterTraitConfig>();
-                        characterTrait.Parents.AddRange(var.Value.ToString().Split(',').Select(p => ModDataStorage.Mod.CharacterTraits.FirstOrDefault(ct => ct.Id.ToString() == p.Trim())));
-                        break;
-                    case "num_parents_needed":
-                        characterTrait.NumParentsRequired = var.Value.ToInt();
-                        break;
-                    case "gui_row":
-                        characterTrait.GuiRow = var.Value.ToInt();
-                        break;
-                    case "gui_column":
-                        characterTrait.GuiColumn = var.Value.ToInt();
-                        break;
-                    case "cost":
-                        characterTrait.Cost = var.Value.ToDouble();
-                        break;
-                    case "gain_xp_on_spotting":
-                        characterTrait.GainXpOnSpotting = var.Value.ToDouble();
-                        break;
-                    default:
-                        ModifierDefinitionConfig modifierDefinitionConfig = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
-                        if (modifierDefinitionConfig != null)
-                        {
-                            characterTrait.Modifiers.Add(modifierDefinitionConfig, var.Value);
-                        }
-                        else if (var.Name.EndsWith("skill"))
-                        {
-                            switch (var.Name)
-                            {
-                                case "skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Skill, var.Value.ToInt());
-                                    break;
-                                case "attack_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Attack, var.Value.ToInt());
-                                    break;
-                                case "defense_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Defense, var.Value.ToInt());
-                                    break;
-                                case "planning_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Planning, var.Value.ToInt());
-                                    break;
-                                case "logistics_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Logistics, var.Value.ToInt());
-                                    break;
-                                case "maneuvering_skill":
-                                    characterTrait.SkillTypes.Add(CharacterSkillType.Maneuvering, var.Value.ToInt());
-                                    break;
 
+                    case "sprite":
+                        trait.Sprite = v.Value.ToInt();
+                        break;
+
+                    case "trait_type":
+                        trait.TraitType = v.Value.ToString().SnakeToPascal().ToEnum<TraitType>(default);
+                        break;
+
+                    case "show_in_combat":
+                        trait.ShowInCombat = v.Value.ToBool();
+                        break;
+
+                    case "slot":
+                        trait.CharacterSlot = ModDataStorage.Mod.IdeaSlots.SearchConfigInFile(v.Value?.ToString());
+                        break;
+
+                    case "specialist_advisor_trait":
+                        trait.SpecialistAdvisorTrait = ModDataStorage.Mod.CharacterTraits.SearchConfigInFile(v.Value?.ToString());
+                        break;
+
+                    case "expert_advisor_trait":
+                        trait.ExpertAdvisorTrait = ModDataStorage.Mod.CharacterTraits.SearchConfigInFile(v.Value?.ToString());
+                        break;
+
+                    case "genius_advisor_trait":
+                        trait.GeniusAdvisorTrait = ModDataStorage.Mod.CharacterTraits.SearchConfigInFile(v.Value?.ToString());
+                        break;
+
+                    case "enable_ability":
+                        // TODO: реализация обработки ability
+                        break;
+
+                    case "mutually_exclusive":
+                        trait.MutuallyExclusives = v.Value.ToString()
+                            .Split(',')
+                            .Select(me => ModDataStorage.Mod.CharacterTraits.SearchConfigInFile(me.Trim()))
+                            .Where(t => t != null)
+                            .ToList();
+                        break;
+
+                    case "parent":
+                        trait.Parents = v.Value.ToString()
+                            .Split(',')
+                            .Select(p => ModDataStorage.Mod.CharacterTraits.SearchConfigInFile(p.Trim()))
+                            .Where(t => t != null)
+                            .ToList();
+                        break;
+
+                    case "num_parents_needed":
+                        trait.NumParentsRequired = v.Value.ToInt();
+                        break;
+
+                    case "gui_row":
+                        trait.GuiRow = v.Value.ToInt();
+                        break;
+
+                    case "gui_column":
+                        trait.GuiColumn = v.Value.ToInt();
+                        break;
+
+                    case "cost":
+                        trait.Cost = v.Value.ToDouble();
+                        break;
+
+                    case "gain_xp_on_spotting":
+                        trait.GainXpOnSpotting = v.Value.ToDouble();
+                        break;
+
+                    default:
+                        // Пытаемся найти модификатор
+                        var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(v.Name);
+                        if (modDef != null)
+                        {
+                            trait.Modifiers.Add(modDef, v.Value);
+                        }
+                        // Или skill
+                        else if (v.Name.EndsWith("skill"))
+                        {
+                            var skillType = v.Name switch
+                            {
+                                "skill" => CharacterSkillType.Skill,
+                                "attack_skill" => CharacterSkillType.Attack,
+                                "defense_skill" => CharacterSkillType.Defense,
+                                "planning_skill" => CharacterSkillType.Planning,
+                                "logistics_skill" => CharacterSkillType.Logistics,
+                                "maneuvering_skill" => CharacterSkillType.Maneuvering,
+                                _ => default
+                            };
+                            if (skillType != default)
+                            {
+                                trait.SkillTypes.Add(skillType, v.Value.ToInt());
                             }
                         }
                         else
                         {
-                            Logger.AddLog($"Unknown var found: {var.Name} when trait parsing {bracket.Name}.");
+                            Logger.AddDbgLog($"Неизвестная переменная при парсинге трейта {bracket.Name}: {v.Name}");
                         }
-
                         break;
-
                 }
             }
-            foreach (Bracket br in bracket.SubBrackets)
+
+            foreach (var br in bracket.SubBrackets)
             {
                 switch (br.Name)
                 {
                     case "allowed":
-                        characterTrait.Allowed = br.ToString(); //todo: implement triggers parsing
-                        break;
-                    case "ai_will_do":
-                        characterTrait.AiWillDo = br.ToString(); //todo: implement ai will do type handling, check https://hoi4.paradoxwikis.com/AI_modding#AI_will_do
-                        break;
-                    case "unit_type":
-                        foreach (Var var in br.SubVars)
-                        {
-                            if (var.Name != "type")
-                            {
-                                Logger.AddLog($"Unknown var found: {var.Name} when unit_type parsing {bracket.Name}.");
-                                continue;
-                            }
-                            SubUnitConfig regiment = ModDataStorage.Mod.SubUnits.FirstOrDefault(r => r.Id.ToString() == var.Value.ToString());
-                            if (regiment != null)
-                            {
-                                characterTrait.UnitType.Add(regiment);
-                            }
-                        }
-                        break;
-                    case "unit_trigger":
-                        characterTrait.UnitTrigger = br.ToString(); //todo: implement triggers parsing
-                        break;
-                    case "on_add":
-                        characterTrait.OnAdd = br.ToString(); //todo: implement effects parsing
-                        break;
-                    case "on_remove":
-                        characterTrait.OnRemove = br.ToString(); //todo: implement effects parsing
-                        break;
-                    case "daily_effect":
-                        characterTrait.DailyEffect = br.ToString(); //todo: implement effects parsing
-                        break;
-                    case "modifier":
-                        foreach (Var var in br.SubVars)
-                        {
-                            ModifierDefinitionConfig modifierDefinitionConfig = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
-                            if (modifierDefinitionConfig != null)
-                            {
-                                characterTrait.ArmyComanderModifiers.Add(modifierDefinitionConfig, var.Value);
-                            }
-                        }
-                        break;
-                    case "non_shared_modifier":
-                        foreach (Var var in br.SubVars)
-                        {
-                            ModifierDefinitionConfig modifierDefinitionConfig = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
-                            if (modifierDefinitionConfig != null)
-                            {
-                                characterTrait.NonSharedModifiers.Add(modifierDefinitionConfig, var.Value);
-                            }
-                        }
-                        break;
-                    case "corps_commander_modifier":
-                        foreach (Var var in br.SubVars)
-                        {
-                            ModifierDefinitionConfig modifierDefinitionConfig = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
-                            if (modifierDefinitionConfig != null)
-                            {
-                                characterTrait.CorpsCommanderModifiers.Add(modifierDefinitionConfig, var.Value);
-                            }
-                        }
-                        break;
-                    case "field_marshal_modifier":
-                        foreach (Var var in br.SubVars)
-                        {
-                            ModifierDefinitionConfig modifierDefinitionConfig = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
-                            if (modifierDefinitionConfig != null)
-                            {
-                                characterTrait.FieldMarshalModifiers.Add(modifierDefinitionConfig, var.Value);
-                            }
-                        }
-                        break;
-                    case "sub_unit_modifier":
-                        foreach (Var var in br.SubVars)
-                        {
-                            ModifierDefinitionConfig modifierDefinitionConfig = ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(m => m.Id.ToString() == var.Name);
-                            if (modifierDefinitionConfig != null)
-                            {
-                                characterTrait.SubUnitModifiers.Add(modifierDefinitionConfig, var.Value);
-                            }
-                        }
-                        break;
-                    case "prerequisites":
-                        //todo: implement triggers parsing
-                        characterTrait.Prerequisites = br.ToString();
-                        break;
-                    case "gain_xp":
-                        //todo: implement triggers parsing
-                        characterTrait.GainXp = br.ToString();
-                        break;
-                    case "trait_xp_factor":
-                        //todo: implement triggers parsing
-                        characterTrait.TraitXpFactor = br.ToString();
+                        trait.Allowed = br.ToString(); // TODO: парсинг триггеров
                         break;
 
-                }
-            }
-            foreach (HoiArray array in bracket.Arrays)
-            {
-                switch (array.Name)
-                {
-                    case "type":
-                        foreach (var value in array.Values)
+                    case "ai_will_do":
+                        trait.AiWillDo = br.ToString(); // TODO: ai will do
+                        break;
+
+                    case "unit_type":
+                        foreach (var var in br.SubVars)
                         {
-                            if (value != null)
+                            if (var.Name == "type")
                             {
-                                if (Enum.TryParse<CharacterType>(value.ToString().SnakeToPascal(), out var characterType))
-                                {
-                                    characterTrait.CharacterTypes.Add(characterType);
-                                }
+                                var subUnit = ModDataStorage.Mod.SubUnits.SearchConfigInFile(var.Value?.ToString());
+                                if (subUnit != null)
+                                    trait.UnitType.Add(subUnit);
+                            }
+                            else
+                            {
+                                Logger.AddDbgLog($"Неизвестная переменная в unit_type трейта {bracket.Name}: {var.Name}");
                             }
                         }
                         break;
+
+                    case "unit_trigger":
+                        trait.UnitTrigger = br.ToString(); // TODO: триггеры
+                        break;
+
+                    case "on_add":
+                        trait.OnAdd = br.ToString(); // TODO: эффекты
+                        break;
+
+                    case "on_remove":
+                        trait.OnRemove = br.ToString(); // TODO: эффекты
+                        break;
+
+                    case "daily_effect":
+                        trait.DailyEffect = br.ToString(); // TODO: эффекты
+                        break;
+
+                    case "modifier":
+                        foreach (var var in br.SubVars)
+                        {
+                            var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(var.Name);
+                            if (modDef != null)
+                                trait.ArmyComanderModifiers.Add(modDef, var.Value);
+                        }
+                        break;
+
+                    case "non_shared_modifier":
+                        foreach (var var in br.SubVars)
+                        {
+                            var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(var.Name);
+                            if (modDef != null)
+                                trait.NonSharedModifiers.Add(modDef, var.Value);
+                        }
+                        break;
+
+                    case "corps_commander_modifier":
+                        foreach (var var in br.SubVars)
+                        {
+                            var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(var.Name);
+                            if (modDef != null)
+                                trait.CorpsCommanderModifiers.Add(modDef, var.Value);
+                        }
+                        break;
+
+                    case "field_marshal_modifier":
+                        foreach (var var in br.SubVars)
+                        {
+                            var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(var.Name);
+                            if (modDef != null)
+                                trait.FieldMarshalModifiers.Add(modDef, var.Value);
+                        }
+                        break;
+
+                    case "sub_unit_modifier":
+                        foreach (var var in br.SubVars)
+                        {
+                            var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(var.Name);
+                            if (modDef != null)
+                                trait.SubUnitModifiers.Add(modDef, var.Value);
+                        }
+                        break;
+
+                    case "prerequisites":
+                        trait.Prerequisites = br.ToString(); // TODO: триггеры
+                        break;
+
+                    case "gain_xp":
+                        trait.GainXp = br.ToString(); // TODO: триггеры
+                        break;
+
+                    case "trait_xp_factor":
+                        trait.TraitXpFactor = br.ToString(); // TODO: триггеры
+                        break;
                 }
             }
-            return characterTrait;
+
+            foreach (var array in bracket.Arrays)
+            {
+                if (array.Name == "type")
+                {
+                    foreach (var value in array.Values)
+                    {
+                        if (value != null && Enum.TryParse<CharacterType>(value.ToString().SnakeToPascal(), out var charType))
+                        {
+                            trait.CharacterTypes.Add(charType);
+                        }
+                    }
+                }
+            }
+
+            // Локализация (если есть name/desc — добавляем, хотя для трейтов обычно через локализацию по id)
+            trait.Localisation = new ConfigLocalisation
+            {
+                Language = ModManagerSettings.CurrentLanguage,
+                Source = trait
+            };
+            // Можно добавить:
+            trait.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(trait.Id.ToString()));
+            trait.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(trait.Id + "_desc"));
+
+            return trait;
         }
+
     }
 }

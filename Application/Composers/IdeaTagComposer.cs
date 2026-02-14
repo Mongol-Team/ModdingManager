@@ -1,167 +1,178 @@
-﻿
-using Application.Debugging;
+﻿using Application.Debugging;
+using Application.Extensions;
+using Application.extentions;
+using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
+using Data;
+using Models.Configs;
+using Models.EntityFiles;
+using Models.Enums;
+using Models.Types.LocalizationData;
+using Models.Types.ObjectCacheData;
+using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using Models.Enums;
-using Models.Types.ObjectCacheData;
-using OpenCvSharp;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Typography.OpenFont.CFF;
-using Models.Configs;
 
 namespace Application.Composers
 {
-    public class IdeaTagComposer : IComposer
+    public class IdeaTagComposer 
     {
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы категорий и тегов идей и возвращает список файлов (ConfigFile<IdeaTagConfig>)
+        /// </summary>
+        public static List<ConfigFile<IdeaTagConfig>> Parse()
         {
-            string[] pathes = new string[]
+            var stopwatch = Stopwatch.StartNew();
+            var tagFiles = new List<ConfigFile<IdeaTagConfig>>();
+
+            string[] pathes =
             {
                 ModPathes.IdeaTagsPath,
                 GamePathes.IdeaTagsPath
             };
-            List<IConfig> res = new List<IConfig>();
-            foreach (var path in pathes)
-            {
-                if (Directory.Exists(path))
-                {
-                    var files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
 
-                    foreach (var file in files)
+            foreach (string path in pathes)
+            {
+                if (!Directory.Exists(path)) continue;
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    try
                     {
-                        try
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile hoiFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                        bool isOverride = path.StartsWith(ModPathes.IdeaTagsPath);
+
+                        var configFile = ParseFile(hoiFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
                         {
-                            HoiFuncFile parsedfile = new TxtParser(new TxtPattern()).Parse(file) as HoiFuncFile;
-                            var parsed = ParseFile(parsedfile);
-                            foreach(var cfg in parsed)
-                            {
-                                cfg.FileFullPath = file;
-                            }
-                            if (parsed != null)
-                                res.AddRange(parsed);
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.AddDbgLog($"[IdeaTagComposer] On parse exception: {ex.Message}{ex.StackTrace}", "IdeaTagComposer");
+                            tagFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл тегов идей: {configFile.FileName} → {configFile.Entities.Count} тегов");
                         }
                     }
-                }
-                if (res.Count > 0)
-                    break;
-            }
-            return res;
-        }
-
-        public static List<IConfig> ParseFile(HoiFuncFile file)
-        {
-            List<IConfig> res = new List<IConfig>();
-            foreach (var bracket in file.Brackets)
-            {
-                if (bracket.Name == "idea_categories")
-                {
-                    foreach (var subbracket in bracket.SubBrackets)
+                    catch (Exception ex)
                     {
-                        IdeaTagConfig cfg = ParseObject(subbracket) as IdeaTagConfig;
-                        res.Add(cfg);
+                        Logger.AddLog($"[IdeaTagComposer] Ошибка при парсинге файла {file}: {ex.Message}");
+                        Logger.AddDbgLog($"Стек: {ex.StackTrace}");
                     }
                 }
             }
-            return res;
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг тегов и категорий идей завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {tagFiles.Count}, тегов всего: {tagFiles.Sum(f => f.Entities.Count)}");
+
+            return tagFiles;
         }
 
-        public static IConfig ParseObject(Bracket br)
+        private static ConfigFile<IdeaTagConfig> ParseFile(HoiFuncFile file, string fileFullPath, bool isOverride)
         {
-            IdeaTagConfig cfg = new IdeaTagConfig();
-            cfg.Id = new(br.Name);
-            foreach (Var var in br.SubVars)
+            var configFile = new ConfigFile<IdeaTagConfig>
             {
-                switch (var.Name)
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            foreach (Bracket topBr in file.Brackets.Where(b => b.Name == "idea_categories"))
+            {
+                foreach (Bracket tagBr in topBr.SubBrackets)
+                {
+                    var cfg = ParseIdeaTag(tagBr, fileFullPath, isOverride);
+                    if (cfg != null)
+                    {
+                        configFile.Entities.Add(cfg);
+                        Logger.AddDbgLog($"  → добавлен тег идеи: {cfg.Id}");
+                    }
+                }
+            }
+
+            return configFile;
+        }
+
+        private static IdeaTagConfig ParseIdeaTag(Bracket br, string fileFullPath, bool isOverride)
+        {
+            var cfg = new IdeaTagConfig
+            {
+                Id = new Identifier(br.Name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
+
+                Slots = new List<IdeaGroupConfig>(),
+                CharacterSlots = new List<string>()
+            };
+
+            foreach (Var v in br.SubVars)
+            {
+                switch (v.Name)
                 {
                     case "type":
-                        switch (var.Value.ToString())
+                        string typeStr = v.Value?.ToString()?.ToLower() ?? string.Empty;
+                        cfg.Type = typeStr switch
                         {
-                            case "army_spirit":
-                                cfg.Type = IdeaType.ArmySpirit;
-                                break;
-                            case "navy_spirit":
-                                cfg.Type = IdeaType.NavySpirit;
-                                break;
-                            case "air_spirit":
-                                cfg.Type = IdeaType.AirSpirit;
-                                break;
-                            case "national_spirit":
-                                cfg.Type = IdeaType.NationalSpirit;
-                                break;
-                        }
+                            "army_spirit" => IdeaType.ArmySpirit,
+                            "navy_spirit" => IdeaType.NavySpirit,
+                            "air_spirit" => IdeaType.AirSpirit,
+                            "national_spirit" => IdeaType.NationalSpirit,
+                            _ => IdeaType.NationalSpirit
+                        };
                         break;
-                    case "slot":
-                        IdeaGroupConfig scfg = ModDataStorage.Mod.IdeaSlots.FirstOrDefault(s => s.Id.ToString() == var.Value.ToString());
-                        if (scfg != null)
-                            cfg.Slots.Add(scfg);
-                        break;
-                    case "character_slot":
-                        cfg.CharacterSlots.Add(var.Value.ToString());
 
+                    case "slot":
+                        var slot = ModDataStorage.Mod.IdeaSlots.SearchConfigInFile(v.Value?.ToString());
+                        if (slot != null)
+                            cfg.Slots.Add(slot);
+                        else
+                            Logger.AddDbgLog($"Слот {v.Value} не найден для тега {br.Name} (файл: {fileFullPath})");
                         break;
+
+                    case "character_slot":
+                        if (!string.IsNullOrEmpty(v.Value?.ToString()))
+                            cfg.CharacterSlots.Add(v.Value.ToString());
+                        break;
+
                     case "cost":
-                        if (int.TryParse(var.Value.ToString(), out int cost))
-                            cfg.Cost = cost;
+                        cfg.Cost = v.Value.ToInt();
                         break;
+
                     case "removal_cost":
-                        if (int.TryParse(var.Value.ToString(), out int rcost))
-                            cfg.RemovalCost = rcost;
+                        cfg.RemovalCost = v.Value.ToInt();
                         break;
+
                     case "ledger":
-                        switch (var.Value.ToString())
+                        string ledgerStr = v.Value?.ToString()?.ToLower() ?? string.Empty;
+                        cfg.Ledger = ledgerStr switch
                         {
-                            case "civilian":
-                                cfg.Ledger = IdeaLedgerType.Civilian;
-                                break;
-                            case "army":
-                                cfg.Ledger = IdeaLedgerType.Army;
-                                break;
-                            case "air":
-                                cfg.Ledger = IdeaLedgerType.Air;
-                                break;
-                            case "navy":
-                                cfg.Ledger = IdeaLedgerType.Navy;
-                                break;
-                            case "military":
-                                cfg.Ledger = IdeaLedgerType.Military;
-                                break;
-                            case "all":
-                                cfg.Ledger = IdeaLedgerType.All;
-                                break;
-                            case "hidden":
-                                cfg.Ledger = IdeaLedgerType.Hidden;
-                                break;
-                            case "invalid":
-                                cfg.Ledger = IdeaLedgerType.Invalid;
-                                break;
-                            default:
-                                cfg.Ledger = IdeaLedgerType.Invalid;
-                                break;
-                        }
+                            "civilian" => IdeaLedgerType.Civilian,
+                            "army" => IdeaLedgerType.Army,
+                            "air" => IdeaLedgerType.Air,
+                            "navy" => IdeaLedgerType.Navy,
+                            "military" => IdeaLedgerType.Military,
+                            "all" => IdeaLedgerType.All,
+                            "hidden" => IdeaLedgerType.Hidden,
+                            _ => IdeaLedgerType.Invalid
+                        };
                         break;
+
                     case "hidden":
-                        if (var.Value is bool hval)
-                            cfg.Hidden = hval;
+                        cfg.Hidden = v.Value.ToBool();
                         break;
+
                     case "politics_tab":
-                        if (var.Value is bool pval)
-                            cfg.PoliticsTab = pval;
-                        break;
-                    default:
+                        cfg.PoliticsTab = v.Value.ToBool();
                         break;
                 }
             }
 
             return cfg;
         }
+
     }
 }

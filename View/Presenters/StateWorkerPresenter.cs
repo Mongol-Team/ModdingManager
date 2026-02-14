@@ -213,7 +213,7 @@ namespace ViewPresenters
         public void SearchProvince(int id)
         {
             SearchAndCenterView(_view.ProvinceIDLayer, id.ToString());
-            ProvinceConfig prov = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == id);
+            ProvinceConfig prov = ModDataStorage.Mod.Map.Provinces.SearchConfigInFile(id.ToString());
             MarkEventArg markEventArg = new()
             {
                 MarkedProvince = prov
@@ -224,7 +224,7 @@ namespace ViewPresenters
         public void SearchState(int id)
         {
             SearchAndCenterView(_view.StateIDLayer, id.ToString());
-            StateConfig state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == id);
+            StateConfig state = ModDataStorage.Mod.Map.States.SearchConfigInFile(id.ToString());
             MarkEventArg markEventArg = new()
             {
                 MarkedState = state
@@ -234,7 +234,7 @@ namespace ViewPresenters
         public void SearchCountry(int id)
         {
             SearchAndCenterView(_view.CountryIDLayer, id.ToString());
-            CountryConfig country = ModDataStorage.Mod.Map.Countries.FirstOrDefault(c => c.Id.ToString() == id.ToString());
+            CountryConfig country = ModDataStorage.Mod.Map.Countries.SearchConfigInFile(id.ToString());
             MarkEventArg markEventArg = new()
             {
                 MarkedCountry = country
@@ -244,7 +244,7 @@ namespace ViewPresenters
         public void SearchStrategicRegion(int id)
         {
             SearchAndCenterView(_view.StrategicIDLayer, id.ToString());
-            StrategicRegionConfig region = ModDataStorage.Mod.Map.StrategicRegions.FirstOrDefault(r => r.Id.ToInt() == id);
+            StrategicRegionConfig region = ModDataStorage.Mod.Map.StrategicRegions.SearchConfigInFile(id.ToString());
             MarkEventArg markEventArg = new()
             {
                 MarkedRegion = region
@@ -359,9 +359,10 @@ namespace ViewPresenters
         }
         private void UpdateRegionLayer(ProvinceTransferArg arg)
         {
-            var sourceRegion = ModDataStorage.Mod.Map.StrategicRegions.FirstOrDefault(s => s.Id == arg.SourceRegion?.Id);
-            var targetRegion = ModDataStorage.Mod.Map.StrategicRegions.FirstOrDefault(s => s.Id == arg.TargetRegion?.Id);
-            var province = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
+            
+            var sourceRegion = ModDataStorage.Mod.Map.StrategicRegions.SearchConfigInFile(arg.SourceRegion?.Id.ToString());
+            var targetRegion = ModDataStorage.Mod.Map.StrategicRegions.SearchConfigInFile(arg.SourceRegion?.Id.ToString());
+            var province = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
 
             if (targetRegion == null || province == null)
                 return;
@@ -382,9 +383,9 @@ namespace ViewPresenters
         }
         private void UpdateStateLayer(ProvinceTransferArg arg)
         {
-            var sourceState = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id == arg.SourceState?.Id);
-            var targetState = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id == arg.TargetState?.Id);
-            var province = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
+            var sourceState = ModDataStorage.Mod.Map.States.SearchConfigInFile(arg.SourceRegion?.Id.ToString());
+            var targetState = ModDataStorage.Mod.Map.States.SearchConfigInFile(arg.SourceRegion?.Id.ToString());
+            var province = ModDataStorage.Mod.Map.Provinces.SearchConfigInFile(arg.SourceRegion?.Id.ToString());
 
             if (targetState == null || province == null)
                 return;
@@ -407,7 +408,7 @@ namespace ViewPresenters
 
         private void UpdateCountryLayerAfterProvinceTransfer(ProvinceTransferArg arg)
         {
-            var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id == arg.TargetState?.Id);
+            var state = ModDataStorage.Mod.Map.States.FileEntitiesToList().FirstOrDefault(s => s.Id == arg.TargetState?.Id);
             if (state == null)
                 return;
 
@@ -425,14 +426,12 @@ namespace ViewPresenters
 
         private void UpdateCountryLayerAfterStateTransfer(StateTransferArg arg)
         {
-            var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Id.ToInt() == arg.StateId);
+            var state = ModDataStorage.Mod.Map.States.SearchConfigInFile(arg.StateId?.ToString());
             if (state == null)
                 return;
 
-            var sourceCountry = ModDataStorage.Mod.Map.Countries.FirstOrDefault(c =>
-                c.States.Any(s => s.Id.ToInt() == arg.StateId));
-            var targetCountry = ModDataStorage.Mod.Map.Countries.FirstOrDefault(c =>
-                c.Id.ToString() == arg.TargetCountryTag);
+            var sourceCountry = ModDataStorage.Mod.Map.Countries.SearchConfigInFile(arg.StateId?.ToString());
+            var targetCountry = ModDataStorage.Mod.Map.Countries.SearchConfigInFile(arg.StateId?.ToString());
 
             if (targetCountry == null)
                 return;
@@ -527,11 +526,11 @@ namespace ViewPresenters
 
             var assignedProvinceIds = new HashSet<int>();
 
-            foreach (var reg in ModDataStorage.Mod.Map.StrategicRegions)
+            foreach (var reg in ModDataStorage.Mod.Map.StrategicRegions.FileEntitiesToList())
             {
                 // Исправление 2: Получаем реальные провинции
                 var provincesInRegion = reg.Provinces
-                    .Join(ModDataStorage.Mod.Map.Provinces,
+                    .Join(ModDataStorage.Mod.Map.Provinces.FileEntitiesToList(),
                         pr => pr.Id,
                         p => p.Id,
                         (pr, p) => p)
@@ -553,7 +552,7 @@ namespace ViewPresenters
                 }
             }
 
-            var unassigned = ModDataStorage.Mod.Map.Provinces.Where(p => !assignedProvinceIds.Contains(p.Id.ToInt()));
+            var unassigned = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().Where(p => !assignedProvinceIds.Contains(p.Id.ToInt()));
             foreach (var province in unassigned)
             {
                 // Исправление 5: Отрисовываем в правильный слой
@@ -588,9 +587,9 @@ namespace ViewPresenters
             if (ModDataStorage.Mod.Map?.States == null || ModDataStorage.Mod.Map.Provinces == null)
                 return;
 
-            foreach (var province in ModDataStorage.Mod.Map.Provinces)
+            foreach (var province in ModDataStorage.Mod.Map.Provinces.FileEntitiesToList())
             {
-                var state = ModDataStorage.Mod.Map.States.FirstOrDefault(s => s.Provinces.Any(p => p.Id == province.Id));
+                var state = ModDataStorage.Mod.Map.States.FileEntitiesToList().FirstOrDefault(s => s.Provinces.Any(p => p.Id == province.Id));
 
                 if (state != null)
                 {
@@ -602,12 +601,12 @@ namespace ViewPresenters
                 }
             }
 
-            foreach (var state in ModDataStorage.Mod.Map.States)
+            foreach (var state in ModDataStorage.Mod.Map.States.FileEntitiesToList())
             {
                 if (state.Provinces.Count == 0)
                     continue;
 
-                var provinces = ModDataStorage.Mod.Map.Provinces
+                var provinces = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList()
                     .Where(p => state.Provinces.Any(sp => sp.Id == p.Id))
                     .ToList();
 
@@ -631,7 +630,7 @@ namespace ViewPresenters
 
             var provinceToCountry = new Dictionary<int, CountryConfig>();
 
-            foreach (var country in ModDataStorage.Mod.Map.Countries)
+            foreach (var country in ModDataStorage.Mod.Map.Countries.FileEntitiesToList())
             {
                 if (country.States == null) continue;
 
@@ -648,7 +647,7 @@ namespace ViewPresenters
             }
 
             // Отрисовываем провинции цветом их страны
-            foreach (var province in ModDataStorage.Mod.Map.Provinces)
+            foreach (var province in ModDataStorage.Mod.Map.Provinces.FileEntitiesToList())
             {
                 if (provinceToCountry.TryGetValue(province.Id.ToInt(), out var country))
                 {
@@ -671,7 +670,7 @@ namespace ViewPresenters
             }
 
             // Отрисовываем метки стран
-            foreach (var country in ModDataStorage.Mod.Map.Countries)
+            foreach (var country in ModDataStorage.Mod.Map.Countries.FileEntitiesToList() )
             {
                 // Собираем все провинции страны
                 var allProvinces = new List<ProvinceConfig>();
@@ -684,7 +683,7 @@ namespace ViewPresenters
                         {
                             foreach (var province in state.Provinces)
                             {
-                                var fullProvince = ModDataStorage.Mod.Map.Provinces.FirstOrDefault(p => p.Id == province.Id);
+                                var fullProvince = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().FirstOrDefault(p => p.Id == province.Id);
                                 if (fullProvince != null)
                                 {
                                     allProvinces.Add(fullProvince);
@@ -796,14 +795,14 @@ namespace ViewPresenters
             // Получаем список провинций для этого entity
             List<ProvinceConfig> provinces = layerType switch
             {
-                "COUNTRY" => ModDataStorage.Mod.Map.Countries
+                "COUNTRY" => ModDataStorage.Mod.Map.Countries.FileEntitiesToList()
                     .FirstOrDefault(c => c.Id.ToString() == entityId.ToString())?
                     .States.SelectMany(s => s.Provinces)
                     .ToList(),
-                "STATE" => ModDataStorage.Mod.Map.States
+                "STATE" => ModDataStorage.Mod.Map.States.FileEntitiesToList()
                     .FirstOrDefault(s => s.Id.ToInt() == entityId)?
                     .Provinces.ToList(),
-                "STRATEGIC" => ModDataStorage.Mod.Map.StrategicRegions
+                "STRATEGIC" => ModDataStorage.Mod.Map.StrategicRegions.FileEntitiesToList()
                     .FirstOrDefault(sr => sr.Id.ToInt() == entityId)?
                     .Provinces.ToList(),
                 _ => null
@@ -845,7 +844,7 @@ namespace ViewPresenters
         }
         private CountryConfig GetCountryForState(int? stateId)
         {
-            return ModDataStorage.Mod.Map.Countries?.FirstOrDefault(c =>
+            return ModDataStorage.Mod.Map.Countries?.FileEntitiesToList().FirstOrDefault(c =>
                 c.States?.Any(s => s.Id.ToInt() == stateId) == true);
         }
         #endregion

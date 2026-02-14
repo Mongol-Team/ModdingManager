@@ -1,83 +1,124 @@
 ﻿using Application.Debugging;
+using Application.Extensions;
+using Application.extentions;
 using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
 using Models.Configs;
+using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
-using Models.Types;
 using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 
 namespace Application.Composers
 {
-    public class IdeologyComposer : IComposer
+    public class IdeologyComposer
     {
-        public IdeologyComposer() { }
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы идеологий и возвращает список файлов (ConfigFile<IdeologyConfig>)
+        /// </summary>
+        public static List<ConfigFile<IdeologyConfig>> Parse()
         {
-            List<IConfig> res = new();
-            string[] possiblePaths = {
+            var stopwatch = Stopwatch.StartNew();
+            var ideologyFiles = new List<ConfigFile<IdeologyConfig>>();
+
+            string[] possiblePaths =
+            {
                 ModPathes.IdeologyPath,
                 GamePathes.IdeologyPath
             };
+
             foreach (string path in possiblePaths)
             {
                 if (!Directory.Exists(path))
-                    throw new FileNotFoundException($"Dir not found: {path}");
-                List<string> ideologyFiles = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories).ToList();
-                foreach (string file in ideologyFiles)
                 {
-                    string content = File.ReadAllText(file);
-                    var parser = new TxtParser(new TxtPattern());
-                    var parsedFile = (HoiFuncFile)parser.Parse(content);
-                    if (parsedFile == null)
+                    Logger.AddLog($"Директория не найдена: {path}");
+                    continue;
+                }
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    try
                     {
-                        Logger.AddDbgLog("Failed to parse the ideology file:" + file, "IdeologyComposer");
-                        continue;
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile parsedFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                        bool isOverride = path.StartsWith(ModPathes.IdeologyPath);
+
+                        var configFile = ParseFile(parsedFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
+                        {
+                            ideologyFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл идеологий: {configFile.FileName} → {configFile.Entities.Count} идеологий");
+                        }
                     }
-                    var fileConfigs = ParseFile(parsedFile, file);
-                    foreach (var cfg in fileConfigs)
-                    { 
-                        cfg.FileFullPath = file;
+                    catch (Exception ex)
+                    {
+                        Logger.AddLog($"[IdeologyComposer] Ошибка парсинга файла {file}: {ex.Message}");
+                        Logger.AddDbgLog($"Стек: {ex.StackTrace}");
                     }
-                    res.AddRange(fileConfigs);
                 }
             }
-            if (res.Count > 0)
-            {
-                ParseDynamicModifierDefinitions(res.OfType<ModifierDefinitionConfig>().ToList());
-            }
-            return res;
+
+            // Динамические модификаторы создаём после парсинга всех файлов
+            PaseDynamicModifierDefinitions(ideologyFiles);
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг идеологий завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {ideologyFiles.Count}, идеологий всего: {ideologyFiles.Sum(f => f.Entities.Count)}");
+
+            return ideologyFiles;
         }
 
-        public static List<IConfig> ParseFile(HoiFuncFile file, string FileFullPath)
+        private static ConfigFile<IdeologyConfig> ParseFile(HoiFuncFile file, string fileFullPath, bool isOverride)
         {
-            List<IConfig> res = new();
-            Bracket ideologiesBracket = file.Brackets.FirstOrDefault(b => b.Name == "ideologies");
+            var configFile = new ConfigFile<IdeologyConfig>
+            {
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
+
+            var ideologiesBracket = file.Brackets.FirstOrDefault(b => b.Name == "ideologies");
             if (ideologiesBracket == null)
             {
-                Logger.AddDbgLog("Failed to search ideologies in file:" + FileFullPath, "IdeologyComposer");
-                return res;
+                Logger.AddDbgLog($"Блок 'ideologies' не найден в файле: {fileFullPath}");
+                return configFile;
             }
-            foreach (var ideologyBracket in ideologiesBracket.SubBrackets)
+
+            foreach (Bracket ideologyBr in ideologiesBracket.SubBrackets)
             {
-                var config = ParseIdeologyConfig(ideologyBracket.Name, ideologyBracket);
+                var config = ParseIdeologyConfig(ideologyBr.Name, ideologyBr, fileFullPath, isOverride);
                 if (config != null)
-                    res.Add(config);
+                {
+                    configFile.Entities.Add(config);
+                    Logger.AddDbgLog($"  → добавлена идеология: {config.Id}");
+                }
             }
-            return res;
+
+            return configFile;
         }
-        public static IdeologyConfig ParseIdeologyConfig(string name, Bracket bracket)
+
+        private static IdeologyConfig ParseIdeologyConfig(string name, Bracket bracket, string fileFullPath, bool isOverride)
         {
             var config = new IdeologyConfig
             {
                 Id = new Identifier(name),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
+
                 SubTypes = new List<IdeologyType>(),
                 Rules = new Dictionary<RuleConfig, bool>(),
                 Modifiers = new Dictionary<ModifierDefinitionConfig, object>(),
@@ -85,35 +126,31 @@ namespace Application.Composers
                 DynamicFactionNames = new List<string>()
             };
 
+            // Подтипы (types)
             var typesBracket = bracket.SubBrackets.FirstOrDefault(b => b.Name == "types");
             if (typesBracket != null)
             {
-                foreach (var typeBracket in typesBracket.SubBrackets)
+                foreach (Bracket typeBr in typesBracket.SubBrackets)
                 {
                     var type = new IdeologyType
                     {
-                        Name = typeBracket.Name,
+                        Id = new(typeBr.Name),
                         Parrent = name
                     };
 
-                    Var canBeRandom = typeBracket.SubVars.FirstOrDefault(v => v.Name == "can_be_randomly_selected");
-                    if (canBeRandom != null && canBeRandom.Value is bool canBeRandomval)
-                    {
-                        type.CanBeRandomlySelected = canBeRandomval;
-                    }
+                    var canBeRandom = typeBr.SubVars.FirstOrDefault(v => v.Name == "can_be_randomly_selected");
+                    type.CanBeRandomlySelected = canBeRandom?.Value.ToBool() ?? false;
 
-                    var colorValue = typeBracket.SubVars.FirstOrDefault(v => v.Name == "color");
-                    if (colorValue != null && colorValue.Value is Color colorobj)
-                    {
-                        type.Color = colorobj;
-                    }
+                    var colorVar = typeBr.SubVars.FirstOrDefault(v => v.Name == "color");
+                    if (colorVar?.Value is Color colorObj)
+                        type.Color = colorObj;
 
                     config.SubTypes.Add(type);
                 }
             }
 
-            // Обработка dynamic_faction_names
-            var namesArr = bracket.Arrays.FirstOrDefault(b => b.Name == "dynamic_faction_names");
+            // dynamic_faction_names
+            var namesArr = bracket.Arrays.FirstOrDefault(a => a.Name == "dynamic_faction_names");
             if (namesArr != null)
             {
                 config.DynamicFactionNames = namesArr.Values
@@ -121,107 +158,97 @@ namespace Application.Composers
                     .ToList();
             }
 
-            // Обработка color
-            var color = bracket.SubVars.FirstOrDefault(b => b.Name == "color");
-            if (color != null)
-            {
-                config.Color = (Color)color.Value;
-            }
+            // color (основной)
+            var colorMain = bracket.SubVars.FirstOrDefault(v => v.Name == "color");
+            if (colorMain?.Value is Color mainColor)
+                config.Color = mainColor;
 
-            // Обработка rules
+            // rules
             var rulesBracket = bracket.SubBrackets.FirstOrDefault(b => b.Name == "rules");
             if (rulesBracket != null)
             {
-                foreach (var varItem in rulesBracket.SubVars)
+                foreach (Var v in rulesBracket.SubVars)
                 {
-                    var rule = ModDataStorage.Mod.Rules.Where(r => r.Id.ToString() == varItem.Name).FirstOrDefault();
-                    if (rule == null)
+                    var rule = ModDataStorage.Mod.Rules.SearchConfigInFile(v.Name);
+                    if (rule != null)
                     {
-                        Logger.AddDbgLog($"Не удалось найти правило с Id = {varItem.Name}", "IdeologyComposer");
-                        continue;
+                        config.Rules.TryAdd(rule, v.Value.ToBool());
                     }
-                    if (!config.Rules.TryAdd(rule, (bool)varItem.Value))
+                    else
                     {
-                        Logger.AddDbgLog($"Не удалось добавить правило с Id = {(varItem.Value as HoiReference).Value}", "IdeologyComposer");
+                        Logger.AddDbgLog($"Правило {v.Name} не найдено для идеологии {name}");
                     }
-
                 }
             }
 
-            // Обработка modifiers
+            // modifiers
             var modsBracket = bracket.SubBrackets.FirstOrDefault(b => b.Name == "modifiers");
             if (modsBracket != null)
             {
-                foreach (var varItem in modsBracket.SubVars)
+                foreach (Var v in modsBracket.SubVars)
                 {
-                    var mod = ModDataStorage.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == varItem.Name).FirstOrDefault();
-                    if (mod == null || varItem.Value == null)
+                    var mod = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(v.Name);
+                    if (mod != null)
                     {
-                        Logger.AddDbgLog($"Ошибка, либо модификатор либо его значение не найдено!", "IdeologyComposer");
-                        continue;
+                        config.Modifiers.TryAdd(mod, v.Value);
                     }
-                    if (!config.Modifiers.TryAdd(mod, varItem.Value))
+                    else
                     {
-                        Logger.AddDbgLog($"Не удалось добавить модифер с Id = {(varItem.Value as HoiReference).Value}", "IdeologyComposer");
+                        Logger.AddDbgLog($"Модификатор {v.Name} не найден для идеологии {name}");
                     }
                 }
             }
 
-            // Обработка faction_modifiers
+            // faction_modifiers
             var factionModsBracket = bracket.SubBrackets.FirstOrDefault(b => b.Name == "faction_modifiers");
             if (factionModsBracket != null)
             {
-                foreach (var varItem in factionModsBracket.SubVars)
+                foreach (Var v in factionModsBracket.SubVars)
                 {
-                    var mod = ModDataStorage.Mod.ModifierDefinitions.Where(r => r.Id.ToString() == varItem.Name).FirstOrDefault();
-                    if (mod == null || varItem.Value == null)
+                    var mod = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(v.Name);
+                    if (mod != null)
                     {
-                        Logger.AddDbgLog($"Ошибка, либо модификатор либо его значение не найдено!", "IdeologyComposer");
-                        continue;
+                        config.FactionModifiers.TryAdd(mod, v.Value);
                     }
-                    if (!config.Modifiers.TryAdd(mod, varItem.Value))
+                    else
                     {
-                        Logger.AddDbgLog($"Не удалось добавить модифер для фракции с Id = {(varItem.Value as HoiReference).Value}", "IdeologyComposer");
+                        Logger.AddDbgLog($"Фракционный модификатор {v.Name} не найден для идеологии {name}");
                     }
                 }
             }
 
-            // Обработка остальных переменных
-            foreach (var varItem in bracket.SubVars)
+            // Остальные переменные
+            foreach (Var v in bracket.SubVars)
             {
-                if (varItem.Name.StartsWith("ai_"))
+                if (v.Name.StartsWith("ai_"))
                 {
-                    string aiName = varItem.Name.Substring(3);
-                    var ideologyAIType = aiName switch
+                    string aiName = v.Name.Substring(3).ToLower();
+                    config.AiIdeologyName = aiName switch
                     {
                         "neutrality" => IdeologyAIType.Neutrality,
                         "democracy" => IdeologyAIType.Democracy,
                         "fascism" => IdeologyAIType.Fascism,
                         "communism" => IdeologyAIType.Communism,
-                        _ => IdeologyAIType.None,// Keep original if not matched
+                        _ => IdeologyAIType.None
                     };
-                    config.AiIdeologyName = ideologyAIType;
                 }
 
-                switch (varItem.Name)
+                switch (v.Name)
                 {
                     case "can_host_government_in_exile":
-                        config.CanFormExileGoverment = (bool)varItem.Value;
+                        config.CanFormExileGoverment = v.Value.ToBool();
                         break;
                     case "war_impact_on_world_tension":
-                        config.WarImpactOnTension = (double)varItem.Value;
+                        config.WarImpactOnTension = v.Value.ToDouble();
                         break;
                     case "faction_impact_on_world_tension":
-                        config.FactionImpactOnTension = (double)varItem.Value;
+                        config.FactionImpactOnTension = v.Value.ToDouble();
                         break;
                     case "can_be_boosted":
-                        config.CanBeBoosted = (bool)varItem.Value;
+                        config.CanBeBoosted = v.Value.ToBool();
                         break;
                     case "can_collaborate":
-                        config.CanColaborate = (bool)varItem.Value;
-                        break;
-                    default:
-
+                        config.CanColaborate = v.Value.ToBool();
                         break;
                 }
             }
@@ -229,54 +256,86 @@ namespace Application.Composers
             return config;
         }
 
-        public static void ParseDynamicModifierDefinitions(List<ModifierDefinitionConfig> defs)
+        public static void PaseDynamicModifierDefinitions(List<ConfigFile<IdeologyConfig>> ideologyFiles)
         {
-            foreach (var ideology in defs)
+            // Ищем или создаём виртуальный core_objects
+            var coreFile = ModDataStorage.Mod.ModifierDefinitions?
+                .FirstOrDefault(f => f.FileName == "core_objects");
+
+            if (coreFile == null)
             {
-                // ───────────── drift ─────────────
-                var drift = new ModifierDefinitionConfig
+                coreFile = new ConfigFile<ModifierDefinitionConfig>
                 {
-                    Id = new Identifier($"{ideology.Id}_drift"),
+                    FileFullPath = "core_objects",
                     IsCore = true,
-                    Cathegory = ModifierDefinitionCathegoryType.Country,
-                    ValueType = ModifierDefenitionValueType.Number,
-                    ScopeType = ScopeTypes.Country,
-                    ColorType = ModifierDefenitionColorType.Good,
-                    Precision = 2,
-                    FileFullPath = DataDefaultValues.ItemCreatedDynamically,
-                    Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                    Entities = new List<ModifierDefinitionConfig>()
                 };
-
-                drift.Localisation = new ConfigLocalisation
-                {
-                    Language = ModManagerSettings.CurrentLanguage,
-                };
-                drift.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(drift.Id.ToString()));
-
-                ModDataStorage.Mod.ModifierDefinitions.Add(drift);
-
-                // ───────────── acceptance ─────────────
-                var acceptance = new ModifierDefinitionConfig
-                {
-                    Id = new Identifier($"{ideology.Id}_acceptance"),
-                    IsCore = true,
-                    Cathegory = ModifierDefinitionCathegoryType.Country,
-                    ValueType = ModifierDefenitionValueType.Number,
-                    ScopeType = ScopeTypes.Country,
-                    ColorType = ModifierDefenitionColorType.Good,
-                    Precision = 2,
-                    FileFullPath = DataDefaultValues.ItemCreatedDynamically,
-                    Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
-                };
-
-                acceptance.Localisation = new ConfigLocalisation
-                {
-                    Language = ModManagerSettings.CurrentLanguage,
-                };
-                acceptance.Localisation.Data.AddPair(ModDataStorage.Localisation.GetLocalisationByKey(acceptance.Id.ToString()));
-
-                ModDataStorage.Mod.ModifierDefinitions.Add(acceptance);
+                ModDataStorage.Mod.ModifierDefinitions.Add(coreFile);
+                Logger.AddDbgLog("Создан виртуальный core_objects для динамических модификаторов идеологий");
+                
             }
+
+            int created = 0;
+
+            foreach (var file in ideologyFiles)
+            {
+                foreach (IdeologyConfig ideology in file.Entities)
+                {
+                    if (ideology.Id == null) continue;
+
+                    // drift
+                    var drift = new ModifierDefinitionConfig
+                    {
+                        Id = new Identifier($"{ideology.Id}_drift"),
+                        IsCore = true,
+                        Cathegory = ModifierDefinitionCathegoryType.Country,
+                        ValueType = ModifierDefenitionValueType.Number,
+                        ScopeType = ScopeTypes.Country,
+                        ColorType = ModifierDefenitionColorType.Good,
+                        Precision = 2,
+                        FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                        Localisation = new ConfigLocalisation
+                        {
+                            Language = ModManagerSettings.CurrentLanguage
+                        }
+                    };
+                    drift.Localisation.Data.AddPair(
+                        ModDataStorage.Localisation.GetLocalisationByKey(drift.Id.ToString())
+                    );
+
+                    coreFile.Entities.Add(drift);
+                    created++;
+
+                    // acceptance
+                    var acceptance = new ModifierDefinitionConfig
+                    {
+                        Id = new Identifier($"{ideology.Id}_acceptance"),
+                        IsCore = true,
+                        Cathegory = ModifierDefinitionCathegoryType.Country,
+                        ValueType = ModifierDefenitionValueType.Number,
+                        ScopeType = ScopeTypes.Country,
+                        ColorType = ModifierDefenitionColorType.Good,
+                        Precision = 2,
+                        FileFullPath = DataDefaultValues.ItemCreatedDynamically,
+                        Gfx = new SpriteType(DataDefaultValues.ItemWithNoGfxImage, DataDefaultValues.ItemWithNoGfx),
+                        Localisation = new ConfigLocalisation
+                        {
+                            Language = ModManagerSettings.CurrentLanguage
+                        }
+                    };
+                    acceptance.Localisation.Data.AddPair(
+                        ModDataStorage.Localisation.GetLocalisationByKey(acceptance.Id.ToString())
+                    );
+
+                    coreFile.Entities.Add(acceptance);
+                    created++;
+                }
+            }
+
+            Logger.AddLog($"Создано {created} динамических модификаторов для идеологий (drift и acceptance)");
         }
+
+     
     }
 }

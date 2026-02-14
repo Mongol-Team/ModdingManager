@@ -1,276 +1,277 @@
 ﻿using Application.Debugging;
 using Application.Extensions;
 using Application.Extentions;
+using Application.Settings;
 using Application.utils.Pathes;
+using Data;
 using Models.Configs;
+using Models.EntityFiles;
+using Models.Enums;
+using Models.GfxTypes;
+using Models.Types.LocalizationData;
 using Models.Types.ObectCacheData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace Application.Composers
 {
-    public class TechTreeItemComposer : IComposer
+    public class TechTreeItemComposer 
     {
-        public static List<IConfig> Parse()
+        /// <summary>
+        /// Парсит все файлы технологий (research_*.txt) и возвращает список файлов (ConfigFile<TechTreeItemConfig>)
+        /// </summary>
+        public static List<ConfigFile<TechTreeItemConfig>> Parse()
         {
-            List<IConfig> configs = new();
+            var stopwatch = Stopwatch.StartNew();
+            var techItemFiles = new List<ConfigFile<TechTreeItemConfig>>();
+
             string[] possiblePathes =
             {
                 ModPathes.TechTreePath,
                 GamePathes.TechTreePath
             };
-            HashSet<string> seenIds = new();
+
             foreach (string path in possiblePathes)
             {
-                string[] files = Directory.GetFiles(path);
+                if (!Directory.Exists(path)) continue;
+
+                string[] files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
                 foreach (string file in files)
                 {
-                    if (new TxtParser(new TxtPattern()).Parse(file) is not HoiFuncFile funcFile) continue;
-
-                    foreach (var bracket in funcFile.Brackets)
+                    try
                     {
-                        if (bracket.Name == "technologies")
-                        {
-                            List<TechTreeItemConfig> configList = ParseTechnologyConfigItemsFromFile(bracket);
-                            if (configList == null) continue;
+                        string content = File.ReadAllText(file);
+                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
-                            foreach (var config in configList)
-                            {
-                                config.FileFullPath = file;
-                                string id = config.Id.ToString();
-                                if (!seenIds.Contains(id))
-                                {
-                                    configs.Add(config);
-                                    seenIds.Add(id);
-                                }
-                            }
+                        bool isOverride = path.StartsWith(ModPathes.TechTreePath);
+
+                        var configFile = ParseFile(hoiFuncFile, file, isOverride);
+
+                        if (configFile.Entities.Any())
+                        {
+                            techItemFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл технологий: {configFile.FileName} → {configFile.Entities.Count} технологий");
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        Logger.AddLog($"[TechTreeItemComposer] Ошибка парсинга файла {file}: {ex.Message}");
+                    }
                 }
             }
-            return configs;
+
+            // Динамические модификаторы здесь не создаются (их нет в этом композере)
+
+            stopwatch.Stop();
+            Logger.AddLog($"Парсинг технологий завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
+                          $"Файлов: {techItemFiles.Count}, технологий всего: {techItemFiles.Sum(f => f.Entities.Count)}");
+
+            return techItemFiles;
         }
 
-        public static List<TechTreeItemConfig> ParseTechnologyConfigItemsFromFile(Bracket bracket)
+        private static ConfigFile<TechTreeItemConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
-            List<TechTreeItemConfig> res = new();
-
-            foreach (Bracket techBr in bracket.SubBrackets)
+            var configFile = new ConfigFile<TechTreeItemConfig>
             {
-                string id = techBr.Name;
-                TechTreeItemConfig item = ModDataStorage.Mod.TechTreeItems.FindById(id);
-                if (item == null)
-                {
-                    item = new TechTreeItemConfig();
-                    item.Id = new Identifier(id);
-                }
-                else
-                {
-                    res.Add(item);
-                    continue;
-                }
-                foreach (Var argVar in techBr.SubVars)
-                {
-                    switch (argVar.Name.ToLowerInvariant())
-                    {
-                        case "research_cost":
-                            item.Cost = argVar.Value.ToInt();
-                            break;
-                        case "start_year":
-                            item.StartYear = argVar.Value.ToInt();
-                            break;
-                        case "force_use_small_tech_layout":
-                            item.IsBig = argVar.Value.ToBool();
-                            break;
-                        case "show_equipment_icon":
-                            item.ShowEqIcon = argVar.Value.ToBool();
-                            break;
-                        case "desc":
-                            item.SpecialDescKey = argVar.Value.ToString();
-                            break;
-                        default:
-                            item.Modifiers.AddSafe(new(ModDataStorage.Mod.ModifierDefinitions.FindById(argVar.Name), argVar.Value));
-                            break;
-                    }
-                }
-                TechTreeConfig fl = null;
-                foreach (Bracket argBr in techBr.SubBrackets)
-                {
-                    switch (argBr.Name.ToLowerInvariant())
-                    {
-                        case "path":
-                            Var coef = argBr.SubVars.FirstOrDefault(v => v.Name == "research_cost_coeff");
-                            if (coef != null)
-                            {
-                                item.ModifCost = coef.Value.ToInt();
-                            }
-                            Var childV = argBr.SubVars.FirstOrDefault(v => v.Name == "leads_to_tech");
-                            if (childV == null)
-                            {
-                                break;
-                            }
-                            TechTreeItemConfig cildTech = ModDataStorage.Mod.TechTreeLedgers.GetTreeItem(childV.Value.ToString());
-                            if (cildTech == null)
-                            {
-                                cildTech = new TechTreeItemConfig();
-                                cildTech.Id = new Identifier(childV.Value.ToString());
-                            }
-                            cildTech.ChildOf.AddSafe(item);
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride
+            };
 
-                            break;
-                        case "folder":
-                            Var flname = argBr.SubVars.FirstOrDefault(v => v.Name == "name");
-                            if (flname == null)
-                            {
-                                Logger.AddLog($"[Warning] Item {item.Id.ToString} has folder br without name.");
-                            }
-                            else
-                            {
-                                fl = ModDataStorage.Mod.TechTreeLedgers.FirstOrDefault(t => t.Id.ToString() == flname.Value.ToString());
-                                if (fl == null)
-                                {
-                                    Logger.AddLog($"[Warning] Item {item.Id.ToString} has null folder.");
-                                }
-                                else
-                                {
-                                    fl.Items.AddSafe(item);
-                                }
-                            }
+            var technologiesBracket = hoiFuncFile.Brackets.FirstOrDefault(b => b.Name == "technologies");
+            if (technologiesBracket == null) return configFile;
 
-                            Bracket posbr = argBr.SubBrackets.FirstOrDefault(b => b.Name == "position");
-                            if (posbr == null)
-                            {
-                                Logger.AddLog($"[Warning] Item {item.Id.ToString} has no coords br.");
-                            }
-                            else
-                            {
-                                Var x = posbr.SubVars.FirstOrDefault(v => v.Name == "x");
-                                Var y = posbr.SubVars.FirstOrDefault(v => v.Name == "y");
-                                if (y == null && x == null)
-                                {
-                                    Logger.AddLog($"[Warning] Item {item.Id.ToString} has no coords in br.");
-                                    break;
-                                }
-                                item.GridX = x.ToInt();
-                                item.GridY = y.ToInt();
-                            }
-                            break;
-                        case "enable_building":
-                            Var building = argBr.SubVars.FirstOrDefault(v => v.Name == "building ");
-                            Var level = argBr.SubVars.FirstOrDefault(v => v.Name == "level");
-                            if (building == null || level == null)
-                            {
-                                Logger.AddLog($"[Warning] Enable building br of {item} is missing building or level var.");
-                                break;
-                            }
-                            BuildingConfig bitem = ModDataStorage.Mod.Buildings.FirstOrDefault(b => b.Id.ToString() == building.Value.ToString());
-                            if (bitem == null)
-                            {
-                                break;
-                            }
-                            item.EnableBuildings.Add(bitem, level.Value);
-                            break;
-                        case "on_research_complete":
-                            item.Effects = argBr.ToString();
-                            break;
-                        case "ai_will_do":
-                            item.AiWillDo = argBr.ToString();
-                            break;
-                        case "allow_branch":
-                            item.AllowBranch = argBr.ToString();
-                            break;
-                        case "allowed":
-                            item.Allowed = argBr.ToString();
-                            break;
-                        case "xor":
-
-                            break;
-                    }
-                }
-                foreach (HoiArray arr in techBr.Arrays)
+            foreach (Bracket techBr in technologiesBracket.SubBrackets)
+            {
+                var config = ParseTechItem(techBr, fileFullPath, isOverride);
+                if (config != null)
                 {
-                    switch (arr.Name.ToLowerInvariant())
-                    {
-                        case "xor":
-                            if (arr.Values == null)
-                            {
-                                Logger.AddLog($"[Warning] XOR br of {item} is empty.");
-                                break;
-                            }
-                            foreach (var value in arr.Values)
-                            {
-                                TechTreeItemConfig itm = ModDataStorage.Mod.TechTreeItems.FindById(value.ToString());
-                                if (item == null)
-                                {
-                                    Logger.AddDbgLog($"[Warning] Item {value.ToString()} is no existng. Creating empty...", "TechTreeItemComposer");
-                                    itm = new TechTreeItemConfig();
-                                    itm.Id = new(value.ToString());
-                                }
-                                item.Mutal.Add(itm);
-                            }
-                            break;
-                        case "categories":
-                            if (arr.Values == null)
-                            {
-                                Logger.AddLog($"[Warning] Item {item.Id} has no categories defined.");
-                                break;
-                            }
-                            foreach (object val in arr.Values)
-                            {
-                                TechCategoryConfig category = ModDataStorage.Mod.TechCategories.FirstOrDefault(c => c.Id.ToString() == val.ToString());
-                                if (category == null)
-                                {
-                                    Logger.AddLog($"[Warning] Item {item.Id} has {val.ToString()} that undef category");
-                                    continue;
-                                }
-                                item.Categories.AddSafe(ModDataStorage.Mod.TechCategories.FirstOrDefault(c => c.Id.ToString() == val.ToString()));
-                            }
-                            break;
-                        case "enable_equipments":
-                            if (arr.Values == null)
-                            {
-                                Logger.AddLog($"[Warning] Item {item.Id} has no enablig eq defined.");
-                                break;
-                            }
-                            foreach (object val in arr.Values)
-                            {
-                                EquipmentConfig equip = ModDataStorage.Mod.Equipments.FirstOrDefault(e => e.Id.ToString() == val.ToString());
-                                if (equip == null)
-                                {
-                                    Logger.AddDbgLog($"[Warning] Equpment {equip.Id.ToString()} is undefiend.");
-                                    continue;
-                                }
-                                item.EnableEquipments.Add(equip);
-                            }
-                            break;
-                        case "enable_subunits":
-                            if (arr.Values == null)
-                            {
-                                Logger.AddLog($"[Warning] Item {item.Id} has no enablig eq defined.");
-                                break;
-                            }
-                            foreach (object val in arr.Values)
-                            {
-                                SubUnitConfig reg = ModDataStorage.Mod.SubUnits.FirstOrDefault(e => e.Id.ToString() == val.ToString());
-                                if (reg == null)
-                                {
-                                    Logger.AddDbgLog($"[Warning] Regiment {reg.Id.ToString()} is undefiend.");
-                                    continue;
-                                }
-                                item.EnableUnits.Add(reg);
-                            }
-                            break;
-                        case "enable_equipment_modules":
-                            //todo: modules
-                            break;
-                    }
+                    configFile.Entities.Add(config);
+                    Logger.AddDbgLog($"  → добавлена технология: {config.Id}");
                 }
-                res.Add(item);
             }
-            return res;
+
+            return configFile;
+        }
+
+        private static TechTreeItemConfig ParseTechItem(Bracket techBr, string fileFullPath, bool isOverride)
+        {
+            string id = techBr.Name;
+            if (string.IsNullOrWhiteSpace(id)) return null;
+
+            var item = new TechTreeItemConfig
+            {
+                Id = new Identifier(id),
+                FileFullPath = fileFullPath,
+                IsOverride = isOverride,
+
+                Modifiers = new Dictionary<ModifierDefinitionConfig, object>(),
+                EnableBuildings = new Dictionary<BuildingConfig, object>(),
+                EnableEquipments = new List<EquipmentConfig>(),
+                EnableUnits = new List<SubUnitConfig>(),
+                Categories = new List<TechCategoryConfig>(),
+                Mutal = new List<TechTreeItemConfig>(),
+                ChildOf = new List<TechTreeItemConfig>()
+            };
+
+            // Простые переменные
+            foreach (Var v in techBr.SubVars)
+            {
+                switch (v.Name.ToLowerInvariant())
+                {
+                    case "research_cost":
+                        item.Cost = v.Value.ToInt();
+                        break;
+
+                    case "start_year":
+                        item.StartYear = v.Value.ToInt();
+                        break;
+
+                    case "force_use_small_tech_layout":
+                        item.IsBig = !v.Value.ToBool(); // в оригинале IsBig = !force_small
+                        break;
+
+                    case "show_equipment_icon":
+                        item.ShowEqIcon = v.Value.ToBool();
+                        break;
+
+                    case "desc":
+                        item.SpecialDescKey = v.Value?.ToString();
+                        break;
+
+                    default:
+                        var modDef = ModDataStorage.Mod.ModifierDefinitions.SearchConfigInFile(v.Name);
+                        if (modDef != null)
+                            item.Modifiers.Add(modDef, v.Value);
+                        break;
+                }
+            }
+
+            // Подблоки
+            foreach (Bracket subBr in techBr.SubBrackets)
+            {
+                switch (subBr.Name.ToLowerInvariant())
+                {
+                    case "path":
+                        var coef = subBr.SubVars.FirstOrDefault(v => v.Name == "research_cost_coeff");
+                        if (coef != null)
+                            item.ModifCost = coef.Value.ToInt();
+
+                        var childV = subBr.SubVars.FirstOrDefault(v => v.Name == "leads_to_tech");
+                        if (childV != null)
+                        {
+                            var childTech = ModDataStorage.Mod.TechTreeItems.SearchConfigInFile(childV.Value?.ToString());
+                            if (childTech != null)
+                                childTech.ChildOf.Add(item);
+                        }
+                        break;
+
+                    case "folder":
+                        var flName = subBr.SubVars.FirstOrDefault(v => v.Name == "name");
+                        if (flName != null)
+                        {
+                            var folder = ModDataStorage.Mod.TechTreeLedgers.SearchConfigInFile(flName.Value?.ToString());
+                            if (folder != null)
+                                folder.Items.Add(item);
+                        }
+
+                        var posBr = subBr.SubBrackets.FirstOrDefault(b => b.Name == "position");
+                        if (posBr != null)
+                        {
+                            var x = posBr.SubVars.FirstOrDefault(v => v.Name == "x")?.Value.ToInt() ?? 0;
+                            var y = posBr.SubVars.FirstOrDefault(v => v.Name == "y")?.Value.ToInt() ?? 0;
+                            item.GridX = x;
+                            item.GridY = y;
+                        }
+                        break;
+
+                    case "enable_building":
+                        var buildingVar = subBr.SubVars.FirstOrDefault(v => v.Name == "building");
+                        var levelVar = subBr.SubVars.FirstOrDefault(v => v.Name == "level");
+                        if (buildingVar != null && levelVar != null)
+                        {
+                            var building = ModDataStorage.Mod.Buildings.SearchConfigInFile(buildingVar.Value?.ToString());
+                            if (building != null)
+                                item.EnableBuildings.Add(building, levelVar.Value.ToInt());
+                        }
+                        break;
+
+                    case "on_research_complete":
+                        item.Effects = subBr.ToString();
+                        break;
+
+                    case "ai_will_do":
+                        item.AiWillDo = subBr.ToString();
+                        break;
+
+                    case "allow_branch":
+                        item.AllowBranch = subBr.ToString();
+                        break;
+
+                    case "allowed":
+                        item.Allowed = subBr.ToString();
+                        break;
+
+                    case "xor":
+                        // обрабатывается в массивах ниже
+                        break;
+                }
+            }
+
+            // Массивы
+            foreach (HoiArray arr in techBr.Arrays)
+            {
+                switch (arr.Name.ToLowerInvariant())
+                {
+                    case "xor":
+                        foreach (var value in arr.Values)
+                        {
+                            var xorItem = ModDataStorage.Mod.TechTreeItems.SearchConfigInFile(value?.ToString());
+                            if (xorItem != null)
+                                item.Mutal.Add(xorItem);
+                        }
+                        break;
+
+                    case "categories":
+                        foreach (var val in arr.Values)
+                        {
+                            var category = ModDataStorage.Mod.TechCategories.SearchConfigInFile(val?.ToString());
+                            if (category != null)
+                                item.Categories.Add(category);
+                        }
+                        break;
+
+                    case "enable_equipments":
+                        foreach (var val in arr.Values)
+                        {
+                            var equip = ModDataStorage.Mod.Equipments.SearchConfigInFile(val?.ToString());
+                            if (equip != null)
+                                item.EnableEquipments.Add(equip);
+                        }
+                        break;
+
+                    case "enable_subunits":
+                        foreach (var val in arr.Values)
+                        {
+                            var subunit = ModDataStorage.Mod.SubUnits.SearchConfigInFile(val?.ToString());
+                            if (subunit != null)
+                                item.EnableUnits.Add(subunit);
+                        }
+                        break;
+
+                    case "enable_equipment_modules":
+                        // todo: modules (если нужно — добавь позже)
+                        break;
+                }
+            }
+
+            return item;
         }
     }
 }

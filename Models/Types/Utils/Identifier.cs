@@ -18,7 +18,7 @@ namespace Models.Types.Utils
         {
             return int.Parse(RawItendifier.ToString());
         }
-        public string ToString()
+        public override string ToString()
         {
             return RawItendifier.ToString();
         }

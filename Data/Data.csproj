@@ -16,6 +16,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <None Remove="Data\Text\OtherModifierDefenitions.txt" />
+    <None Remove="Embedded\Images\Controls\warn.png" />
     <None Remove="Embedded\JSON\ErrorTypesDefenitions.json" />
     <None Remove="Embedded\Text\OtherModifierDefenitions.txt" />
   </ItemGroup>
@@ -32,6 +33,10 @@
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="9.0.10" />
     <PackageReference Include="System.Resources.Extensions" Version="9.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Embedded\Images\Controls\warn.png" />
   </ItemGroup>
 
   <ItemGroup>
