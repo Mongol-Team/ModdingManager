@@ -105,5 +105,11 @@
   "Log.WindowTitleBar.WindowMaximized": "Окно развернуто на весь экран",
   "Log.WindowTitleBar.WindowRestored": "Окно восстановлено до нормального размера"
 
+  "Log.CountriesInitialized": "Страны инициализированы: {0}, пример: {1}",
+  "Window.Settings": "Настройки",
+  "Label.ParallelismPercent": "Процент использования параллелизма:",
+  "Label.DebugMode": "Режим отладки",
+  "Label.InterfaceLanguage": "Язык интерфейса:",
+  "Button.SaveSettings": "Сохранить настройки"
 
 }

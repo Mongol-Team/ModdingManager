@@ -1,6 +1,7 @@
 using Application;
 using Application.Settings;
 using Application.utils;
+using Microsoft.Win32;
 using Models.Enums;
 using System.IO;
 using System.Windows;
@@ -26,10 +27,10 @@ namespace View
 
         private void WelcomeWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (DialogResult != true && string.IsNullOrEmpty(SelectedProjectPath))
-            {
-                DialogResult = false;
-            }
+            //if (DialogResult != true && string.IsNullOrEmpty(SelectedProjectPath))
+            //{
+            //    DialogResult = false;
+            //}
         }
 
         private void UpdateGameDirectoryDisplay()
@@ -162,7 +163,7 @@ namespace View
                 try
                 {
                     await LoadModData();
-                    MainWindow mainWindow = new MainWindow();
+                    MainWindow mainWindow = new();
                     System.Windows.Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
                     mainWindow.Activate();
@@ -228,36 +229,42 @@ namespace View
 
         private async void CreateProjectButton_Click(object sender, RoutedEventArgs e)
         {
-            using (var dialog = new FolderBrowserDialog())
+            var dialog = new OpenFolderDialog
             {
-                dialog.Description = StaticLocalisation.GetString("Button.CreateNewProject");
-                dialog.ShowNewFolderButton = true;
+                Title = StaticLocalisation.GetString("Button.CreateNewProject"),
+                // InitialDirectory = ... // можно задать стартовую папку
+            };
 
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (dialog.ShowDialog() == true)
+            {
+                var projectPath = dialog.FolderName;
+                var projectName = Path.GetFileName(projectPath);
+
+                if (string.IsNullOrEmpty(projectName))
+                    projectName = projectPath;
+
+                ModManagerSettingsLoader.AddRecentProject(projectPath, projectName);
+                SelectedProjectPath = projectPath;
+
+                try
                 {
-                    var projectPath = dialog.SelectedPath;
-                    var projectName = Path.GetFileName(projectPath);
-                    if (string.IsNullOrEmpty(projectName))
-                        projectName = projectPath;
+                    await LoadModData();
 
-                    ModManagerSettingsLoader.AddRecentProject(projectPath, projectName);
-                    SelectedProjectPath = projectPath;
-                    try
-                    {
-                        await LoadModData();
-                        ((Window)this).DialogResult = true;
-                        var mainWindow = new MainWindow();
-                        System.Windows.Application.Current.MainWindow = (Window)mainWindow;
-                        mainWindow.Show();
-                        this.Close();
-                    }
-                    catch (Exception ex)
-                    {
-                        ShowError(
-                            $"Ошибка при загрузке данных мода: {ex.Message}",
-                            NotificationCorner.TopRight);
-                        ((Window)this).DialogResult = false;
-                    }
+                    DialogResult = true;
+
+                    var mainWindow = new MainWindow();
+                    System.Windows.Application.Current.MainWindow = mainWindow;
+                    mainWindow.Show();
+
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    ShowError(
+                        $"Ошибка при загрузке данных мода: {ex.Message}",
+                        NotificationCorner.TopRight);
+
+                    DialogResult = false;
                 }
             }
         }
@@ -300,46 +307,18 @@ namespace View
 
         private void LoadSettings()
         {
-            ParallelismSlider.Value = ModManagerSettings.MaxPercentForParallelUsage;
-            ParallelismValueText.Text = $"{ModManagerSettings.MaxPercentForParallelUsage}%";
-            DebugModeCheckBox.IsChecked = ModManagerSettings.IsDebugRunning;
-
-            LanguageComboBox.ItemsSource = Enum.GetValues(typeof(Language)).Cast<Language>();
-            LanguageComboBox.SelectedItem = ModManagerSettings.CurrentLanguage;
+            WelcomeSettingsControl.ParallelismPercent = ModManagerSettings.MaxPercentForParallelUsage;
+            WelcomeSettingsControl.IsDebugMode = ModManagerSettings.IsDebugRunning;
+            WelcomeSettingsControl.LanguageItemsSource = Enum.GetValues(typeof(Language)).Cast<Language>();
+            WelcomeSettingsControl.SelectedLanguage = ModManagerSettings.CurrentLanguage;
         }
 
-        private void ParallelismSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void WelcomeSettingsControl_SaveClicked(object sender, RoutedEventArgs e)
         {
-            if (ParallelismValueText != null)
-            {
-                ParallelismValueText.Text = $"{(int)e.NewValue}%";
-            }
-        }
+            ModManagerSettings.MaxPercentForParallelUsage = WelcomeSettingsControl.ParallelismPercent;
+            ModManagerSettings.IsDebugRunning = WelcomeSettingsControl.IsDebugMode;
 
-        private void DebugModeCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            ModManagerSettings.IsDebugRunning = true;
-        }
-
-        private void DebugModeCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            ModManagerSettings.IsDebugRunning = false;
-        }
-
-        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (LanguageComboBox.SelectedItem is Language language)
-            {
-                ModManagerSettings.CurrentLanguage = language;
-            }
-        }
-
-        private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            ModManagerSettings.MaxPercentForParallelUsage = (int)ParallelismSlider.Value;
-            ModManagerSettings.IsDebugRunning = DebugModeCheckBox.IsChecked ?? false;
-
-            if (LanguageComboBox.SelectedItem is Language language)
+            if (WelcomeSettingsControl.SelectedLanguage is Language language)
             {
                 ModManagerSettings.CurrentLanguage = language;
             }

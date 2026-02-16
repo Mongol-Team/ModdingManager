@@ -65,6 +65,8 @@ public static class ModDataStorage
 
         var customMods = Mod.ModifierDefinitions.Where(m => !m.IsCore).ToObservableCollection();
 
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+#pragma warning disable CS8604 // Possible null reference argument.
         Logger.AddLog(StaticLocalisation.GetString("Log.IdeologiesInitialized",
             Mod.Ideologies.Count,
             Mod.Ideologies.Count > 0 ? Mod.Ideologies.FileEntitiesToList()?.Random().Id : "none"));
@@ -134,6 +136,8 @@ public static class ModDataStorage
         Logger.AddLog(StaticLocalisation.GetString("Log.CountriesInitialized",
             Mod.Countries.Count,
             Mod.Countries.Count > 0 ? Mod.Countries.FileEntitiesToList()?.Random().Id : "none"));
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 }
 

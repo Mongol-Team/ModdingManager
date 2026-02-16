@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Application.Utils
 {
     public static class AppPaths
@@ -7,26 +5,17 @@ namespace Application.Utils
         public const string Company = "SME";
         public const string AppName = "ModdingManager";
 
-        public static string BaseDirectory => AppContext.BaseDirectory;
+        public const string ProgramConfigName = "program.cfg";
+
+        public static string MyBaseDirectory => AppContext.BaseDirectory;
 
         private static bool IsDevelopmentEnvironment()
         {
-            if (Debugger.IsAttached)
-                return true;
-
-            var baseDir = BaseDirectory;
-            var dirName = Path.GetFileName(Path.GetDirectoryName(baseDir))?.ToLowerInvariant();
-
-            if (dirName is "debug" or "release")
-                return true;
-
-            var parentDir = Path.GetDirectoryName(Path.GetDirectoryName(baseDir));
-            var parentDirName = Path.GetFileName(parentDir)?.ToLowerInvariant();
-
-            if (parentDirName == "bin")
-                return true;
-
+#if DEBUG
+            return true;
+#else
             return false;
+#endif
         }
 
         public static string DataDirectory
@@ -34,32 +23,26 @@ namespace Application.Utils
             get
             {
                 if (IsDevelopmentEnvironment())
-                    return Ensure(Path.Combine(BaseDirectory, "AppData"));
+                    return EnsureOrCreate(Path.Combine(MyBaseDirectory, "AppData"));
 
-                return Ensure(Path.Combine(
+                return EnsureOrCreate(Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     Company,
                     AppName
                 ));
             }
         }
+        // Directories , we use "EnsureOrCreate" for them
+        public static string ConfigDirectory => EnsureOrCreate(Path.Combine(DataDirectory, "Configs"));
+        public static string LogsDirectory => EnsureOrCreate(Path.Combine(DataDirectory, "Logs"));
+        public static string ProfilesDirectory => EnsureOrCreate(Path.Combine(DataDirectory, "Profiles"));
+        public static string CacheDirectory => EnsureOrCreate(Path.Combine(DataDirectory, "Cache"));
+        // Files , we use "Ensure" for them
+        public static string ProgramConfigPath => Path.Combine(ConfigDirectory, ProgramConfigName);
 
-        public static string ConfigDirectory => Ensure(Path.Combine(DataDirectory, "Configs"));
-        public static string LogsDirectory => Ensure(Path.Combine(DataDirectory, "Logs"));
-        public static string ProfilesDirectory => Ensure(Path.Combine(DataDirectory, "Profiles"));
-        public static string CacheDirectory => Ensure(Path.Combine(DataDirectory, "Cache"));
+        public static void Ensure(string dir)  { if (!File.Exists(dir)) throw new FileNotFoundException($"Configuration file not found: {dir}"); }
 
-        public static string GetConfigPath(string name) => Path.Combine(ConfigDirectory, name);
-
-        public static string ProgramCfgPath => GetConfigPath("program.cfg");
-
-        public static void EnsureProgramCfgExists()
-        {
-            if (!File.Exists(ProgramCfgPath))
-                throw new FileNotFoundException($"Configuration file not found: {ProgramCfgPath}");
-        }
-
-        private static string Ensure(string dir)
+        private static string EnsureOrCreate(string dir)
         {
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
