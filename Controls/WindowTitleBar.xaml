@@ -37,15 +37,15 @@
                     Style="{StaticResource WindowControlButton}"
                     Click="MaximizeButton_Click"
                     ToolTip="Развернуть">
-                <TextBlock Text="🗗" FontSize="10"/>
+                <TextBlock Text="🗖" FontSize="10"/>
             </Button>
 
             <Button x:Name="RestoreButton"
                     Style="{StaticResource WindowControlButton}"
                     Click="RestoreButton_Click"
                     ToolTip="Восстановить"
-                    Visibility="Collapsed">
-                <TextBlock Text="🗖" FontSize="10"/>
+                    Visibility="Collapsed" Cursor="Hand">
+                <TextBlock Text="🗗" FontSize="10"/>
             </Button>
             
             <Button x:Name="CloseButton"

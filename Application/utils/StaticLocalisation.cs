@@ -1,9 +1,6 @@
 using Application.Debugging;
 using Application.Settings;
 using Models.Enums;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 
@@ -17,7 +14,6 @@ namespace Application.utils
 
         private static Assembly FindDataAssembly()
         {
-            // Попробовать найти сборку Data по имени
             var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             var dataAssembly = assemblies.FirstOrDefault(a => 
                 a.GetName().Name == "Data" && 
@@ -100,7 +96,6 @@ namespace Application.utils
                     : string.Format(template, args);
             }
            
-
             var language = ModManagerSettings.CurrentLanguage;
             
             if (_localizations.TryGetValue(language, out var langDict))

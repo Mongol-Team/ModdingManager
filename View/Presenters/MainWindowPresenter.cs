@@ -8,21 +8,15 @@ namespace ViewPresenters
 {
     public sealed class MainWindowPresenter
     {
-        //private readonly MainWindow _view;
+        private readonly MainWindow _view;
         private bool _isLoaded = false;
         private bool _isApplicationInitialized = false;
 
-        public MainWindowPresenter(/*MainWindow view*/)
+        public MainWindowPresenter(MainWindow view)
         {
-            //ModManagerSettingsLoader.Load();
-            //_view = view ?? throw new ArgumentNullException(nameof(view));
-            //WireUp();
-            //_view.Loaded += OnWindowLoaded;
-        }
-
-        private void WireUp()
-        {
-
+            ModManagerSettingsLoader.Load();
+            _view = view ?? throw new ArgumentNullException(nameof(view));
+            _view.Loaded += OnWindowLoaded;
         }
 
         private async void OnWindowLoaded(object? sender, RoutedEventArgs e)
@@ -36,20 +30,6 @@ namespace ViewPresenters
         private async System.Threading.Tasks.Task InitializeApplicationAsync()
         {
             _isApplicationInitialized = true;
-        }
-
-        private bool HasAnyDir()
-        {
-            return !string.IsNullOrEmpty(ModManagerSettings.ModDirectory) || !string.IsNullOrEmpty(ModManagerSettings.GameDirectory);
-        }
-
-        private void UpdateModManager()
-        {
-            if (!_isApplicationInitialized)
-            {
-                MessageBox.Show(StaticLocalisation.GetString("Info.AppNotInitialized"), StaticLocalisation.GetString("Info.Info"), MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
         }
     }
 }

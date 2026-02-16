@@ -71,12 +71,14 @@ public static class OverrideManager
                 }
             });
 
-            // Удаляем из ObservableCollection
             if (value is IList list)
             {
                 foreach (var item in toRemove)
                 {
-                    list.Remove(item);
+                    if (list.Contains(item)) // проверка на наличие
+                    {
+                        list.Remove(item);
+                    }
                 }
             }
         }
