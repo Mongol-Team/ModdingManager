@@ -1,13 +1,12 @@
 using Application;
 using Application.Settings;
+using Application.utils;
 using Models.Enums;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Forms;
-using View.Utils;
-using Application.utils;
+using System.Windows.Input;
 
 namespace View
 {

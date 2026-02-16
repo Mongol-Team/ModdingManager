@@ -1,13 +1,9 @@
-﻿using ViewControls;
+﻿using Controls;
+using Models.Configs;
 using Models.Enums;
-using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Windows;
-using Models.Configs;
 
 namespace ViewInterfaces
 {

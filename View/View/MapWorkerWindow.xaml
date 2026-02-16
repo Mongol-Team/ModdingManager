@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:controls="clr-namespace:ViewControls"
+        xmlns:controls="clr-namespace:Controls;assembly=Controls"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:View"
         xmlns:base="clr-namespace:View"
@@ -57,7 +57,7 @@
             <Button Margin="15" Content="Страны" x:Name="CountryMapButton" Background="#FFC7E549" FontSize="18" Click="CountryLayerButton_Click"/>
             <Button Margin="15" Content="Регионы" x:Name="StrategicMapButton" Background="#FFE59E49" FontSize="18" Click="StrategicLayerButton_Click"/>
             <CheckBox Margin="10" x:Name="DisplayIdsBox" Content="Отобр. айди" FontSize="16" VerticalAlignment="Center"/>
-            <controls:ImageButton Margin="10" x:Name="HealerButton" ImageSource="/data/gfx/interface/healer.png" Width="35" Height="35" MouseDown="HealerButton_MouseDown"/>
+            <controls:ImageButton Margin="10" x:Name="HealerButton"  Width="35" Height="35" MouseDown="HealerButton_MouseDown"/>
         </StackPanel>
 
         <StackPanel Margin="942,0,10,7">

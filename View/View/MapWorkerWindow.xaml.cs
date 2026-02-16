@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using ViewControls;
+using Controls;
 using ViewInterfaces;
 using ViewPresenters;
 using Cursors = System.Windows.Input.Cursors;

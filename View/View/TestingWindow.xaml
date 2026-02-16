@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:View"
-        xmlns:ctrs="clr-namespace:ViewControls"
-        xmlns:controls="clr-namespace:ViewControls"
+        xmlns:controls="clr-namespace:Controls;assembly=Controls"
         xmlns:base="clr-namespace:View"
         mc:Ignorable="d"
         Title="TestingWindow" Height="450" Width="800">
@@ -14,6 +13,6 @@
             <RowDefinition Height="209*"/>
             <RowDefinition Height="225*"/>
         </Grid.RowDefinitions>
-        <ctrs:ErrorPanel x:Name="errTest"> </ctrs:ErrorPanel>
+        <controls:ErrorPanel x:Name="errTest"> </controls:ErrorPanel>
     </Grid>
 </base:BaseWindow>

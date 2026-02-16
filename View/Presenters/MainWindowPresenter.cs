@@ -2,23 +2,22 @@
 using Application.utils;
 using global::View;
 using System.Windows;
-using View.Utils;
 using MessageBox = System.Windows.MessageBox;
 
 namespace ViewPresenters
 {
     public sealed class MainWindowPresenter
     {
-        private readonly MainWindow _view;
+        //private readonly MainWindow _view;
         private bool _isLoaded = false;
         private bool _isApplicationInitialized = false;
 
-        public MainWindowPresenter(MainWindow view)
+        public MainWindowPresenter(/*MainWindow view*/)
         {
-            ModManagerSettingsLoader.Load();
-            _view = view ?? throw new ArgumentNullException(nameof(view));
-            WireUp();
-            _view.Loaded += OnWindowLoaded;
+            //ModManagerSettingsLoader.Load();
+            //_view = view ?? throw new ArgumentNullException(nameof(view));
+            //WireUp();
+            //_view.Loaded += OnWindowLoaded;
         }
 
         private void WireUp()

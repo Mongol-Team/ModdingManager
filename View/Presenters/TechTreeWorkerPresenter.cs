@@ -1,12 +1,9 @@
-﻿using ViewControls;
-using ViewInterfaces;
-using Application.Extentions;
+﻿using Application.Extentions;
 using Application.handlers;
-using Models.GfxTypes;
-using System;
-using System.Linq;
-using System.Windows;
+using Controls;
 using Models.Configs;
+using Models.GfxTypes;
+using ViewInterfaces;
 
 namespace ViewPresenters
 {

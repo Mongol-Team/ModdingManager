@@ -1,16 +1,13 @@
-﻿using Application.Debugging;
-using Application.Settings;
+﻿using Application.Settings;
 using Application.utils;
 using Application.Utils;
+using Controls;
+using Controls.Docking;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using View.Controls;
-using View.Utils;
-using ViewControls;
-using ViewControls.Docking;
 using Button = System.Windows.Controls.Button;
 namespace View
 {

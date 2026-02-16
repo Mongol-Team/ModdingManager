@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:View"
-        xmlns:controls="clr-namespace:ViewControls"
+        xmlns:controls="clr-namespace:Controls;assembly=Controls"
         xmlns:base="clr-namespace:View"
         mc:Ignorable="d"
         Title="MapHealerWindow" Height="450" Width="800"

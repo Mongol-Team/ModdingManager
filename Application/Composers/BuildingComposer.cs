@@ -33,17 +33,24 @@ namespace Application.Composers
 
             foreach (string path in possiblePathes)
             {
-                string[] files = Directory.GetFiles(path);
-                foreach (string file in files)
+                if(path.HasFiles())
                 {
-                    if (File.Exists(file))
+                    string[] files = Directory.GetFiles(path);
+                    foreach (string file in files)
                     {
-                        string fileContent = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
-                        ConfigFile<BuildingConfig> configFile = ParseFile(hoiFuncFile, file, path == ModPathes.BuildingsPath); // Передаем путь для определения IsOverride
-                        buildingFiles.Add(configFile);
-                        Logger.AddDbgLog($"Добавлен файл: {configFile.FileName} с {configFile.Entities.Count} конфигами.");
+                        if (File.Exists(file))
+                        {
+                            string fileContent = File.ReadAllText(file);
+                            HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
+                            ConfigFile<BuildingConfig> configFile = ParseFile(hoiFuncFile, file, path == ModPathes.BuildingsPath); // Передаем путь для определения IsOverride
+                            buildingFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлен файл: {configFile.FileName} с {configFile.Entities.Count} конфигами.");
+                        }
                     }
+                }
+                else
+                {
+                    Logger.AddDbgLog($"Пути {path} не существует.");
                 }
             }
 

@@ -3,11 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:cntrls="clr-namespace:ViewControls"
         xmlns:local="clr-namespace:View"
         xmlns:base="clr-namespace:View"
         mc:Ignorable="d"
-        xmlns:controls="clr-namespace:ViewControls"
+        xmlns:controls="clr-namespace:Controls;assembly=Controls"
         Title="TechCreator" Height="820" Width="1500"
         ResizeMode="CanResize"
         Style="{StaticResource WindowDark}">
@@ -44,7 +43,7 @@
                 Drop="TechIconCanvas_Drop"
                 Background="Transparent">
                 <Image x:Name="SmallBackgroundImage"
-                   Source="pack://application:,,,/data/gfx/interface/tech_industry_available_item_bg.png"
+                   
                    Width="62" Height="62"
                    Stretch="UniformToFill"
                    IsHitTestVisible="False" />
@@ -59,7 +58,6 @@
                 Drop="TechIconCanvas_Drop"
                 Background="Transparent">
                 <Image x:Name="BigBackgroundImage"
-                       Source="pack://application:,,,/data/gfx/interface/technology_available_item_bg.png"
                        Width="183" Height="84"
                        Stretch="UniformToFill"
                        IsHitTestVisible="False" />
@@ -161,7 +159,6 @@
                 MouseDown="RemoveImageEvent" Margin="203,3,27,736">
                 <Image x:Name="TabFolderBackgroundImage"
                    Width="182" Height="61"
-                   Source="pack://application:,,,/data/gfx/interface/techtree_tabs.png"
                    Stretch="Uniform"
                    IsHitTestVisible="False" />
                 <Image x:Name="TabFolderFirstImage"
@@ -174,7 +171,6 @@
                    IsHitTestVisible="False" Canvas.Left="124" Canvas.Top="17" />
                 <Image x:Name="TabFolderShadowingImage"
                    Width="182" Height="61"
-                   Source="pack://application:,,,/data/gfx/interface/techtree_tabs_shadowing.png"
                    Stretch="Uniform"
                    IsHitTestVisible="False" />
             </Canvas>
@@ -182,8 +178,8 @@
             <!-- пока ничего -->
         </Grid>
 
-            <cntrls:TechnologyGrid x:Name="TechGrid"  Grid.Column="1">
-            </cntrls:TechnologyGrid >
+            <controls:TechnologyGrid x:Name="TechGrid"  Grid.Column="1">
+            </controls:TechnologyGrid >
         </Grid>
     </Grid>
 </base:BaseWindow>
