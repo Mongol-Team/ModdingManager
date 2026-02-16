@@ -1,6 +1,5 @@
-using View.Utils;
-using System.Windows;
 using Application.utils;
+using System.Windows;
 
 namespace View
 {

@@ -1,9 +1,9 @@
-﻿<base:BaseWindow x:Class="View.MainWindow"
+﻿<local:BaseWindow x:Class="View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="clr-namespace:ViewControls"
-        xmlns:docking="clr-namespace:ViewControls.Docking"
-        xmlns:base="clr-namespace:View"
+        xmlns:controls="clr-namespace:Controls;assembly=Controls"
+        xmlns:docking="clr-namespace:Controls.Docking;assembly=Controls"
+        xmlns:local="clr-namespace:View"
         Title="Главное меню"
         Width="963" Height="694"
         WindowStartupLocation="CenterScreen"
@@ -20,5 +20,5 @@
         
         <docking:DockManager x:Name="DockManager" Grid.Row="1"/>
     </Grid>
-</base:BaseWindow>
+</local:BaseWindow>
 

@@ -1,10 +1,8 @@
-using View.Utils;
-using System;
+using Application.Settings;
+using Application.utils;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
-using Application.Settings;
-using Application.utils;
 
 namespace View
 {

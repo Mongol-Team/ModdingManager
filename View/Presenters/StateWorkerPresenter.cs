@@ -1,13 +1,13 @@
 ﻿using Application;
 using Application.Extentions;
 using Application.Settings;
+using Controls;
 using Models.Args;
 using Models.Configs;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
-using ViewControls;
 using ViewInterfaces;
 using Brushes = System.Windows.Media.Brushes;
 using MessageBox = System.Windows.MessageBox;
@@ -24,7 +24,6 @@ namespace ViewPresenters
         private readonly IStateWorkerView _view;
         private readonly StateWorkerHandler _handler;
         private Dictionary<int, System.Windows.Media.Color> _stateColors = new();
-        private LoadingWindow _loadingWindow = new();
 
         public StateWorkerPresenter(IStateWorkerView view)
         {
@@ -44,38 +43,36 @@ namespace ViewPresenters
         {
             if (_view is not Window window || !window.IsLoaded) return;
 
-            var loadingWindow = new LoadingWindow
-            {
-                Owner = window,
-                Message = "Извлекаем формы провинций с картинки..."
-            };
-            loadingWindow.SetProgressBounds(0, 4);
-            loadingWindow.Show();
+            //var loadingWindow = new Window
+            //{
+            //    Message = "Извлекаем формы провинций с картинки..."
+            //};
+            //loadingWindow.SetProgressBounds(0, 4);
 
-            string modDirectory = ModManagerSettings.ModDirectory;
-            _view.Display.Width = ModDataStorage.Mod.Map.Bitmap.Width;
-            _view.Display.Height = ModDataStorage.Mod.Map.Bitmap.Height;
+            //string modDirectory = ModManagerSettings.ModDirectory;
+            //_view.Display.Width = ModDataStorage.Mod.Map.Bitmap.Width;
+            //_view.Display.Height = ModDataStorage.Mod.Map.Bitmap.Height;
 
-            loadingWindow.Message = "Рисуем провинции...";
-            DrawProvinceLayer();
-            loadingWindow.Progress = 1;
-            await Dispatcher.Yield();
+            //loadingWindow.Message = "Рисуем провинции...";
+            //DrawProvinceLayer();
+            //loadingWindow.Progress = 1;
+            //await Dispatcher.Yield();
 
-            loadingWindow.Message = "Рисуем штаты...";
-            DrawStateLayer();
-            loadingWindow.Progress = 2;
-            await Dispatcher.Yield();
+            //loadingWindow.Message = "Рисуем штаты...";
+            //DrawStateLayer();
+            //loadingWindow.Progress = 2;
+            //await Dispatcher.Yield();
 
-            loadingWindow.Message = "Рисуем страны...";
-            DrawCountryLayer();
-            loadingWindow.Progress = 3;
-            await Dispatcher.Yield();
+            //loadingWindow.Message = "Рисуем страны...";
+            //DrawCountryLayer();
+            //loadingWindow.Progress = 3;
+            //await Dispatcher.Yield();
 
-            loadingWindow.Message = "Рисуем стратегические регионы...";
-            DrawStrategicLayer();
-            loadingWindow.Progress = 4;
+            //loadingWindow.Message = "Рисуем стратегические регионы...";
+            //DrawStrategicLayer();
+            //loadingWindow.Progress = 4;
 
-            loadingWindow.EndLoading();
+            //loadingWindow.EndLoading();
 
             UpdateLayer("PROVINCE");
         }

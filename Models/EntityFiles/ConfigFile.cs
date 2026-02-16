@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Models.EntityFiles
 {
-    public class ConfigFile<T> where T : IConfig
+    public class ConfigFile<T> : IFile where T : IConfig
     {
         public List<T> Entities { get; set; } = new List<T>();
         public string FileFullPath { get; set; }

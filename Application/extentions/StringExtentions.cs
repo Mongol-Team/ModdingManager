@@ -25,6 +25,17 @@ namespace Application.Extentions
                 .Split('_', StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => char.ToUpperInvariant(s[0]) + s.Substring(1)));
         }
+        public static bool HasFiles(this string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return false;
+
+            if (!Directory.Exists(path))
+                return false;
+
+            var files = Directory.GetFiles(path);
+            return files != null && files.Length > 0;
+        }
 
         public static string SnakeToCamel(this string input)
         {

@@ -1,16 +1,23 @@
 <base:BaseWindow x:Class="View.WelcomeWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="clr-namespace:ViewControls"
-        xmlns:loc="clr-namespace:View.Utils"
-        xmlns:enums="clr-namespace:Models.Enums"
+        xmlns:controls="clr-namespace:Controls;assembly=Controls"
+        xmlns:enums="clr-namespace:Models.Enums;assembly=Models"
         xmlns:base="clr-namespace:View"
-        Title="{loc:Localize Key=Window.ModdingManager}"
+        xmlns:loc="clr-namespace:Controls.Utils;assembly=Controls"
         Width="1200" Height="700"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
         Style="{StaticResource WindowDark}"
         Closing="WelcomeWindow_Closing">
+    <base:BaseWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                
+                <ResourceDictionary Source="/Controls;component/Themes/Colors.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </base:BaseWindow.Resources>
     <Grid Background="{StaticResource BackgroundApp}">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -212,7 +219,7 @@
                         
                         <CheckBox x:Name="DebugModeCheckBox" 
                                   Content="Режим отладки"
-                                  Style="{StaticResource CheckBoxDark}"
+                                  Style="{DynamicResource CheckBoxDark}"
                                   Margin="0,0,0,16"
                                   Checked="DebugModeCheckBox_Checked"
                                   Unchecked="DebugModeCheckBox_Unchecked"/>

@@ -60,23 +60,30 @@ namespace Application.Composers
                         string tag = tagVar.Name;
                         string countryFileRelative = tagVar.Value?.ToString() ?? string.Empty;
 
-                        if (string.IsNullOrWhiteSpace(countryFileRelative))
-                            continue;
-
-                        CountryConfig country = ParseCountryHistory(tag, countryFileRelative, tagFilePath);
-                        if (country == null)
-                            continue;
-
-                        // Создаём "виртуальный" файл, т.к. у страны обычно один конфиг на файл
-                        var configFile = new ConfigFile<CountryConfig>
+                        // В Parse
+                        CountryConfig country = null;
+                        string actualHistoryPath = FindCountryHistoryPath(tag, countryFileRelative, tagFilePath);
+                        if (actualHistoryPath != null)
                         {
-                            FileFullPath = tagFilePath,  // или путь к файлу истории, если важно
-                            IsOverride = isOverride,
-                            Entities = { country }
-                        };
+                            string historyContent = File.ReadAllText(actualHistoryPath);
+                            HoiFuncFile historyFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(historyContent);
 
-                        countryFiles.Add(configFile);
-                        Logger.AddDbgLog($"Добавлена страна: {tag} ({country.Id}) из {Path.GetFileName(tagFilePath)}");
+                            country = ParseCountryHistory(tag, countryFileRelative, actualHistoryPath, historyFile);
+                        }
+
+                        if (country != null)
+                        {
+                            var configFile = new ConfigFile<CountryConfig>
+                            {
+                                FileFullPath = actualHistoryPath, // теперь реальный путь к истории
+                                IsOverride = isOverride,
+                                Entities = { country }
+                            };
+
+                            countryFiles.Add(configFile);
+                            Logger.AddDbgLog($"Добавлена страна: {tag} ({country.Id}) из {Path.GetFileName(actualHistoryPath)}");
+                        }
+
                     }
                 }
             }
@@ -88,47 +95,42 @@ namespace Application.Composers
 
             return countryFiles;
         }
-
-        /// <summary>
-        /// Парсит файл истории одной страны по относительному пути из tags
-        /// </summary>
-        private static CountryConfig ParseCountryHistory(string tag, string relativePath, string tagFilePath)
+        // Вынесенная функция поиска пути
+        private static string FindCountryHistoryPath(string tag, string relativePath, string tagFilePath)
         {
             string[] possibleHistoryPaths =
             {
-                Path.Combine(ModPathes.HistoryPath, relativePath.Replace("/", "\\")),
-                Path.Combine(GamePathes.HistoryPath, relativePath.Replace("/", "\\")),
-                Path.Combine(ModPathes.HistoryCountriesPath, relativePath.Replace("/", "\\")),
-                Path.Combine(GamePathes.HistoryCountriesPath, relativePath.Replace("/", "\\"))
-            };
-
-            string actualHistoryPath = null;
+        Path.Combine(ModPathes.HistoryPath, relativePath.Replace("/", "\\")),
+        Path.Combine(GamePathes.HistoryPath, relativePath.Replace("/", "\\")),
+        Path.Combine(ModPathes.HistoryCountriesPath, relativePath.Replace("/", "\\")),
+        Path.Combine(GamePathes.HistoryCountriesPath, relativePath.Replace("/", "\\"))
+    };
 
             foreach (string candidate in possibleHistoryPaths)
             {
                 if (File.Exists(candidate))
-                {
-                    actualHistoryPath = candidate;
-                    break;
-                }
+                    return candidate;
             }
+            string[] filesInFolder = Enumerable.Empty<string>()
+                .Concat(Directory.Exists(ModPathes.HistoryCountriesPath) && !string.IsNullOrEmpty(ModPathes.HistoryCountriesPath)
+                    ? Directory.GetFiles(ModPathes.HistoryCountriesPath)
+                    : Array.Empty<string>())
+                .Concat(Directory.Exists(GamePathes.HistoryCountriesPath) && !string.IsNullOrEmpty(GamePathes.HistoryCountriesPath)
+                    ? Directory.GetFiles(GamePathes.HistoryCountriesPath)
+                    : Array.Empty<string>())
+                .ToArray();
 
-            // Если не нашли по точному пути — ищем по тегу в папке (старое поведение)
-            if (actualHistoryPath == null)
-            {
-                string[] filesInFolder = Directory.GetFiles(ModPathes.HistoryCountriesPath).Concat(Directory.GetFiles(GamePathes.HistoryCountriesPath)).ToArray();
-                actualHistoryPath = filesInFolder
-                    .FirstOrDefault(f => Path.GetFileNameWithoutExtension(f).Contains(tag, StringComparison.OrdinalIgnoreCase));
 
-                if (actualHistoryPath == null)
-                {
-                    Logger.AddLog($"Не найден файл истории для страны {tag} (тег-файл: {tagFilePath}), возможно ето динамик - страна. ");
-                    return null;
-                }
-            }
+            return filesInFolder.FirstOrDefault(f =>
+                Path.GetFileNameWithoutExtension(f).Contains(tag, StringComparison.OrdinalIgnoreCase));
+        }
 
-            string content = File.ReadAllText(actualHistoryPath);
-            HoiFuncFile file = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+        /// <summary>
+        /// Парсит файл истории одной страны по относительному пути из tags
+        /// </summary>
+        private static CountryConfig ParseCountryHistory(string tag, string relativePath, string actualHistoryPath, HoiFuncFile file)
+        {
+           
 
             var country = new CountryConfig
             {
