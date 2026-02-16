@@ -1316,7 +1316,6 @@ namespace Controls
                 ld.Width = 200;
             }
 
-            // Подробная отладка: Детали применения стиля
             Logger.AddDbgLog($"Применён стиль GenericViewer к элементу типа {controlTypeName} с Width={control.Width}.");
         }
         private FrameworkElement CreateControlForType(Type type, object value, Action<object> onValueChanged)

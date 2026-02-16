@@ -33,10 +33,17 @@ namespace Controls
             set => SetValue(ErrorProperty, value);
         }
 
+        // Кеш для запобігання повторним обчисленням
+        private double _lastCalculatedHeight = -1;
+        private bool _isUpdating = false;
+
         public ErrorBlock()
         {
             InitializeComponent();
-            SizeChanged += OnSizeChanged;
+
+            // ОПТИМІЗАЦІЯ: Відписуємось від SizeChanged - він викликає безкінечні перерахунки
+            // Замість цього висота буде автоматично розраховуватись через Grid
+            // SizeChanged += OnSizeChanged; // ВИДАЛЕНО
         }
 
         private static void OnErrorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -50,53 +57,75 @@ namespace Controls
                 return;
             }
 
-            // Обновляем содержимое
-            errorBlock.ErrorText.Text = error.Message ?? string.Empty;
+            // Запобігаємо рекурсивним оновленням
+            if (errorBlock._isUpdating)
+                return;
 
-            // Определяем тип иконки
-            var icon = error.Type switch
+            errorBlock._isUpdating = true;
+
+            try
             {
-                ErrorType.Warn => Properties.Resources.warn,
-                ErrorType.Critical => Properties.Resources.err,
-                ErrorType.Fatal => Properties.Resources.err, // если есть отдельная иконка
-                ErrorType.Info => Properties.Resources.warn,
-                _ => Properties.Resources.err,
-            };
+                // Обновляем содержимое
+                errorBlock.ErrorText.Text = error.Message ?? string.Empty;
 
-            errorBlock.ErrorIcon.Source = icon.ToBitmapSource();
+                // Определяем тип иконки
+                var icon = error.Type switch
+                {
+                    ErrorType.Warn => Properties.Resources.warn,
+                    ErrorType.Critical => Properties.Resources.err,
+                    ErrorType.Fatal => Properties.Resources.err,
+                    ErrorType.Info => Properties.Resources.warn,
+                    _ => Properties.Resources.err,
+                };
 
-            // Можно также использовать IsFatal для визуального выделения, если хотите
-            // Например: более яркий фон или красная рамка
-            if (error.Type == ErrorType.Fatal)
-            {
-                errorBlock.Background = new SolidColorBrush(Color.FromArgb(40, 255, 0, 0));
+                errorBlock.ErrorIcon.Source = icon.ToBitmapSource();
+
+                // Визуальное выделение для Fatal
+                if (error.Type == ErrorType.Fatal)
+                {
+                    errorBlock.Background = new SolidColorBrush(Color.FromArgb(40, 255, 0, 0));
+                }
+                else
+                {
+                    errorBlock.Background = Brushes.Transparent;
+                }
+
+                // Подсказка/тултип с дополнительной информацией
+                errorBlock.ToolTip = $"Type: {error.Type}\n" +
+                                    $"File: {error.Path}\n" +
+                                    $"Line: {error.Line}\n" +
+                                    (error.IsGameError ? "Game-related error" : "");
             }
-            else
+            finally
             {
-                errorBlock.Background = Brushes.Transparent;
+                errorBlock._isUpdating = false;
             }
-
-            // Подсказка/тултип с дополнительной информацией
-            errorBlock.ToolTip = $"Type: {error.Type}\n" +
-                                $"File: {error.Path}\n" +
-                                $"Line: {error.Line}\n" +
-                                (error.IsGameError ? "Game-related error" : "");
         }
 
         private void Clear()
         {
-            ErrorText.Text = string.Empty;
-            ErrorIcon.Source = null;
-            Background = Brushes.Transparent;
-            ToolTip = null;
+            if (_isUpdating)
+                return;
+
+            _isUpdating = true;
+
+            try
+            {
+                ErrorText.Text = string.Empty;
+                ErrorIcon.Source = null;
+                Background = Brushes.Transparent;
+                ToolTip = null;
+                _lastCalculatedHeight = -1;
+            }
+            finally
+            {
+                _isUpdating = false;
+            }
         }
 
-        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            double imageTotalHeight = ErrorIcon.ActualHeight + ErrorIcon.Margin.Top + ErrorIcon.Margin.Bottom;
-            double textTotalHeight = ErrorText.ActualHeight + ErrorText.Margin.Top + ErrorText.Margin.Bottom;
-            Height = Math.Max(imageTotalHeight, textTotalHeight) + 4; // небольшой запас
-        }
+        // ВИДАЛЕНО: OnSizeChanged більше не потрібен
+        // Grid автоматично розраховує висоту на основі своїх дочірніх елементів
+        // private void OnSizeChanged(object sender, SizeChangedEventArgs e) { ... }
 
         private void UserControl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {

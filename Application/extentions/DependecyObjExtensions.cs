@@ -54,5 +54,18 @@ namespace Application.Extentions
             }
             return null;
         }
+
+        /// <summary>
+        /// Получает визуального родителя элемента
+        /// </summary>
+        public static DependencyObject GetVisualParent(this DependencyObject element)
+        {
+            if (element == null)
+            {
+                return null;
+            }
+
+            return System.Windows.Media.VisualTreeHelper.GetParent(element);
+        }
     }
 }

@@ -1,9 +1,11 @@
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Controls;
-using System.Diagnostics;
 using Application.Debugging;
+using Application.Extentions;
+using Application.utils;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Controls
 {
@@ -18,11 +20,16 @@ namespace Controls
         private StackPanel _rightPanel;
         private List<Tuple<Button, PanelSide>> _pendingButtons = new List<Tuple<Button, PanelSide>>();
         private bool _isInitialized = false;
-
+        private Window _parentWindow;
+        private bool _isDragging = false;
+        private Point _clickPosition;
         public WindowTitleBar()
         {
             InitializeComponent();
             this.Loaded += OnWindowTitleBarLoaded;
+            MouseLeftButtonDown += OnMouseLeftButtonDown;
+            MouseLeftButtonUp += OnMouseLeftButtonUp;
+            MouseMove += OnMouseMove;
         }
 
         private void OnWindowTitleBarLoaded(object sender, RoutedEventArgs e)
@@ -37,6 +44,16 @@ namespace Controls
             _pendingButtons.Clear();
 
             Logger.AddLog("WindowTitleBar полностью загружен и инициализирован");
+            _parentWindow = Window.GetWindow(this);
+
+            if (_parentWindow == null)
+            {
+                Logger.AddLog(StaticLocalisation.GetString("Log.WindowTitleBar.ParentWindowNotFound"));
+            }
+            else
+            {
+                Logger.AddDbgLog(StaticLocalisation.GetString("Log.WindowTitleBar.ParentWindowFound", _parentWindow.Title));
+            }
         }
 
         private void InitializePanels()
@@ -205,6 +222,172 @@ namespace Controls
             {
                 MaximizeButton.Visibility = Visibility.Visible;
                 RestoreButton.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// Получаем ссылку на родительское окно при загрузке контрола
+        /// </summary>
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            _parentWindow = Window.GetWindow(this);
+
+            if (_parentWindow == null)
+            {
+                Logger.AddLog(StaticLocalisation.GetString("Log.WindowTitleBar.ParentWindowNotFound"));
+            }
+            else
+            {
+                Logger.AddDbgLog(StaticLocalisation.GetString("Log.WindowTitleBar.ParentWindowFound", _parentWindow.Title));
+            }
+        }
+
+        /// <summary>
+        /// Начало перетаскивания окна
+        /// </summary>
+        /// <summary>
+        /// Обработка нажатия левой кнопки мыши для перемещения окна
+        /// </summary>
+        private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+           
+
+            try
+            {
+                if (_parentWindow.WindowState == WindowState.Maximized)
+                {
+                    Point mousePosition = e.GetPosition(_parentWindow);
+                    double mouseRelativeX = mousePosition.X / _parentWindow.ActualWidth;
+
+                    _parentWindow.WindowState = WindowState.Normal;
+
+                    Point screenPoint = PointToScreen(e.GetPosition(this));
+                    _parentWindow.Left = screenPoint.X - (_parentWindow.ActualWidth * mouseRelativeX);
+                    _parentWindow.Top = screenPoint.Y - mousePosition.Y;
+
+                    Logger.AddDbgLog(StaticLocalisation.GetString("Log.WindowTitleBar.WindowRestoredForDrag"));
+                }
+
+                // Оптимизация: отключаем сложный рендеринг во время перетаскивания
+                DisableRenderingOptimizations();
+
+                _parentWindow.DragMove();
+
+                // Восстанавливаем после завершения перетаскивания
+                EnableRenderingOptimizations();
+
+                Logger.AddDbgLog(StaticLocalisation.GetString("Log.WindowTitleBar.WindowDragged"));
+            }
+            catch (InvalidOperationException ex)
+            {
+               
+            }
+        }
+
+        /// <summary>
+        /// Отключает визуальные эффекты для оптимизации производительности
+        /// </summary>
+        private void DisableRenderingOptimizations()
+        {
+            if (_parentWindow == null) return;
+
+            // Сохраняем текущее значение AllowsTransparency (если используется)
+            // И временно отключаем аппаратное ускорение для сложных элементов
+            System.Windows.Media.RenderOptions.SetBitmapScalingMode(_parentWindow, System.Windows.Media.BitmapScalingMode.LowQuality);
+
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.WindowTitleBar.RenderOptimizationsDisabled"));
+        }
+
+        /// <summary>
+        /// Восстанавливает визуальные эффекты после перетаскивания
+        /// </summary>
+        private void EnableRenderingOptimizations()
+        {
+            if (_parentWindow == null) return;
+
+            System.Windows.Media.RenderOptions.SetBitmapScalingMode(_parentWindow, System.Windows.Media.BitmapScalingMode.HighQuality);
+
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.WindowTitleBar.RenderOptimizationsEnabled"));
+        }
+
+
+
+        /// <summary>
+        /// Завершение перетаскивания окна
+        /// </summary>
+        private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDragging)
+            {
+                _isDragging = false;
+                ReleaseMouseCapture();
+
+                Logger.AddDbgLog(StaticLocalisation.GetString("Log.WindowTitleBar.DragEnded"));
+            }
+        }
+
+        /// <summary>
+        /// Перемещение окна при движении мыши
+        /// </summary>
+        private void OnMouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_isDragging || _parentWindow == null)
+            {
+                return;
+            }
+
+            Point currentPosition = e.GetPosition(_parentWindow);
+            Point screenPosition = PointToScreen(currentPosition);
+
+            // Вычисляем новую позицию окна
+            double newLeft = screenPosition.X - _clickPosition.X;
+            double newTop = screenPosition.Y - _clickPosition.Y;
+
+            _parentWindow.Left = newLeft;
+            _parentWindow.Top = newTop;
+        }
+
+        /// <summary>
+        /// Проверка, был ли клик по кнопке управления окном
+        /// </summary>
+        private bool IsClickOnButton(object source)
+        {
+            // Проверяем, не является ли источник события кнопкой или её дочерним элементом
+            DependencyObject element = source as DependencyObject;
+
+            while (element != null && element != this)
+            {
+                if (element is Button)
+                {
+                    return true;
+                }
+                element = element.GetVisualParent();
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Обработка двойного клика для максимизации/восстановления окна
+        /// </summary>
+        protected override void OnMouseDoubleClick(MouseButtonEventArgs e)
+        {
+            base.OnMouseDoubleClick(e);
+
+            if (_parentWindow == null || IsClickOnButton(e.OriginalSource))
+            {
+                return;
+            }
+
+            if (_parentWindow.WindowState == WindowState.Maximized)
+            {
+                _parentWindow.WindowState = WindowState.Normal;
+                Logger.AddDbgLog(StaticLocalisation.GetString("Log.WindowTitleBar.WindowRestored"));
+            }
+            else
+            {
+                _parentWindow.WindowState = WindowState.Maximized;
+                Logger.AddDbgLog(StaticLocalisation.GetString("Log.WindowTitleBar.WindowMaximized"));
             }
         }
     }
