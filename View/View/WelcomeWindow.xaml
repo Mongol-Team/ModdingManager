@@ -50,7 +50,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
-                <TextBlock x:Name="GetStartedTextBlock" Grid.Row="0" Text="{loc:Localize Key=Window.GetStarted}" 
+                <TextBlock x:Name="GetStartedTextBlock" Grid.Row="0" Text="{loc:LocalizeExtension Key=Window.GetStarted}" 
                            FontSize="28" FontWeight="Light"
                            Foreground="{StaticResource TextPrimary}"
                            Margin="0,0,0,20"/>
@@ -141,7 +141,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
-                <TextBlock x:Name="ActionsTextBlock" Grid.Row="0" Text="{loc:Localize Key=Window.Actions}" 
+                <TextBlock x:Name="ActionsTextBlock" Grid.Row="0" Text="{loc:LocalizeExtension Key=Window.Actions}" 
                            FontSize="20" FontWeight="Light"
                            Foreground="{StaticResource TextPrimary}"
                            Margin="0,0,0,24"/>
@@ -159,7 +159,7 @@
                             <Ellipse Width="24" Height="24" 
                                      Fill="#4CAF50" 
                                      Margin="0,0,12,0"/>
-                            <TextBlock x:Name="CreateProjectTextBlock" Text="{loc:Localize Key=Button.CreateNewProject}" 
+                            <TextBlock x:Name="CreateProjectTextBlock" Text="{loc:LocalizeExtension Key=Button.CreateNewProject}" 
                                        VerticalAlignment="Center"
                                        Foreground="{StaticResource ButtonDarkText}"/>
                         </StackPanel>
@@ -179,73 +179,14 @@
                                   Width="24" Height="24"
                                   Margin="0,0,12,0"
                                   Stretch="Uniform"/>
-                            <TextBlock x:Name="OpenProjectTextBlock" Text="{loc:Localize Key=Button.OpenProject}" 
+                            <TextBlock x:Name="OpenProjectTextBlock" Text="{loc:LocalizeExtension Key=Button.OpenProject}" 
                                        VerticalAlignment="Center"
                                        Foreground="{StaticResource ButtonDarkText}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
-                
-                <TextBlock x:Name="SettingsTextBlock" Grid.Row="2" Text="Настройки" 
-                           FontSize="20" FontWeight="Light"
-                           Foreground="{StaticResource TextPrimary}"
-                           Margin="0,24,0,24"/>
-                
-                <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <Label Content="Процент использования параллелизма:" 
-                               Style="{StaticResource TextLabel}" 
-                               Margin="0,0,0,8"/>
-                        <Grid Margin="0,0,0,16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Slider x:Name="ParallelismSlider" 
-                                    Grid.Column="0"
-                                    Minimum="1" Maximum="100" 
-                                    TickFrequency="10" 
-                                    IsSnapToTickEnabled="True"
-                                    Margin="0,0,12,0"
-                                    ValueChanged="ParallelismSlider_ValueChanged"/>
-                            <TextBlock x:Name="ParallelismValueText" 
-                                       Grid.Column="1"
-                                       Text="50%"
-                                       Foreground="{StaticResource TextPrimary}"
-                                       VerticalAlignment="Center"
-                                       MinWidth="50"
-                                       TextAlignment="Right"/>
-                        </Grid>
-                        
-                        <CheckBox x:Name="DebugModeCheckBox" 
-                                  Content="Режим отладки"
-                                  Style="{DynamicResource CheckBoxDark}"
-                                  Margin="0,0,0,16"
-                                  Checked="DebugModeCheckBox_Checked"
-                                  Unchecked="DebugModeCheckBox_Unchecked"/>
-                        
-                        <Label Content="Язык интерфейса:" 
-                               Style="{StaticResource TextLabel}" 
-                               Margin="0,0,0,8"/>
-                        <ComboBox x:Name="LanguageComboBox"
-                                  Style="{StaticResource ComboBoxDark}"
-                                  Margin="0,0,0,16"
-                                  SelectionChanged="LanguageComboBox_SelectionChanged">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding}"/>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                        
-                        <Button x:Name="SaveSettingsButton"
-                                Content="Сохранить настройки"
-                                Style="{StaticResource ButtonDark}"
-                                Height="40"
-                                Click="SaveSettingsButton_Click"
-                                Margin="0,8,0,0"/>
-                    </StackPanel>
-                </ScrollViewer>
+
+                <controls:SettingsControl x:Name="WelcomeSettingsControl" SaveClicked="WelcomeSettingsControl_SaveClicked" Grid.Row="2"/>
             </Grid>
         </Grid>
         

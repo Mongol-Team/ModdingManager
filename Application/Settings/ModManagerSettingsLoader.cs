@@ -1,3 +1,4 @@
+using Application.Debugging;
 using Application.Utils;
 using Models.Enums;
 
@@ -9,10 +10,9 @@ namespace Application.Settings
         {
             try
             {
-                AppPaths.EnsureProgramCfgExists();
-                var configFileFullPath = AppPaths.ProgramCfgPath;
-                var config = ConfigFileParser.ParseConfigFile(configFileFullPath);
-
+                string configFileFullPath = AppPaths.ProgramConfigPath;
+                AppPaths.Ensure(configFileFullPath);
+                Dictionary<string, string> config = ConfigFileParser.ParseConfigFile(configFileFullPath);
                 ModManagerSettings.ModDirectory = config.TryGetValue("ModDirectory", out var modDir) ? modDir : string.Empty;
                 ModManagerSettings.GameDirectory = config.TryGetValue("GameDirectory", out var gameDir) ? gameDir : string.Empty;
                 ModManagerSettings.IsDebugRunning = config.TryGetValue("IsDebugRunning", out var debug) && bool.TryParse(debug, out var debugVal) && debugVal;
@@ -46,7 +46,7 @@ namespace Application.Settings
                 ["RecentProjects"] = ConfigFileParser.SerializeRecentProjects(ModManagerSettings.RecentProjects ?? new List<RecentProject>())
             };
 
-            ConfigFileParser.WriteConfigFile(AppPaths.ProgramCfgPath, config);
+            ConfigFileParser.WriteConfigFile(AppPaths.ProgramConfigPath, config);
         }
 
         public static void AddRecentProject(string projectPath, string projectName = null)

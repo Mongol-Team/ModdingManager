@@ -86,6 +86,11 @@
   "Log.CharactersInitialized": "Персонажи инициализированы: {0}, пример: {1}",
   "Log.SubUnitsInitialized": "Подразделения инициализированы: {0}, пример: {1}",
   "Log.OpinionModifiersInitialized": "Модификаторы мнений инициализированы: {0}, пример: {1}",
-  "Log.CountriesInitialized": "Страны инициализированы: {0}, пример: {1}"
+  "Log.CountriesInitialized": "Страны инициализированы: {0}, пример: {1}",
+  "Window.Settings": "Настройки",
+  "Label.ParallelismPercent": "Процент использования параллелизма:",
+  "Label.DebugMode": "Режим отладки",
+  "Label.InterfaceLanguage": "Язык интерфейса:",
+  "Button.SaveSettings": "Сохранить настройки"
 
 }

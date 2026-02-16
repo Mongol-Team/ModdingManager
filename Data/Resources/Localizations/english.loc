@@ -62,6 +62,11 @@
   "Log.CharactersInitialized": "Characters initialized: {0}, example: {1}",
   "Log.SubUnitsInitialized": "Sub units initialized: {0}, example: {1}",
   "Log.OpinionModifiersInitialized": "Opinion modifiers initialized: {0}, example: {1}",
-  "Log.CountriesInitialized": "Countries initialized: {0}, example: {1}"
+  "Log.CountriesInitialized": "Countries initialized: {0}, example: {1}",
+  "Window.Settings": "Settings",
+  "Label.ParallelismPercent": "Parallelism usage percent:",
+  "Label.DebugMode": "Debug mode",
+  "Label.InterfaceLanguage": "Interface language:",
+  "Button.SaveSettings": "Save settings"
 }
 
