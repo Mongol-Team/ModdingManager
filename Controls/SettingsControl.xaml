@@ -18,6 +18,26 @@
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
+                <Label Content="{loc:Localize Key=Label.GameDirectory}"
+                       Style="{StaticResource TextLabel}"
+                       Margin="0,0,0,8"/>
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="GameDirectoryTextBox"
+                             Grid.Column="0"
+                             Margin="0,0,12,0"
+                             Style="{StaticResource TextBoxDark}"
+                             Text="{Binding GameDirectory, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Grid.Column="1"
+                            Content="{loc:Localize Key=Button.Browse}"
+                            Style="{StaticResource ButtonDark}"
+                            MinWidth="100"
+                            Click="BrowseGameDirectory_Click"/>
+                </Grid>
+
                 <Label Content="{loc:Localize Key=Label.ParallelismPercent}"
                Style="{StaticResource TextLabel}"
                Margin="0,0,0,8"/>

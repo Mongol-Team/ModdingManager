@@ -61,32 +61,8 @@
 
             <Button x:Name="CloseButton"
                     Grid.Column="2"
-                    Width="20"
-                    Height="20"
-                    Padding="0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    Click="CloseButton_Click">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="CloseBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="2">
-                            <Path Data="M4 4 L12 12 M12 4 L4 12"
-                                  Stroke="{StaticResource TextTertiary}"
-                                  StrokeThickness="1.5"
-                                  Stretch="Uniform"
-                                  Margin="4"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="CloseBorder" Property="Background" Value="{StaticResource BackgroundHover}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
+                    Style="{StaticResource SmallIconCloseButton}"
+                    Click="CloseButton_Click"/>
         </Grid>
     </Border>
 </UserControl>
