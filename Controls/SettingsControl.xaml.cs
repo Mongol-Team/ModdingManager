@@ -22,6 +22,10 @@ namespace Controls
             DependencyProperty.Register(nameof(SelectedLanguage), typeof(object), typeof(SettingsControl),
                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedLanguageChanged));
 
+        public static readonly DependencyProperty EffectiveLanguageProperty =
+            DependencyProperty.Register(nameof(EffectiveLanguage), typeof(object), typeof(SettingsControl),
+                new PropertyMetadata(null, OnEffectiveLanguageChanged));
+
         public static readonly RoutedEvent SaveClickedEvent =
             EventManager.RegisterRoutedEvent(nameof(SaveClicked), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SettingsControl));
 
@@ -55,6 +59,12 @@ namespace Controls
             set => SetValue(SelectedLanguageProperty, value);
         }
 
+        public object EffectiveLanguage
+        {
+            get => GetValue(EffectiveLanguageProperty);
+            set => SetValue(EffectiveLanguageProperty, value);
+        }
+
         public SettingsControl()
         {
             InitializeComponent();
@@ -84,6 +94,24 @@ namespace Controls
         {
             if (d is SettingsControl c && c.LanguageComboBox != null)
                 c.LanguageComboBox.SelectedItem = e.NewValue;
+            if (d is SettingsControl c2)
+                c2.UpdateLanguageRestartHintVisibility();
+        }
+
+        private static void OnEffectiveLanguageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is SettingsControl c)
+                c.UpdateLanguageRestartHintVisibility();
+        }
+
+        private void UpdateLanguageRestartHintVisibility()
+        {
+            if (LanguageRestartHintBlock == null) return;
+            var selected = SelectedLanguage;
+            var effective = EffectiveLanguage;
+            LanguageRestartHintBlock.Visibility = selected != null && effective != null && !Equals(selected, effective)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         private void ParallelismSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -106,7 +134,10 @@ namespace Controls
         private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (LanguageComboBox?.SelectedItem != null)
+            {
                 SelectedLanguage = LanguageComboBox.SelectedItem;
+                UpdateLanguageRestartHintVisibility();
+            }
         }
 
         private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)

@@ -94,7 +94,6 @@
   "ErrorPanel.DisplayedErrors": "Отображено: {0} из {1}",
   "ErrorBlock.FileOpenError": "Не удалось открыть файл:\n{0}\n\n{1}",
   "ErrorBlock.FileOpenErrorTitle": "Ошибка открытия файла",
-
   "Log.WindowTitleBar.ParentWindowNotFound": "Родительское окно для TitleBar не найдено",
   "Log.WindowTitleBar.ParentWindowFound": "Родительское окно найдено: {0}",
   "Log.WindowTitleBar.CannotDragNoWindow": "Невозможно переместить окно: родительское окно не найдено",
@@ -103,13 +102,13 @@
   "Log.WindowTitleBar.WindowDragged": "Окно успешно перемещено",
   "Log.WindowTitleBar.DragMoveException": "Ошибка при перемещении окна: {0}",
   "Log.WindowTitleBar.WindowMaximized": "Окно развернуто на весь экран",
-  "Log.WindowTitleBar.WindowRestored": "Окно восстановлено до нормального размера"
-
+  "Log.WindowTitleBar.WindowRestored": "Окно восстановлено до нормального размера",
   "Log.CountriesInitialized": "Страны инициализированы: {0}, пример: {1}",
   "Window.Settings": "Настройки",
   "Label.ParallelismPercent": "Процент использования параллелизма:",
   "Label.DebugMode": "Режим отладки",
   "Label.InterfaceLanguage": "Язык интерфейса:",
+  "Message.LanguageRestartHint": "Язык вступит в силу после перезапуска приложения.",
   "Button.SaveSettings": "Сохранить настройки"
 
 }

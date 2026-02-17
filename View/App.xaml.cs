@@ -14,6 +14,7 @@ namespace View
             base.OnStartup(e);
 
             ModManagerSettingsLoader.Load();
+            StaticLocalisation.Initialize();
 
             var gameDirectory = ModManagerSettings.GameDirectory ?? string.Empty;
 
