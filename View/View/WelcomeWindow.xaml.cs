@@ -310,6 +310,7 @@ namespace View
             WelcomeSettingsControl.ParallelismPercent = ModManagerSettings.MaxPercentForParallelUsage;
             WelcomeSettingsControl.IsDebugMode = ModManagerSettings.IsDebugRunning;
             WelcomeSettingsControl.LanguageItemsSource = Enum.GetValues(typeof(Language)).Cast<Language>();
+            WelcomeSettingsControl.EffectiveLanguage = ModManagerSettings.CurrentLanguage;
             WelcomeSettingsControl.SelectedLanguage = ModManagerSettings.CurrentLanguage;
         }
 

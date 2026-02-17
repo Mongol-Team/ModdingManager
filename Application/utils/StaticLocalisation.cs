@@ -32,6 +32,11 @@ namespace Application.utils
             }
         }
 
+        public static void Initialize()
+        {
+            LoadLocalizations();
+        }
+
         private static void LoadLocalizations()
         {
             if (_isLoaded) return;
