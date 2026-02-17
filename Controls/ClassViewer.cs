@@ -1119,7 +1119,10 @@ namespace Controls
                         RaisePropertyChanged(prop, old, newValue);
                     });
                     if (gfxControl != null)
+                    {
                         inputControl = gfxControl;
+                        ApplyGenericViewerStyle(gfxControl);
+                    }
                 }
 
                 if (inputControl != null)
@@ -1335,7 +1338,6 @@ namespace Controls
                 var currentGfx = value as IGfx;
                 var rootStack = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
 
-                // ─── Выбор существующего gfx ──────────────────────────────────
                 var combo = new SearchableComboBox
                 {
                     ItemsSource = ModDataStorage.Mod?.Gfxes.FileEntitiesToList()?.ToObservableCollection()
@@ -1344,15 +1346,16 @@ namespace Controls
                     Name = "GfxesComboBox",
                     Width = 240,
                     Margin = new Thickness(0, 0, 0, 8),
-                    IsEnabled = true
+                    IsEnabled = true,
+                    Style = (Style)TryFindResource("GenericViewerSearchableComboBox")
                 };
                 combo.SelectionChanged += (s, e) => onValueChanged?.Invoke(combo.SelectedItem);
 
-                // ─── Expander для создания нового gfx ─────────────────────────
                 var expander = new Expander
                 {
                     Header = L("ClassViewer.Gfx.CreateNew"),
                     IsExpanded = false,
+                    Style = (Style)TryFindResource("GenericViewerExpander"),
                     Margin = new Thickness(0, 8, 0, 0)
                 };
                 expander.Expanded += (s, e) => combo.IsEnabled = false;
@@ -1363,17 +1366,18 @@ namespace Controls
                 var lblName = new TextBlock
                 {
                     Text = L("ClassViewer.Gfx.Name"),
+                    Style = (Style)TryFindResource("GenericViewerTextBlock"),
                     Margin = new Thickness(0, 0, 0, 4)
                 };
-                var tbName = new TextBox { Width = 220, Margin = new Thickness(0, 0, 0, 12) };
+                var tbName = new TextBox { Width = 220, Style = (Style)TryFindResource("GenericViewerExpanderTextBox"), Margin = new Thickness(0, 0, 0, 12) };
 
                 var lblImage = new TextBlock
                 {
                     Text = L("ClassViewer.Gfx.ImageHint"),
+                    Style = (Style)TryFindResource("GenericViewerTextBlock"),
                     Margin = new Thickness(0, 0, 0, 6)
                 };
 
-                // ─── Drag & Drop зона ─────────────────────────────────────────
                 var imageBorder = new Border
                 {
                     Width = 180,
@@ -1392,7 +1396,8 @@ namespace Controls
                     TextAlignment = TextAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     Foreground = Brushes.Gray,
-                    TextWrapping = TextWrapping.Wrap
+                    TextWrapping = TextWrapping.Wrap,
+                    Style = (Style)TryFindResource("GenericViewerTextBlock")
                 };
                 var dropGrid = new Grid();
                 dropGrid.Children.Add(dropText);
@@ -1446,11 +1451,11 @@ namespace Controls
                     e.Handled = true;
                 };
 
-                // ─── Кнопка Обзор ─────────────────────────────────────────────
                 var btnBrowse = new Button
                 {
                     Content = L("ClassViewer.Gfx.Browse"),
                     Width = 80,
+                    Style = (Style)TryFindResource("GenericViewerButton"),
                     Margin = new Thickness(0, 0, 0, 12)
                 };
                 btnBrowse.Click += (s, e) =>
@@ -1475,11 +1480,11 @@ namespace Controls
                     }
                 };
 
-                // ─── Кнопка создания ──────────────────────────────────────────
                 var btnCreate = new Button
                 {
                     Content = L("ClassViewer.Gfx.CreateAndSelect"),
                     Padding = new Thickness(16, 8, 16, 8),
+                    Style = (Style)TryFindResource("GenericViewerButton"),
                     Margin = new Thickness(0, 8, 0, 0),
                     HorizontalAlignment = System.Windows.HorizontalAlignment.Left
                 };
@@ -1542,7 +1547,9 @@ namespace Controls
                 {
                     Text = L("ClassViewer.Gfx.Title"),
                     FontWeight = FontWeights.SemiBold,
-                    Margin = new Thickness(0, 0, 0, 4)
+                    Margin = new Thickness(0, 0, 0, 4),
+                    Style = (Style)TryFindResource("GenericViewerSectionTitle")
+
                 });
                 rootStack.Children.Add(combo);
                 rootStack.Children.Add(expander);
