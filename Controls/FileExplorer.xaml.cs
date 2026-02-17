@@ -1,6 +1,7 @@
 using Application;
 using Application.Extentions;
 using Application.utils;
+using Controls.Docking;
 using Models.Attributes;
 using Models.Configs;
 using Models.EntityFiles;
@@ -2064,11 +2065,12 @@ namespace Controls
                 {
                     case ConfigCreatorType.GenericCreator:
                         var viewer = new GenericViewer(itemType, item);
-                        var parentWindow = Window.GetWindow(viewer); 
-                        if (parentWindow != null) 
-                        { 
-                            var dockManager = parentWindow.GetType().GetProperty("DockManager")?.GetValue(parentWindow); 
-                            (dockManager as dynamic)?.SetContent(viewer); 
+                        var parentWindow = Window.GetWindow(this);
+                        if (parentWindow != null)
+                        {
+                            var dockManager = parentWindow.FindName("DockManager") as DockManager;
+
+                            (dockManager as dynamic)?.SetContent(viewer);
                         }
                         return;
 
