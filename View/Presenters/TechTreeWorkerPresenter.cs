@@ -3,7 +3,7 @@ using Application.handlers;
 using Controls;
 using Models.Configs;
 using Models.GfxTypes;
-using ViewInterfaces;
+using View.Interfaces;
 
 namespace ViewPresenters
 {

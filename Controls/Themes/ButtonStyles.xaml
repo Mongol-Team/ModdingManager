@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>
@@ -30,6 +30,116 @@
         <Setter Property="MinHeight" Value="30"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template" Value="{StaticResource ButtonBaseTemplate}"/>
+    </Style>
+
+    <!-- Стиль для кнопки-файла в FilesStripeControl -->
+    <Style x:Key="FileTabButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource BackgroundElement}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="10,0,6,0"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="MinWidth" Value="60"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="0,0,1,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <!-- Иконка закрепления -->
+                            <TextBlock x:Name="PinMark"
+                                   Grid.Column="0"
+                                   Text="📌"
+                                   FontSize="9"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,4,0"
+                                   Visibility="Collapsed"/>
+                            <!-- Имя файла -->
+                            <ContentPresenter Grid.Column="0"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Left"
+                                          Margin="{TemplateBinding Padding}"/>
+                            <!-- Кнопка закрытия (x) -->
+                            <Border x:Name="CloseArea"
+                                Grid.Column="1"
+                                Width="18"
+                                Height="18"
+                                CornerRadius="2"
+                                Background="Transparent"
+                                Margin="0,0,4,0"
+                                VerticalAlignment="Center"
+                                Cursor="Hand">
+                                <TextBlock x:Name="CloseText"
+                                       Text="✕"
+                                       FontSize="10"
+                                       Foreground="{StaticResource TextTertiary}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="Collapsed"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource BackgroundHover}"/>
+                            <Setter TargetName="CloseText" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{StaticResource ButtonDarkBackgroundPressed}"/>
+                        </Trigger>
+                        <!-- Выбранный таб -->
+                        <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Selected">
+                            <Setter Property="Background" Value="{StaticResource TabBarActiveBackground}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource TabBarActiveBorder}"/>
+                            <Setter TargetName="Root" Property="BorderThickness" Value="0,2,1,0"/>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Стиль для кнопок навигации < > в FilesStripeControl -->
+    <Style x:Key="FileStripeNavButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource BackgroundElement}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{StaticResource BorderColor}"
+                        BorderThickness="1">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource BackgroundHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{StaticResource ButtonDarkBackgroundPressed}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="{StaticResource ButtonDisabledBackground}"/>
+                            <Setter Property="Foreground" Value="{StaticResource ButtonDisabledText}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="ButtonDark" TargetType="Button" BasedOn="{StaticResource ButtonBase}">

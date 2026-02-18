@@ -104,10 +104,8 @@
                   Foreground="{StaticResource TextPrimary}"
                   BorderThickness="0"
                   SelectedItemChanged="FileTreeView_SelectedItemChanged"
-                  MouseRightButtonDown="FileTreeView_MouseRightButtonDown"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                   MouseDoubleClick="FileTreeView_MouseDoubleClick"
-                  ContextMenuOpening="FileTreeView_ContextMenuOpening"
                   AllowDrop="True"
                   DragOver="FileTreeView_DragOver"
                   Drop="FileTreeView_Drop">
