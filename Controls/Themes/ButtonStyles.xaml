@@ -37,11 +37,9 @@
         <Setter Property="Background" Value="{StaticResource BackgroundElement}"/>
         <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="10,0,6,0"/>
-        <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
-        <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="MinWidth" Value="60"/>
+        <Setter Property="Padding" Value="8,0,8,0"/>
+        <!-- симетрично або 10,0,12,0 -->
+        <Setter Property="MinWidth" Value="80"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -49,54 +47,18 @@
                         Background="{TemplateBinding Background}"
                         BorderBrush="{StaticResource BorderColor}"
                         BorderThickness="0,0,1,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <!-- Иконка закрепления -->
-                            <TextBlock x:Name="PinMark"
-                                   Grid.Column="0"
-                                   Text="📌"
-                                   FontSize="9"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Left"
-                                   Margin="0,0,4,0"
-                                   Visibility="Collapsed"/>
-                            <!-- Имя файла -->
-                            <ContentPresenter Grid.Column="0"
-                                          VerticalAlignment="Center"
-                                          HorizontalAlignment="Left"
-                                          Margin="{TemplateBinding Padding}"/>
-                            <!-- Кнопка закрытия (x) -->
-                            <Border x:Name="CloseArea"
-                                Grid.Column="1"
-                                Width="18"
-                                Height="18"
-                                CornerRadius="2"
-                                Background="Transparent"
-                                Margin="0,0,4,0"
-                                VerticalAlignment="Center"
-                                Cursor="Hand">
-                                <TextBlock x:Name="CloseText"
-                                       Text="✕"
-                                       FontSize="10"
-                                       Foreground="{StaticResource TextTertiary}"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Visibility="Collapsed"/>
-                            </Border>
-                        </Grid>
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Stretch"/>
                     </Border>
+                    <!-- Тригери залишаємо, але без CloseText і PinMark -->
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Background" Value="{StaticResource BackgroundHover}"/>
-                            <Setter TargetName="CloseText" Property="Visibility" Value="Visible"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter Property="Background" Value="{StaticResource ButtonDarkBackgroundPressed}"/>
                         </Trigger>
-                        <!-- Выбранный таб -->
                         <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Selected">
                             <Setter Property="Background" Value="{StaticResource TabBarActiveBackground}"/>
                             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>

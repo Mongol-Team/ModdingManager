@@ -21,13 +21,16 @@ using MessageBox = System.Windows.MessageBox;
 namespace ViewPresenters
 {
     /// <summary>
-    /// Presenter для MainWindow. Содержит всю бизнес-логику инициализации,
-    /// управления layout'ом и обработки взаимодействия с FileExplorer.
+    /// Presenter для MainWindow. Містить всю бізнес-логіку ініціалізації,
+    /// управління layout'ом, роботи з FileExplorer та FilesStripe.
     /// </summary>
     public class MainWindowPresenter
     {
         private readonly IMainWindow _view;
         private FileExplorer _fileExplorerControl;
+        private FilesStripeControl _filesStripeControl;
+        private Grid _centralWorkZone; // Центральна робоча зона з FilesStripe + контент
+        private ContentControl _viewerContainer; // Контейнер для GenericViewer та інших редакторів
 
         public MainWindowPresenter(IMainWindow view)
         {
@@ -35,7 +38,7 @@ namespace ViewPresenters
         }
 
         /// <summary>
-        /// Точка входа — вызывается из MainWindow после InitializeComponent.
+        /// Точка входу — викликається з MainWindow після InitializeComponent.
         /// </summary>
         public void Initialize()
         {
@@ -43,13 +46,14 @@ namespace ViewPresenters
 
             LoadLayout();
             InitializeTopbar();
+            InitializeCentralWorkZone();
             InitializeFileExplorer();
 
             Logger.AddLog(StaticLocalisation.GetString("Log.MainWindow.Initialized"));
         }
 
         /// <summary>
-        /// Сохранить layout при закрытии окна.
+        /// Зберегти layout при закритті вікна.
         /// </summary>
         public void OnWindowClosing()
         {
@@ -64,7 +68,7 @@ namespace ViewPresenters
         {
             var settingsButton = new Button
             {
-                Content = StaticLocalisation.GetString("Button.Settings"),
+                Content = StaticLocalisation.GetString("TobBar.Button.Settings"),
                 Name = "SettingsButton"
             };
             // TODO: settingsButton.Click += OnSettingsClicked;
@@ -78,19 +82,19 @@ namespace ViewPresenters
 
         private void AddDebugButtons()
         {
-            // Кнопка отладки
+            // Кнопка відладки
             var debugButton = new Button
             {
-                Content = StaticLocalisation.GetString("Button.Debug"),
+                Content = StaticLocalisation.GetString("TobBar.Button.Debug"),
                 Name = "DebugButton"
             };
             debugButton.Click += (s, e) => OpenDebugWindow();
             _view.AddTopbarButton(debugButton, PanelSide.Left);
 
-            // Кнопка тестирования
+            // Кнопка тестування
             var testingButton = new Button
             {
-                Content = StaticLocalisation.GetString("Button.Test"),
+                Content = StaticLocalisation.GetString("TobBar.Button.Test"),
                 Name = "TestingButton"
             };
             testingButton.Click += (s, e) =>
@@ -113,33 +117,76 @@ namespace ViewPresenters
                 Background = Brushes.Black
             };
 
-            var grid = new System.Windows.Controls.Grid();
-            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition
-            { Height = new GridLength(30) });
-            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition
-            { Height = new GridLength(1, GridUnitType.Star) });
+            var grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(30) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
             var titleBar = new WindowTitleBar();
             var saveToFileBtn = new Button
             {
-                Content = StaticLocalisation.GetString("Button.SaveToFile"),
+                Content = StaticLocalisation.GetString("DebugWindow.Button.SaveToFile"),
                 Name = "SaveToFileButton"
             };
 
-            System.Windows.Controls.Grid.SetRow(titleBar, 0);
+            Grid.SetRow(titleBar, 0);
             grid.Children.Add(titleBar);
 
             var debugControl = new DebugControl();
             saveToFileBtn.Click += (s, e) => debugControl.SendToFile();
             titleBar.AddButton(saveToFileBtn, PanelSide.Left);
 
-            System.Windows.Controls.Grid.SetRow(debugControl, 1);
+            Grid.SetRow(debugControl, 1);
             grid.Children.Add(debugControl);
 
             window.Content = grid;
             window.Show();
 
             Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.DebugWindowOpened"));
+        }
+
+        // ──────────────────────────────────────────────
+        // Центральна робоча зона з FilesStripe
+        // ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Створює центральну робочу зону з FilesStripe у першому рядку
+        /// та контейнером для viewer'ів у другому.
+        /// </summary>
+        private void InitializeCentralWorkZone()
+        {
+            // Створюємо Grid з двома рядками
+            _centralWorkZone = new Grid();
+            _centralWorkZone.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // FilesStripe
+            _centralWorkZone.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }); // Viewer
+
+            // FilesStripe у першому рядку
+            _filesStripeControl = new FilesStripeControl
+            {
+                Orientation = StripeOrientation.Horizontal
+            };
+
+            // Підписка на події FilesStripe
+            _filesStripeControl.FileOpenRequested += OnFilesStripeFileOpenRequested;
+            _filesStripeControl.ActiveFileChanged += OnFilesStripeActiveFileChanged;
+            _filesStripeControl.FileCloseRequested += OnFilesStripeFileCloseRequested;
+            _filesStripeControl.AllFilesCloseRequested += OnFilesStripeAllFilesCloseRequested;
+
+            Grid.SetRow(_filesStripeControl, 0);
+            _centralWorkZone.Children.Add(_filesStripeControl);
+
+            // ContentControl для viewer'ів у другому рядку
+            _viewerContainer = new ContentControl
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch
+            };
+            Grid.SetRow(_viewerContainer, 1);
+            _centralWorkZone.Children.Add(_viewerContainer);
+
+            // Додаємо робочу зону в DockManager
+            _view.OpenInDockZone(_centralWorkZone);
+
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.CentralWorkZoneInitialized"));
         }
 
         // ──────────────────────────────────────────────
@@ -156,7 +203,7 @@ namespace ViewPresenters
 
             if (existingPanel == null)
             {
-                // Панели нет — создаём с нуля
+                // Панелі немає — створюємо з нуля
                 _fileExplorerControl = CreateFileExplorer(title);
 
                 var panel = new DockPanelInfo
@@ -173,72 +220,92 @@ namespace ViewPresenters
             }
             else if (existingPanel.Content is null or not FileExplorer)
             {
-                // Панель есть, но контент не тот — заменяем
+                // Панель є, але контент не той — замінюємо
                 _fileExplorerControl = CreateFileExplorer(title);
                 _view.SetPanelContent(existingPanel, _fileExplorerControl);
                 Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.FileExplorerContentReplaced"));
             }
             else
             {
-                // Панель есть с правильным контентом — переиспользуем
+                // Панель є з правильним контентом — перевикористовуємо
                 _fileExplorerControl = (FileExplorer)existingPanel.Content;
-                _fileExplorerControl.OpenItemRequested += OnFileExplorerOpenItemRequested;
-                _fileExplorerControl.ItemSelected += OnFileExplorerItemSelected;
-                _fileExplorerControl.OpenItemRequested += OnFileExplorerOpenItemRequested;
-                _fileExplorerControl.AddFileRequested += OnAddFileRequested;
-                _fileExplorerControl.AddEntityRequested += OnAddEntityRequested;
-                _fileExplorerControl.DeleteItemRequested += OnDeleteItemRequested;
-                _fileExplorerControl.MoveFileRequested += OnMoveFileRequested;
-                _fileExplorerControl.MoveEntityRequested += OnMoveEntityRequested;
-                _fileExplorerControl.RenameRequested += OnRenameRequested;
+                SubscribeToFileExplorerEvents();
                 Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.FileExplorerReused"));
             }
         }
 
         /// <summary>
-        /// Создаёт и настраивает экземпляр FileExplorer с подпиской на события.
+        /// Створює та налаштовує екземпляр FileExplorer з підпискою на події.
         /// </summary>
-        // В CreateFileExplorer добавить подписки:
         private FileExplorer CreateFileExplorer(string title)
         {
             var explorer = new FileExplorer { Title = title };
             explorer.LoadModData();
-            explorer.ItemSelected += OnFileExplorerItemSelected;
-            explorer.OpenItemRequested += OnFileExplorerOpenItemRequested;
-            explorer.AddFileRequested += OnAddFileRequested;
-            explorer.AddEntityRequested += OnAddEntityRequested;
-            explorer.DeleteItemRequested += OnDeleteItemRequested;
-            explorer.MoveFileRequested += OnMoveFileRequested;
-            explorer.MoveEntityRequested += OnMoveEntityRequested;
-            explorer.RenameRequested += OnRenameRequested;
+            _fileExplorerControl = explorer;
+            SubscribeToFileExplorerEvents();
             return explorer;
         }
 
         /// <summary>
-        /// Обработка выбора элемента в FileExplorer (одиночный клик).
+        /// Підписка на всі події FileExplorer.
+        /// </summary>
+        private void SubscribeToFileExplorerEvents()
+        {
+            _fileExplorerControl.ItemSelected += OnFileExplorerItemSelected;
+            _fileExplorerControl.OpenItemRequested += OnFileExplorerOpenItemRequested;
+            _fileExplorerControl.AddFileRequested += OnAddFileRequested;
+            _fileExplorerControl.AddEntityRequested += OnAddEntityRequested;
+            _fileExplorerControl.DeleteItemRequested += OnDeleteItemRequested;
+            _fileExplorerControl.MoveFileRequested += OnMoveFileRequested;
+            _fileExplorerControl.MoveEntityRequested += OnMoveEntityRequested;
+            _fileExplorerControl.RenameRequested += OnRenameRequested;
+        }
+
+        /// <summary>
+        /// Обробка вибору елемента в FileExplorer (одиночний клік).
         /// </summary>
         private void OnFileExplorerItemSelected(object sender, RoutedEventArgs e)
         {
-            // Дополнительная логика при выборе элемента (например, статусбар)
             Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.FileExplorerItemSelected"));
         }
 
         /// <summary>
-        /// Обработка запроса на открытие элемента (двойной клик) из FileExplorer.
-        /// Именно здесь принимается решение — что открывать и куда.
+        /// Обробка запиту на відкриття елемента (подвійний клік) з FileExplorer.
+        /// Додає таб у FilesStripe та відкриває viewer.
         /// </summary>
         private void OnFileExplorerOpenItemRequested(object sender, OpenItemRequestedEventArgs e)
         {
-            OpenItemInDockZone(e.Item);
+            if (e.Item == null) return;
+
+            var displayName = GetItemDisplayName(e.Item);
+            var uniqueId = GetUniqueItemId(e.Item);
+
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.OpeningItem", displayName, uniqueId));
+
+            // Додаємо таб у FilesStripe з унікальним ID
+            _filesStripeControl.AddTab(
+                filePath: uniqueId,
+                displayName: displayName,
+                fileObject: e.Item,
+                makeActive: true
+            );
+
+            // Відкриваємо viewer
+            OpenItemInViewer(e.Item);
+
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.ItemOpenedInStripe", displayName));
         }
 
         /// <summary>
-        /// Бизнес-логика открытия элемента мода в рабочей зоне DockManager.
-        /// Перенесена из FileExplorer.OpenCreatorForItem.
+        /// Бізнес-логіка відкриття елемента мода в робочій зоні.
         /// </summary>
-        private void OpenItemInDockZone(object item)
+        private void OpenItemInViewer(object item)
         {
-            if (item == null) return;
+            if (item == null)
+            {
+                _viewerContainer.Content = null;
+                return;
+            }
 
             var itemType = item.GetType();
             var creatorAttribute = itemType.GetCustomAttribute<ConfigCreatorAttribute>();
@@ -262,7 +329,7 @@ namespace ViewPresenters
                 {
                     case ConfigCreatorType.GenericCreator:
                         var viewer = new GenericViewer(itemType, item);
-                        _view.OpenInDockZone(viewer);
+                        _viewerContainer.Content = viewer;
                         break;
 
                     case ConfigCreatorType.CountryCreator:
@@ -300,24 +367,54 @@ namespace ViewPresenters
         }
 
         // ──────────────────────────────────────────────
-        // Layout
+        // FilesStripe Events
         // ──────────────────────────────────────────────
 
-        private void LoadLayout()
+        /// <summary>
+        /// Обробка кліку по табу в FilesStripe — відкриває відповідний viewer.
+        /// </summary>
+        private void OnFilesStripeFileOpenRequested(object sender, FileTabEventArgs e)
         {
-            try
-            {
-                var layoutPath = Path.Combine(AppPaths.DataDirectory, "layout.json");
-                _view.LoadLayout(layoutPath);
-                Logger.AddLog(StaticLocalisation.GetString("Log.MainWindow.LayoutLoaded"));
-            }
-            catch (Exception ex)
-            {
-                Logger.AddLog(StaticLocalisation.GetString("Log.MainWindow.LayoutLoadError", ex.Message));
-            }
+            OpenItemInViewer(e.Tab.FileObject);
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.StripeTabOpened", e.Tab.DisplayName));
         }
+
+        /// <summary>
+        /// Обробка зміни активного файлу в FilesStripe.
+        /// </summary>
+        private void OnFilesStripeActiveFileChanged(object sender, FileTabEventArgs e)
+        {
+            OpenItemInViewer(e.Tab.FileObject);
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.StripeActiveFileChanged", e.Tab.DisplayName));
+        }
+
+        /// <summary>
+        /// Обробка закриття одного табу в FilesStripe.
+        /// </summary>
+        private void OnFilesStripeFileCloseRequested(object sender, FileTabEventArgs e)
+        {
+            // Якщо закритий таб був активним, очищуємо viewer
+            var activeTab = _filesStripeControl.GetActiveTab();
+            if (activeTab == null || activeTab.FilePath == e.Tab.FilePath)
+            {
+                _viewerContainer.Content = null;
+                Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.ViewerClearedAfterTabClose"));
+            }
+
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.StripeTabClosed", e.Tab.DisplayName));
+        }
+
+        /// <summary>
+        /// Обробка закриття всіх табів у FilesStripe.
+        /// </summary>
+        private void OnFilesStripeAllFilesCloseRequested(object sender, EventArgs e)
+        {
+            _viewerContainer.Content = null;
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.AllStripeTabsClosed"));
+        }
+
         // ──────────────────────────────────────────────
-        // FileExplorer — обработка операций с данными
+        // FileExplorer — обробка операцій з даними
         // ──────────────────────────────────────────────
 
         private void OnAddFileRequested(object sender, AddFileRequestedEventArgs e)
@@ -358,6 +455,10 @@ namespace ViewPresenters
                 {
                     fileNode.Entities.Add(newEntity);
                     _fileExplorerControl?.LoadModData();
+
+                    // Оновлюємо відкритий viewer, якщо він відображає цей файл
+                    RefreshViewerIfNeeded(fileNode.File);
+
                     Logger.AddDbgLog(StaticLocalisation.GetString(
                         "Log.MainWindow.EntityAdded", fileNode.DisplayName));
                 }
@@ -374,7 +475,7 @@ namespace ViewPresenters
 
         private void OnDeleteItemRequested(object sender, DeleteItemRequestedEventArgs e)
         {
-            // Presenter показывает диалог подтверждения
+            // Presenter показує діалог підтвердження
             var result = CustomMessageBox.Show(
                 StaticLocalisation.GetString("Dialog.ConfirmDelete", e.DisplayName),
                 StaticLocalisation.GetString("Dialog.Confirm"),
@@ -385,16 +486,23 @@ namespace ViewPresenters
             try
             {
                 var modConfig = ModDataStorage.Mod;
+                var uniqueId = string.Empty;
 
                 if (e.Item is ConfigFileNode fileNode)
                 {
-                    // Удаляем файл из соответствующей коллекции ModConfig
+                    uniqueId = GetUniqueItemId(fileNode.File);
+
+                    // Видаляємо файл з відповідної колекції ModConfig
                     foreach (var prop in modConfig.GetType().GetProperties())
                     {
                         if (prop.GetValue(modConfig) is System.Collections.IList list && list.Contains(fileNode.File))
                         {
                             list.Remove(fileNode.File);
                             e.Confirmed = true;
+
+                            // Видаляємо таб з FilesStripe
+                            _filesStripeControl.RemoveTab(uniqueId);
+
                             Logger.AddDbgLog(StaticLocalisation.GetString(
                                 "Log.MainWindow.FileDeleted", fileNode.DisplayName));
                             break;
@@ -403,13 +511,22 @@ namespace ViewPresenters
                 }
                 else if (e.Item is ModItemNode modItem && modItem.ParentFile != null)
                 {
-                    // Удаляем entity из родительского файла
+                    uniqueId = GetUniqueItemId(modItem.Item);
+
+                    // Видаляємо entity з батьківського файлу
                     var entitiesProp = modItem.ParentFile.GetType().GetProperty("Entities");
                     if (entitiesProp?.GetValue(modItem.ParentFile) is System.Collections.IList entities
                         && entities.Contains(modItem.Item))
                     {
                         entities.Remove(modItem.Item);
                         e.Confirmed = true;
+
+                        // Видаляємо таб з FilesStripe
+                        _filesStripeControl.RemoveTab(uniqueId);
+
+                        // Оновлюємо viewer якщо він відкритий
+                        RefreshViewerIfNeeded(modItem.ParentFile);
+
                         Logger.AddDbgLog(StaticLocalisation.GetString(
                             "Log.MainWindow.EntityDeleted", modItem.DisplayName));
                     }
@@ -440,6 +557,18 @@ namespace ViewPresenters
                 }
                 e.TargetCategory.Items?.Add(e.SourceFile);
                 _fileExplorerControl?.LoadModData();
+
+                // Оновлюємо таб у FilesStripe якщо файл відкритий
+                var uniqueId = GetUniqueItemId(e.SourceFile);
+                var tab = _filesStripeControl.GetTab(uniqueId);
+                if (tab != null)
+                {
+                    // Оновлюємо відображуване ім'я
+                    var newDisplayName = GetItemDisplayName(e.SourceFile);
+                    _filesStripeControl.RemoveTab(uniqueId);
+                    _filesStripeControl.AddTab(uniqueId, newDisplayName, e.SourceFile, makeActive: true);
+                }
+
                 Logger.AddDbgLog(StaticLocalisation.GetString(
                     "Log.MainWindow.FileMoved", e.TargetCategory.DisplayName));
             }
@@ -468,6 +597,11 @@ namespace ViewPresenters
                     sourceEntities.Remove(e.SourceItem);
                     targetEntities.Add(e.SourceItem);
                     _fileExplorerControl?.LoadModData();
+
+                    // Оновлюємо viewer якщо один з файлів відкритий
+                    RefreshViewerIfNeeded(e.SourceFile);
+                    RefreshViewerIfNeeded(e.TargetFile);
+
                     Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.EntityMoved"));
                 }
             }
@@ -485,13 +619,20 @@ namespace ViewPresenters
         {
             try
             {
+                var uniqueId = string.Empty;
+
                 if (e.Item is ConfigFileNode fileNode)
                 {
+                    uniqueId = GetUniqueItemId(fileNode.File);
                     var renameMethod = fileNode.File.GetType().GetMethod("Rename");
                     if (renameMethod?.Invoke(fileNode.File, new object[] { e.NewName }) is true)
                     {
                         fileNode.DisplayName = e.NewName;
                         e.Success = true;
+
+                        // Оновлюємо таб у FilesStripe
+                        UpdateTabDisplayName(uniqueId, e.NewName);
+
                         Logger.AddDbgLog(StaticLocalisation.GetString(
                             "Log.MainWindow.FileRenamed", e.NewName));
                     }
@@ -505,11 +646,20 @@ namespace ViewPresenters
                 }
                 else if (e.Item is ModItemNode modItem)
                 {
+                    uniqueId = GetUniqueItemId(modItem.Item);
+
                     if (TrySetEntityId(modItem.Item, e.NewName))
                     {
                         modItem.DisplayName = e.NewName;
                         modItem.Id = e.NewName;
                         e.Success = true;
+
+                        // Оновлюємо таб у FilesStripe
+                        UpdateTabDisplayName(uniqueId, e.NewName);
+
+                        // Оновлюємо viewer
+                        RefreshViewerIfNeeded(modItem.Item);
+
                         Logger.AddDbgLog(StaticLocalisation.GetString(
                             "Log.MainWindow.EntityRenamed", e.NewName));
                     }
@@ -525,8 +675,130 @@ namespace ViewPresenters
             }
         }
 
+        // ──────────────────────────────────────────────
+        // Допоміжні методи
+        // ──────────────────────────────────────────────
+
         /// <summary>
-        /// Устанавливает Id через IConfig или IGfx, создавая новый Identifier.
+        /// Генерує унікальний ідентифікатор для елемента (файлу або сутності).
+        /// Формат: тип_хешкод або тип_id для IConfig/IGfx.
+        /// </summary>
+        private static string GetUniqueItemId(object item)
+        {
+            if (item == null) return Guid.NewGuid().ToString();
+
+            var itemType = item.GetType();
+            var typeName = itemType.Name;
+
+            // Для IConfig та IGfx використовуємо Id як частину унікального ключа
+            if (item is IConfig config && config.Id != null)
+            {
+                var filePath = config.FileFullPath ?? "unknown";
+                return $"{typeName}_{config.Id}_{filePath.GetHashCode()}";
+            }
+
+            if (item is IGfx gfx && gfx.Id != null)
+            {
+                var filePath = GetItemFilePath(item);
+                return $"{typeName}_{gfx.Id}_{filePath.GetHashCode()}";
+            }
+
+            // Для файлів використовуємо FileFullPath
+            var filePathProp = itemType.GetProperty("FileFullPath");
+            if (filePathProp != null)
+            {
+                var path = filePathProp.GetValue(item) as string;
+                if (!string.IsNullOrEmpty(path))
+                    return $"{typeName}_{path.GetHashCode()}";
+            }
+
+            // Fallback — хеш об'єкта
+            return $"{typeName}_{item.GetHashCode()}";
+        }
+
+        /// <summary>
+        /// Оновлює відображуване ім'я табу в FilesStripe.
+        /// </summary>
+        private void UpdateTabDisplayName(string uniqueId, string newDisplayName)
+        {
+            var tab = _filesStripeControl.GetTab(uniqueId);
+            if (tab != null)
+            {
+                var fileObject = tab.FileObject;
+                var wasActive = _filesStripeControl.GetActiveTab()?.FilePath == uniqueId;
+
+                _filesStripeControl.RemoveTab(uniqueId);
+                _filesStripeControl.AddTab(uniqueId, newDisplayName, fileObject, makeActive: wasActive);
+
+                Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.StripeTabRenamed", newDisplayName));
+            }
+        }
+
+        /// <summary>
+        /// Оновлює viewer якщо відображається вказаний файл або об'єкт.
+        /// </summary>
+        private void RefreshViewerIfNeeded(object fileOrItem)
+        {
+            var activeTab = _filesStripeControl.GetActiveTab();
+            if (activeTab?.FileObject == fileOrItem)
+            {
+                OpenItemInViewer(fileOrItem);
+                Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.ViewerRefreshed"));
+            }
+        }
+
+        /// <summary>
+        /// Отримує відображуване ім'я елемента.
+        /// </summary>
+        private static string GetItemDisplayName(object item)
+        {
+            if (item == null) return "Unknown";
+
+            // Для IConfig та IGfx використовуємо Id
+            if (item is IConfig config && config.Id != null)
+                return config.Id.ToString();
+
+            if (item is IGfx gfx && gfx.Id != null)
+                return gfx.Id.ToString();
+
+            // Для файлів використовуємо FileName
+            var fileNameProp = item.GetType().GetProperty("FileName");
+            if (fileNameProp != null)
+            {
+                var fileName = fileNameProp.GetValue(item) as string;
+                if (!string.IsNullOrEmpty(fileName))
+                    return fileName;
+            }
+
+            // Fallback на ім'я типу
+            return item.GetType().Name;
+        }
+
+        /// <summary>
+        /// Отримує шлях до файлу елемента.
+        /// </summary>
+        private static string GetItemFilePath(object item)
+        {
+            if (item == null) return string.Empty;
+
+            // Для IConfig використовуємо FileFullPath
+            if (item is IConfig config)
+                return config.FileFullPath ?? string.Empty;
+
+            // Для файлів використовуємо FileFullPath через рефлексію
+            var filePathProp = item.GetType().GetProperty("FileFullPath");
+            if (filePathProp != null)
+            {
+                var filePath = filePathProp.GetValue(item) as string;
+                if (!string.IsNullOrEmpty(filePath))
+                    return filePath;
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Встановлює Id через IConfig або IGfx, створюючи новий Identifier.
         /// </summary>
         private static bool TrySetEntityId(object entity, string newName)
         {
@@ -550,6 +822,25 @@ namespace ViewPresenters
             }
             return false;
         }
+
+        // ──────────────────────────────────────────────
+        // Layout
+        // ──────────────────────────────────────────────
+
+        private void LoadLayout()
+        {
+            try
+            {
+                var layoutPath = Path.Combine(AppPaths.DataDirectory, "layout.json");
+                _view.LoadLayout(layoutPath);
+                Logger.AddLog(StaticLocalisation.GetString("Log.MainWindow.LayoutLoaded"));
+            }
+            catch (Exception ex)
+            {
+                Logger.AddLog(StaticLocalisation.GetString("Log.MainWindow.LayoutLoadError", ex.Message));
+            }
+        }
+
         private void SaveLayout()
         {
             try
@@ -565,4 +856,3 @@ namespace ViewPresenters
         }
     }
 }
-

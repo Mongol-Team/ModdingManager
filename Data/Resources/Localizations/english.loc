@@ -527,6 +527,11 @@
   "Property.TriggerDefenitionConfig.FileFullPath": "File Path",
   "Property.TriggerDefenitionConfig.CustomTooltip": "Custom Tooltip",
   "Property.TriggerDefenitionConfig.Scope": "Scope",
-  "Property.TriggerDefenitionConfig.Target": "Target"
+  "Property.TriggerDefenitionConfig.Target": "Target",
+  "DebugWindow.Button.SaveToFile": "Save to file",
+  "FileExplorer.SearchPlaceholder": "Search...",
+  "TobBar.Button.Settings": "Settings",
+  "TobBar.Button.Debug": "Debug",
+  "TobBar.Button.Test": "Test"
 }
 

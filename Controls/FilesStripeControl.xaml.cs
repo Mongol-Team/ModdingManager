@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Controls
 {
@@ -24,11 +25,20 @@ namespace Controls
     /// </summary>
     public class FileTabItem
     {
+        /// <summary>Путь к файлу</summary>
         public string FilePath { get; set; } = string.Empty;
+
+        /// <summary>Отображаемое имя файла</summary>
         public string DisplayName { get; set; } = string.Empty;
+
+        /// <summary>Закреплён ли таб</summary>
         public bool IsPinned { get; set; } = false;
+
         /// <summary>Порядок закрепления (меньше — левее/выше среди закреплённых)</summary>
         public int PinOrder { get; set; } = -1;
+
+        /// <summary>Ссылка на обозреваемый объект (любой тип данных)</summary>
+        public object? FileObject { get; set; }
 
         internal Button? Button { get; set; }
     }
@@ -51,8 +61,11 @@ namespace Controls
     {
         // ─── События ──────────────────────────────────────────────────────────
 
-        /// <summary>Двойной клик по вкладке — «открыть файл».</summary>
+        /// <summary>Двойной клик по вкладке или обычный клик — «открыть файл».</summary>
         public event EventHandler<FileTabEventArgs>? FileOpenRequested;
+
+        /// <summary>Активный файл изменился.</summary>
+        public event EventHandler<FileTabEventArgs>? ActiveFileChanged;
 
         /// <summary>Закрытие одной вкладки (крестик).</summary>
         public event EventHandler<FileTabEventArgs>? FileCloseRequested;
@@ -64,13 +77,14 @@ namespace Controls
 
         private readonly List<FileTabItem> _tabs = new();
         private int _scrollOffset = 0; // индекс первого видимого таба
+        private FileTabItem? _activeTab; // текущий открытый файл
 
         private StripeOrientation _orientation;
         private StackPanel _activePanel = null!;
         private ScrollViewer _activeScrollViewer = null!;
         private Button _scrollPrevButton = null!;
         private Button _scrollNextButton = null!;
-
+        
         // ─── DependencyProperty: Orientation ──────────────────────────────────
 
         public static readonly DependencyProperty OrientationProperty =
@@ -98,17 +112,56 @@ namespace Controls
         {
             InitializeComponent();
             Loaded += OnLoaded;
+
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             ApplyOrientation(Orientation);
             SizeChanged += (_, _) => UpdateScrollButtons();
+            UpdateScrollOffset();
             Logger.AddLog(StaticLocalisation.GetString("Log.FilesStripe.Loaded"));
         }
 
         // ─── Ориентация ───────────────────────────────────────────────────────
+        private void OnScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            UpdateScrollOffset();
+            UpdateScrollButtons(); // Оновлюємо кнопки після будь-якої зміни прокрутки
+        }
+        private void UpdateScrollOffset()
+        {
+            if (_activePanel.Children.Count == 0)
+            {
+                _scrollOffset = 0;
+                return;
+            }
 
+            double offset = _orientation == StripeOrientation.Horizontal
+                ? _activeScrollViewer.HorizontalOffset
+                : _activeScrollViewer.VerticalOffset;
+
+            int index = 0;
+            foreach (var child in _activePanel.Children.OfType<FrameworkElement>())
+            {
+                var pos = child.TransformToAncestor(_activeScrollViewer).Transform(new Point(0, 0));
+                double childPos = _orientation == StripeOrientation.Horizontal ? pos.X : pos.Y;
+
+                // Знаходимо перший таб, чия позиція >= поточного offset (перший видимий або частково видимий)
+                if (childPos >= offset - 1) // -1 для tolerance на fractional offsets
+                {
+                    _scrollOffset = index;
+                    break;
+                }
+                index++;
+            }
+
+            // Якщо не знайшли (крайній випадок), скидаємо на останній
+            if (index >= _activePanel.Children.Count)
+                _scrollOffset = _activePanel.Children.Count - 1;
+
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.FilesStripe.ScrollOffsetUpdated", _scrollOffset));
+        }
         private void ApplyOrientation(StripeOrientation orientation)
         {
             _orientation = orientation;
@@ -133,7 +186,7 @@ namespace Controls
                 _scrollPrevButton = ScrollUpButton;
                 _scrollNextButton = ScrollDownButton;
             }
-
+            _activeScrollViewer.ScrollChanged += OnScrollChanged;
             RebuildPanel();
             Logger.AddDbgLog(StaticLocalisation.GetString("Log.FilesStripe.OrientationApplied", orientation));
         }
@@ -141,23 +194,40 @@ namespace Controls
         // ─── Публичные методы ─────────────────────────────────────────────────
 
         /// <summary>Добавить вкладку файла.</summary>
-        public void AddTab(string filePath, string displayName)
+        /// <param name="filePath">Путь к файлу</param>
+        /// <param name="displayName">Отображаемое имя</param>
+        /// <param name="fileObject">Объект, представляющий файл (опционально)</param>
+        /// <param name="makeActive">Сделать активным после добавления</param>
+        public void AddTab(string filePath, string displayName, object? fileObject = null, bool makeActive = false)
         {
             if (_tabs.Any(t => t.FilePath == filePath))
             {
                 Logger.AddDbgLog(StaticLocalisation.GetString("Log.FilesStripe.TabAlreadyExists", filePath));
+
+                // Если таб уже существует и нужно сделать активным
+                if (makeActive)
+                {
+                    var existingTab = _tabs.First(t => t.FilePath == filePath);
+                    SetActiveTab(existingTab);
+                }
                 return;
             }
 
             var tab = new FileTabItem
             {
                 FilePath = filePath,
-                DisplayName = displayName
+                DisplayName = displayName,
+                FileObject = fileObject
             };
 
             _tabs.Add(tab);
             Logger.AddLog(StaticLocalisation.GetString("Log.FilesStripe.TabAdded", displayName));
             RebuildPanel();
+
+            if (makeActive)
+            {
+                SetActiveTab(tab);
+            }
         }
 
         /// <summary>Удалить вкладку по пути файла.</summary>
@@ -166,8 +236,23 @@ namespace Controls
             var tab = _tabs.FirstOrDefault(t => t.FilePath == filePath);
             if (tab == null) return;
 
+            // Если удаляется активный таб, нужно выбрать новый активный
+            bool wasActive = tab == _activeTab;
+
             _tabs.Remove(tab);
             Logger.AddLog(StaticLocalisation.GetString("Log.FilesStripe.TabRemoved", tab.DisplayName));
+
+            if (wasActive)
+            {
+                // Переключаемся на следующий таб или предыдущий
+                _activeTab = _tabs.FirstOrDefault();
+                if (_activeTab != null)
+                {
+                    ActiveFileChanged?.Invoke(this, new FileTabEventArgs(_activeTab));
+                    Logger.AddDbgLog(StaticLocalisation.GetString("Log.FilesStripe.ActiveFileChanged", _activeTab.FilePath));
+                }
+            }
+
             RebuildPanel();
         }
 
@@ -199,9 +284,41 @@ namespace Controls
         {
             _tabs.Clear();
             _scrollOffset = 0;
+            _activeTab = null;
             RebuildPanel();
             AllFilesCloseRequested?.Invoke(this, EventArgs.Empty);
             Logger.AddLog(StaticLocalisation.GetString("Log.FilesStripe.AllClosed"));
+        }
+
+        /// <summary>Установить активный файл.</summary>
+        public void SetActiveTab(string filePath)
+        {
+            var tab = _tabs.FirstOrDefault(t => t.FilePath == filePath);
+            if (tab != null)
+            {
+                SetActiveTab(tab);
+            }
+        }
+
+        /// <summary>Получить текущий активный таб.</summary>
+        public FileTabItem? GetActiveTab() => _activeTab;
+
+        /// <summary>Получить все табы.</summary>
+        public IReadOnlyList<FileTabItem> GetAllTabs() => _tabs.AsReadOnly();
+
+        /// <summary>Получить таб по пути файла.</summary>
+        public FileTabItem? GetTab(string filePath) => _tabs.FirstOrDefault(t => t.FilePath == filePath);
+
+        // ─── Приватные методы для работы с активным табом ─────────────────────
+
+        private void SetActiveTab(FileTabItem tab)
+        {
+            if (_activeTab == tab) return;
+
+            _activeTab = tab;
+            RebuildPanel(); // Перерисовываем для обновления визуального состояния
+            ActiveFileChanged?.Invoke(this, new FileTabEventArgs(tab));
+            Logger.AddDbgLog(StaticLocalisation.GetString("Log.FilesStripe.ActiveFileChanged", tab.FilePath));
         }
 
         // ─── Построение панели ────────────────────────────────────────────────
@@ -231,7 +348,8 @@ namespace Controls
                 tab.Button = BuildTabButton(tab);
                 _activePanel.Children.Add(tab.Button);
             }
-
+            UpdateScrollOffset();
+            UpdateScrollButtons();
             sw.Stop();
             Logger.AddLog(StaticLocalisation.GetString("Log.FilesStripe.Rebuilt", ordered.Count, sw.ElapsedMilliseconds));
 
@@ -240,67 +358,116 @@ namespace Controls
 
         private Button BuildTabButton(FileTabItem tab)
         {
-            // Контент: [📌 если закреплён] Имя  [✕]
             var nameBlock = new TextBlock
             {
-                Text = (tab.IsPinned ? "📌 " : string.Empty) + tab.DisplayName,
+                Text = (tab.IsPinned ? "📌  " : "") + tab.DisplayName,
                 VerticalAlignment = VerticalAlignment.Center,
                 TextTrimming = TextTrimming.CharacterEllipsis,
-                MaxWidth = 150
+                // MaxWidth = 140  ← краще прибрати або зробити більшим
             };
 
-            var closeBlock = new TextBlock
+            var pinButton = new TextBlock
+            {
+                Text = tab.IsPinned ? "📌" : "📍",
+                FontSize = 12,
+                Foreground = Brushes.White,           // ← тимчасово яскравий колір для дебагу
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(6, 0, 6, 0),
+                Cursor = Cursors.Hand,
+                ToolTip = tab.IsPinned ? "Відкріпити" : "Закріпити",
+                Visibility = Visibility.Collapsed,
+            };
+
+            var closeButton = new TextBlock
             {
                 Text = "✕",
-                FontSize = 10,
-                Foreground = (System.Windows.Media.Brush)FindResource("TextTertiary"),
+                FontSize = 13,
+                Foreground = Brushes.White,
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(6, 0, 0, 0),
+                Margin = new Thickness(4, 0, 10, 0),
+                Cursor = Cursors.Hand,
+                ToolTip = "Закрити",
                 Visibility = Visibility.Collapsed,
-                Cursor = Cursors.Hand
             };
 
-            var contentGrid = new Grid();
+            var contentGrid = new Grid { Background = Brushes.Transparent };
+            contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
             Grid.SetColumn(nameBlock, 0);
-            Grid.SetColumn(closeBlock, 1);
+            Grid.SetColumn(pinButton, 1);
+            Grid.SetColumn(closeButton, 2);
+
             contentGrid.Children.Add(nameBlock);
-            contentGrid.Children.Add(closeBlock);
+            contentGrid.Children.Add(pinButton);
+            contentGrid.Children.Add(closeButton);
 
             var btn = new Button
             {
                 Content = contentGrid,
                 Style = (Style)FindResource("FileTabButton"),
-                Height = _orientation == StripeOrientation.Horizontal ? 30 : double.NaN,
-                Width = _orientation == StripeOrientation.Vertical ? double.NaN : double.NaN,
-                Margin = _orientation == StripeOrientation.Horizontal
-                    ? new Thickness(0, 0, 0, 0)
-                    : new Thickness(0, 0, 0, 1),
-                Padding = new Thickness(10, 0, 6, 0),
-                ToolTip = tab.FilePath
+                Height = _orientation == StripeOrientation.Horizontal ? 32 : double.NaN,
+                Padding = new Thickness(10, 0, 4, 0),   // зменшити правий padding
+                MinWidth = 100,
+                Tag = tab
             };
 
-            // Показ крестика при наведении
-            btn.MouseEnter += (_, _) => closeBlock.Visibility = Visibility.Visible;
-            btn.MouseLeave += (_, _) => closeBlock.Visibility = Visibility.Collapsed;
-
-            // Двойной клик — открыть файл
-            btn.MouseDoubleClick += (_, e) =>
+            // Дебаг: видно, чи спрацьовує подія
+            btn.MouseEnter += (_, _) =>
+            {
+                pinButton.Visibility = Visibility.Visible;
+                closeButton.Visibility = Visibility.Visible;
+            };
+            btn.Click += (_, e) =>
             {
                 e.Handled = true;
-                Logger.AddDbgLog(StaticLocalisation.GetString("Log.FilesStripe.FileOpenRequested", tab.FilePath));
+                SetActiveTab(tab);
                 FileOpenRequested?.Invoke(this, new FileTabEventArgs(tab));
             };
+            btn.MouseLeave += (_, _) =>
+            {
+                pinButton.Visibility = Visibility.Collapsed;
+                closeButton.Visibility = Visibility.Collapsed;
+            };
 
-            // Клик по крестику (через нажатие на closeBlock внутри кнопки)
-            closeBlock.MouseLeftButtonDown += (_, e) =>
+            pinButton.MouseLeftButtonDown += (_, e) =>
+            {
+                e.Handled = true;
+                SetPinned(tab.FilePath, !tab.IsPinned);
+                nameBlock.Text = (tab.IsPinned ? "📌  " : "") + tab.DisplayName;
+                pinButton.Text = tab.IsPinned ? "📌" : "📍";
+                pinButton.Foreground = tab.IsPinned ? Brushes.Gold : Brushes.Gray;
+            };
+
+            closeButton.MouseLeftButtonDown += (_, e) =>
             {
                 e.Handled = true;
                 OnCloseTabClicked(tab);
             };
 
+            UpdateTabButtonVisualState(btn, tab == _activeTab);
+
             return btn;
+        }
+
+        /// <summary>Обновить визуальное состояние кнопки таба (активный/неактивный).</summary>
+        private void UpdateTabButtonVisualState(Button btn, bool isActive)
+        {
+            if (isActive)
+            {
+                // Активный таб — яркий фон
+                btn.Background = (Brush)FindResource("AccentBrush");
+                btn.Foreground = (Brush)FindResource("TextPrimary");
+                btn.FontWeight = FontWeights.SemiBold;
+            }
+            else
+            {
+                // Неактивный таб — стандартный стиль
+                btn.ClearValue(BackgroundProperty);
+                btn.ClearValue(ForegroundProperty);
+                btn.FontWeight = FontWeights.Normal;
+            }
         }
 
         private void OnCloseTabClicked(FileTabItem tab)
@@ -319,19 +486,27 @@ namespace Controls
         {
             if (_activeScrollViewer == null || _activePanel == null) return;
 
-            bool needScroll = _orientation == StripeOrientation.Horizontal
-                ? _activePanel.ActualWidth > _activeScrollViewer.ActualWidth
-                : _activePanel.ActualHeight > _activeScrollViewer.ActualHeight;
+            double extent = _orientation == StripeOrientation.Horizontal
+                ? _activeScrollViewer.ExtentWidth
+                : _activeScrollViewer.ExtentHeight;
 
+            double viewport = _orientation == StripeOrientation.Horizontal
+                ? _activeScrollViewer.ViewportWidth
+                : _activeScrollViewer.ViewportHeight;
+
+            double offset = _orientation == StripeOrientation.Horizontal
+                ? _activeScrollViewer.HorizontalOffset
+                : _activeScrollViewer.VerticalOffset;
+
+            bool needScroll = extent > viewport;
             var vis = needScroll ? Visibility.Visible : Visibility.Collapsed;
             _scrollPrevButton.Visibility = vis;
             _scrollNextButton.Visibility = vis;
 
             if (needScroll)
             {
-                // Обновляем доступность кнопок прокрутки
-                _scrollPrevButton.IsEnabled = _scrollOffset > 0;
-                _scrollNextButton.IsEnabled = _scrollOffset < _activePanel.Children.Count - 1;
+                _scrollPrevButton.IsEnabled = offset > 0; // Зміна: не _scrollOffset > 0, а реальний offset
+                _scrollNextButton.IsEnabled = offset + viewport < extent; // Чи є ще контент за видимою зоною
             }
         }
 
@@ -339,16 +514,23 @@ namespace Controls
         private void ScrollToIndex(int index)
         {
             if (_activePanel.Children.Count == 0) return;
-
             index = Math.Max(0, Math.Min(index, _activePanel.Children.Count - 1));
-            _scrollOffset = index;
 
             var child = _activePanel.Children[index] as FrameworkElement;
             if (child == null) return;
 
-            child.BringIntoView();
-            UpdateScrollButtons();
+            var pos = child.TransformToAncestor(_activeScrollViewer).Transform(new Point(0, 0));
 
+            if (_orientation == StripeOrientation.Horizontal)
+            {
+                _activeScrollViewer.ScrollToHorizontalOffset(pos.X);
+            }
+            else
+            {
+                _activeScrollViewer.ScrollToVerticalOffset(pos.Y);
+            }
+
+            // _scrollOffset оновиться автоматично через OnScrollChanged
             Logger.AddDbgLog(StaticLocalisation.GetString("Log.FilesStripe.ScrolledTo", index));
         }
 

@@ -34,5 +34,6 @@ namespace View.Models
         /// <summary>Сериализовать/десериализовать layout через LayoutSerializer</summary>
         void LoadLayout(string layoutPath);
         void SaveLayout(string layoutPath);
+
     }
 }

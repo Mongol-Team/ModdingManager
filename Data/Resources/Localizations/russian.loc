@@ -526,12 +526,17 @@
   "Button.Settings": "Настройки",
   "Button.Debug": "Отладка",
   "Button.Test": "Тест",
-  "Button.SaveToFile": "Сохранить в файл",
+  "DebugWindow.Button.SaveToFile": "Сохранить в файл",
   "Window.Debug": "Debug / Лог",
   "Error.NoCreatorAttribute": "Для типа {0} не указан атрибут ConfigCreatorAttribute",
   "Error.UnknownCreatorType": "Неизвестный тип Creator: {0}",
   "Error.OpenCreatorFailed": "Ошибка при открытии Creator: {0}",
   "Info.CreatorNotImplemented": "{0} пока не реализован",
   "Dialog.Error": "Ошибка",
-  "Dialog.Info": "Информация"
+  "Dialog.Info": "Информация",
+
+  "FileExplorer.SearchPlaceholder": "Искать...",
+  "TobBar.Button.Settings": "Настройки",
+  "TobBar.Button.Debug": "Отладка",
+  "TobBar.Button.Test": "Тест"
 }
