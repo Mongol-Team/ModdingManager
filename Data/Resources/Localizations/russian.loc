@@ -549,5 +549,6 @@
   "Log.FileExplorer.NoImplementations": "Нет реализаций для интерфейса: {0}",
   "Log.FileExplorer.FileTypeSelected": "Выбран тип файла {0} для категории {1}",
   "Log.FileExplorer.EntityTypeSelected": "Выбран тип сущности {0} для файла {1}"
+  "Button.SaveSettings": "Сохранить настройки"
 
 }
