@@ -1,4 +1,5 @@
-﻿using Models.Interfaces;
+﻿using Models.Attributes;
+using Models.Interfaces;
 using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
@@ -9,12 +10,14 @@ using System.Threading.Tasks;
 
 namespace Models.GfxTypes
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class PieChartType : IGfx
     {
         public Bitmap Content { get; set; }
         public Identifier Id { get; set; }
         public int Size { get; set; }
         public List<Color> Colors { get; set; }
+        public string FileFullPath { get; set; }
         public override string ToString()
         {
             return Id.ToString();

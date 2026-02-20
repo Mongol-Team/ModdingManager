@@ -1,4 +1,5 @@
-﻿using Models.Interfaces;
+﻿using Models.Attributes;
+using Models.Interfaces;
 using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Models.GfxTypes
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class ArrowType : IGfx
     {
         public Identifier Id { get; set; }
@@ -17,6 +19,7 @@ namespace Models.GfxTypes
         public Bitmap? Content { get; set; }
         public string NormalPath { get; set; }
         public Bitmap? NormalContent { get; set; }
+        public string FileFullPath { get; set; }
         public string SpecularPath { get; set; }
         public Bitmap? SpecularContent { get; set; }
 

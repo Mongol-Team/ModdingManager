@@ -1,10 +1,12 @@
 ﻿using Data;
+using Models.Attributes;
 using Models.Interfaces;
 using Models.Types.Utils;
 using System.Drawing;
 
 namespace Models.GfxTypes
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class SpriteType : IGfx
     {
         public Identifier Id { get; set; }
@@ -15,6 +17,7 @@ namespace Models.GfxTypes
         public bool LegacyLazyLoad { get; set; }        // lazy loading flag
         public bool TransparenceCheck { get; set; }       // if alpha channel is used for click bounding
         public Bitmap Content { get; set; }
+        public string FileFullPath { get; set; }
         public SpriteType() { }
         public SpriteType(Bitmap content, string name)
         {

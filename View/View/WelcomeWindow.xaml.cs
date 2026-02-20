@@ -209,6 +209,7 @@ namespace View
 
             await System.Threading.Tasks.Task.Run(() =>
             {
+                ModDataStorage.RegisterTypes();
                 ModDataStorage.ComposeMod((current, total, message) =>
                 {
                     Dispatcher.Invoke(() =>

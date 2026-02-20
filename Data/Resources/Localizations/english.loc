@@ -530,6 +530,12 @@
   "Property.TriggerDefenitionConfig.Target": "Target",
   "DebugWindow.Button.SaveToFile": "Save to file",
   "FileExplorer.SearchPlaceholder": "Search...",
+  "ClassViewer.Bitmap.Title": "Image",
+  "ClassViewer.Bitmap.NoImage": "No image",
+  "Log.TypeRegistration.Started": "Types regestration started.",
+  "Log.TypeRegistration.Completed": "Types regestration completed.",
+  "ClassViewer.Bitmap.Browse": "Browse...",
+  "ClassViewer.Bitmap.FileFilter": "Image files (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp",
   "TobBar.Button.Settings": "Settings",
   "TobBar.Button.Debug": "Debug",
   "TobBar.Button.Test": "Test"

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿// Controls/Args/FileExplorerEventArgs.cs
+using System;
 using System.Windows;
 
 namespace Controls.Args
@@ -13,11 +9,16 @@ namespace Controls.Args
     public class AddFileRequestedEventArgs : RoutedEventArgs
     {
         public ModCategoryNode Category { get; }
+        public Type SpecificType { get; }  // Новое свойство
 
-        public AddFileRequestedEventArgs(RoutedEvent routedEvent, ModCategoryNode category)
+        public AddFileRequestedEventArgs(
+            RoutedEvent routedEvent,
+            ModCategoryNode category,
+            Type specificType = null)  // Опциональный параметр
             : base(routedEvent)
         {
             Category = category;
+            SpecificType = specificType;
         }
     }
 
@@ -26,11 +27,16 @@ namespace Controls.Args
     public class AddEntityRequestedEventArgs : RoutedEventArgs
     {
         public ConfigFileNode FileNode { get; }
+        public Type SpecificType { get; }  // Новое свойство
 
-        public AddEntityRequestedEventArgs(RoutedEvent routedEvent, ConfigFileNode fileNode)
+        public AddEntityRequestedEventArgs(
+            RoutedEvent routedEvent,
+            ConfigFileNode fileNode,
+            Type specificType = null)  // Опциональный параметр
             : base(routedEvent)
         {
             FileNode = fileNode;
+            SpecificType = specificType;
         }
     }
 
@@ -104,6 +110,19 @@ namespace Controls.Args
         {
             Item = item;
             NewName = newName;
+        }
+    }
+
+    // ─── Открытие элемента ──────────────────────────────────────────────────────
+
+    public class OpenItemRequestedEventArgs : RoutedEventArgs
+    {
+        public object Item { get; }
+
+        public OpenItemRequestedEventArgs(RoutedEvent routedEvent, object item)
+            : base(routedEvent)
+        {
+            Item = item;
         }
     }
 }

@@ -166,6 +166,25 @@ namespace Controls
                     };
                     inputControl = textBox;
                 }
+                else if (prop.PropertyType == typeof(System.Drawing.Bitmap))
+                {
+                    var currentBitmap = prop.GetValue(_buildingContent) as System.Drawing.Bitmap;
+
+                    var control = CreateBitmapControl(
+                        currentBitmap,
+                        newValue =>
+                        {
+                            var old = prop.GetValue(_buildingContent);
+                            prop.SetValue(_buildingContent, newValue);
+                            RaisePropertyChanged(prop, old, newValue);
+                        });
+
+                    if (control != null)
+                    {
+                        inputControl = control;
+                        ApplyGenericViewerStyle(control);  // если хотите применить стили
+                    }
+                }
                 else if (prop.PropertyType == typeof(Identifier))
                 {
                     var identifier = value as Identifier;
@@ -1570,6 +1589,168 @@ namespace Controls
         {
             var ext = Path.GetExtension(path)?.ToLowerInvariant();
             return ext is ".png" or ".jpg" or ".jpeg" or ".bmp";
+        }
+
+        private FrameworkElement CreateBitmapControl(
+    System.Drawing.Bitmap initialBitmap,
+    Action<System.Drawing.Bitmap> onBitmapChanged)
+        {
+            var root = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
+
+            // Заголовок
+            root.Children.Add(new TextBlock
+            {
+                Text = L("ClassViewer.Bitmap.Title"),  // например "Изображение (Bitmap)"
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 6),
+                Style = (Style)TryFindResource("GenericViewerSectionTitle")
+            });
+
+            // Preview
+            var imageBorder = new Border
+            {
+                Width = 180,
+                Height = 180,
+                Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255)),
+                BorderBrush = Brushes.Gray,
+                BorderThickness = new Thickness(2),
+                CornerRadius = new CornerRadius(4),
+                Margin = new Thickness(0, 0, 0, 12),
+                AllowDrop = true
+            };
+
+            var previewImage = new Image
+            {
+                Stretch = Stretch.Uniform,
+                Visibility = Visibility.Collapsed
+            };
+
+            var placeholderText = new TextBlock
+            {
+                Text = L("ClassViewer.Bitmap.NoImage"),
+                TextAlignment = TextAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = Brushes.Gray,
+                TextWrapping = TextWrapping.Wrap,
+                Style = (Style)TryFindResource("GenericViewerTextBlock")
+            };
+
+            var grid = new Grid();
+            grid.Children.Add(placeholderText);
+            grid.Children.Add(previewImage);
+            imageBorder.Child = grid;
+
+            // Начальная загрузка, если есть
+            if (initialBitmap != null)
+            {
+                try
+                {
+                    previewImage.Source = initialBitmap.ToImageSource();  // ваш extension-метод
+                    previewImage.Visibility = Visibility.Visible;
+                    placeholderText.Visibility = Visibility.Collapsed;
+                }
+                catch { /* silent fail */ }
+            }
+
+            // ─── Drag & Drop ────────────────────────────────────────
+            imageBorder.DragEnter += (s, e) =>
+            {
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    imageBorder.BorderBrush = Brushes.DodgerBlue;
+                    imageBorder.Background = new SolidColorBrush(Color.FromArgb(80, 0, 120, 215));
+                }
+            };
+
+            imageBorder.DragLeave += (s, e) =>
+            {
+                imageBorder.BorderBrush = Brushes.Gray;
+                imageBorder.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
+            };
+
+            imageBorder.Drop += (s, e) =>
+            {
+                imageBorder.BorderBrush = Brushes.Gray;
+                imageBorder.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
+
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+                    if (files?.Length > 0)
+                    {
+                        TryLoadAndSetBitmap(files[0], previewImage, placeholderText, onBitmapChanged);
+                    }
+                }
+            };
+
+            // ─── Кнопка Browse ──────────────────────────────────────
+            var btnBrowse = new Button
+            {
+                Content = L("ClassViewer.Bitmap.Browse"),
+                Width = 120,
+                Style = (Style)TryFindResource("GenericViewerButton"),
+                Margin = new Thickness(0, 0, 0, 8),
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+
+            btnBrowse.Click += (s, e) =>
+            {
+                var ofd = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = L("ClassViewer.Bitmap.FileFilter")  // "Image files (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp"
+                };
+
+                if (ofd.ShowDialog() == true)
+                {
+                    TryLoadAndSetBitmap(ofd.FileName, previewImage, placeholderText, onBitmapChanged);
+                }
+            };
+
+            // ─── Собираем всё вместе ────────────────────────────────
+            root.Children.Add(imageBorder);
+            root.Children.Add(btnBrowse);
+
+            return root;
+        }
+
+        private void TryLoadAndSetBitmap(
+            string filePath,
+            Image previewImage,
+            TextBlock placeholder,
+            Action<System.Drawing.Bitmap> onChanged)
+        {
+            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+                return;
+
+            var ext = Path.GetExtension(filePath)?.ToLowerInvariant();
+            if (ext is not (".png" or ".jpg" or ".jpeg" or ".bmp"))
+            {
+                CustomMessageBox.Show(
+                    L("ClassViewer.Bitmap.Error.WrongFormat"),
+                    L("ClassViewer.Error.Title"));
+                return;
+            }
+
+            try
+            {
+                using var original = System.Drawing.Bitmap.FromFile(filePath) as System.Drawing.Bitmap;
+                if (original == null) return;
+
+                // Можно сделать копию, если нужно избежать блокировки файла
+                var copy = new System.Drawing.Bitmap(original);
+
+                previewImage.Source = copy.ToImageSource();
+                previewImage.Visibility = Visibility.Visible;
+                placeholder.Visibility = Visibility.Collapsed;
+
+                onChanged?.Invoke(copy);
+            }
+            catch (Exception ex)
+            {
+                CustomMessageBox.Show(
+                    L("ClassViewer.Bitmap.Error.LoadFailed") + "\n" + ex.Message,
+                    L("ClassViewer.Error.Title"));
+            }
         }
     }
 }

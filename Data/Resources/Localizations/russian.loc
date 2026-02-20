@@ -534,9 +534,20 @@
   "Info.CreatorNotImplemented": "{0} пока не реализован",
   "Dialog.Error": "Ошибка",
   "Dialog.Info": "Информация",
+  "ClassViewer.Bitmap.Browse": "Обзор...",
 
+  "ClassViewer.Bitmap.NoImage": "Нет изображения",
+  "ClassViewer.Bitmap.FileFilter": "Файлы изображений (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp",
   "FileExplorer.SearchPlaceholder": "Искать...",
   "TobBar.Button.Settings": "Настройки",
+  "Log.TypeRegistration.Started": "Начата регистрация типов",
+  "Log.TypeRegistration.Completed": "Регистрация типов завершена",
+  "ClassViewer.Bitmap.Title": "Изображение",
   "TobBar.Button.Debug": "Отладка",
-  "TobBar.Button.Test": "Тест"
+  "TobBar.Button.Test": "Тест",
+  "FileExplorer.NoImplementationsFound": "Не найдено зарегистрированных реализаций для интерфейса {0}",
+  "Log.FileExplorer.NoImplementations": "Нет реализаций для интерфейса: {0}",
+  "Log.FileExplorer.FileTypeSelected": "Выбран тип файла {0} для категории {1}",
+  "Log.FileExplorer.EntityTypeSelected": "Выбран тип сущности {0} для файла {1}"
+
 }

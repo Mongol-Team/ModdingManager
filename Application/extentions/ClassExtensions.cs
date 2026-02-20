@@ -28,6 +28,7 @@ namespace Application.Extentions
 
             return target;
         }
+       
         public static int ToInt<TClass>(this TClass id) where TClass : class
         {
             if (id == null)

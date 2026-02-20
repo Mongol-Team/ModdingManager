@@ -450,15 +450,23 @@ namespace ViewPresenters
 
             try
             {
-                var newEntity = Activator.CreateInstance(fileNode.ConfigType);
+                // Используйте SpecificType из события, если задан (concrete реализация)
+                var typeToCreate = e.SpecificType ?? fileNode.ConfigType;
+
+                // Дополнительная проверка: не создаем интерфейсы/абстракты
+                if (typeToCreate.IsInterface || typeToCreate.IsAbstract)
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot create instance of interface/abstract type: {typeToCreate.Name}. " +
+                        "Ensure a concrete implementation is selected.");
+                }
+
+                var newEntity = Activator.CreateInstance(typeToCreate);
                 if (newEntity != null)
                 {
                     fileNode.Entities.Add(newEntity);
                     _fileExplorerControl?.LoadModData();
-
-                    // Оновлюємо відкритий viewer, якщо він відображає цей файл
                     RefreshViewerIfNeeded(fileNode.File);
-
                     Logger.AddDbgLog(StaticLocalisation.GetString(
                         "Log.MainWindow.EntityAdded", fileNode.DisplayName));
                 }

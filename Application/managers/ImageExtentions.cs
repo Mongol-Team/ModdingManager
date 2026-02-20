@@ -10,7 +10,7 @@ using DDF = Data.DataDefaultValues;
 
 namespace Application.managers
 {
-    public static class ImageManager
+    public static class ImageExtentions
     {
         public static Bitmap LoadAndCropRightSideOfIcon(string FileFullPath)
         {
@@ -23,7 +23,7 @@ namespace Application.managers
 
             try
             {
-                using var fullBitmap = DDSManager.LoadDDSAsBitmap(FileFullPath);
+                using var fullBitmap = DDSExtentions.LoadDDSAsBitmap(FileFullPath);
                 return CropLeftHalf(fullBitmap);
             }
             catch

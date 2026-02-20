@@ -1,10 +1,12 @@
-﻿using Models.Interfaces;
+﻿using Models.Attributes;
+using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 using System.Drawing;
 
 namespace Models.GfxTypes
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class ProgressbarType : IGfx
     {
         public Identifier Id { get; set; }
@@ -14,6 +16,7 @@ namespace Models.GfxTypes
         public Bitmap Content { get; set; }
         public Color Color { get; set; }              // { r g b [a] }
         public Color SecondColor { get; set; }
+        public string FileFullPath { get; set; }
         public Point Size { get; set; }
         public string EffectFile { get; set; }        // "<path>"
         public bool IsHorisontal { get; set; }          // <bool>

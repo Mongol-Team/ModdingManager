@@ -6,7 +6,7 @@ using Application.Settings;
 using Models.Configs;
 namespace Application.managers
 {
-    public static class DDSManager
+    public static class DDSExtentions
     {
 
         public static Bitmap LoadDDSAsBitmap(string path)

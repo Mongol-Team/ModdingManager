@@ -1,5 +1,6 @@
 using Application;
 using Application.Debugging;
+using Application.extentions;
 using Application.Extentions;
 using Application.utils;
 using Controls.Args;
@@ -392,63 +393,8 @@ namespace Controls
 
         // ─── Создание заголовков ─────────────────────────────────────────────────
 
-        private StackPanel CreateCategoryHeader(ModCategoryNode category)
-        {
-            var panel = new StackPanel { Orientation = Orientation.Horizontal };
-
-            panel.Children.Add(new TextBlock
-            {
-                Text = "\uE8B7",
-                FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                FontSize = 14,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 0, 6, 0),
-                Foreground = (Brush)System.Windows.Application.Current.Resources["FolderLayer1"]
-            });
-            panel.Children.Add(CreateHighlightedTextBlock(category.DisplayName));
-
-            var addBtn = CreateHeaderButton("+", StaticLocalisation.GetString("Tooltip.AddFile"),
-                _ => RaiseEvent(new AddFileRequestedEventArgs(AddFileRequestedEvent, category)));
-            panel.Children.Add(addBtn);
-
-            return panel;
-        }
-
-        private StackPanel CreateFileHeader(ConfigFileNode fileNode)
-        {
-            var panel = new StackPanel { Orientation = Orientation.Horizontal };
-
-            panel.Children.Add(new TextBlock
-            {
-                Text = "\uE8A5",
-                Style = (Style)FindResource("FileIconStyle"),
-                Foreground = (Brush)System.Windows.Application.Current.Resources["Link"]
-            });
-            panel.Children.Add(CreateHighlightedTextBlock(fileNode.DisplayName));
-            panel.Children.Add(new TextBlock
-            {
-                Text = $"<{GetShortTypeName(fileNode.ConfigType)}>",
-                Style = (Style)FindResource("FileTypeStyle")
-            });
-            panel.Children.Add(new TextBlock
-            {
-                Text = $"({fileNode.EntityCount})",
-                Style = (Style)FindResource("ItemCountStyle")
-            });
-
-            var addBtn = CreateHeaderButton("+", StaticLocalisation.GetString("Tooltip.AddEntity"),
-                _ => RaiseEvent(new AddEntityRequestedEventArgs(AddEntityRequestedEvent, fileNode)));
-            addBtn.Margin = new Thickness(8, 0, 0, 0);
-            panel.Children.Add(addBtn);
-
-            var delBtn = CreateHeaderButton("−", StaticLocalisation.GetString("Tooltip.RemoveFile"),
-                _ => RequestDelete(fileNode, fileNode.DisplayName));
-            delBtn.Margin = new Thickness(4, 0, 0, 0);
-            panel.Children.Add(delBtn);
-
-            return panel;
-        }
-
+       
+      
         private UIElement CreateItemHeader(string name)
         {
             var panel = new StackPanel { Orientation = Orientation.Horizontal };
@@ -870,11 +816,7 @@ namespace Controls
         private void DeleteMenuItem_Click(object sender, RoutedEventArgs e) =>
             DeleteSelectedItem();
 
-        private void AddFileMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (_selectedItem?.Tag is ModCategoryNode category)
-                RaiseEvent(new AddFileRequestedEventArgs(AddFileRequestedEvent, category));
-        }
+       
 
         // ─── Вспомогательные методы ──────────────────────────────────────────────
 
@@ -992,7 +934,6 @@ namespace Controls
             {
                 var args = new RenameRequestedEventArgs(RenameRequestedEvent, _renamingItem.Tag, newName);
                 RaiseEvent(args);
-                success = args.Success;
             }
 
             // Восстанавливаем TextBlock
@@ -1016,6 +957,252 @@ namespace Controls
             _renamingItem = null;
 
             if (success) LoadModData();
+        }
+        // Добавить в FileExplorer.xaml.cs
+
+        // ─── Методы для работы с выбором типа ────────────────────────────────────────
+
+        /// <summary>
+        /// Обработка нажатия кнопки "+" для категории
+        /// </summary>
+        private void HandleAddFileRequest(ModCategoryNode category)
+        {
+            // Получаем тип из generic аргумента ItemType (ConfigFile<T> или GfxFile<T>)
+            var fileContainerType = category.ItemType;
+            if (!fileContainerType.IsGenericType)
+            {
+                RaiseEvent(new AddFileRequestedEventArgs(AddFileRequestedEvent, category));
+                return;
+            }
+
+            Type entityType = fileContainerType.GetGenericArguments()[0];
+
+            // Проверяем, является ли T интерфейсом
+            if (entityType.IsInterface())
+            {
+                var implementations = entityType.GetImplementationsForType();
+
+                if (implementations.Count == 0)
+                {
+                    // Нет зарегистрированных реализаций - показываем ошибку
+                    CustomMessageBox.Show(
+                        StaticLocalisation.GetString("FileExplorer.NoImplementationsFound", entityType.Name),
+                        StaticLocalisation.GetString("Dialog.Error"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    Logger.AddDbgLog(StaticLocalisation.GetString("Log.FileExplorer.NoImplementations", entityType.Name));
+                    return;
+                }
+
+                if (implementations.Count == 1)
+                {
+                    // Только одна реализация - создаем сразу
+                    RaiseEvent(new AddFileRequestedEventArgs(
+                        AddFileRequestedEvent,
+                        category,
+                        implementations[0].Type));
+                }
+                else
+                {
+                    // Несколько реализаций - показываем меню выбора
+                    ShowFileTypeSelectionMenu(category, implementations);
+                }
+            }
+            else
+            {
+                // T - это обычный класс, создаем как раньше
+                RaiseEvent(new AddFileRequestedEventArgs(AddFileRequestedEvent, category));
+            }
+        }
+
+        /// <summary>
+        /// Обработка нажатия кнопки "+" для файла (добавление сущности)
+        /// </summary>
+        private void HandleAddEntityRequest(ConfigFileNode fileNode)
+        {
+            var entityType = fileNode.ConfigType;
+
+            // Проверяем, является ли T интерфейсом
+            if (entityType.IsInterface())
+            {
+                var implementations = entityType.GetImplementationsForType();
+
+                if (implementations.Count == 0)
+                {
+                    // Нет зарегистрированных реализаций - показываем ошибку
+                    CustomMessageBox.Show(
+                        StaticLocalisation.GetString("FileExplorer.NoImplementationsFound", entityType.Name),
+                        StaticLocalisation.GetString("Dialog.Error"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    Logger.AddDbgLog(StaticLocalisation.GetString("Log.FileExplorer.NoImplementations", entityType.Name));
+                    return;
+                }
+
+                if (implementations.Count == 1)
+                {
+                    // Только одна реализация - создаем сразу
+                    RaiseEvent(new AddEntityRequestedEventArgs(
+                        AddEntityRequestedEvent,
+                        fileNode,
+                        implementations[0].Type));
+                }
+                else
+                {
+                    // Несколько реализаций - показываем меню выбора
+                    ShowEntityTypeSelectionMenu(fileNode, implementations);
+                }
+            }
+            else
+            {
+                // T - это обычный класс, создаем как раньше
+                RaiseEvent(new AddEntityRequestedEventArgs(AddEntityRequestedEvent, fileNode));
+            }
+        }
+
+        /// <summary>
+        /// Показывает контекстное меню для выбора типа файла
+        /// </summary>
+        private void ShowFileTypeSelectionMenu(ModCategoryNode category, List<Application.TypeInfo> implementations)
+        {
+            var menu = new ContextMenu();
+
+            foreach (var typeInfo in implementations)
+            {
+                var displayName = typeInfo.LocalizationKey != null
+                    ? StaticLocalisation.GetString(typeInfo.LocalizationKey)
+                    : typeInfo.DisplayName;
+
+                var menuItem = new MenuItem
+                {
+                    Header = displayName,
+                    Tag = typeInfo.Type
+                };
+
+                menuItem.Click += (s, e) =>
+                {
+                    var selectedType = (Type)((MenuItem)s).Tag;
+                    RaiseEvent(new AddFileRequestedEventArgs(
+                        AddFileRequestedEvent,
+                        category,
+                        selectedType));
+                    Logger.AddDbgLog(StaticLocalisation.GetString(
+                        "Log.FileExplorer.FileTypeSelected",
+                        selectedType.Name,
+                        category.DisplayName));
+                };
+
+                menu.Items.Add(menuItem);
+            }
+
+            menu.IsOpen = true;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;
+        }
+
+        /// <summary>
+        /// Показывает контекстное меню для выбора типа сущности
+        /// </summary>
+        private void ShowEntityTypeSelectionMenu(ConfigFileNode fileNode, List<Application.TypeInfo> implementations)
+        {
+            var menu = new ContextMenu();
+
+            foreach (var typeInfo in implementations)
+            {
+                var displayName = typeInfo.LocalizationKey != null
+                    ? StaticLocalisation.GetString(typeInfo.LocalizationKey)
+                    : typeInfo.DisplayName;
+
+                var menuItem = new MenuItem
+                {
+                    Header = displayName,
+                    Tag = typeInfo.Type
+                };
+
+                menuItem.Click += (s, e) =>
+                {
+                    var selectedType = (Type)((MenuItem)s).Tag;
+                    RaiseEvent(new AddEntityRequestedEventArgs(
+                        AddEntityRequestedEvent,
+                        fileNode,
+                        selectedType));
+                    Logger.AddDbgLog(StaticLocalisation.GetString(
+                        "Log.FileExplorer.EntityTypeSelected",
+                        selectedType.Name,
+                        fileNode.DisplayName));
+                };
+
+                menu.Items.Add(menuItem);
+            }
+
+            menu.IsOpen = true;
+            menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse;
+        }
+
+        // ─── Обновляем существующие методы создания заголовков ───────────────────────
+
+        private StackPanel CreateCategoryHeader(ModCategoryNode category)
+        {
+            var panel = new StackPanel { Orientation = Orientation.Horizontal };
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "\uE8B7",
+                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                FontSize = 14,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 6, 0),
+                Foreground = (Brush)System.Windows.Application.Current.Resources["FolderLayer1"]
+            });
+            panel.Children.Add(CreateHighlightedTextBlock(category.DisplayName));
+
+            var addBtn = CreateHeaderButton("+", StaticLocalisation.GetString("Tooltip.AddFile"),
+                _ => HandleAddFileRequest(category)); // Изменено!
+            panel.Children.Add(addBtn);
+
+            return panel;
+        }
+
+        private StackPanel CreateFileHeader(ConfigFileNode fileNode)
+        {
+            var panel = new StackPanel { Orientation = Orientation.Horizontal };
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = "\uE8A5",
+                Style = (Style)FindResource("FileIconStyle"),
+                Foreground = (Brush)System.Windows.Application.Current.Resources["Link"]
+            });
+            panel.Children.Add(CreateHighlightedTextBlock(fileNode.DisplayName));
+            panel.Children.Add(new TextBlock
+            {
+                Text = $"<{GetShortTypeName(fileNode.ConfigType)}>",
+                Style = (Style)FindResource("FileTypeStyle")
+            });
+            panel.Children.Add(new TextBlock
+            {
+                Text = $"({fileNode.EntityCount})",
+                Style = (Style)FindResource("ItemCountStyle")
+            });
+
+            var addBtn = CreateHeaderButton("+", StaticLocalisation.GetString("Tooltip.AddEntity"),
+                _ => HandleAddEntityRequest(fileNode)); // Изменено!
+            addBtn.Margin = new Thickness(8, 0, 0, 0);
+            panel.Children.Add(addBtn);
+
+            var delBtn = CreateHeaderButton("−", StaticLocalisation.GetString("Tooltip.RemoveFile"),
+                _ => RequestDelete(fileNode, fileNode.DisplayName));
+            delBtn.Margin = new Thickness(4, 0, 0, 0);
+            panel.Children.Add(delBtn);
+
+            return panel;
+        }
+
+        // ─── Обновляем контекстное меню ──────────────────────────────────────────────
+
+        private void AddFileMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedItem?.Tag is ModCategoryNode category)
+                HandleAddFileRequest(category); // Изменено!
         }
 
         // ─── Поиск ───────────────────────────────────────────────────────────────
