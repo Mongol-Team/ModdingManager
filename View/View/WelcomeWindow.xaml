@@ -76,21 +76,15 @@
                                     <ItemsControl ItemsSource="{Binding Value}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="Transparent" 
+                                                <Border Style="{StaticResource ListItemHoverBorder}"
                                                         Margin="0,2"
                                                         Padding="8,6"
-                                                        Cursor="Hand"
-                                                        MouseLeftButtonDown="ProjectItem_MouseLeftButtonDown">
-                                                    <Border.Style>
-                                                        <Style TargetType="Border">
-                                                            <Setter Property="Background" Value="Transparent"/>
-                                                            <Style.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="{StaticResource BackgroundHover}"/>
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Border.Style>
+                                                        Cursor="Hand">
+                                                    <Border.InputBindings>
+                                                        <MouseBinding MouseAction="LeftClick"
+                                                                      Command="{Binding OpenProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                      CommandParameter="{Binding}"/>
+                                                    </Border.InputBindings>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="Auto"/>
@@ -115,12 +109,18 @@
                                                                        Margin="0,2,0,0"/>
                                                         </StackPanel>
                                                         
-                                                        <TextBlock Grid.Column="2" 
-                                                                   Text="{Binding LastOpened}" 
-                                                                   FontSize="11"
-                                                                   Foreground="{StaticResource TextTertiary}"
-                                                                   VerticalAlignment="Center"
-                                                                   Margin="12,0,0,0"/>
+                                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="12,0,0,0">
+                                                            <TextBlock Text="{Binding LastOpened}" 
+                                                                       FontSize="11"
+                                                                       Foreground="{StaticResource TextTertiary}"
+                                                                       HorizontalAlignment="Right"/>
+                                                            <Button Style="{StaticResource SmallDeleteIconButton}"
+                                                                    Margin="0,2,0,0"
+                                                                    HorizontalAlignment="Right"
+                                                                    ToolTip="{loc:LocalizeExtension Key=Menu.Delete}"
+                                                                    Command="{Binding RemoveProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                    CommandParameter="{Binding}"/>
+                                                        </StackPanel>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>
