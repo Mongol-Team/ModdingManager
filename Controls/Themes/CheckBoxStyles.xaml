@@ -1,0 +1,109 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+
+        <ResourceDictionary Source="Colors.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+    <ControlTemplate x:Key="CheckBoxCircleTemplate" TargetType="CheckBox">
+        <Grid Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Круглый индикатор чекбокса -->
+            <Border x:Name="CheckBoxBorder"
+                    Grid.Column="0"
+                    Width="18"
+                    Height="18"
+                    Background="{StaticResource InputBackground}"
+                    BorderBrush="{StaticResource InputBorder}"
+                    BorderThickness="1"
+                    CornerRadius="9"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left">
+
+                <!-- Внутренний круг для отмеченного состояния -->
+                <Ellipse x:Name="CheckMark"
+                        Width="10"
+                        Height="10"
+                        Fill="{StaticResource Link}"
+                        Visibility="Collapsed"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+            </Border>
+
+            <!-- Контент чекбокса (текст) -->
+            <ContentPresenter x:Name="ContentPresenter"
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            RecognizesAccessKey="True"/>
+        </Grid>
+
+        <ControlTemplate.Triggers>
+            <!-- Состояние: отмечен -->
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{StaticResource Link}"/>
+                <Setter TargetName="CheckBoxBorder" Property="Background" Value="{StaticResource InputBackground}"/>
+            </Trigger>
+
+            <!-- Состояние: наведение мыши -->
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{StaticResource InputBorderHover}"/>
+            </Trigger>
+
+            <!-- Состояние: наведение мыши + отмечен -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="True"/>
+                    <Condition Property="IsChecked" Value="True"/>
+                </MultiTrigger.Conditions>
+                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{StaticResource LinkHover}"/>
+                <Setter TargetName="CheckMark" Property="Fill" Value="{StaticResource LinkHover}"/>
+            </MultiTrigger>
+
+            <!-- Состояние: нажат -->
+            <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="CheckBoxBorder" Property="Background" Value="{StaticResource BackgroundHover}"/>
+            </Trigger>
+
+            <!-- Состояние: неопределенное (Indeterminate) -->
+            <Trigger Property="IsChecked" Value="{x:Null}">
+                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="CheckMark" Property="Width" Value="8"/>
+                <Setter TargetName="CheckMark" Property="Height" Value="2"/>
+                <Setter TargetName="CheckMark" Property="Fill" Value="{StaticResource Link}"/>
+                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{StaticResource Link}"/>
+            </Trigger>
+
+            <!-- Состояние: отключен -->
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="CheckBoxBorder" Property="Background" Value="{StaticResource InputDisabledBackground}"/>
+                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{StaticResource InputBorder}"/>
+                <Setter TargetName="CheckMark" Property="Fill" Value="{StaticResource TextDisabled}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextDisabled}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- Базовый стиль для CheckBox -->
+    <Style x:Key="CheckBoxDark" TargetType="CheckBox">
+        <Setter Property="FontFamily" Value="{StaticResource FontFamilyBase}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="Background" Value="{StaticResource InputBackground}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource InputBorder}"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template" Value="{StaticResource CheckBoxCircleTemplate}"/>
+    </Style>
+
+    <!-- Глобальный стиль (применяется ко всем CheckBox по умолчанию) -->
+    <Style TargetType="CheckBox" BasedOn="{StaticResource CheckBoxDark}"/>
+
+</ResourceDictionary>

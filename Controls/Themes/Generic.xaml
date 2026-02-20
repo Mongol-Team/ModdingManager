@@ -14,6 +14,7 @@
         <ResourceDictionary Source="WindowStyles.xaml"/>
         <ResourceDictionary Source="ScrollBarStyles.xaml"/>
         <ResourceDictionary Source="DockingStyles.xaml"/>
+        <ResourceDictionary Source="CheckBoxStyles.xaml"/>
         <ResourceDictionary Source="GenericViewerStyles.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
