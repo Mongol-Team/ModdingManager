@@ -1,10 +1,12 @@
-﻿using Models.Interfaces;
+﻿using Models.Attributes;
+using Models.Interfaces;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 using System.Drawing;
 
 namespace Models.GfxTypes
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class MaskedShieldType : IGfx
     {
         //tyt bil duvblicat CorneredTileSpriteType, nyzhno realizovat етот класс
@@ -14,7 +16,7 @@ namespace Models.GfxTypes
         public string EffectFile { get; set; }
         public Bitmap? Content { get; set; }
         public Bitmap MaskContent { get; set; }
-
+        public string FileFullPath { get; set; }
         public override string ToString()
         {
             return Id.ToString();

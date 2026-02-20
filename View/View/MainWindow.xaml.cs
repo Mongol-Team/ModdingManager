@@ -8,192 +8,80 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using View.Models;
+using ViewPresenters;
 using Button = System.Windows.Controls.Button;
 namespace View
 {
-    public partial class MainWindow : BaseWindow
+
+    /// <summary>
+    /// View — только UI, никакой бизнес-логики.
+    /// Всё делегируется MainWindowPresenter.
+    /// </summary>
+    public partial class MainWindow : BaseWindow, IMainWindow
     {
-        private FileExplorer _fileExplorerControl;
-        [DllImport("kernel32.dll")] private static extern bool AllocConsole(); 
+        [DllImport("kernel32.dll")] private static extern bool AllocConsole();
         [DllImport("kernel32.dll")] private static extern bool FreeConsole();
+
+        private readonly MainWindowPresenter _presenter;
 
         public MainWindow()
         {
             InitializeComponent();
-            InitializeDocking();
+            _presenter = new MainWindowPresenter(this);
+            _presenter.Initialize();
         }
 
-        private void InitializeDocking()
-        {
-            LoadLayout();
+        // ──────────────────────────────────────────────
+        // IMainWindow — реализация
+        // ──────────────────────────────────────────────
 
-            var solutionExplorerTitle = StaticLocalisation.GetString("Window.EntityExplorer");
-            var existingPanel = FindPanelWithTitle(solutionExplorerTitle);
-            Topbar.AddButton(new Button
-            {
-                Content = "Настройки",
-                Name = "SettingsButton"
+        public void AddTopbarButton(Button button, PanelSide side)
+            => Topbar.AddButton(button, side);
 
-            }, PanelSide.Left);
-            if (ModManagerSettings.IsDebugRunning)
-            {
-                var debugButton = new Button
-                {
-                    Content = "Отладка",
-                    Name = "DebugButton"
-                };
-                debugButton.Click += (s, e) =>
-                {
-                    var window = new Window
-                    {
-                        Title = "Debug / Лог",
-                        Width = 1000,
-                        Height = 500,
-                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                        WindowStyle = WindowStyle.None, 
-                        Background = Brushes.Black
-                    };
-
-                    var grid = new Grid();
-                    grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(30) });
-                    grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-
-                    var titleBar = new WindowTitleBar();
-                    Button saveToFileBtn = new Button
-                    {
-                        Content = "Сорханить в файл",
-                        Name = "CloseButton"
-                    };
-                   
-
-                    Grid.SetRow(titleBar, 0);
-                    grid.Children.Add(titleBar);
-
-                    var debugControl = new DebugControl();
-                    saveToFileBtn.Click += (s, e) =>
-                    {
-                        debugControl.SendToFile();
-                    };
-                    titleBar.AddButton(saveToFileBtn, PanelSide.Left);
-                    Grid.SetRow(debugControl, 1);
-                    grid.Children.Add(debugControl);
-
-                    window.Content = grid;
-
-                    window.Show();
-
-
-                };
-                Topbar.AddButton(debugButton, PanelSide.Left);
-                var testingButton = new Button
-                {
-                    Content = "Тест",
-                    Name = "TestingButton"
-                };
-                testingButton.Click += (s, e) =>
-                {
-                    var testWindow = new TestingWindow();
-                    testWindow.ShowDialog();
-                };
-                Topbar.AddButton(testingButton, PanelSide.Left);
-            }
-            if (existingPanel == null)
-            {
-                _fileExplorerControl = new FileExplorer
-                {
-                    Title = solutionExplorerTitle
-                };
-                _fileExplorerControl.LoadModData();
-                _fileExplorerControl.ItemSelected += FileExplorerControl_ItemSelected;
-
-                var fileExplorerPanel = new DockPanelInfo
-                {
-                    Title = solutionExplorerTitle,
-                    Content = _fileExplorerControl,
-                    CanClose = false,
-                    CanPin = true,
-                    IsPinned = true
-                };
-
-                DockManager.AddPanel(fileExplorerPanel, DockSide.Right);
-            }
-            else if (existingPanel.Content is null or not FileExplorer)
-            {
-                _fileExplorerControl = new FileExplorer
-                {
-                    Title = solutionExplorerTitle
-                };
-                _fileExplorerControl.LoadModData();
-                _fileExplorerControl.ItemSelected += FileExplorerControl_ItemSelected;
-                existingPanel.Content = _fileExplorerControl;
-            }
-            else
-            {
-                _fileExplorerControl = existingPanel.Content as FileExplorer;
-                if (_fileExplorerControl != null)
-                {
-                    _fileExplorerControl.ItemSelected += FileExplorerControl_ItemSelected;
-                }
-            }
-        }
-
-        private void SaveToFileBtn_Click(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private DockPanelInfo FindPanelWithTitle(string title)
+        public DockPanelInfo FindPanelWithTitle(string title)
         {
             foreach (var panel in DockManager.GetAllPanels())
             {
                 if (panel.Title == title)
-                {
                     return panel;
-                }
             }
             return null;
         }
 
+        public void AddDockPanel(DockPanelInfo panel, DockSide side)
+            => DockManager.AddPanel(panel, side);
 
-        private void LoadLayout()
+        public void SetPanelContent(DockPanelInfo panel, object content)
+            => panel.Content = content as UIElement;
+
+        public void OpenInDockZone(UIElement content)
         {
-            try
-            {
-                var layoutPath = Path.Combine(AppPaths.DataDirectory, "layout.json");
-                var layout = LayoutSerializer.LoadFromFile(layoutPath);
-                if (layout != null)
-                {
-                    LayoutSerializer.Deserialize(DockManager, layout);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error loading layout: {ex.Message}");
-            }
+            // DockManager предоставляет метод для установки центрального контента
+            DockManager.SetContent(content);
         }
 
-        private void SaveLayout()
+        public IEnumerable<DockPanelInfo> GetAllDockPanels()
+            => DockManager.GetAllPanels();
+
+        public void LoadLayout(string layoutPath)
         {
-            try
-            {
-                var layout = LayoutSerializer.Serialize(DockManager);
-                var layoutPath = Path.Combine(AppPaths.DataDirectory, "layout.json");
-                LayoutSerializer.SaveToFile(layout, layoutPath);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error saving layout: {ex.Message}");
-            }
+            var layout = LayoutSerializer.LoadFromFile(layoutPath);
+            if (layout != null)
+                LayoutSerializer.Deserialize(DockManager, layout);
         }
+
+        public void SaveLayout(string layoutPath)
+        {
+            var layout = LayoutSerializer.Serialize(DockManager);
+            LayoutSerializer.SaveToFile(layout, layoutPath);
+        }
+
+        // ──────────────────────────────────────────────
+        // UI Events — только проброс в Presenter
+        // ──────────────────────────────────────────────
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            SaveLayout();
-        }
-
-        private void FileExplorerControl_ItemSelected(object sender, RoutedEventArgs e)
-        {
-            // Обработка выбора элемента мода
-        }
+            => _presenter.OnWindowClosing();
     }
 }

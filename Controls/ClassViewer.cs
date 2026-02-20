@@ -2,6 +2,7 @@
 using Application.Debugging;
 using Application.Extensions;
 using Application.Extentions;
+using Application.utils;
 using Application.utils.Pathes;
 using Data;
 using Models.Args;
@@ -88,6 +89,21 @@ namespace Controls
             };
         }
 
+        // ─── Возвращает локализованное имя свойства.
+        // Ключ строится как "Property.{ClassName}.{PropName}".
+        // Если локализация не найдена (GetString вернул сам ключ) — возвращаем prop.Name как фолбэк.
+        private static string GetPropertyDisplayName(PropertyInfo prop)
+        {
+            var key = $"Property.{prop.DeclaringType?.Name ?? "Unknown"}.{prop.Name}";
+            var localised = StaticLocalisation.GetString(key);
+            return localised == key ? prop.Name : localised;
+        }
+
+        // ─── Обёртка над StaticLocalisation.GetString для UI-строк.
+        // Если ключ не найден — возвращает сам ключ (не упадёт).
+        private static string L(string key, params object[] args)
+            => StaticLocalisation.GetString(key, args);
+
         private void UpdateElementsAlignment()
         {
             foreach (UIElement child in Children)
@@ -110,13 +126,12 @@ namespace Controls
             }
         }
 
-
-
         private void RaisePropertyChanged(PropertyInfo prop, object oldValue, object newValue)
         {
             if (!Equals(oldValue, newValue))
                 OnPropertyChange?.Invoke(this, new PropertyChangedEventArg(prop.Name, oldValue, newValue));
         }
+
         private void BuildUI()
         {
             Children.Clear();
@@ -150,6 +165,25 @@ namespace Controls
                         RaisePropertyChanged(prop, old, newText);
                     };
                     inputControl = textBox;
+                }
+                else if (prop.PropertyType == typeof(System.Drawing.Bitmap))
+                {
+                    var currentBitmap = prop.GetValue(_buildingContent) as System.Drawing.Bitmap;
+
+                    var control = CreateBitmapControl(
+                        currentBitmap,
+                        newValue =>
+                        {
+                            var old = prop.GetValue(_buildingContent);
+                            prop.SetValue(_buildingContent, newValue);
+                            RaisePropertyChanged(prop, old, newValue);
+                        });
+
+                    if (control != null)
+                    {
+                        inputControl = control;
+                        ApplyGenericViewerStyle(control);  // если хотите применить стили
+                    }
                 }
                 else if (prop.PropertyType == typeof(Identifier))
                 {
@@ -187,19 +221,19 @@ namespace Controls
                         var old = prop.GetValue(_buildingContent);
                         Identifier newIdentifier = null;
                         if (!string.IsNullOrWhiteSpace(textBox.Text))
-                        {
                             newIdentifier = new Identifier(textBox.Text);
-                        }
                         prop.SetValue(_buildingContent, newIdentifier);
                         RaisePropertyChanged(prop, old, newIdentifier);
                     };
                     inputControl = textBox;
                 }
-                else if (prop.PropertyType.IsEnum || (prop.PropertyType.IsGenericType && 
-                         prop.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) && 
+                else if (prop.PropertyType.IsEnum || (prop.PropertyType.IsGenericType &&
+                         prop.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
                          prop.PropertyType.GetGenericArguments()[0].IsEnum))
                 {
-                    Type enumType = prop.PropertyType.IsEnum ? prop.PropertyType : prop.PropertyType.GetGenericArguments()[0];
+                    var enumType = prop.PropertyType.IsEnum
+                        ? prop.PropertyType
+                        : prop.PropertyType.GetGenericArguments()[0];
                     var enumValues = Enum.GetValues(enumType);
                     var comboBox = new SearchableComboBox
                     {
@@ -225,14 +259,14 @@ namespace Controls
                         localisation = new ConfigLocalisation();
                         prop.SetValue(_buildingContent, localisation);
                     }
-                    
+
                     var localisationDisplay = new LocalisationDisplay
                     {
                         Localisation = localisation,
                         Margin = ElementMargin,
                         Width = this.Width,
                     };
-                    
+
                     var languageComboBox = new SearchableComboBox
                     {
                         ItemsSource = Enum.GetValues(typeof(Models.Enums.Language)).Cast<Models.Enums.Language>(),
@@ -250,12 +284,9 @@ namespace Controls
                             RaisePropertyChanged(prop, old, selectedLanguage);
                         }
                     };
-                    
-                    var stackPanel = new StackPanel
-                    {
-                        Orientation = Orientation.Vertical
-                    };
-                    
+
+                    var stackPanel = new StackPanel { Orientation = Orientation.Vertical };
+
                     var languageRow = new Grid
                     {
                         Margin = new Thickness(0, ElementMargin.Top, 0, ElementMargin.Bottom)
@@ -263,32 +294,31 @@ namespace Controls
                     languageRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
                     languageRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                     languageRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-                    
+
                     var languageLabel = new TextBlock
                     {
-                        Text = "Language",
+                        // Используем локализацию; фолбэк на "Language" если ключ не найден
+                        Text = L("ClassViewer.Label.Language"),
                         Style = (Style)TryFindResource("GenericViewerSectionTitle"),
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
                         Margin = new Thickness(ElementMargin.Left, 0, 10, 0)
                     };
-                    
+
                     if (languageComboBox is FrameworkElement fe1)
                     {
                         fe1.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
                         fe1.Margin = new Thickness(0, 0, ElementMargin.Right, 0);
                     }
-                    
+
                     Grid.SetColumn(languageLabel, 0);
                     Grid.SetColumn(languageComboBox, 2);
                     languageRow.Children.Add(languageLabel);
                     languageRow.Children.Add(languageComboBox);
                     if (this.Width > 0)
-                    {
                         languageRow.Width = this.Width;
-                    }
                     stackPanel.Children.Add(languageRow);
-                    
+
                     var localisationRow = new Grid
                     {
                         Margin = new Thickness(0, ElementMargin.Top + 10, 0, ElementMargin.Bottom)
@@ -296,32 +326,30 @@ namespace Controls
                     localisationRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
                     localisationRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                     localisationRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
-                    
+
                     var localisationLabel = new TextBlock
                     {
-                        Text = "Localisation",
+                        Text = L("ClassViewer.Label.Localisation"),
                         Style = (Style)TryFindResource("GenericViewerSectionTitle"),
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
                         Margin = new Thickness(ElementMargin.Left, 0, 10, 0)
                     };
-                    
+
                     if (localisationDisplay is FrameworkElement fe2)
                     {
                         fe2.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
                         fe2.Margin = new Thickness(0, 0, ElementMargin.Right, 0);
                     }
-                    
+
                     Grid.SetColumn(localisationLabel, 0);
                     Grid.SetColumn(localisationDisplay, 2);
                     localisationRow.Children.Add(localisationLabel);
                     localisationRow.Children.Add(localisationDisplay);
                     if (this.Width > 0)
-                    {
                         localisationRow.Width = this.Width;
-                    }
                     stackPanel.Children.Add(localisationRow);
-                    
+
                     inputControl = stackPanel;
                 }
                 else if (prop.PropertyType == typeof(List<Var>))
@@ -331,7 +359,6 @@ namespace Controls
                     foreach (var item in list)
                     {
                         if (item == null || string.IsNullOrWhiteSpace(item.Name)) continue;
-
                         var valStr = item.Value?.ToString();
                         if (valStr != null)
                             valStr = valStr.Replace("\r", "").Replace("\n", " ");
@@ -349,39 +376,31 @@ namespace Controls
                         Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
-
                     textBox.TextChanged += (s, e) =>
                     {
                         var newList = new List<Var>();
                         var lines = textBox.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-
                         foreach (var line in lines)
                         {
                             var trimmedLine = line.Trim();
                             if (string.IsNullOrWhiteSpace(trimmedLine)) continue;
-
                             var eqIndex = trimmedLine.IndexOf('=');
                             if (eqIndex <= 0) continue;
-
                             var namePart = trimmedLine.Substring(0, eqIndex).Trim();
                             var valuePart = eqIndex < trimmedLine.Length - 1
                                 ? trimmedLine.Substring(eqIndex + 1).Trim()
                                 : null;
-
                             if (string.IsNullOrWhiteSpace(namePart)) continue;
-
                             newList.Add(new Var
                             {
                                 Name = namePart,
                                 Value = !string.IsNullOrWhiteSpace(valuePart) ? valuePart : null
                             });
                         }
-
                         var oldList = prop.GetValue(_buildingContent);
                         prop.SetValue(_buildingContent, newList);
                         RaisePropertyChanged(prop, oldList, newList);
                     };
-
                     inputControl = textBox;
                 }
                 else if (prop.PropertyType == typeof(bool))
@@ -389,7 +408,8 @@ namespace Controls
                     var checkBox = new CheckBox
                     {
                         IsChecked = (bool?)value,
-                        Content = prop.Name,
+                        // Используем локализованное имя вместо prop.Name
+                        Content = GetPropertyDisplayName(prop),
                         Margin = ElementMargin,
                         Width = this.Width,
                     };
@@ -431,10 +451,12 @@ namespace Controls
                 else if (prop.PropertyType.GetInterface("IConfig") != null)
                 {
                     var t = prop.PropertyType;
-                    var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p => p.PropertyType.IsGenericType &&
+                    var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                        p.PropertyType.IsGenericType &&
                         (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
-                        p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
+                         p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
                         p.PropertyType.GetGenericArguments()[0] == t);
+
                     if (listProp != null)
                     {
                         var list = (IEnumerable)listProp.GetValue(ModDataStorage.Mod);
@@ -451,12 +473,11 @@ namespace Controls
                                 }
                             }
                         }
-                        var searchCm = new SearchableComboBox()
+                        var searchCm = new SearchableComboBox
                         {
                             ItemsSource = list,
                             SelectedItem = selected
                         };
-                        inputControl = searchCm;
                         searchCm.SelectionChanged += (s, e) =>
                         {
                             var old = prop.GetValue(_buildingContent);
@@ -464,6 +485,7 @@ namespace Controls
                             prop.SetValue(_buildingContent, newValue);
                             RaisePropertyChanged(prop, old, newValue);
                         };
+                        inputControl = searchCm;
                     }
                 }
                 else if (prop.PropertyType == typeof(System.Windows.Media.Color))
@@ -607,33 +629,20 @@ namespace Controls
                         Style = (Style)TryFindResource("GenericViewerTextBox"),
                         Tag = prop.Name
                     };
-
                     textBox.TextChanged += (s, e) =>
                     {
                         var oldValue = prop.GetValue(_buildingContent);
-                        string newText = textBox.Text;
-
-                        object newValue = newText;  // по умолчанию просто строка
-
-                        // Если текст выглядит как число — пытаемся привести
+                        var newText = textBox.Text;
+                        object newValue = newText;
                         if (int.TryParse(newText, out int intVal))
-                        {
                             newValue = intVal;
-                        }
                         else if (double.TryParse(newText, out double doubleVal))
-                        {
                             newValue = doubleVal;
-                        }
                         else if (bool.TryParse(newText, out bool boolVal))
-                        {
                             newValue = boolVal;
-                        }
-                        // можно добавить другие примитивы, если нужно (DateTime, Guid и т.д.)
-
                         prop.SetValue(_buildingContent, newValue);
                         RaisePropertyChanged(prop, oldValue, newValue);
                     };
-
                     inputControl = textBox;
                 }
                 else if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
@@ -699,9 +708,10 @@ namespace Controls
                     }
                     else if (itemType.IsEnum || itemType == typeof(string) || itemType == typeof(int) || itemType == typeof(int?))
                     {
+                        var displayName = GetPropertyDisplayName(prop);
                         var expander = new Expander
                         {
-                            Header = $"{prop.Name} ({list.Count} items)",
+                            Header = L("ClassViewer.ExpanderHeader", displayName, list.Count),
                             IsExpanded = false,
                             Margin = ElementMargin,
                             Width = this.Width,
@@ -723,7 +733,7 @@ namespace Controls
                             {
                                 var removeButton = new Button
                                 {
-                                    Content = "Remove",
+                                    Content = L("ClassViewer.Button.Remove"),
                                     Margin = new Thickness(0, 2, 0, 2),
                                     Style = (Style)TryFindResource("GenericViewerButton")
                                 };
@@ -731,7 +741,7 @@ namespace Controls
                                 {
                                     list.Remove(item);
                                     itemsPanel.Children.Remove(itemControl.Parent as UIElement);
-                                    expander.Header = $"{prop.Name} ({list.Count} items)";
+                                    expander.Header = L("ClassViewer.ExpanderHeader", displayName, list.Count);
                                     RaisePropertyChanged(prop, list, list);
                                 };
                                 var itemContainer = new StackPanel { Orientation = Orientation.Horizontal };
@@ -742,7 +752,7 @@ namespace Controls
                         }
                         var addButton = new Button
                         {
-                            Content = "Add",
+                            Content = L("ClassViewer.Button.Add"),
                             Margin = new Thickness(0, 5, 0, 0),
                             Style = (Style)TryFindResource("GenericViewerButton")
                         };
@@ -778,7 +788,7 @@ namespace Controls
                                 {
                                     var removeButton = new Button
                                     {
-                                        Content = "Remove",
+                                        Content = L("ClassViewer.Button.Remove"),
                                         Margin = new Thickness(0, 2, 0, 2),
                                         Style = (Style)TryFindResource("GenericViewerButton")
                                     };
@@ -786,14 +796,14 @@ namespace Controls
                                     {
                                         list.Remove(newItem);
                                         itemsPanel.Children.Remove(itemControl.Parent as UIElement);
-                                        expander.Header = $"{prop.Name} ({list.Count} items)";
+                                        expander.Header = L("ClassViewer.ExpanderHeader", displayName, list.Count);
                                         RaisePropertyChanged(prop, list, list);
                                     };
                                     var itemContainer = new StackPanel { Orientation = Orientation.Horizontal };
                                     itemContainer.Children.Add(itemControl);
                                     itemContainer.Children.Add(removeButton);
                                     itemsPanel.Children.Add(itemContainer);
-                                    expander.Header = $"{prop.Name} ({list.Count} items)";
+                                    expander.Header = L("ClassViewer.ExpanderHeader", displayName, list.Count);
                                     RaisePropertyChanged(prop, list, list);
                                 }
                             }
@@ -804,16 +814,19 @@ namespace Controls
                     }
                     else if (itemType.GetInterface("IConfig") != null)
                     {
-                        var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p => p.PropertyType.IsGenericType &&
+                        var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                            p.PropertyType.IsGenericType &&
                             (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
-                            p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
+                             p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
                             p.PropertyType.GetGenericArguments()[0] == itemType);
+
                         if (listProp != null)
                         {
+                            var displayName = GetPropertyDisplayName(prop);
                             var availableItems = (IEnumerable)listProp.GetValue(ModDataStorage.Mod);
                             var expander = new Expander
                             {
-                                Header = $"{prop.Name} ({list.Count} items)",
+                                Header = L("ClassViewer.ExpanderHeader", displayName, list.Count),
                                 IsExpanded = false,
                                 Style = (Style)TryFindResource("GenericViewerExpander"),
                                 Margin = ElementMargin,
@@ -840,7 +853,7 @@ namespace Controls
                                 };
                                 var removeButton = new Button
                                 {
-                                    Content = "Remove",
+                                    Content = L("ClassViewer.Button.Remove"),
                                     Margin = new Thickness(0, 2, 0, 2),
                                     Style = (Style)TryFindResource("GenericViewerButton")
                                 };
@@ -848,7 +861,7 @@ namespace Controls
                                 {
                                     list.Remove(item);
                                     itemsPanel.Children.Remove(searchCm.Parent as UIElement);
-                                    expander.Header = $"{prop.Name} ({list.Count} items)";
+                                    expander.Header = L("ClassViewer.ExpanderHeader", displayName, list.Count);
                                     RaisePropertyChanged(prop, list, list);
                                 };
                                 var itemContainer = new StackPanel { Orientation = Orientation.Horizontal };
@@ -858,7 +871,7 @@ namespace Controls
                             }
                             var addButton = new Button
                             {
-                                Content = "Add",
+                                Content = L("ClassViewer.Button.Add"),
                                 Margin = new Thickness(0, 5, 0, 0),
                                 Style = (Style)TryFindResource("GenericViewerButton")
                             };
@@ -886,7 +899,7 @@ namespace Controls
                                     };
                                     var removeButton = new Button
                                     {
-                                        Content = "Remove",
+                                        Content = L("ClassViewer.Button.Remove"),
                                         Margin = new Thickness(0, 2, 0, 2),
                                         Style = (Style)TryFindResource("GenericViewerButton")
                                     };
@@ -894,14 +907,14 @@ namespace Controls
                                     {
                                         list.Remove(firstItem);
                                         itemsPanel.Children.Remove(searchCm.Parent as UIElement);
-                                        expander.Header = $"{prop.Name} ({list.Count} items)";
+                                        expander.Header = L("ClassViewer.ExpanderHeader", displayName, list.Count);
                                         RaisePropertyChanged(prop, list, list);
                                     };
                                     var itemContainer = new StackPanel { Orientation = Orientation.Horizontal };
                                     itemContainer.Children.Add(searchCm);
                                     itemContainer.Children.Add(removeButton);
                                     itemsPanel.Children.Add(itemContainer);
-                                    expander.Header = $"{prop.Name} ({list.Count} items)";
+                                    expander.Header = L("ClassViewer.ExpanderHeader", displayName, list.Count);
                                     RaisePropertyChanged(prop, list, list);
                                 }
                             };
@@ -923,14 +936,14 @@ namespace Controls
                         prop.SetValue(_buildingContent, dictionary);
                     }
 
+                    var displayName = GetPropertyDisplayName(prop);
                     var expander = new Expander
                     {
-                        Header = $"{prop.Name} ({dictionary.Count} items)",
+                        Header = L("ClassViewer.ExpanderHeader", displayName, dictionary.Count),
                         IsExpanded = false,
                         Margin = ElementMargin,
                         Style = (Style)TryFindResource("GenericViewerExpander"),
                     };
-
                     var itemsPanel = new StackPanel { Orientation = Orientation.Vertical };
 
                     foreach (DictionaryEntry entry in dictionary)
@@ -944,7 +957,6 @@ namespace Controls
 
                         if (keyControl != null && valueControl != null)
                         {
-                            // фиксированные размеры и стили — оставляем как было
                             if (keyControl is FrameworkElement keyFe)
                             {
                                 keyFe.Width = 100;
@@ -969,7 +981,7 @@ namespace Controls
                             var itemContainer = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 2) };
                             var removeButton = new Button
                             {
-                                Content = "Remove",
+                                Content = L("ClassViewer.Button.Remove"),
                                 Margin = new Thickness(5, 0, 0, 0),
                                 Style = (Style)TryFindResource("GenericViewerButton")
                             };
@@ -977,10 +989,9 @@ namespace Controls
                             {
                                 dictionary.Remove(entry.Key);
                                 itemsPanel.Children.Remove(itemContainer);
-                                expander.Header = $"{prop.Name} ({dictionary.Count} items)";
+                                expander.Header = L("ClassViewer.ExpanderHeader", displayName, dictionary.Count);
                                 RaisePropertyChanged(prop, dictionary, dictionary);
                             };
-
                             itemContainer.Children.Add(keyControl);
                             itemContainer.Children.Add(valueControl);
                             itemContainer.Children.Add(removeButton);
@@ -990,17 +1001,16 @@ namespace Controls
 
                     var addButton = new Button
                     {
-                        Content = "Add",
+                        Content = L("ClassViewer.Button.Add"),
                         Margin = new Thickness(0, 5, 0, 0),
                         Style = (Style)TryFindResource("GenericViewerButton")
                     };
-
                     addButton.Click += (s, e) =>
                     {
                         object newKey = null;
                         object newValue = null;
 
-                        // ─── Ключ ───────────────────────────────────────────────────────
+                        // ─── Ключ ────────────────────────────────────────────────────────
                         if (keyType.GetInterface("IGfx") != null || keyType.GetInterface("IConfig") != null)
                         {
                             var collectionProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
@@ -1008,60 +1018,36 @@ namespace Controls
                                 (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
                                  p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
                                 p.PropertyType.GetGenericArguments()[0] == keyType);
-
                             if (collectionProp != null)
                             {
                                 var available = (IEnumerable)collectionProp.GetValue(ModDataStorage.Mod);
                                 if (available != null && available.Cast<object>().Any())
-                                {
                                     newKey = available.Cast<object>().First();
-                                }
                             }
                         }
-                        else if (keyType == typeof(string))
-                        {
-                            newKey = string.Empty;
-                        }
-                        else if (keyType == typeof(int) || keyType == typeof(int?))
-                        {
-                            newKey = 0;
-                        }
-                        else if (keyType == typeof(double) || keyType == typeof(double?))
-                        {
-                            newKey = 0.0;
-                        }
-                        else if (keyType == typeof(float) || keyType == typeof(float?))
-                        {
-                            newKey = 0.0f;
-                        }
-                        else if (keyType == typeof(decimal) || keyType == typeof(decimal?))
-                        {
-                            newKey = 0.0m;
-                        }
-                        else if (keyType == typeof(bool))
-                        {
-                            newKey = false;
-                        }
+                        else if (keyType == typeof(string)) newKey = string.Empty;
+                        else if (keyType == typeof(int) || keyType == typeof(int?)) newKey = 0;
+                        else if (keyType == typeof(double) || keyType == typeof(double?)) newKey = 0.0;
+                        else if (keyType == typeof(float) || keyType == typeof(float?)) newKey = 0.0f;
+                        else if (keyType == typeof(decimal) || keyType == typeof(decimal?)) newKey = 0.0m;
+                        else if (keyType == typeof(bool)) newKey = false;
+                        else if (keyType == typeof(object)) newKey = string.Empty;
                         else if (keyType.IsEnum)
                         {
                             var vals = Enum.GetValues(keyType);
                             newKey = vals.Length > 0 ? vals.GetValue(0) : null;
                         }
-                        else if (keyType == typeof(object))
-                        {
-                            newKey = string.Empty;  // по умолчанию пустая строка
-                        }
                         else
                         {
                             itemsPanel.Children.Add(new Label
                             {
-                                Content = $"Type without support (key): {keyType.FullName}",
+                                Content = L("ClassViewer.Error.UnsupportedKeyType", keyType.FullName),
                                 Foreground = Brushes.Red
                             });
                             return;
                         }
 
-                        // ─── Значение ───────────────────────────────────────────────────
+                        // ─── Значение ────────────────────────────────────────────────────
                         if (valueType.GetInterface("IGfx") != null || valueType.GetInterface("IConfig") != null)
                         {
                             var collectionProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
@@ -1069,54 +1055,30 @@ namespace Controls
                                 (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
                                  p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
                                 p.PropertyType.GetGenericArguments()[0] == valueType);
-
                             if (collectionProp != null)
                             {
                                 var available = (IEnumerable)collectionProp.GetValue(ModDataStorage.Mod);
                                 if (available != null && available.Cast<object>().Any())
-                                {
                                     newValue = available.Cast<object>().First();
-                                }
                             }
                         }
-                        else if (valueType == typeof(string))
-                        {
-                            newValue = string.Empty;
-                        }
-                        else if (valueType == typeof(int) || valueType == typeof(int?))
-                        {
-                            newValue = 0;
-                        }
-                        else if (valueType == typeof(double) || valueType == typeof(double?))
-                        {
-                            newValue = 0.0;
-                        }
-                        else if (valueType == typeof(float) || valueType == typeof(float?))
-                        {
-                            newValue = 0.0f;
-                        }
-                        else if (valueType == typeof(decimal) || valueType == typeof(decimal?))
-                        {
-                            newValue = 0.0m;
-                        }
-                        else if (valueType == typeof(bool))
-                        {
-                            newValue = false;
-                        }
+                        else if (valueType == typeof(string)) newValue = string.Empty;
+                        else if (valueType == typeof(int) || valueType == typeof(int?)) newValue = 0;
+                        else if (valueType == typeof(double) || valueType == typeof(double?)) newValue = 0.0;
+                        else if (valueType == typeof(float) || valueType == typeof(float?)) newValue = 0.0f;
+                        else if (valueType == typeof(decimal) || valueType == typeof(decimal?)) newValue = 0.0m;
+                        else if (valueType == typeof(bool)) newValue = false;
+                        else if (valueType == typeof(object)) newValue = string.Empty;
                         else if (valueType.IsEnum)
                         {
                             var vals = Enum.GetValues(valueType);
                             newValue = vals.Length > 0 ? vals.GetValue(0) : null;
                         }
-                        else if (valueType == typeof(object))
-                        {
-                            newValue = string.Empty;  // по умолчанию пустая строка
-                        }
                         else
                         {
                             itemsPanel.Children.Add(new Label
                             {
-                                Content = $"Type without support (value): {valueType.FullName}",
+                                Content = L("ClassViewer.Error.UnsupportedValueType", valueType.FullName),
                                 Foreground = Brushes.Red
                             });
                             return;
@@ -1135,14 +1097,13 @@ namespace Controls
 
                             if (keyControl != null && valueControl != null)
                             {
-                                // фиксированные размеры и стили (как было)
                                 if (keyControl is FrameworkElement kf) { kf.Width = 100; kf.Margin = new Thickness(0); }
                                 if (valueControl is FrameworkElement vf) { vf.Width = 100; vf.Margin = new Thickness(10, 0, 0, 0); }
 
                                 var itemContainer = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 2) };
                                 var removeBtn = new Button
                                 {
-                                    Content = "Remove",
+                                    Content = L("ClassViewer.Button.Remove"),
                                     Margin = new Thickness(5, 0, 0, 0),
                                     Style = (Style)TryFindResource("GenericViewerButton")
                                 };
@@ -1150,51 +1111,45 @@ namespace Controls
                                 {
                                     dictionary.Remove(newKey);
                                     itemsPanel.Children.Remove(itemContainer);
-                                    expander.Header = $"{prop.Name} ({dictionary.Count} items)";
+                                    expander.Header = L("ClassViewer.ExpanderHeader", displayName, dictionary.Count);
                                     RaisePropertyChanged(prop, dictionary, dictionary);
                                 };
-
                                 itemContainer.Children.Add(keyControl);
                                 itemContainer.Children.Add(valueControl);
                                 itemContainer.Children.Add(removeBtn);
                                 itemsPanel.Children.Add(itemContainer);
-
-                                expander.Header = $"{prop.Name} ({dictionary.Count} items)";
+                                expander.Header = L("ClassViewer.ExpanderHeader", displayName, dictionary.Count);
                                 RaisePropertyChanged(prop, dictionary, dictionary);
                             }
                         }
                     };
-
                     itemsPanel.Children.Add(addButton);
                     expander.Content = itemsPanel;
                     inputControl = expander;
                 }
-                else if ((prop.PropertyType.GetInterface(nameof(IGfx)) != null ||
-                         typeof(IGfx).IsAssignableFrom(prop.PropertyType)))
+                else if (prop.PropertyType.GetInterface(nameof(IGfx)) != null ||
+                         typeof(IGfx).IsAssignableFrom(prop.PropertyType))
                 {
-                    // Получаем текущее значение свойства
                     var currentValue = prop.GetValue(_buildingContent);
-
-                    // Создаём контрол через CreateControlForType
                     var gfxControl = CreateControlForType(prop.PropertyType, currentValue, (newValue) =>
                     {
-                        // При изменении значения — сохраняем в объект и поднимаем событие
                         var old = prop.GetValue(_buildingContent);
                         prop.SetValue(_buildingContent, newValue);
                         RaisePropertyChanged(prop, old, newValue);
                     });
-
                     if (gfxControl != null)
                     {
                         inputControl = gfxControl;
+                        ApplyGenericViewerStyle(gfxControl);
                     }
                 }
 
                 if (inputControl != null)
                 {
+                    // Лейбл с локализованным именем свойства; фолбэк — prop.Name
                     var label = new TextBlock
                     {
-                        Text = prop.Name,
+                        Text = GetPropertyDisplayName(prop),
                         Style = (Style)TryFindResource("GenericViewerSectionTitle"),
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
@@ -1217,15 +1172,12 @@ namespace Controls
 
                     Grid.SetColumn(label, 0);
                     Grid.SetColumn(inputControl, 2);
-
                     rowPanel.Children.Add(label);
                     rowPanel.Children.Add(inputControl);
 
                     rowPanel.HorizontalAlignment = GetHorizontalAlignment();
                     if (this.Width > 0)
-                    {
                         rowPanel.Width = this.Width;
-                    }
 
                     Children.Add(rowPanel);
                 }
@@ -1234,6 +1186,7 @@ namespace Controls
             InvalidateMeasure();
             InvalidateArrange();
         }
+
         private System.Windows.HorizontalAlignment GetHorizontalAlignment()
         {
             return _elementOrientation switch
@@ -1248,53 +1201,51 @@ namespace Controls
         private static Type GetNullableUnderlyingType(Type type)
         {
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
                 return type.GetGenericArguments()[0];
-            }
             return null;
         }
+
         private void ApplyGenericViewerStyle(FrameworkElement control)
         {
-            var controlTypeName = control.GetType().Name;  // Для отладки
+            Logger.AddDbgLog(L("ClassViewer.DbgLog.ApplyStyle", control.GetType().Name, control.Width));
 
             if (control is TextBox tb)
             {
-                tb.Style = (Style)TryFindResource("GenericViewerTextBox");  // Стиль с CornerRadius=2, Margin=0,0,0,10
-                tb.Width = 200;  // Фиксированный размер
+                tb.Style = (Style)TryFindResource("GenericViewerTextBox");
+                tb.Width = 200;
             }
             else if (control is SearchableComboBox cb)
             {
-                cb.Style = (Style)TryFindResource("GenericViewerSearchableComboBox");  // BasedOn="ComboBoxDark", Margin=0,0,0,10
+                cb.Style = (Style)TryFindResource("GenericViewerSearchableComboBox");
                 cb.Width = 200;
             }
             else if (control is CheckBox chb)
             {
-                chb.Style = (Style)TryFindResource("GenericViewerCheckBox");  // BasedOn="CheckBoxDark", Margin=0,0,0,10
+                chb.Style = (Style)TryFindResource("GenericViewerCheckBox");
             }
             else if (control is Expander exp)
             {
-                exp.Style = (Style)TryFindResource("GenericViewerExpander");  // Foreground="#ffffff", Margin=0,0,0,10 — исправление применения к Expander
-                exp.Width = 200;  // Фиксированный размер для списков
+                exp.Style = (Style)TryFindResource("GenericViewerExpander");
+                exp.Width = 200;
 
-                // Рекурсия для внутренних элементов списков (стилизация списков интерфейсов: SearchableComboBox, TextBox, Button)
                 if (exp.Content is Panel panel)
                 {
                     foreach (var child in panel.Children.OfType<FrameworkElement>())
                     {
-                        ApplyGenericViewerStyle(child);  // Рекурсивно
+                        ApplyGenericViewerStyle(child);
                         if (child is Button btn)
                         {
-                            btn.Style = (Style)TryFindResource("GenericViewerButton");  // BasedOn="ButtonBase", Margin=0,5,0,0
+                            btn.Style = (Style)TryFindResource("GenericViewerButton");
                             btn.Width = 100;
                         }
                         else if (child is TextBox innerTb)
                         {
-                            innerTb.Style = (Style)TryFindResource("GenericViewerExpanderTextBox");  // Для элементов в Expander, Margin=0,2
+                            innerTb.Style = (Style)TryFindResource("GenericViewerExpanderTextBox");
                             innerTb.Width = 100;
                         }
-                        else if (child is SearchableComboBox scb)  // Для списков IConfig/IGfx
+                        else if (child is SearchableComboBox scb)
                         {
-                            scb.Style = (Style)TryFindResource("GenericViewerSearchableComboBox");  // Адаптация для SearchableComboBox
+                            scb.Style = (Style)TryFindResource("GenericViewerSearchableComboBox");
                             scb.Width = 200;
                         }
                     }
@@ -1302,22 +1253,21 @@ namespace Controls
             }
             else if (control is CustomDatePicker dp)
             {
-                dp.Margin = new Thickness(0, 0, 0, 10);  // Как в примерах
+                dp.Margin = new Thickness(0, 0, 0, 10);
                 dp.Width = 200;
             }
             else if (control is ColorPickerDropdown cpd)
             {
-                cpd.Width = 120;  // Как в примерах
+                cpd.Width = 120;
                 cpd.Margin = new Thickness(0, 0, 0, 10);
             }
             else if (control is LocalisationDisplay ld)
             {
-                ld.Margin = new Thickness(0, 0, 0, 10);  // Как в примерах
+                ld.Margin = new Thickness(0, 0, 0, 10);
                 ld.Width = 200;
             }
-
-            Logger.AddDbgLog($"Применён стиль GenericViewer к элементу типа {controlTypeName} с Width={control.Width}.");
         }
+
         private FrameworkElement CreateControlForType(Type type, object value, Action<object> onValueChanged)
         {
             if (type == typeof(string))
@@ -1330,9 +1280,7 @@ namespace Controls
                 };
                 ApplyGenericViewerStyle(textBox);
                 if (onValueChanged != null)
-                {
                     textBox.TextChanged += (s, e) => onValueChanged(textBox.Text);
-                }
                 return textBox;
             }
             else if (type == typeof(int) || type == typeof(int?))
@@ -1343,18 +1291,13 @@ namespace Controls
                     Width = 200,
                     Style = (Style)TryFindResource("GenericViewerTextBox")
                 };
-
                 ApplyGenericViewerStyle(textBox);
                 if (onValueChanged != null)
-                {
                     textBox.TextChanged += (s, e) =>
                     {
                         if (int.TryParse(textBox.Text, out int result))
-                        {
                             onValueChanged(result);
-                        }
                     };
-                }
                 return textBox;
             }
             else if (type.IsEnum)
@@ -1367,20 +1310,19 @@ namespace Controls
                     Width = 200,
                     Style = (Style)TryFindResource("GenericViewerSearchableComboBox")
                 };
-
                 ApplyGenericViewerStyle(comboBox);
                 if (onValueChanged != null)
-                {
                     comboBox.SelectionChanged += (s, e) => onValueChanged(comboBox.SelectedItem);
-                }
                 return comboBox;
             }
             else if (type.GetInterface("IConfig") != null)
             {
-                var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p => p.PropertyType.IsGenericType &&
+                var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                    p.PropertyType.IsGenericType &&
                     (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
-                    p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
+                     p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
                     p.PropertyType.GetGenericArguments()[0] == type);
+
                 if (listProp != null)
                 {
                     var availableItems = (IEnumerable)listProp.GetValue(ModDataStorage.Mod);
@@ -1390,12 +1332,9 @@ namespace Controls
                         SelectedItem = value,
                         Width = 200,
                     };
-
                     ApplyGenericViewerStyle(searchCm);
                     if (onValueChanged != null)
-                    {
                         searchCm.SelectionChanged += (s, e) => onValueChanged(searchCm.SelectedItem);
-                    }
                     return searchCm;
                 }
             }
@@ -1408,69 +1347,56 @@ namespace Controls
                     Width = 200,
                     Style = (Style)TryFindResource("GenericViewerTextBox")
                 };
-
                 ApplyGenericViewerStyle(textBox);
                 if (onValueChanged != null)
-                {
                     textBox.TextChanged += (s, e) => onValueChanged(new Identifier(textBox.Text));
-                }
                 return textBox;
             }
             else if (typeof(IGfx).IsAssignableFrom(type))
             {
                 var currentGfx = value as IGfx;
-
                 var rootStack = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
 
-                // ─── Выбор существующего gfx ───────────────────────────────────
                 var combo = new SearchableComboBox
                 {
-                    ItemsSource = ModDataStorage.Mod?.Gfxes.FileEntitiesToList()?.ToObservableCollection() ?? new ObservableCollection<IGfx>(),
+                    ItemsSource = ModDataStorage.Mod?.Gfxes.FileEntitiesToList()?.ToObservableCollection()
+                                  ?? new ObservableCollection<IGfx>(),
                     SelectedItem = currentGfx,
-                    Name = "GfxesComboBox",               // или "Id", "DisplayName" — подставь своё
+                    Name = "GfxesComboBox",
                     Width = 240,
                     Margin = new Thickness(0, 0, 0, 8),
-                    IsEnabled = true
+                    IsEnabled = true,
+                    Style = (Style)TryFindResource("GenericViewerSearchableComboBox")
                 };
+                combo.SelectionChanged += (s, e) => onValueChanged?.Invoke(combo.SelectedItem);
 
-                combo.SelectionChanged += (s, e) =>
-                {
-                    onValueChanged?.Invoke(combo.SelectedItem);
-                };
-
-                // ─── Expander только для создания нового ───────────────────────
                 var expander = new Expander
                 {
-                    Header = "Создать новую графику",
+                    Header = L("ClassViewer.Gfx.CreateNew"),
                     IsExpanded = false,
+                    Style = (Style)TryFindResource("GenericViewerExpander"),
                     Margin = new Thickness(0, 8, 0, 0)
                 };
-
                 expander.Expanded += (s, e) => combo.IsEnabled = false;
                 expander.Collapsed += (s, e) => combo.IsEnabled = true;
 
-                // Содержимое экспандера
                 var createPanel = new StackPanel { Margin = new Thickness(10, 6, 10, 10) };
 
                 var lblName = new TextBlock
                 {
-                    Text = "Имя:",
+                    Text = L("ClassViewer.Gfx.Name"),
+                    Style = (Style)TryFindResource("GenericViewerTextBlock"),
                     Margin = new Thickness(0, 0, 0, 4)
                 };
-
-                var tbName = new TextBox
-                {
-                    Width = 220,
-                    Margin = new Thickness(0, 0, 0, 12)
-                };
+                var tbName = new TextBox { Width = 220, Style = (Style)TryFindResource("GenericViewerExpanderTextBox"), Margin = new Thickness(0, 0, 0, 12) };
 
                 var lblImage = new TextBlock
                 {
-                    Text = "Изображение (перетащите файл или нажмите Обзор):",
+                    Text = L("ClassViewer.Gfx.ImageHint"),
+                    Style = (Style)TryFindResource("GenericViewerTextBlock"),
                     Margin = new Thickness(0, 0, 0, 6)
                 };
 
-                // ─── Область drag-and-drop + превью ────────────────────────────
                 var imageBorder = new Border
                 {
                     Width = 180,
@@ -1482,29 +1408,21 @@ namespace Controls
                     Margin = new Thickness(0, 0, 0, 12),
                     AllowDrop = true
                 };
-
-                var dropImage = new Image
-                {
-                    Stretch = Stretch.Uniform,
-                    Visibility = Visibility.Collapsed
-                };
-
+                var dropImage = new Image { Stretch = Stretch.Uniform, Visibility = Visibility.Collapsed };
                 var dropText = new TextBlock
                 {
-                    Text = "Перетащите изображение сюда\nили нажмите Обзор...",
+                    Text = L("ClassViewer.Gfx.DropHint"),
                     TextAlignment = TextAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     Foreground = Brushes.Gray,
-                    TextWrapping = TextWrapping.Wrap
+                    TextWrapping = TextWrapping.Wrap,
+                    Style = (Style)TryFindResource("GenericViewerTextBlock")
                 };
-
                 var dropGrid = new Grid();
                 dropGrid.Children.Add(dropText);
                 dropGrid.Children.Add(dropImage);
-
                 imageBorder.Child = dropGrid;
 
-                // ─── Drag & Drop события ───────────────────────────────────────
                 imageBorder.DragEnter += (s, e) =>
                 {
                     if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -1514,24 +1432,21 @@ namespace Controls
                         e.Handled = true;
                     }
                 };
-
                 imageBorder.DragLeave += (s, e) =>
                 {
                     imageBorder.BorderBrush = Brushes.Gray;
                     imageBorder.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
                 };
-
                 imageBorder.Drop += (s, e) =>
                 {
                     imageBorder.BorderBrush = Brushes.Gray;
                     imageBorder.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
-
                     if (e.Data.GetDataPresent(DataFormats.FileDrop))
                     {
-                        string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                        var files = (string[])e.Data.GetData(DataFormats.FileDrop);
                         if (files.Length > 0)
                         {
-                            string filePath = files[0];
+                            var filePath = files[0];
                             if (IsImageFile(filePath))
                             {
                                 try
@@ -1539,63 +1454,59 @@ namespace Controls
                                     dropImage.Source = new BitmapImage(new Uri(filePath));
                                     dropImage.Visibility = Visibility.Visible;
                                     dropText.Visibility = Visibility.Collapsed;
-                                    imageBorder.Tag = filePath;  // сохраняем путь
+                                    imageBorder.Tag = filePath;
                                 }
                                 catch
                                 {
-                                    CustomMessageBox.Show("Не удалось загрузить изображение", "Ошибка");
+                                    CustomMessageBox.Show(L("ClassViewer.Gfx.Error.LoadFailed"), L("ClassViewer.Error.Title"));
                                 }
                             }
                             else
                             {
-                                CustomMessageBox.Show("Поддерживаются только изображения (png, jpg, jpeg, bmp)", "Неверный формат");
+                                CustomMessageBox.Show(L("ClassViewer.Gfx.Error.WrongFormat"), L("ClassViewer.Error.FormatTitle"));
                             }
                         }
                     }
                     e.Handled = true;
                 };
 
-                // ─── Кнопка Обзор ──────────────────────────────────────────────
                 var btnBrowse = new Button
                 {
-                    Content = "Обзор...",
+                    Content = L("ClassViewer.Gfx.Browse"),
                     Width = 80,
+                    Style = (Style)TryFindResource("GenericViewerButton"),
                     Margin = new Thickness(0, 0, 0, 12)
                 };
-
                 btnBrowse.Click += (s, e) =>
                 {
                     var ofd = new Microsoft.Win32.OpenFileDialog
                     {
-                        Filter = "Изображения (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|Все файлы|*.*"
+                        Filter = L("ClassViewer.Gfx.FileFilter")
                     };
-
                     if (ofd.ShowDialog() == true)
                     {
-                        string filePath = ofd.FileName;
                         try
                         {
-                            dropImage.Source = new BitmapImage(new Uri(filePath));
+                            dropImage.Source = new BitmapImage(new Uri(ofd.FileName));
                             dropImage.Visibility = Visibility.Visible;
                             dropText.Visibility = Visibility.Collapsed;
-                            imageBorder.Tag = filePath;
+                            imageBorder.Tag = ofd.FileName;
                         }
                         catch
                         {
-                            CustomMessageBox.Show("Не удалось загрузить изображение", "Ошибка");
+                            CustomMessageBox.Show(L("ClassViewer.Gfx.Error.LoadFailed"), L("ClassViewer.Error.Title"));
                         }
                     }
                 };
 
-                // ─── Кнопка создания ───────────────────────────────────────────
                 var btnCreate = new Button
                 {
-                    Content = "Создать и выбрать",
+                    Content = L("ClassViewer.Gfx.CreateAndSelect"),
                     Padding = new Thickness(16, 8, 16, 8),
+                    Style = (Style)TryFindResource("GenericViewerButton"),
                     Margin = new Thickness(0, 8, 0, 0),
                     HorizontalAlignment = System.Windows.HorizontalAlignment.Left
                 };
-
                 btnCreate.Click += (s, e) =>
                 {
                     var name = tbName.Text?.Trim();
@@ -1603,72 +1514,68 @@ namespace Controls
 
                     if (string.IsNullOrWhiteSpace(name))
                     {
-                        CustomMessageBox.Show("Укажите имя", "Ошибка");
+                        CustomMessageBox.Show(L("ClassViewer.Gfx.Error.NoName"), L("ClassViewer.Error.Title"));
                         return;
                     }
-
                     if (string.IsNullOrEmpty(path) || !File.Exists(path))
                     {
-                        CustomMessageBox.Show("Выберите изображение", "Ошибка");
+                        CustomMessageBox.Show(L("ClassViewer.Gfx.Error.NoImage"), L("ClassViewer.Error.Title"));
                         return;
                     }
 
-                    var newGfx = new SpriteType()
+                    var newGfx = new SpriteType
                     {
                         Id = new(name),
                         Content = dropImage.Source.ToBitmap(),
                         TexturePath = DataDefaultValues.NeedToHandle,
                     };
-                    if (newGfx != null)
+
+                    var gfxFile = new GfxFile<IGfx>
                     {
-                        GfxFile<IGfx> gfxFile = new GfxFile<IGfx>
-                        {
-                            FileFullPath = Path.Combine(ModPathes.InterfacePath, $"{name}.gfx"),
-                            IsOverride = false,
-                            Entities = new List<IGfx> { newGfx },
-                            IsCore = false
-                        };
-                        ModDataStorage.Mod.Gfxes.Add(gfxFile);
+                        FileFullPath = Path.Combine(ModPathes.InterfacePath, $"{name}.gfx"),
+                        IsOverride = false,
+                        Entities = new List<IGfx> { newGfx },
+                        IsCore = false
+                    };
+                    ModDataStorage.Mod.Gfxes.Add(gfxFile);
 
-                        var oldSource = combo.ItemsSource;
-                        combo.ItemsSource = null;
-                        combo.ItemsSource = oldSource;
-                        combo.SelectedItem = newGfx;
+                    var oldSource = combo.ItemsSource;
+                    combo.ItemsSource = null;
+                    combo.ItemsSource = oldSource;
+                    combo.SelectedItem = newGfx;
 
-                        expander.IsExpanded = false;
+                    expander.IsExpanded = false;
 
-                        // сброс формы
-                        tbName.Text = "";
-                        dropImage.Source = null;
-                        dropImage.Visibility = Visibility.Collapsed;
-                        dropText.Visibility = Visibility.Visible;
-                        imageBorder.Tag = null;
-                    }
+                    // Сброс формы
+                    tbName.Text = string.Empty;
+                    dropImage.Source = null;
+                    dropImage.Visibility = Visibility.Collapsed;
+                    dropText.Visibility = Visibility.Visible;
+                    imageBorder.Tag = null;
                 };
 
-                // собираем содержимое экспандера
                 createPanel.Children.Add(lblName);
                 createPanel.Children.Add(tbName);
                 createPanel.Children.Add(lblImage);
                 createPanel.Children.Add(imageBorder);
                 createPanel.Children.Add(btnBrowse);
                 createPanel.Children.Add(btnCreate);
-
                 expander.Content = createPanel;
 
-                // ─── Итоговая сборка ───────────────────────────────────────────
                 rootStack.Children.Add(new TextBlock
                 {
-                    Text = "Графика (IGfx)",
+                    Text = L("ClassViewer.Gfx.Title"),
                     FontWeight = FontWeights.SemiBold,
-                    Margin = new Thickness(0, 0, 0, 4)
+                    Margin = new Thickness(0, 0, 0, 4),
+                    Style = (Style)TryFindResource("GenericViewerSectionTitle")
+
                 });
                 rootStack.Children.Add(combo);
                 rootStack.Children.Add(expander);
-
                 return rootStack;
             }
 
+            // Фолбэк для неподдерживаемых типов — readonly TextBox
             return new TextBox
             {
                 Text = value?.ToString() ?? string.Empty,
@@ -1676,12 +1583,174 @@ namespace Controls
                 Width = 200,
                 Style = (Style)TryFindResource("GenericViewerTextBox")
             };
-
         }
+
         private bool IsImageFile(string path)
         {
             var ext = Path.GetExtension(path)?.ToLowerInvariant();
             return ext is ".png" or ".jpg" or ".jpeg" or ".bmp";
+        }
+
+        private FrameworkElement CreateBitmapControl(
+    System.Drawing.Bitmap initialBitmap,
+    Action<System.Drawing.Bitmap> onBitmapChanged)
+        {
+            var root = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
+
+            // Заголовок
+            root.Children.Add(new TextBlock
+            {
+                Text = L("ClassViewer.Bitmap.Title"),  // например "Изображение (Bitmap)"
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 6),
+                Style = (Style)TryFindResource("GenericViewerSectionTitle")
+            });
+
+            // Preview
+            var imageBorder = new Border
+            {
+                Width = 180,
+                Height = 180,
+                Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255)),
+                BorderBrush = Brushes.Gray,
+                BorderThickness = new Thickness(2),
+                CornerRadius = new CornerRadius(4),
+                Margin = new Thickness(0, 0, 0, 12),
+                AllowDrop = true
+            };
+
+            var previewImage = new Image
+            {
+                Stretch = Stretch.Uniform,
+                Visibility = Visibility.Collapsed
+            };
+
+            var placeholderText = new TextBlock
+            {
+                Text = L("ClassViewer.Bitmap.NoImage"),
+                TextAlignment = TextAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = Brushes.Gray,
+                TextWrapping = TextWrapping.Wrap,
+                Style = (Style)TryFindResource("GenericViewerTextBlock")
+            };
+
+            var grid = new Grid();
+            grid.Children.Add(placeholderText);
+            grid.Children.Add(previewImage);
+            imageBorder.Child = grid;
+
+            // Начальная загрузка, если есть
+            if (initialBitmap != null)
+            {
+                try
+                {
+                    previewImage.Source = initialBitmap.ToImageSource();  // ваш extension-метод
+                    previewImage.Visibility = Visibility.Visible;
+                    placeholderText.Visibility = Visibility.Collapsed;
+                }
+                catch { /* silent fail */ }
+            }
+
+            // ─── Drag & Drop ────────────────────────────────────────
+            imageBorder.DragEnter += (s, e) =>
+            {
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    imageBorder.BorderBrush = Brushes.DodgerBlue;
+                    imageBorder.Background = new SolidColorBrush(Color.FromArgb(80, 0, 120, 215));
+                }
+            };
+
+            imageBorder.DragLeave += (s, e) =>
+            {
+                imageBorder.BorderBrush = Brushes.Gray;
+                imageBorder.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
+            };
+
+            imageBorder.Drop += (s, e) =>
+            {
+                imageBorder.BorderBrush = Brushes.Gray;
+                imageBorder.Background = new SolidColorBrush(Color.FromArgb(40, 255, 255, 255));
+
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+                    if (files?.Length > 0)
+                    {
+                        TryLoadAndSetBitmap(files[0], previewImage, placeholderText, onBitmapChanged);
+                    }
+                }
+            };
+
+            // ─── Кнопка Browse ──────────────────────────────────────
+            var btnBrowse = new Button
+            {
+                Content = L("ClassViewer.Bitmap.Browse"),
+                Width = 120,
+                Style = (Style)TryFindResource("GenericViewerButton"),
+                Margin = new Thickness(0, 0, 0, 8),
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+
+            btnBrowse.Click += (s, e) =>
+            {
+                var ofd = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = L("ClassViewer.Bitmap.FileFilter")  // "Image files (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp"
+                };
+
+                if (ofd.ShowDialog() == true)
+                {
+                    TryLoadAndSetBitmap(ofd.FileName, previewImage, placeholderText, onBitmapChanged);
+                }
+            };
+
+            // ─── Собираем всё вместе ────────────────────────────────
+            root.Children.Add(imageBorder);
+            root.Children.Add(btnBrowse);
+
+            return root;
+        }
+
+        private void TryLoadAndSetBitmap(
+            string filePath,
+            Image previewImage,
+            TextBlock placeholder,
+            Action<System.Drawing.Bitmap> onChanged)
+        {
+            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+                return;
+
+            var ext = Path.GetExtension(filePath)?.ToLowerInvariant();
+            if (ext is not (".png" or ".jpg" or ".jpeg" or ".bmp"))
+            {
+                CustomMessageBox.Show(
+                    L("ClassViewer.Bitmap.Error.WrongFormat"),
+                    L("ClassViewer.Error.Title"));
+                return;
+            }
+
+            try
+            {
+                using var original = System.Drawing.Bitmap.FromFile(filePath) as System.Drawing.Bitmap;
+                if (original == null) return;
+
+                // Можно сделать копию, если нужно избежать блокировки файла
+                var copy = new System.Drawing.Bitmap(original);
+
+                previewImage.Source = copy.ToImageSource();
+                previewImage.Visibility = Visibility.Visible;
+                placeholder.Visibility = Visibility.Collapsed;
+
+                onChanged?.Invoke(copy);
+            }
+            catch (Exception ex)
+            {
+                CustomMessageBox.Show(
+                    L("ClassViewer.Bitmap.Error.LoadFailed") + "\n" + ex.Message,
+                    L("ClassViewer.Error.Title"));
+            }
         }
     }
 }

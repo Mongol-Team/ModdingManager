@@ -8,5 +8,6 @@ namespace Models.Interfaces
     {
         Identifier Id { get; set; }
         public Bitmap Content { get; set; }
+        public string FileFullPath { get; set; }
     }
 }

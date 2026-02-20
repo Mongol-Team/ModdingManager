@@ -5,7 +5,7 @@ using Models.Types.LocalizationData;
 using Models.Types.Utils;
 using System.Drawing;
 
-namespace ViewInterfaces
+namespace View.Interfaces
 {
     public interface ITechTreeCreatorView
     {

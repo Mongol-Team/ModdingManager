@@ -1,4 +1,5 @@
-﻿using Models.Interfaces;
+﻿using Models.Attributes;
+using Models.Interfaces;
 using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Models.GfxTypes
 {
+    [ConfigCreator(ConfigCreatorType.GenericCreator)]
     public class CircularProgressBarType : IGfx
     {
         public Identifier Id { get; set; }
@@ -19,6 +21,7 @@ namespace Models.GfxTypes
         public int Size { get; set; }
         public int Rotation { get; set; }
         public int Amount { get; set; }
+        public string FileFullPath { get; set; }
 
         public override string ToString()
         {

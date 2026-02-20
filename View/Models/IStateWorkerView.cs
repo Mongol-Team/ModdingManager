@@ -3,7 +3,7 @@ using Models.Args;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ViewInterfaces
+namespace View.Models
 {
     public interface IStateWorkerView
     {

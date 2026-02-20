@@ -2,7 +2,7 @@
 using Models.Configs;
 using System.Drawing;
 using System.Windows;
-using ViewInterfaces;
+using View.Interfaces;
 
 namespace ViewPresenters
 {

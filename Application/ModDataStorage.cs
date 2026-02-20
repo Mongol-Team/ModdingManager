@@ -6,6 +6,7 @@ using Application.Loaders;
 using Application.utils;
 using Data;
 using Models.Configs;
+using Models.GfxTypes;
 using Models.Interfaces;
 using System.Diagnostics;
 
@@ -65,8 +66,8 @@ public static class ModDataStorage
 
         var customMods = Mod.ModifierDefinitions.Where(m => !m.IsCore).ToObservableCollection();
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-#pragma warning disable CS8604 // Possible null reference argument.
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            #pragma warning disable CS8604 // Possible null reference argument.
         Logger.AddLog(StaticLocalisation.GetString("Log.IdeologiesInitialized",
             Mod.Ideologies.Count,
             Mod.Ideologies.Count > 0 ? Mod.Ideologies.FileEntitiesToList()?.Random().Id : "none"));
@@ -136,8 +137,31 @@ public static class ModDataStorage
         Logger.AddLog(StaticLocalisation.GetString("Log.CountriesInitialized",
             Mod.Countries.Count,
             Mod.Countries.Count > 0 ? Mod.Countries.FileEntitiesToList()?.Random().Id : "none"));
-#pragma warning restore CS8604 // Possible null reference argument.
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            #pragma warning restore CS8604 // Possible null reference argument.
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+    }
+
+    public static void RegisterTypes()
+    {
+        Logger.AddLog(StaticLocalisation.GetString("Log.TypeRegistration.Started"));
+
+        // Регистрация Config типов
+        TypeRegistry.RegisterType<IConfig, MapConfig>();
+
+        TypeRegistry.RegisterType<IGfx, ArrowType>();
+        TypeRegistry.RegisterType<IGfx, CircularProgressBarType>();
+        TypeRegistry.RegisterType<IGfx, CorneredTileSpriteType>();
+        TypeRegistry.RegisterType<IGfx, FrameAnimatedSpriteType>();
+        TypeRegistry.RegisterType<IGfx, LineChartType>();
+        TypeRegistry.RegisterType<IGfx, PieChartType>();
+        TypeRegistry.RegisterType<IGfx, ProgressbarType>();
+        TypeRegistry.RegisterType<IGfx, SpriteType>();
+        TypeRegistry.RegisterType<IGfx, TextSpriteType>();
+        TypeRegistry.GetImplementations<IGfx>();
+        // Регистрация Gfx типов (если есть)
+        // TypeRegistry.RegisterType<IGfx, SomeGfxType>();
+
+        Logger.AddLog(StaticLocalisation.GetString("Log.TypeRegistration.Completed"));
     }
 }
 

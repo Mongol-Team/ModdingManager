@@ -128,7 +128,7 @@ namespace Application.Loaders
                 {
                     foreach (Bracket spriteBr in defineBr.SubBrackets)
                     {
-                        IGfx gfx = ParseSingleSpriteGfx(spriteBr);
+                        IGfx gfx = ParseSingleSpriteGfx(spriteBr, gfxFilePath);
                         if (gfx != null)
                             configFile.Entities.Add(gfx);
                     }
@@ -146,7 +146,7 @@ namespace Application.Loaders
 
             return configFile;
         }
-        public static IGfx? ParseSingleSpriteGfx(Bracket gfxBracket)
+        public static IGfx? ParseSingleSpriteGfx(Bracket gfxBracket, string fullPath)
         {
             string brName = gfxBracket.Name.ToLower();
             string dd = gfxBracket.GetVarString("name");
@@ -166,7 +166,8 @@ namespace Application.Loaders
                             TexturePath = gfxBracket.GetVarString("textureFile").Replace("/", "\\"),
                             NoOfFrames = gfxBracket.GetVarInt("noOfFrames"),
                             EffectFile = gfxBracket.GetVarString("effectFile"),
-                            Content = BitmapExtensions.LoadResourceRealativePath(gfxBracket.GetVarString("textureFile").Replace("/", "\\"))
+                            Content = BitmapExtensions.LoadResourceRealativePath(gfxBracket.GetVarString("textureFile").Replace("/", "\\")),
+                            FileFullPath = fullPath,
                         };
                         return res;
                     }
@@ -187,8 +188,10 @@ namespace Application.Loaders
                             AllwaysTransparent = gfxBracket.GetVarBool("alwaystransparent"),
                             LegacyLazyLoad = gfxBracket.GetVarBool("legacy_lazy_load"),
                             TransparenceCheck = gfxBracket.GetVarBool("transparencecheck"),
+                            FileFullPath = fullPath,
                             Content = File.Exists(modPath) ? BitmapExtensions.LoadResourceFullPath(modPath)
                                    : File.Exists(gamePath) ? BitmapExtensions.LoadResourceFullPath(gamePath) : DDF.NullImageSource
+
                         };
                         return res;
                     }
@@ -211,6 +214,7 @@ namespace Application.Loaders
                             EffectFile = gfxBracket.GetVarString("effectFile"),
                             AllwaysTransparent = gfxBracket.GetVarBool("alwaystransparent"),
                             PlayOnShow = gfxBracket.GetVarBool("play_on_show"),
+                            FileFullPath = fullPath,
                             PauseOnLoop = gfxBracket.GetVarDouble("pause_on_loop")
                         };
                     }
@@ -238,6 +242,7 @@ namespace Application.Loaders
                                 gfxBracket.GetSubBracketVarInt("size", "y")),
                             EffectFile = gfxBracket.GetVarString("effectFile"),
                             Color = gfxBracket.GetArrayColor("color"),
+                            FileFullPath = fullPath,
                             SecondColor = gfxBracket.GetArrayColor("colortwo"),
                             IsHorisontal = false,
                             Steps = -1
@@ -265,6 +270,7 @@ namespace Application.Loaders
                             Size = new System.Drawing.Point(
                                 gfxBracket.GetSubBracketVarInt("size", "x"),
                                 gfxBracket.GetSubBracketVarInt("size", "y")),
+                            FileFullPath = fullPath,
                             BorderSize = new System.Drawing.Point(
                                 gfxBracket.GetSubBracketVarInt("borderSize", "x"),
                                 gfxBracket.GetSubBracketVarInt("borderSize", "y"))
@@ -276,6 +282,7 @@ namespace Application.Loaders
                         return new PieChartType
                         {
                             Id = new Identifier(gfxBracket.GetVarString("name")),
+                            FileFullPath = fullPath,
                             Size = gfxBracket.GetVarInt("size"),
                             Colors = gfxBracket.Arrays.FirstOrDefault(a => a.Name == "colors")?.Values.Cast<Color>().ToList() ?? new List<Color>()
                         };
@@ -288,6 +295,7 @@ namespace Application.Loaders
                             Size = new System.Drawing.Point(
                                 gfxBracket.GetSubBracketVarInt("size", "x"),
                                 gfxBracket.GetSubBracketVarInt("size", "y")),
+                            FileFullPath = fullPath,
                             LineWidth = gfxBracket.GetVarDouble("lineWidth"),
                         };
                     }
@@ -309,6 +317,7 @@ namespace Application.Loaders
                                        : File.Exists(gamePath2) ? BitmapExtensions.LoadResourceFullPath(gamePath2) : DDF.NullImageSource,
                             Content = File.Exists(modPath1) ? BitmapExtensions.LoadResourceFullPath(modPath1)
                                     : File.Exists(gamePath1) ? BitmapExtensions.LoadResourceFullPath(gamePath1) : DDF.NullImageSource,
+                            FileFullPath = fullPath,
                             EffectFile = gfxBracket.GetVarString("effectFile")
                         };
                     }
@@ -322,6 +331,7 @@ namespace Application.Loaders
                         Size = gfxBracket.GetVarInt("size"),
                         Rotation = gfxBracket.GetVarInt("rotation"),
                         Amount = gfxBracket.GetVarInt("amount"),
+                        FileFullPath = fullPath,
                         EffectContent = BitmapExtensions.LoadResourceRealativePath(gfxBracket.GetVarString("effectFile2").Replace("/", "\\")),
                     };
                 default:

@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Windows;
 using System.Windows.Media;
 
-namespace ViewInterfaces
+namespace View.Interfaces
 {
     public interface ICountryView
     {

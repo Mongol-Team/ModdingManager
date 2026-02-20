@@ -25,7 +25,7 @@
     <SolidColorBrush x:Key="LikeHover" Color="#ff6b9d"/>
     <SolidColorBrush x:Key="Success" Color="#89d185"/>
     <SolidColorBrush x:Key="Warning" Color="#cca700"/>
-    
+    <SolidColorBrush x:Key="AccentBrush" Color="#4A90E2"/>
     <SolidColorBrush x:Key="ButtonDarkBackground" Color="#0e639c"/>
     <SolidColorBrush x:Key="ButtonDarkBackgroundHover" Color="#1177bb"/>
     <SolidColorBrush x:Key="ButtonDarkBackgroundPressed" Color="#005a9e"/>

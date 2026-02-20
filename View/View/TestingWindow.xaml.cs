@@ -26,7 +26,7 @@ namespace View
             Logger.AddLog("------------------------------------------------"); 
             var md = ModDataStorage.Mod.ModifierDefinitions
                 .FirstOrDefault(md => md.ToString() == "build_cost_ic");
-
+            filesStripe.AddTab("govno", "hueta", ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(), true);
             Logger.AddLog(md?.ToString() ?? "govno");
 
         }

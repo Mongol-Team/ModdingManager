@@ -14,5 +14,6 @@
             <RowDefinition Height="225*"/>
         </Grid.RowDefinitions>
         <controls:ErrorPanel x:Name="errTest"> </controls:ErrorPanel>
+        <controls:FilesStripeControl x:Name="filesStripe" Margin="0,209,0,166" Grid.RowSpan="2"/>
     </Grid>
 </base:BaseWindow>
