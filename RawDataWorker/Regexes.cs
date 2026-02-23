@@ -131,9 +131,9 @@ namespace RawDataWorker
 
 
         //use only for extracted & validated array | Name={ ... }
-        private static string array = @"\w+\s*=\s*{(?!\s*(\d+\s+){}\d+)(?:[^{}=])+?\s*}";
+        private static string array = @"\w+\s*=\s*\{[^{}=]+\}";
         public static readonly Regex Array =
-            new Regex(array, RegexOptions.Compiled | RegexOptions.CultureInvariant, Timeout);
+            new Regex(array, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Singleline, Timeout);
 
         private static string arrayName = @"^\w+\s*(?==)";
         public static readonly Regex ArrayName =

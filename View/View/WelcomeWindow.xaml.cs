@@ -328,6 +328,7 @@ namespace View
             WelcomeSettingsControl.LanguageItemsSource = Enum.GetValues(typeof(Language)).Cast<Language>();
             WelcomeSettingsControl.EffectiveLanguage = ModManagerSettings.CurrentLanguage;
             WelcomeSettingsControl.SelectedLanguage = ModManagerSettings.CurrentLanguage;
+            WelcomeSettingsControl.ClassDebugNames = ModManagerSettings.ClassDebugNames;
         }
 
         private void WelcomeSettingsControl_SaveClicked(object sender, RoutedEventArgs e)
@@ -340,7 +341,7 @@ namespace View
             {
                 ModManagerSettings.CurrentLanguage = language;
             }
-
+            ModManagerSettings.ClassDebugNames = WelcomeSettingsControl.ClassDebugNames ?? new List<string>();
             ModManagerSettingsLoader.Save(ModManagerSettings.ModDirectory ?? string.Empty, ModManagerSettings.GameDirectory ?? string.Empty);
 
             ShowSuccess(

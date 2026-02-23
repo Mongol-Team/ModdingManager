@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.Debugging;
 using Application.Extentions;
+using Controls;
 using Models.Configs;
 using RawDataWorker.Healers;
 using System.Windows;
@@ -21,12 +22,10 @@ namespace View
 
         private void JUDES()
         {
-            errTest.AddErrors(ModDataStorage.CsvErrors);
-            errTest.AddErrors(ModDataStorage.TxtErrors);
             Logger.AddLog("------------------------------------------------"); 
             var md = ModDataStorage.Mod.ModifierDefinitions
                 .FirstOrDefault(md => md.ToString() == "build_cost_ic");
-            filesStripe.AddTab("govno", "hueta", ModDataStorage.Mod.ModifierDefinitions.FirstOrDefault(), true);
+            MpViewr.Initialize(ModDataStorage.Mod.Map);
             Logger.AddLog(md?.ToString() ?? "govno");
 
         }

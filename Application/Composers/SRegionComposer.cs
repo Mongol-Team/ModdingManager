@@ -139,10 +139,10 @@ namespace Application.Composers
                     string provIdStr = provIdObj.ToString();
                     if (!int.TryParse(provIdStr, out int provId)) continue;
 
-                    var province = ModDataStorage.Mod.Map.Provinces.SearchConfigInFile(provId.ToString());
+                    var province = ModDataStorage.Mod.Map.Basic.FirstOrDefault(b => b.Id.ToString() == provId.ToString());
                     if (province != null)
                     {
-                        region.Provinces.Add(province);
+                        region.Provinces.Add((ProvinceConfig)province);
                     }
                     else
                     {

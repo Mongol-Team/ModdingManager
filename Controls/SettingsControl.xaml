@@ -4,8 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:loc="clr-namespace:Controls.Utils"
-             mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             xmlns:converters="clr-namespace:Controls.Utils.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" Height="546">
+    <UserControl.Resources>
+        <converters:CommaSeparatedStringToListConverter x:Key="CommaSeparatedStringToListConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -89,13 +92,27 @@
                            Margin="0,0,0,16"
                            TextWrapping="Wrap"
                            Visibility="Collapsed"/>
-
+                <Label  Content="{loc:Localize Key=Label.DebugListNames}"
+               Style="{StaticResource TextLabel}"
+               Margin="0,0,0,8"/>
+                <TextBox x:Name="DebugListNamesTextBox"
+         Margin="0,0,0,16"
+         Style="{StaticResource TextBoxDark}"
+         Height="100"
+         AcceptsReturn="True"
+         VerticalScrollBarVisibility="Auto"
+         Text="{Binding ClassDebugNames, 
+                        RelativeSource={RelativeSource AncestorType=UserControl}, 
+                        Mode=TwoWay, 
+                        UpdateSourceTrigger=PropertyChanged,
+                        Converter={StaticResource CommaSeparatedStringToListConverter}}"
+/>
                 <Button x:Name="SaveSettingsButton"
-                Content="{loc:Localize Key=Button.SaveSettings}"
-                Style="{StaticResource ButtonDark}"
-                Height="40"
-                Click="SaveSettingsButton_Click"
-                Margin="0,8,0,0"/>
+                    Content="{loc:Localize Key=Button.SaveSettings}"
+                    Style="{StaticResource ButtonDark}"
+                    Height="40"
+                    Click="SaveSettingsButton_Click"
+                    Margin="0,8,0,0"/>
             </StackPanel>
         </ScrollViewer>
     </Grid>

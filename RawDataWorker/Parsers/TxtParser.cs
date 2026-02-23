@@ -30,7 +30,7 @@ namespace RawDataWorker.Parsers
 
             var result = new HoiFuncFile();
 
-            // Проверка баланса скобок — если не совпадает, это Fatal → не лечим
+            // Проверка баланса скобок
             var (openCount, closeCount) = CountBraces(content, pattern.OpenChar[0], pattern.CloseChar[0]);
             if (openCount != closeCount)
             {
@@ -50,7 +50,7 @@ namespace RawDataWorker.Parsers
                 }
             }
 
-            // Парсим брекеты
+            // Парсим брекеты (они сами распарсят свои массивы внутри)
             content = Rx.FindBracket.Replace(content, m =>
             {
                 var bracket = ParseBracketWithHealing(m.Value);
@@ -72,7 +72,7 @@ namespace RawDataWorker.Parsers
                 }
             }
 
-            // Парсим массивы
+            // Парсим массивы ТОЛЬКО на верхнем уровне (если они не в брекетах)
             var arrayMatches = Rx.Array.Matches(content);
             foreach (Match match in arrayMatches)
             {
@@ -110,11 +110,7 @@ namespace RawDataWorker.Parsers
 
                 if (bracket != null && !localErrors.Any(e => e.Type == ErrorType.Fatal))
                 {
-                    // Warn-ошибки оставляем, но не прерываем
-                    foreach (var warn in localErrors.Where(e => e.Type == ErrorType.Warn))
-                    {
-
-                    }
+                    
                     return bracket;
                 }
 
@@ -163,7 +159,6 @@ namespace RawDataWorker.Parsers
 
             if (nameMatch.Success)
             {
-                // ищем позицию имени и смотрим, есть ли = после имени и перед {
                 string beforeOpening = content.Substring(0, content.IndexOf(pattern.OpenChar));
                 if (!beforeOpening.Contains("="))
                 {
@@ -171,13 +166,27 @@ namespace RawDataWorker.Parsers
                 }
             }
 
-            // Рекурсивно парсим вложенные брекеты
             innerContent = Rx.FindBracket.Replace(innerContent, m =>
             {
-                var subBracket = ParseBracketWithHealing(m.Value);
-                if (subBracket != null)
+                // Извлекаем содержимое между { }
+                var tempContentMatch = Rx.BracketContent.Match(m.Value);
+                var tempInner = tempContentMatch.Success ? tempContentMatch.Value : string.Empty;
+
+                // Проверяем, есть ли внутри знак присваивания '='
+                if (tempInner.Contains('='))
                 {
-                    bracket.SubBrackets.Add(subBracket);
+                    // Это брекет - внутри есть присваивания
+                    var subBracket = ParseBracketWithHealing(m.Value);
+                    if (subBracket != null)
+                    {
+                        bracket.SubBrackets.Add(subBracket);
+                    }
+                }
+                else
+                {
+                    // Это массив - только значения без '='
+                    var array = ParseArrayWithHealing(m.Value);
+                    bracket.Arrays.Add(array);
                 }
                 return string.Empty;
             });
@@ -188,7 +197,18 @@ namespace RawDataWorker.Parsers
                 errors.Add(new BracketInBracketError());
             }
 
-            // Парсим Var внутри
+            // 2. ПОТОМ парсим массивы (теперь только те, что на ЭТОМ уровне)
+            var arrayMatches = Rx.Array.Matches(innerContent);
+            foreach (Match match in arrayMatches)
+            {
+                var array = ParseArrayWithHealing(match.Value);
+                bracket.Arrays.Add(array);
+            }
+
+            // Удаляем распарсенные массивы
+            innerContent = Rx.Array.Replace(innerContent, string.Empty);
+
+            // 3. Парсим Var внутри
             var varMatches = Rx.FindVar.Matches(innerContent);
             foreach (Match match in varMatches)
             {
@@ -197,14 +217,6 @@ namespace RawDataWorker.Parsers
                 {
                     bracket.SubVars.Add(varItem);
                 }
-            }
-
-            // Парсим массивы внутри
-            var arrayMatches = Rx.Array.Matches(innerContent);
-            foreach (Match match in arrayMatches)
-            {
-                var array = ParseArrayWithHealing(match.Value);
-                bracket.Arrays.Add(array);
             }
 
             // Пустой брекет

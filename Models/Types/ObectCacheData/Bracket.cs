@@ -21,6 +21,15 @@ namespace Models.Types.ObjectCacheData
             {
                 sb.AppendLine($"\t{br.ToString().Replace("\n", "\n\t")}");
             }
+            foreach (HoiArray arr in this.Arrays)
+            {
+                sb.AppendLine($"\t{arr.Name} = {{");
+                foreach (var item in arr.Values)
+                {
+                    sb.AppendLine($"\t\t{item.ToString()}");
+                }
+                sb.AppendLine("\t}");
+            }
             return sb.AppendLine("}").ToString();
         }
     }

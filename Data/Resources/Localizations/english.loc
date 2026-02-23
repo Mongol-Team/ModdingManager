@@ -15,6 +15,7 @@
   "Button.CloneRepository": "Clone a repository",
   "Label.GameDirectory": "Game Directory",
   "Label.RecentProjects": "Recent Projects",
+  "Label.DebugListNames": "List of clases names to debug",
   "Message.PageNotReady": "This page is not ready yet",
   "Message.WorkingOnIt": "We are working on this functionality",
   "Message.SearchRecent": "Search recent (Alt+S)",

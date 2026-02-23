@@ -14,8 +14,9 @@ namespace Application.Composers
     {
         public static MapConfig Parse()
         {
-            List<ConfigFile<StateConfig>> stateConfigs = StateComposer.Parse();
+
             List<ConfigFile<ProvinceConfig>> provinceConfigs = ProvinceComposer.Parse();
+            List<ConfigFile<StateConfig>> stateConfigs = StateComposer.Parse();
             List<ConfigFile<StrategicRegionConfig>> strategicRegionConfigs = SRegionComposer.Parse();
             List<ConfigFile<CountryConfig>> countryConfigs = CountryComposer.Parse();
             string bmPath = "";
@@ -35,10 +36,10 @@ namespace Application.Composers
             MapConfig mapConfig = new MapConfig
             {
                 States = stateConfigs,
-                Provinces = provinceConfigs,
+                Basic = provinceConfigs.SelectMany(p => p.Entities),
                 StrategicRegions = strategicRegionConfigs,
                 Countries = countryConfigs,
-                Bitmap = new Bitmap(bmPath)
+                MapImage = new Bitmap(bmPath)
             };
             return mapConfig;
         }

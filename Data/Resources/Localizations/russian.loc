@@ -15,6 +15,7 @@
   "Button.CloneRepository": "Клонировать репозиторий",
   "Label.GameDirectory": "Директория игры",
   "Label.RecentProjects": "Недавние проекты",
+  "Label.DebugListNames": "Имена классов для отладки",
   "Message.PageNotReady": "Эта страница пока не готова",
   "Message.WorkingOnIt": "Мы работаем над этим функционалом",
   "Message.SearchRecent": "Поиск недавних (Alt+S)",

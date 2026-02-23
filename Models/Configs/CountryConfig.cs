@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace Models.Configs
 {
     [ConfigCreator(ConfigCreatorType.CountryCreator)]
-    public class CountryConfig : IConfig
+    public class CountryConfig : IConfig, IMapEntity
     {
         public IGfx Gfx { get; set; } 
         public Identifier Id { get; set; }
@@ -37,10 +37,32 @@ namespace Models.Configs
         public List<IdeaConfig>? Ideas { get; set; } = new List<IdeaConfig>();
         public List<CountryCharacterConfig>? Characters { get; set; } = new List<CountryCharacterConfig>();
         public Dictionary<StateConfig, bool>? StateCores { get; set; } = new Dictionary<StateConfig, bool>();
+
+        public void AddChild(object child)
+        {
+            States.Add((StateConfig)child);
+        }
+
+        public IEnumerable<IBasicMapEntity> GetAllBasicEntities()
+        {
+            return States.SelectMany(s => s.GetAllBasicEntities());
+        }
+
+        public IEnumerable<object> GetChildren()
+        {
+            return States;
+        }
+
+        public void RemoveChild(object child)
+        {
+            States.Remove((StateConfig)child);
+        }
+
         public override string ToString()
         {
             return this.Id.ToString();
         }
+        
     }
 
 }

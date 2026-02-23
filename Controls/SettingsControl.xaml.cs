@@ -31,6 +31,10 @@ namespace Controls
             DependencyProperty.Register(nameof(EffectiveLanguage), typeof(object), typeof(SettingsControl),
                 new PropertyMetadata(null, OnEffectiveLanguageChanged));
 
+        public static readonly DependencyProperty ClassDebugNamesProperty =
+            DependencyProperty.Register(nameof(ClassDebugNames), typeof(List<string>), typeof(SettingsControl),
+                new FrameworkPropertyMetadata(new List<string>(), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
         public static readonly RoutedEvent SaveClickedEvent =
             EventManager.RegisterRoutedEvent(nameof(SaveClicked), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SettingsControl));
 
@@ -75,7 +79,11 @@ namespace Controls
             get => (string)GetValue(GameDirectoryProperty);
             set => SetValue(GameDirectoryProperty, value);
         }
-
+        public List<string> ClassDebugNames
+        {
+            get => (List<string>)GetValue(ClassDebugNamesProperty);
+            set => SetValue(ClassDebugNamesProperty, value);
+        }
         public SettingsControl()
         {
             InitializeComponent();

@@ -19,6 +19,8 @@ namespace Application.Settings
                 ModManagerSettings.MaxPercentForParallelUsage = config.TryGetValue("MaxPercentForParallelUsage", out var maxPercent) && int.TryParse(maxPercent, out var maxVal) ? maxVal : 50;
                 ModManagerSettings.CurrentLanguage = config.TryGetValue("CurrentLanguage", out var lang) && Enum.TryParse<Language>(lang, true, out var langVal) ? langVal : Language.english;
                 ModManagerSettings.RecentProjects = config.TryGetValue("RecentProjects", out var projects) ? ConfigFileParser.ParseRecentProjects(projects) : new List<RecentProject>();
+                ModManagerSettings.ClassDebugNames = config.TryGetValue("ClassDebugNames", out var debugNames) ? ConfigFileParser.ParseList(debugNames) : new List<string>();
+
             }
             catch
             {
@@ -28,6 +30,7 @@ namespace Application.Settings
                 ModManagerSettings.MaxPercentForParallelUsage = 50;
                 ModManagerSettings.CurrentLanguage = Language.english;
                 ModManagerSettings.RecentProjects = new List<RecentProject>();
+                ModManagerSettings.ClassDebugNames = new List<string>();
             }
         }
 
@@ -43,7 +46,8 @@ namespace Application.Settings
                 ["IsDebugRunning"] = ModManagerSettings.IsDebugRunning.ToString(),
                 ["MaxPercentForParallelUsage"] = ModManagerSettings.MaxPercentForParallelUsage.ToString(),
                 ["CurrentLanguage"] = ModManagerSettings.CurrentLanguage.ToString(),
-                ["RecentProjects"] = ConfigFileParser.SerializeRecentProjects(ModManagerSettings.RecentProjects ?? new List<RecentProject>())
+                ["RecentProjects"] = ConfigFileParser.SerializeRecentProjects(ModManagerSettings.RecentProjects ?? new List<RecentProject>()),
+                ["ClassDebugNames"] = ConfigFileParser.SerializeList(ModManagerSettings.ClassDebugNames ?? new List<string>())
             };
 
             ConfigFileParser.WriteConfigFile(AppPaths.ProgramConfigPath, config);

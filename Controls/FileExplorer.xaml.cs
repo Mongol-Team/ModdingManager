@@ -1410,7 +1410,7 @@ namespace Controls
         {
             foreach (TreeViewItem item in categoryItem.Items)
             {
-                if (item.Tag is ConfigFileNode f &&
+                if(item.Tag is ConfigFileNode f &&
                     f.DisplayName == fileNode.DisplayName &&
                     f.ConfigType == fileNode.ConfigType)
                 {

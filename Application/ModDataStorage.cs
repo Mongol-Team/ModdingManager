@@ -28,7 +28,7 @@ public static class ModDataStorage
         steps.Add((() => { Mod.ModifierDefinitions = ModifierDefComposer.Parse().ToObservableCollection(); }, "Progress.LoadingModifierDefs"));
         steps.Add((() => { Mod.Buildings = BuildingComposer.Parse().ToObservableCollection(); }, "Progress.LoadingBuildings"));
         steps.Add((() => { Mod.Ideologies = IdeologyComposer.Parse().ToObservableCollection(); }, "Progress.LoadingIdeologies"));
-        steps.Add((() => { Mod.Map.Provinces = ProvinceComposer.Parse().ToList(); }, "Progress.LoadingProvinces"));
+        steps.Add((() => { Mod.Map.Basic = ProvinceComposer.Parse().SelectMany(p => p.Entities).ToList(); }, "Progress.LoadingProvinces"));
         steps.Add((() => { Mod.StateCathegories = StateCathegoryComposer.Parse().ToObservableCollection(); }, "Progress.LoadingStateCategories"));
         steps.Add((() => { Mod.Rules = RuleComposer.Parse().ToObservableCollection(); }, "Progress.LoadingRules"));
         steps.Add((() => { Mod.SubUnits = SubUnitComposer.Parse().ToObservableCollection(); }, "Progress.LoadingSubUnits"));
@@ -86,9 +86,9 @@ public static class ModDataStorage
             Localisation.OtherLocalisation.Data.Count,
             Localisation.VictoryPointsLocalisation.Data.Count));
 
-        Logger.AddLog(StaticLocalisation.GetString("Log.ProvincesInitialized",
-            Mod.Map.Provinces.Count,
-            Mod.Map.Provinces.Count > 0 ? Mod.Map.Provinces.FileEntitiesToList()?.Random().Id : "none"));
+        //Logger.AddLog(StaticLocalisation.GetString("Log.ProvincesInitialized",
+        //    Mod.Map.Basic.Count,
+        //    Mod.Map.Basic.Count() > 0 ? Mod.Map.Basic.FileEntitiesToList()?.Random().Id : "none"));
 
         Logger.AddLog(StaticLocalisation.GetString("Log.StateCategoriesInitialized",
             Mod.StateCathegories.Count,

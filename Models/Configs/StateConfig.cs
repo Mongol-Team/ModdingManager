@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace Models.Configs
 {
     [ConfigCreator(ConfigCreatorType.MapCreator)]
-    public class StateConfig : IConfig
+    public class StateConfig : IConfig, IMapEntity
     {
         public IGfx Gfx { get; set; }
         [JsonIgnore]
@@ -19,7 +19,7 @@ namespace Models.Configs
         public bool IsOverride { get; set; }
         public string FileFullPath { get; set; } = "";
         public ConfigLocalisation Localisation { get; set; }
-        public Color Color { get; set; }
+        public Color? Color { get; set; }
         [JsonIgnore]
         public string LocalizationKey { get; set; } = string.Empty;
         public StateCathegoryConfig Cathegory { get; set; }
@@ -29,6 +29,27 @@ namespace Models.Configs
         public List<string> CoresTag { get; set; }
         public Dictionary<int, int> VictoryPoints { get; set; }
         public Dictionary<BuildingConfig, int> Buildings { get; set; }
+
+        public void AddChild(object child)
+        {
+            Provinces.Add((ProvinceConfig)child);
+        }
+
+        public IEnumerable<IBasicMapEntity> GetAllBasicEntities()
+        {
+            return Provinces;
+        }
+
+        public IEnumerable<object> GetChildren()
+        {
+            return Provinces;
+        }
+
+        public void RemoveChild(object child)
+        {
+            Provinces.Remove((ProvinceConfig)child);
+        }
+
         public override string ToString()
         {
             return this.Id.ToString();
