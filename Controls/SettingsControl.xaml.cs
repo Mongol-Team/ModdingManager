@@ -174,6 +174,7 @@ namespace Controls
 
         private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
         {
+            DebugListNamesTextBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
             RaiseEvent(new RoutedEventArgs(SaveClickedEvent));
         }
     }

@@ -22,11 +22,15 @@ namespace Models.Configs
         public List<ConfigFile<CountryConfig>> Countries { get; set; } = new List<ConfigFile<CountryConfig>>();
         public Bitmap MapImage { get; set; }
 
-        public IEnumerable<(string LayerName, IEnumerable<IMapEntity> Entities)> GetLayers()
+        public IEnumerable<(string LayerName, List<IMapEntity> Entities)> GetLayers()
         {
-            yield return ("States", States.SelectMany(f => f.Entities));
-            yield return ("StrategicRegions", StrategicRegions.SelectMany(f => f.Entities));
-            yield return ("Countries", Countries.SelectMany(f => f.Entities));
+            var stateEntities = States.SelectMany(f => f.Entities).Cast<IMapEntity>().ToList();
+            var regionEntities = StrategicRegions.SelectMany(f => f.Entities).Cast<IMapEntity>().ToList();
+            var countryEntities = Countries.SelectMany(f => f.Entities).Cast<IMapEntity>().ToList();
+
+            yield return ("States", stateEntities);
+            yield return ("StrategicRegions", regionEntities);
+            yield return ("Countries", countryEntities);
         }
 
         public Point? GetProvincePos(int provinceId)

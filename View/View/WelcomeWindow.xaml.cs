@@ -1,4 +1,5 @@
 using Application;
+using Application.Debugging;
 using Application.Settings;
 using Application.utils;
 using Microsoft.Win32;
@@ -224,6 +225,7 @@ namespace View
             await System.Threading.Tasks.Task.Run(() =>
             {
                 ModDataStorage.RegisterTypes();
+
                 ModDataStorage.ComposeMod((current, total, message) =>
                 {
                     Dispatcher.Invoke(() =>
@@ -329,6 +331,8 @@ namespace View
             WelcomeSettingsControl.EffectiveLanguage = ModManagerSettings.CurrentLanguage;
             WelcomeSettingsControl.SelectedLanguage = ModManagerSettings.CurrentLanguage;
             WelcomeSettingsControl.ClassDebugNames = ModManagerSettings.ClassDebugNames;
+            Logger.DbgTargets = WelcomeSettingsControl.ClassDebugNames;
+            Logger.IsDebug = WelcomeSettingsControl.IsDebugMode;
         }
 
         private void WelcomeSettingsControl_SaveClicked(object sender, RoutedEventArgs e)

@@ -29,8 +29,8 @@ using Polygon = System.Windows.Shapes.Polygon;
 namespace Controls
 {
     /// <summary>
-    /// Универсальный контрол для отображения политической карты
-    /// Поддерживает вложенность IMapEntity (матрешки)
+    /// Оптимизированный контрол для отображения политической карты
+    /// Поддерживает вложенность IMapEntity с переиспользованием Polygon объектов
     /// </summary>
     public partial class MapViewer : UserControl
     {
@@ -45,34 +45,18 @@ namespace Controls
         private MouseButton _lastClickButton;
         private Point _lastClickPosition;
         private bool _isDoubleClick = false;
+        public bool _showIds = false;
+        // Кэш полигонов: BasicEntity.Id -> Polygon
+        private readonly Dictionary<string, BasicShapeCache> _pointsCache = new();
 
         #endregion
 
         #region События
 
-        /// <summary>
-        /// Событие двойного клика по сущности
-        /// </summary>
         public event Action<EntityDoubleClickEventArg> OnEntityDoubleClick;
-
-        /// <summary>
-        /// Событие перемещения сущности между родителями
-        /// </summary>
         public event Action<EntityMoveEventArg> OnEntityMove;
-
-        /// <summary>
-        /// Событие левого клика по сущности
-        /// </summary>
         public event Action<EntityClickEventArg> OnEntityLeftClick;
-
-        /// <summary>
-        /// Событие правого клика по сущности
-        /// </summary>
         public event Action<EntityClickEventArg> OnEntityRightClick;
-
-        /// <summary>
-        /// Событие изменения слоя
-        /// </summary>
         public event Action<string> OnLayerChanged;
 
         #endregion
@@ -82,23 +66,14 @@ namespace Controls
         public MapViewer()
         {
             InitializeComponent();
-
-            // Таймер для различения одиночного и двойного клика (300мс)
-            _clickTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(300)
-            };
+            _clickTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
             _clickTimer.Tick += ClickTimer_Tick;
         }
-
 
         #endregion
 
         #region Публичные методы
 
-        /// <summary>
-        /// Инициализация контрола с политической картой
-        /// </summary>
         public void Initialize(IPoliticalMap politicalMap)
         {
             if (politicalMap == null)
@@ -113,66 +88,57 @@ namespace Controls
             {
                 DisplayView.Width = _politicalMap.MapImage.Width;
                 DisplayView.Height = _politicalMap.MapImage.Height;
-                Logger.AddDbgLog($"Map size: {_politicalMap.MapImage.Width}x{_politicalMap.MapImage.Height}");
             }
+
             ComputeProvinceShapes();
+            CreatePolygonCache();
             CreateLayers();
             DrawLayers();
             CreateLayerButtons();
-
-            // Переключаемся на базовый слой
             SwitchToLayer("Basic");
 
             Logger.AddLog(StaticLocalisation.GetString("MapViewer.Initialized"));
         }
 
-        /// <summary>
-        /// Переключение на указанный слой
-        /// </summary>
         public void SwitchToLayer(string layerName)
         {
-            if (!_layers.ContainsKey(layerName))
-            {
-                Logger.AddLog(StaticLocalisation.GetString("MapViewer.LayerNotFound", layerName));
-                return;
-            }
+            if (!_layers.ContainsKey(layerName)) return;
 
             _currentLayer = layerName;
 
-            // Скрываем все слои
             foreach (var layer in _layers.Values)
             {
                 layer.ParentCanvas.Visibility = Visibility.Collapsed;
             }
 
-            // Показываем текущий
             _layers[_currentLayer].ParentCanvas.Visibility = Visibility.Visible;
 
+            // Восстанавливаем состояние ShowIds для нового слоя
+            ShowIds(_showIds);
+
             OnLayerChanged?.Invoke(_currentLayer);
-            Logger.AddDbgLog($"Switched to layer: {layerName}");
         }
 
-        /// <summary>
-        /// Показать/скрыть ID на текущем слое
-        /// </summary>
         public void ShowIds(bool show)
         {
-            if (_layers.ContainsKey(_currentLayer))
+            // Скрываем IdCanvas у всех слоёв
+            foreach (var layer in _layers.Values)
             {
-                _layers[_currentLayer].IdCanvas.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+                layer.IdCanvas.Visibility = Visibility.Collapsed;
+            }
+
+            // Показываем только для текущего активного слоя, если show=true
+            if (show && _layers.TryGetValue(_currentLayer, out var currentLayerInfo))
+            {
+                currentLayerInfo.IdCanvas.Visibility = Visibility.Visible;
             }
         }
 
-        /// <summary>
-        /// Поиск и центрирование на сущности по ID
-        /// </summary>
         public void SearchAndCenter(int entityId)
         {
             if (!_layers.ContainsKey(_currentLayer)) return;
 
             var layerInfo = _layers[_currentLayer];
-
-            // Ищем сущность
             IBasicMapEntity foundBasic = null;
 
             if (_currentLayer == "Basic")
@@ -181,11 +147,9 @@ namespace Controls
             }
             else
             {
-                // Ищем в текущем слое
                 var entity = layerInfo.Entities?.FirstOrDefault(e => e.Id.ToInt() == entityId);
                 if (entity != null)
                 {
-                    // Берём первую базовую сущность этого entity
                     foundBasic = entity.GetAllBasicEntities()?.FirstOrDefault();
                 }
             }
@@ -204,6 +168,8 @@ namespace Controls
 
         #endregion
 
+       
+
         #region Создание слоёв
 
         private void CreateLayers()
@@ -211,41 +177,29 @@ namespace Controls
             _layers.Clear();
             DisplayView.Children.Clear();
 
-            // Создаём базовый слой
             CreateLayer("Basic", _politicalMap.Basic?.ToList(), null);
 
-            // Создаём остальные слои из IPoliticalMap
             foreach (var (layerName, entities) in _politicalMap.GetLayers())
             {
                 CreateLayer(layerName, null, entities?.ToList());
             }
-
-            Logger.AddDbgLog($"Created {_layers.Count} layers");
         }
 
         private void CreateLayer(string layerName, List<IBasicMapEntity> basicEntities, List<IMapEntity> mapEntities)
         {
-            // Создаём родительский Canvas для слоя
             var parentCanvas = new Canvas
             {
                 Background = System.Windows.Media.Brushes.Transparent,
                 Visibility = Visibility.Collapsed
             };
 
-            // Canvas для отрисовки полигонов
-            var renderCanvas = new Canvas
-            {
-                Background = System.Windows.Media.Brushes.Transparent
-            };
-
-            // Canvas для ID меток
+            var renderCanvas = new Canvas { Background = System.Windows.Media.Brushes.Transparent };
             var idCanvas = new Canvas
             {
                 Background = System.Windows.Media.Brushes.Transparent,
                 Visibility = Visibility.Collapsed
             };
 
-            // Добавляем обработчик для drag
             renderCanvas.MouseMove += RenderCanvas_MouseMove;
 
             parentCanvas.Children.Add(renderCanvas);
@@ -261,8 +215,6 @@ namespace Controls
                 BasicEntities = basicEntities,
                 Entities = mapEntities
             };
-
-            Logger.AddDbgLog($"Layer '{layerName}' created");
         }
 
         #endregion
@@ -293,21 +245,283 @@ namespace Controls
             layerInfo.RenderCanvas.Children.Clear();
             layerInfo.IdCanvas.Children.Clear();
 
-            foreach (var basic in layerInfo.BasicEntities)
+            // Фильтруем сразу по кэшу
+            var validEntities = layerInfo.BasicEntities
+                .Where(b => _pointsCache.ContainsKey(b.Id.ToString()))
+                .ToList();
+
+            foreach (var basic in validEntities)
             {
-                DrawBasicEntity(layerInfo.RenderCanvas, basic, basic.Color);
-                AddIdLabel(layerInfo.IdCanvas, basic);
+                var poly = CreatePolygon(basic);
+                if (poly == null) continue;
+
+                poly.Fill = new SolidColorBrush(basic.Color?.ToMediaColor() ?? Colors.Gray);
+                poly.ToolTip = $"ID: {basic.Id}";
+                layerInfo.RenderCanvas.Children.Add(poly);
             }
 
-            Logger.AddDbgLog($"Basic layer drawn: {layerInfo.BasicEntities.Count} entities");
+            var textBlocks = CreateTextBlocksUniversal(validEntities.Cast<IBasicMapEntity>().ToList(), null, layerInfo.Name);
+            foreach (var tb in textBlocks)
+                layerInfo.IdCanvas.Children.Add(tb);
+
+            Logger.AddDbgLog($"Basic layer drawn: {validEntities.Count}/{layerInfo.BasicEntities.Count} entities (filtered by cache)", caller: "MapViewer");
         }
+
+        private void DrawMapEntityLayer(LayerInfo layerInfo)
+        {
+            if (layerInfo.Entities == null || layerInfo.Entities.Count == 0) return;
+
+            layerInfo.RenderCanvas.Children.Clear();
+            layerInfo.IdCanvas.Children.Clear();
+
+            foreach (var entity in layerInfo.Entities)
+            {
+                // Рекурсивно собираем Basic, фильтруем по наличию в кэше
+                var allBasicEntities = entity.GetAllBasicEntities()?
+                    .Where(b => _pointsCache.ContainsKey(b.Id.ToString()))
+                    .ToList();
+
+                if (allBasicEntities.Count == 0) continue;
+
+                var color = entity.Color ?? GenerateRandomColor();
+
+                foreach (var basic in allBasicEntities)
+                {
+                    var poly = CreatePolygon(basic, entity);
+                    if (poly == null) continue;
+
+                    poly.Fill = new SolidColorBrush(color.ToMediaColor());
+                    poly.ToolTip = $"{layerInfo.Name}: {entity.Id} | Province: {basic.Id}";
+                    layerInfo.RenderCanvas.Children.Add(poly);
+                }
+
+                var textBlocks = CreateTextBlocksUniversal(allBasicEntities, entity.Id.ToString(), layerInfo.Name);
+                foreach (var tb in textBlocks)
+                    layerInfo.IdCanvas.Children.Add(tb);
+            }
+
+            Logger.AddLog($"Layer '{layerInfo.Name}' drawn: {layerInfo.Entities.Count} entities, {layerInfo.RenderCanvas.Children.Count} polygons");
+        }
+
+        private System.Drawing.Color GenerateRandomColor()
+        {
+            var random = new Random();
+            return System.Drawing.Color.FromArgb(255, random.Next(50, 255), random.Next(50, 255), random.Next(50, 255));
+        }
+
+        #endregion
+
+        #region CreateTextBlocksUniversal - из легаси
+
+        /// <summary>
+        /// Универсальный метод создания TextBlock с правильным размером и позицией
+        /// Адаптирован для работы с IBasicMapEntity вместо ProvinceConfig
+        /// </summary>
+        private List<TextBlock> CreateTextBlocksUniversal(IEnumerable<IBasicMapEntity> basicEntities, string text = null, string layer = "")
+        {
+            var result = new List<TextBlock>();
+
+            // Фильтруем только те у кого есть кэш — Shape не трогаем
+            var entityList = basicEntities?
+                .Where(e => e != null && _pointsCache.ContainsKey(e.Id.ToString()))
+                .ToList() ?? new();
+
+            if (entityList.Count == 0) return result;
+
+            if (text != null)
+            {
+                // Групповой лейбл
+                var allPoints = entityList
+                    .SelectMany(e => _pointsCache[e.Id.ToString()].ContourPoints)
+                    .ToList();
+
+                if (allPoints.Count == 0) return result;
+
+                var bounds = GetBoundingBox(allPoints);
+                double size = Math.Max(bounds.Width, bounds.Height);
+                double fontSize = CalculateFontSize(size);
+                if (fontSize <= 0) return result;
+
+                // Центр — среднее Pos из кэша
+                double centerX = entityList.Average(e => _pointsCache[e.Id.ToString()].Pos.X);
+                double centerY = entityList.Average(e => _pointsCache[e.Id.ToString()].Pos.Y);
+                double textWidth = text.Length * fontSize * 0.6;
+
+                var tb = new TextBlock
+                {
+                    Text = text,
+                    Foreground = Brushes.Black,
+                    FontWeight = FontWeights.Bold,
+                    FontSize = fontSize,
+                    Tag = "Group",
+                    RenderTransform = new TranslateTransform(
+                        centerX - textWidth / 2,
+                        centerY - fontSize / 2
+                    )
+                };
+                Logger.AddDbgLog($"Текст {text ?? "Basic"} → позиция {Math.Floor(tb.RenderTransform.Value.OffsetX)},{Math.Floor(tb.RenderTransform.Value.OffsetY)}, слой {layer}", caller: "MapViewer");
+                result.Add(tb);
+            }
+            else
+            {
+                // Индивидуальный лейбл для Basic слоя
+                foreach (var entity in entityList)
+                {
+                    var cache = _pointsCache[entity.Id.ToString()];
+                    var bounds = GetBoundingBox(cache.ContourPoints);
+                    double size = Math.Min(bounds.Width, bounds.Height);
+                    double fontSize = CalculateFontSize(size);
+                    if (fontSize <= 0) continue;
+
+                    string displayText = entity.Id.ToString();
+                    double textWidth = displayText.Length * fontSize * 0.6;
+
+                    // Центр из кэша
+                    var candidatePoint = FindBestCenterPoint(cache.ContourPoints);
+                    if (!IsInsidePolygon(candidatePoint, cache.ContourPoints))
+                        candidatePoint = bounds.Center;
+
+                    result.Add(new TextBlock
+                    {
+                        Text = displayText,
+                        Foreground = Brushes.Black,
+                        FontWeight = FontWeights.Bold,
+                        FontSize = fontSize,
+                        Tag = entity.Id.ToString(),
+                        RenderTransform = new TranslateTransform(
+                            candidatePoint.X - textWidth / 2,
+                            candidatePoint.Y - fontSize / 2
+                        )
+                    });
+                }
+
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Helper Methods для TextBlock
+        private void CreatePolygonCache()
+        {
+            _pointsCache.Clear();
+
+            foreach (var basic in _politicalMap.Basic)
+            {
+                if (basic.Shape?.ContourPoints == null || basic.Shape.ContourPoints.Length < 3)
+                    continue;
+
+                _pointsCache[basic.Id.ToString()] = new BasicShapeCache
+                {
+                    Points = new PointCollection(basic.Shape.ContourPoints.ToWindowsPoints()),
+                    Pos = basic.Shape.Pos,
+                    ContourPoints = basic.Shape.ContourPoints
+                };
+            }
+
+            Logger.AddDbgLog($"Points cache created: {_pointsCache.Count} entries", caller: "MapViewer");
+        }
+
+        // Фабричный метод — каждый раз новый Polygon, но точки берём из кэша
+        private Polygon CreatePolygon(IBasicMapEntity basic, IMapEntity parentEntity = null)
+        {
+            if (!_pointsCache.TryGetValue(basic.Id.ToString(), out var cache))
+                return null;
+
+            return new Polygon
+            {
+                Points = cache.Points,
+                StrokeThickness = 0,
+                Fill = Brushes.Gray,
+                Tag = new PolygonTag { BasicEntity = basic, ParentEntity = parentEntity }
+            };
+        }
+        private double CalculateFontSize(double size)
+        {
+            const double MinVisibleSize = 1;
+            const double MaxFontSize = 25.0;
+            const double MinFontSize = 1.0;
+            const double ScalingFactor = 0.2;
+
+            if (size < MinVisibleSize) return 0;
+
+            double fontSize = size * ScalingFactor;
+            return Math.Min(MaxFontSize, Math.Max(MinFontSize, fontSize));
+        }
+
+        private (double Width, double Height, System.Drawing.Point Center) GetBoundingBox(IEnumerable<System.Drawing.Point> points)
+        {
+            double minX = points.Min(p => p.X);
+            double maxX = points.Max(p => p.X);
+            double minY = points.Min(p => p.Y);
+            double maxY = points.Max(p => p.Y);
+            return (maxX - minX, maxY - minY, new System.Drawing.Point((int)((minX + maxX) / 2), (int)((minY + maxY) / 2)));
+        }
+
+        private System.Drawing.Point FindBestCenterPoint(System.Drawing.Point[] contour)
+        {
+            var xAvg = contour.Average(p => p.X);
+            var yAvg = contour.Average(p => p.Y);
+            return new System.Drawing.Point((int)xAvg, (int)yAvg);
+        }
+
+        private bool IsInsidePolygon(System.Drawing.Point point, System.Drawing.Point[] polygon)
+        {
+            bool result = false;
+            int j = polygon.Length - 1;
+            for (int i = 0; i < polygon.Length; i++)
+            {
+                if ((polygon[i].Y < point.Y && polygon[j].Y >= point.Y) || (polygon[j].Y < point.Y && polygon[i].Y >= point.Y))
+                {
+                    if (polygon[i].X + (point.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) * (polygon[j].X - polygon[i].X) < point.X)
+                        result = !result;
+                }
+                j = i;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Обновление позиции и размера TextBlock при изменении состава entity
+        /// </summary>
+        public void UpdateEntityLabel(string layerName, int entityId)
+        {
+            if (!_layers.TryGetValue(layerName, out var layerInfo)) return;
+
+            // Находим ВСЕ TextBlock с этим текстом и удаляем их
+            var oldLabels = layerInfo.IdCanvas.Children
+                .OfType<TextBlock>()
+                .Where(tb => tb.Text == entityId.ToString())
+                .ToList();
+
+            foreach (var tb in oldLabels)
+                layerInfo.IdCanvas.Children.Remove(tb);
+
+            var entity = layerInfo.Entities?.FirstOrDefault(e => e.Id.ToInt() == entityId);
+            if (entity == null) return;
+
+            var allBasic = entity.GetAllBasicEntities()?.ToList();
+            if (allBasic == null || allBasic.Count == 0) return;
+
+            var newTextBlocks = CreateTextBlocksUniversal(allBasic, entityId.ToString(), layerName);
+            if (newTextBlocks.Count == 0) return;
+
+            // Добавляем новый
+            layerInfo.IdCanvas.Children.Add(newTextBlocks[0]);
+        }
+
+        #endregion
+
+        #region ComputeProvinceShapes
+
         public void ComputeProvinceShapes()
         {
             using var mat = Application.Extentions.BitmapExtensions.ToMat(ModDataStorage.Mod.Map.MapImage);
             if (mat.Empty())
                 throw new InvalidOperationException("Не удалось загрузить provinces.bmp");
 
-            Logger.AddDbgLog($"🔍 Начало обработки {_politicalMap.Basic.Count()} провинций...");
+            Logger.AddDbgLog($"🔍 Начало обработки {_politicalMap.Basic.Count()} провинций...", caller:"MapViewer");
 
             int successCount = 0;
             var timer = System.Diagnostics.Stopwatch.StartNew();
@@ -326,43 +540,27 @@ namespace Controls
                         mask);
 
                     int pixelCount = Cv2.CountNonZero(mask);
-                    if (pixelCount == 0)
-                    {
-                        Logger.AddDbgLog($"⚠️ Провинция {province.Id} не найдена (цвет R:{province.Color.Value.R}, G:{province.Color.Value.G}, B:{province.Color.Value.B})");
-                        return;
-                    }
+                    if (pixelCount == 0) return;
 
-                    Cv2.FindContours(mask, out var contours, out _,
-             RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-
-                    if (contours.Length == 0)
-                        return;
+                    Cv2.FindContours(mask, out var contours, out _, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+                    if (contours.Length == 0) return;
 
                     var mainContour = contours.OrderByDescending(c => Cv2.ContourArea(c)).First();
 
                     double area = Cv2.ContourArea(mainContour);
                     double perimeter = Cv2.ArcLength(mainContour, true);
 
-                    bool isSimple = mainContour.Length < 50 ||
-                                    (4 * Math.PI * area / (perimeter * perimeter) > 0.5);
+                    bool isSimple = mainContour.Length < 50 || (4 * Math.PI * area / (perimeter * perimeter) > 0.5);
 
                     if (!isSimple)
                     {
-
-                        Cv2.FindContours(mask, out contours, out _,
-                            RetrievalModes.External, ContourApproximationModes.ApproxNone);
-
+                        Cv2.FindContours(mask, out contours, out _, RetrievalModes.External, ContourApproximationModes.ApproxNone);
                         mainContour = contours.OrderByDescending(c => Cv2.ContourArea(c)).First();
                     }
 
                     var moments = Cv2.Moments(mainContour);
-                    if (moments.M00 <= 0.5)
-                    {
-                        Logger.AddDbgLog($"⚠️ Провинция {province.Id}: контур слишком мал (площадь {moments.M00})");
-                        return;
-                    }
+                    if (moments.M00 <= 0.5) return;
 
-                    // 5. Заполняем Shape (берём ВСЕ точки контура)
                     province.Shape = new ProvinceShapeArg
                     {
                         ContourPoints = mainContour.Select(p => new System.Drawing.Point(p.X, p.Y)).ToArray(),
@@ -374,139 +572,12 @@ namespace Controls
                 }
                 catch (Exception ex)
                 {
-                    Logger.AddDbgLog($"🔥 Ошибка при обработке провинции {province.Id}: {ex.Message}");
+                    Logger.AddDbgLog($"🔥 Ошибка при обработке провинции {province.Id}: {ex.Message}", caller: "MapViewer");
                 }
             });
 
             timer.Stop();
-            Logger.AddDbgLog("\n====================================");
-            Logger.AddDbgLog($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек");
-            Logger.AddDbgLog($"Успешно: {successCount} | Не удалось: {_politicalMap.Basic.Count() - successCount}");
-            Logger.AddDbgLog("====================================\n");
-            
-        }
-        private void DrawMapEntityLayer(LayerInfo layerInfo)
-        {
-            if (layerInfo.Entities == null || layerInfo.Entities.Count == 0) return;
-
-            // ВАЖНО: Очищаем Canvas перед отрисовкой!
-            layerInfo.RenderCanvas.Children.Clear();
-            layerInfo.IdCanvas.Children.Clear();
-
-            Logger.AddDbgLog($"Drawing layer '{layerInfo.Name}' with {layerInfo.Entities.Count} entities");
-
-            foreach (var entity in layerInfo.Entities)
-            {
-                var allBasicEntities = entity.GetAllBasicEntities()?.ToList();
-                if (allBasicEntities == null || allBasicEntities.Count == 0)
-                {
-                    Logger.AddDbgLog($"  Entity {entity.Id} has no basic entities!");
-                    continue;
-                }
-
-                var color = entity.Color ?? GenerateRandomColor();
-
-                Logger.AddDbgLog($"  Drawing entity {entity.Id} with {allBasicEntities.Count} provinces, color: {color}");
-
-                int drawnCount = 0;
-                foreach (var basic in allBasicEntities)
-                {
-                    DrawBasicEntity(layerInfo.RenderCanvas, basic, color, entity);
-                    drawnCount++;
-                }
-
-                Logger.AddDbgLog($"    → Drew {drawnCount} polygons on canvas (total canvas children: {layerInfo.RenderCanvas.Children.Count})");
-
-                AddEntityLabel(layerInfo.IdCanvas, entity);
-            }
-
-            Logger.AddLog($"Layer '{layerInfo.Name}' drawn: {layerInfo.Entities.Count} entities, {layerInfo.RenderCanvas.Children.Count} polygons");
-        }
-
-        private System.Drawing.Color GenerateRandomColor()
-        {
-            var random = new Random();
-            return System.Drawing.Color.FromArgb(
-                255,
-                random.Next(50, 255),
-                random.Next(50, 255),
-                random.Next(50, 255)
-            );
-        }
-
-        private void DrawBasicEntity(Canvas canvas, IBasicMapEntity entity, System.Drawing.Color? color, IMapEntity parentEntity = null)
-        {
-            if (entity.Shape?.ContourPoints == null || entity.Shape.ContourPoints.Length < 3)
-                return;
-
-            var poly = new Polygon
-            {
-                Fill = new SolidColorBrush(color?.ToMediaColor() ?? Colors.Gray),
-                Points = new PointCollection(entity.Shape.ContourPoints.ToWindowsPoints()),
-                StrokeThickness = 0,
-                ToolTip = $"ID: {entity.Id}",
-                Tag = new PolygonTag
-                {
-                    BasicEntity = entity,
-                    ParentEntity = parentEntity
-                }
-            };
-
-            canvas.Children.Add(poly);
-        }
-
-        private void AddIdLabel(Canvas canvas, IBasicMapEntity entity)
-        {
-            if (entity.Shape?.Pos == null) return;
-
-            var textBlock = new TextBlock
-            {
-                Text = entity.Id.ToString(),
-                Foreground = Brushes.Black,
-                FontWeight = FontWeights.Bold,
-                FontSize = 12,
-                Tag = entity
-            };
-
-            textBlock.RenderTransform = new TranslateTransform(
-                entity.Shape.Pos.X - 10,
-                entity.Shape.Pos.Y - 6
-            );
-
-            canvas.Children.Add(textBlock);
-        }
-        
-        private void AddEntityLabel(Canvas canvas, IMapEntity entity)
-        {
-            var allBasic = entity.GetAllBasicEntities()?.ToList();
-            if (allBasic == null || allBasic.Count == 0) return;
-
-            // Вычисляем центр всех базовых сущностей
-            var allPoints = allBasic
-                .Where(b => b.Shape?.ContourPoints != null)
-                .SelectMany(b => b.Shape.ContourPoints)
-                .ToList();
-
-            if (allPoints.Count == 0) return;
-
-            double centerX = allPoints.Average(p => p.X);
-            double centerY = allPoints.Average(p => p.Y);
-
-            var textBlock = new TextBlock
-            {
-                Text = entity.Id.ToString(),
-                Foreground = Brushes.Black,
-                FontWeight = FontWeights.Bold,
-                FontSize = 16,
-                Tag = entity
-            };
-
-            textBlock.RenderTransform = new TranslateTransform(
-                centerX - 15,
-                centerY - 8
-            );
-
-            canvas.Children.Add(textBlock);
+            Logger.AddDbgLog($"ОБРАБОТКА ЗАВЕРШЕНА за {timer.Elapsed.TotalSeconds:F2} сек. Успешно: {successCount}", caller: "MapViewer");
         }
 
         #endregion
@@ -538,7 +609,6 @@ namespace Controls
                 ButtonStrip.Children.Add(button);
             }
 
-            // Чекбокс для показа ID
             var showIdsCheckbox = new CheckBox
             {
                 Content = "ID",
@@ -547,12 +617,10 @@ namespace Controls
                 ToolTip = StaticLocalisation.GetString("MapViewer.ShowIds")
             };
 
-            showIdsCheckbox.Checked += (s, e) => ShowIds(true);
-            showIdsCheckbox.Unchecked += (s, e) => ShowIds(false);
+            showIdsCheckbox.Checked += (s, e) => { _showIds = true; ShowIds(true); };
+            showIdsCheckbox.Unchecked += (s, e) => { _showIds = false; ShowIds(false); };
 
             ButtonStrip.Children.Add(showIdsCheckbox);
-
-            Logger.AddDbgLog($"Created {_layers.Count} layer buttons");
         }
 
         private void LayerButton_Click(object sender, RoutedEventArgs e)
@@ -570,7 +638,7 @@ namespace Controls
         private void Display_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.RightButton != MouseButtonState.Pressed) return;
-            if (_currentLayer == "Basic") return; // В базовом слое нельзя перемещать
+            if (_currentLayer == "Basic") return;
 
             var hit = VisualTreeHelper.HitTest(DisplayView, e.GetPosition(DisplayView));
             if (hit?.VisualHit is Polygon polygon && polygon.Tag is PolygonTag tag)
@@ -592,7 +660,6 @@ namespace Controls
 
         private void RenderCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            // Вызываем общий обработчик для Drag
             Display_MouseMove(sender, e);
         }
 
@@ -617,27 +684,14 @@ namespace Controls
             var layerInfo = _layers[_currentLayer];
             if (layerInfo.Entities == null) return;
 
-            // Находим родительские IMapEntity для обоих базовых сущностей
-            // ВАЖНО: используем рекурсивный поиск через GetAllBasicEntities()
             IMapEntity sourceParent = FindParentEntity(draggedBasic, layerInfo.Entities);
             IMapEntity targetParent = FindParentEntity(targetBasic, layerInfo.Entities);
 
-            if (sourceParent == null || targetParent == null || sourceParent.Id == targetParent.Id)
-            {
-                Logger.AddDbgLog($"Cannot move: source={sourceParent?.Id}, target={targetParent?.Id}");
-                return;
-            }
+            if (sourceParent == null || targetParent == null || sourceParent.Id == targetParent.Id) return;
 
-            // Находим непосредственную дочернюю сущность sourceParent, которая содержит draggedBasic
             object childToMove = FindDirectChild(sourceParent, draggedBasic);
+            if (childToMove == null) return;
 
-            if (childToMove == null)
-            {
-                Logger.AddDbgLog($"Cannot find direct child containing basic entity {draggedBasic.Id}");
-                return;
-            }
-
-            // Создаём событие
             var moveArg = new EntityMoveEventArg
             {
                 BasicEntityId = draggedBasic.Id.ToInt(),
@@ -649,24 +703,19 @@ namespace Controls
 
             OnEntityMove?.Invoke(moveArg);
 
-            // Выполняем перемещение
             sourceParent.RemoveChild(childToMove);
             targetParent.AddChild(childToMove);
+
+            // Обновляем лейблы после перемещения
+            UpdateEntityLabel(_currentLayer, sourceParent.Id.ToInt());
+            UpdateEntityLabel(_currentLayer, targetParent.Id.ToInt());
 
             // Перерисовываем слой
             DrawMapEntityLayer(layerInfo);
 
-            Logger.AddLog(StaticLocalisation.GetString(
-                "MapViewer.EntityMoved",
-                childToMove,
-                sourceParent.Id,
-                targetParent.Id));
+            Logger.AddLog(StaticLocalisation.GetString("MapViewer.EntityMoved", childToMove, sourceParent.Id, targetParent.Id));
         }
 
-        /// <summary>
-        /// Находит IMapEntity родителя для данной IBasicMapEntity
-        /// Использует рекурсивный поиск через GetAllBasicEntities()
-        /// </summary>
         private IMapEntity FindParentEntity(IBasicMapEntity basic, List<IMapEntity> entities)
         {
             foreach (var entity in entities)
@@ -680,10 +729,6 @@ namespace Controls
             return null;
         }
 
-        /// <summary>
-        /// Находит непосредственную дочернюю сущность parent, которая содержит basic
-        /// Это может быть сам basic (если он прямой ребёнок) или вложенный IMapEntity
-        /// </summary>
         private object FindDirectChild(IMapEntity parent, IBasicMapEntity basic)
         {
             var children = parent.GetChildren();
@@ -692,12 +737,10 @@ namespace Controls
             {
                 if (child is IBasicMapEntity basicChild && basicChild.Id == basic.Id)
                 {
-                    // Прямой ребёнок
                     return child;
                 }
                 else if (child is IMapEntity mapChild)
                 {
-                    // Проверяем содержит ли этот IMapEntity наш basic
                     var allBasic = mapChild.GetAllBasicEntities();
                     if (allBasic != null && allBasic.Any(b => b.Id == basic.Id))
                     {
@@ -740,7 +783,6 @@ namespace Controls
             }
             else if (e.ClickCount == 1 && _draggedBasicEntity == null)
             {
-                // Только если не начали drag
                 _isDoubleClick = false;
                 _lastClickButton = MouseButton.Right;
                 _lastClickPosition = e.GetPosition(DisplayView);
@@ -818,7 +860,12 @@ namespace Controls
         #endregion
 
         #region Вспомогательные классы
-
+        private class BasicShapeCache
+        {
+            public PointCollection Points { get; set; }
+            public System.Drawing.Point Pos { get; set; }
+            public System.Drawing.Point[] ContourPoints { get; set; }
+        }
         private class LayerInfo
         {
             public string Name { get; set; }

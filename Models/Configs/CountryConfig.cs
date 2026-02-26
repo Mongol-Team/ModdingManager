@@ -10,7 +10,7 @@ namespace Models.Configs
     [ConfigCreator(ConfigCreatorType.CountryCreator)]
     public class CountryConfig : IConfig, IMapEntity
     {
-        public IGfx Gfx { get; set; } 
+        public IGfx Gfx { get; set; }
         public Identifier Id { get; set; }
         public ConfigLocalisation Localisation { get; set; } = new ConfigLocalisation();
         public int? Capital { get; set; } 

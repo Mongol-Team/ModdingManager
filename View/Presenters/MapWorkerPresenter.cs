@@ -356,7 +356,7 @@
 //        }
 //        private void UpdateRegionLayer(ProvinceTransferArg arg)
 //        {
-            
+
 //            var sourceRegion = ModDataStorage.Mod.Map.StrategicRegions.SearchConfigInFile(arg.SourceRegion?.Id.ToString());
 //            var targetRegion = ModDataStorage.Mod.Map.StrategicRegions.SearchConfigInFile(arg.SourceRegion?.Id.ToString());
 //            var province = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().FirstOrDefault(p => p.Id.ToInt() == arg.ProvinceId);
@@ -667,7 +667,7 @@
 //            //}
 
 //            //// Отрисовываем метки стран
-//            foreach (var country in ModDataStorage.Mod.Map.Countries.FileEntitiesToList() )
+//            foreach (var country in ModDataStorage.Mod.Map.Countries.FileEntitiesToList())
 //            {
 //                // Собираем все провинции страны
 //                var allProvinces = new List<ProvinceConfig>();

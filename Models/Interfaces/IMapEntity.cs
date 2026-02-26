@@ -13,7 +13,7 @@ namespace Models.Interfaces
     /// Составная сущность карты - например State, Country
     /// Может содержать как IBasicMapEntity, так и другие IMapEntity (вложенность)
     /// </summary>
-    public interface IMapEntity
+    public interface IMapEntity : IConfig
     {
         /// <summary>
         /// Идентификатор сущности

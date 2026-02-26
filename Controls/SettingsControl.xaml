@@ -96,17 +96,16 @@
                Style="{StaticResource TextLabel}"
                Margin="0,0,0,8"/>
                 <TextBox x:Name="DebugListNamesTextBox"
-         Margin="0,0,0,16"
-         Style="{StaticResource TextBoxDark}"
-         Height="100"
-         AcceptsReturn="True"
-         VerticalScrollBarVisibility="Auto"
-         Text="{Binding ClassDebugNames, 
-                        RelativeSource={RelativeSource AncestorType=UserControl}, 
-                        Mode=TwoWay, 
-                        UpdateSourceTrigger=PropertyChanged,
-                        Converter={StaticResource CommaSeparatedStringToListConverter}}"
-/>
+                     Margin="0,0,0,16"
+                     Style="{StaticResource TextBoxDark}"
+                     Height="100"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     Text="{Binding ClassDebugNames,
+                           RelativeSource={RelativeSource AncestorType=UserControl},
+                           Mode=TwoWay,
+                           UpdateSourceTrigger=Explicit,
+                           Converter={StaticResource CommaSeparatedStringToListConverter}}"/>
                 <Button x:Name="SaveSettingsButton"
                     Content="{loc:Localize Key=Button.SaveSettings}"
                     Style="{StaticResource ButtonDark}"

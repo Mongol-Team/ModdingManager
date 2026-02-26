@@ -25,6 +25,6 @@ namespace Models.Interfaces
         /// Например: ("States", [state1, state2, ...]), ("Countries", [country1, country2, ...])
         /// </summary>
         /// <returns>Пары (Название слоя, Коллекция IMapEntity)</returns>
-        IEnumerable<(string LayerName, IEnumerable<IMapEntity> Entities)> GetLayers();
+        IEnumerable<(string LayerName, List<IMapEntity> Entities)> GetLayers();
     }
 }

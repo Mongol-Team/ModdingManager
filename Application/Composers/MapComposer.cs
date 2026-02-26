@@ -1,12 +1,6 @@
 ﻿using Application.utils.Pathes;
 using Models.Configs;
-using Models.EntityFiles;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Composers
 {
@@ -14,15 +8,12 @@ namespace Application.Composers
     {
         public static MapConfig Parse()
         {
-
-            List<ConfigFile<ProvinceConfig>> provinceConfigs = ProvinceComposer.Parse();
-            List<ConfigFile<StateConfig>> stateConfigs = StateComposer.Parse();
-            List<ConfigFile<StrategicRegionConfig>> strategicRegionConfigs = SRegionComposer.Parse();
-            List<ConfigFile<CountryConfig>> countryConfigs = CountryComposer.Parse();
+            MapConfig mapConfig = new MapConfig();
             string bmPath = "";
             if (File.Exists(ModPathes.ProvinceImagePath))
             {
-                bmPath = ModPathes.ProvinceImagePath;   
+                bmPath = ModPathes.ProvinceImagePath;
+                mapConfig.IsOverride = true;
             }
             else if (File.Exists(GamePathes.ProvinceImagePath))
             {
@@ -30,17 +21,10 @@ namespace Application.Composers
             }
             else
             {
-                throw new FileNotFoundException("Bitmap file not found in mod or game directories.");
+                return mapConfig;
             }
-
-            MapConfig mapConfig = new MapConfig
-            {
-                States = stateConfigs,
-                Basic = provinceConfigs.SelectMany(p => p.Entities),
-                StrategicRegions = strategicRegionConfigs,
-                Countries = countryConfigs,
-                MapImage = new Bitmap(bmPath)
-            };
+            
+            mapConfig.MapImage = new Bitmap(bmPath);
             return mapConfig;
         }
     }

@@ -20,7 +20,6 @@ namespace Application.Settings
                 ModManagerSettings.CurrentLanguage = config.TryGetValue("CurrentLanguage", out var lang) && Enum.TryParse<Language>(lang, true, out var langVal) ? langVal : Language.english;
                 ModManagerSettings.RecentProjects = config.TryGetValue("RecentProjects", out var projects) ? ConfigFileParser.ParseRecentProjects(projects) : new List<RecentProject>();
                 ModManagerSettings.ClassDebugNames = config.TryGetValue("ClassDebugNames", out var debugNames) ? ConfigFileParser.ParseList(debugNames) : new List<string>();
-
             }
             catch
             {

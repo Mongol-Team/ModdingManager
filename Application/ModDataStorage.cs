@@ -45,9 +45,14 @@ public static class ModDataStorage
         steps.Add((() => { Mod.Equipments = EquipmentComposer.Parse().ToObservableCollection(); }, "Progress.LoadingEquipments"));
         steps.Add((() => { Mod.TechCategories = TechCategoryComposer.Parse().ToObservableCollection(); }, "Progress.LoadingTechCategories"));
         steps.Add((() => { Mod.TechTreeItems = TechTreeItemComposer.Parse().ToObservableCollection(); }, "Progress.LoadingTechTreeDefinitions"));
-        steps.Add((() => { Mod.Countries = CountryComposer.Parse().ToObservableCollection(); }, "Progress.LoadingCountries"));
         steps.Add((() => { Mod.Map = MapComposer.Parse() as MapConfig; }, "Progress.LoadingMap"));
-        steps.Add((() => { OverrideManager.HandleOverride(); }, "Progress.HandlingOverrides"));
+        steps.Add((() => { Mod.Map.Basic = ProvinceComposer.Parse().SelectMany(p => p.Entities); }, "Progress.LoadingMap"));
+        steps.Add((() => { Mod.Map.States = StateComposer.Parse(); }, "Progress.LoadingMap"));
+        steps.Add((() => { Mod.Map.StrategicRegions = SRegionComposer.Parse(); }, "Progress.LoadingMap"));
+        steps.Add((() => { Mod.Map.Countries = CountryComposer.Parse(); }, "Progress.LoadingMap"));
+
+        steps.Add((() => { OverrideManager.HandleOverride(Mod); }, "Progress.HandlingOverrides"));
+        
 
         int totalSteps = steps.Count;
         int currentStep = 0;

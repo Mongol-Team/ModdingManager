@@ -23,67 +23,117 @@ namespace Application.Composers
 {
     public class CountryComposer
     {
-        /// <summary>
-        /// Парсит теги стран и соответствующие файлы истории → возвращает список файлов с конфигами стран
-        /// </summary>
         public static List<ConfigFile<CountryConfig>> Parse()
         {
             var stopwatch = Stopwatch.StartNew();
             var countryFiles = new List<ConfigFile<CountryConfig>>();
 
-            string[] possibleTagPathes =
-            {
-                ModPathes.CountryTagsPath,
-                GamePathes.CountryTagsPath
-            };
+            // Множество тегов, которые переопределены в моде (имеют приоритет)
+            var overriddenByMod = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (string tagPath in possibleTagPathes)
+            // ────────────────────────────────────────────────
+            // 1. Сначала обрабатываем мод (самый высокий приоритет)
+            // ────────────────────────────────────────────────
+            string[] modTagFiles = Array.Empty<string>();
+            if (Directory.Exists(ModPathes.CountryTagsPath))
             {
-                if (!Directory.Exists(tagPath)) continue;
-
-                string[] tagFiles = Directory.GetFiles(tagPath, "*.txt", SearchOption.AllDirectories);
-                foreach (string tagFilePath in tagFiles)
+                 modTagFiles = Directory.GetFiles(ModPathes.CountryTagsPath, "*.txt", SearchOption.AllDirectories);
+                foreach (string tagFilePath in modTagFiles)
                 {
                     string content = File.ReadAllText(tagFilePath);
-                    HoiFuncFile tagFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
-
-                    bool isOverride = tagPath.StartsWith(ModPathes.CountryTagsPath);
+                    var tagFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                     foreach (Var tagVar in tagFile.Vars)
                     {
                         if (tagVar.Name == "dynamic_tags" && tagVar.Value.ToBool())
-                        {
-                            // динамические теги пока пропускаем
                             continue;
-                        }
 
                         string tag = tagVar.Name;
                         string countryFileRelative = tagVar.Value?.ToString() ?? string.Empty;
 
-                        // В Parse
-                        CountryConfig country = null;
-                        string actualHistoryPath = FindCountryHistoryPath(tag, countryFileRelative, tagFilePath);
-                        if (actualHistoryPath != null)
-                        {
-                            string historyContent = File.ReadAllText(actualHistoryPath);
-                            HoiFuncFile historyFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(historyContent);
+                        string actualHistoryPath = FindCountryHistoryPath(tag, countryFileRelative, tagFilePath, preferMod: true);
+                        if (actualHistoryPath == null)
+                            continue;
 
-                            country = ParseCountryHistory(tag, countryFileRelative, actualHistoryPath, historyFile);
+                        string historyContent = File.ReadAllText(actualHistoryPath);
+                        var historyFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(historyContent);
+
+                        var country = ParseCountryHistory(tag, countryFileRelative, actualHistoryPath, historyFile);
+                        if (country == null)
+                            continue;
+
+                        var configFile = new ConfigFile<CountryConfig>
+                        {
+                            FileFullPath = actualHistoryPath,
+                            IsOverride = true,
+                            Entities = { country }
+                        };
+
+                        countryFiles.Add(configFile);
+                        overriddenByMod.Add(tag);
+
+                        Logger.AddDbgLog($"[MOD] Добавлена страна: {tag} ({country.Id}) из {Path.GetFileName(actualHistoryPath)}");
+                    }
+                }
+            }
+
+            // ────────────────────────────────────────────────
+            // 2. Теперь обрабатываем ваниль, но пропускаем уже переопределённые модом теги
+            // ────────────────────────────────────────────────
+            if (Directory.Exists(GamePathes.CountryTagsPath))
+            {
+                string[] vanillaTagFiles = Directory.GetFiles(GamePathes.CountryTagsPath, "*.txt", SearchOption.AllDirectories);
+                foreach (string tagFilePath in vanillaTagFiles)
+                {
+                    // Проверка: если файл с таким же именем уже есть в modTagFiles → пропускаем
+                    string fileName = Path.GetFileName(tagFilePath);
+                    if (modTagFiles.Any(mf => Path.GetFileName(mf).Equals(fileName, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        Logger.AddDbgLog($"[VANILLA skipped] Файл {fileName} переопределён модом → пропущен");
+                        continue;
+                    }
+
+
+                    string content = File.ReadAllText(tagFilePath);
+                    var tagFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+
+                    foreach (Var tagVar in tagFile.Vars)
+                    {
+                        if (tagVar.Name == "dynamic_tags" && tagVar.Value.ToBool())
+                            continue;
+
+                        string tag = tagVar.Name;
+
+                        // ← Ключевая проверка: если тег уже переопределён модом → пропускаем
+                        if (overriddenByMod.Contains(tag))
+                        {
+                            Logger.AddDbgLog($"[VANILLA skipped] Страна {tag} переопределена в моде → пропущена");
+                            continue;
                         }
 
-                        if (country != null)
+                        string countryFileRelative = tagVar.Value?.ToString() ?? string.Empty;
+
+                        string actualHistoryPath = FindCountryHistoryPath(tag, countryFileRelative, tagFilePath, preferMod: false);
+                        if (actualHistoryPath == null)
+                            continue;
+
+                        string historyContent = File.ReadAllText(actualHistoryPath);
+                        var historyFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(historyContent);
+
+                        var country = ParseCountryHistory(tag, countryFileRelative, actualHistoryPath, historyFile);
+                        if (country == null)
+                            continue;
+
+                        var configFile = new ConfigFile<CountryConfig>
                         {
-                            var configFile = new ConfigFile<CountryConfig>
-                            {
-                                FileFullPath = actualHistoryPath, // теперь реальный путь к истории
-                                IsOverride = isOverride,
-                                Entities = { country }
-                            };
+                            FileFullPath = actualHistoryPath,
+                            IsOverride = false,
+                            Entities = { country }
+                        };
 
-                            countryFiles.Add(configFile);
-                            Logger.AddDbgLog($"Добавлена страна: {tag} ({country.Id}) из {Path.GetFileName(actualHistoryPath)}");
-                        }
+                        countryFiles.Add(configFile);
 
+                        Logger.AddDbgLog($"[VANILLA] Добавлена страна: {tag} ({country.Id}) из {Path.GetFileName(actualHistoryPath)}");
                     }
                 }
             }
@@ -91,40 +141,58 @@ namespace Application.Composers
 
             stopwatch.Stop();
             Logger.AddLog($"Парсинг стран завершён. Время: {stopwatch.ElapsedMilliseconds} мс. " +
-                          $"Стран: {countryFiles.Sum(f => f.Entities.Count)} (файлов: {countryFiles.Count})");
+                          $"Стран: {countryFiles.Sum(f => f.Entities.Count)} (файлов: {countryFiles.Count}) " +
+                          $"(мод: {overriddenByMod.Count}, ваниль: {countryFiles.Count - overriddenByMod.Count})");
 
             return countryFiles;
         }
-        // Вынесенная функция поиска пути
-        private static string FindCountryHistoryPath(string tag, string relativePath, string tagFilePath)
-        {
-            string[] possibleHistoryPaths =
-            {
-        Path.Combine(ModPathes.HistoryPath, relativePath.Replace("/", "\\")),
-        Path.Combine(GamePathes.HistoryPath, relativePath.Replace("/", "\\")),
-        Path.Combine(ModPathes.HistoryCountriesPath, relativePath.Replace("/", "\\")),
-        Path.Combine(GamePathes.HistoryCountriesPath, relativePath.Replace("/", "\\"))
-    };
 
-            foreach (string candidate in possibleHistoryPaths)
+
+        private static string FindCountryHistoryPath(string tag, string relativePath, string tagFilePath, bool preferMod)
+        {
+            var candidates = new List<string>();
+
+            // Приоритет мода → выше
+            if (preferMod)
+            {
+                candidates.Add(Path.Combine(ModPathes.HistoryPath, relativePath.Replace("/", "\\")));
+                candidates.Add(Path.Combine(ModPathes.HistoryCountriesPath, relativePath.Replace("/", "\\")));
+            }
+
+            candidates.Add(Path.Combine(GamePathes.HistoryPath, relativePath.Replace("/", "\\")));
+            candidates.Add(Path.Combine(GamePathes.HistoryCountriesPath, relativePath.Replace("/", "\\")));
+
+            // Если не preferMod — модовые пути всё равно можно добавить в конец (fallback)
+            if (!preferMod)
+            {
+                candidates.Insert(0, Path.Combine(ModPathes.HistoryPath, relativePath.Replace("/", "\\")));
+                candidates.Insert(1, Path.Combine(ModPathes.HistoryCountriesPath, relativePath.Replace("/", "\\")));
+            }
+
+            foreach (var candidate in candidates)
             {
                 if (File.Exists(candidate))
                     return candidate;
             }
-            string[] filesInFolder = Enumerable.Empty<string>()
-                .Concat(Directory.Exists(ModPathes.HistoryCountriesPath) && !string.IsNullOrEmpty(ModPathes.HistoryCountriesPath)
-                    ? Directory.GetFiles(ModPathes.HistoryCountriesPath)
-                    : Array.Empty<string>())
-                .Concat(Directory.Exists(GamePathes.HistoryCountriesPath) && !string.IsNullOrEmpty(GamePathes.HistoryCountriesPath)
-                    ? Directory.GetFiles(GamePathes.HistoryCountriesPath)
-                    : Array.Empty<string>())
-                .ToArray();
 
+            // Fallback-поиск по имени файла (содержит тег)
+            string[] searchDirs =
+            {
+            ModPathes.HistoryCountriesPath,
+            GamePathes.HistoryCountriesPath
+        };
 
-            return filesInFolder.FirstOrDefault(f =>
-                Path.GetFileNameWithoutExtension(f).Contains(tag, StringComparison.OrdinalIgnoreCase));
+            foreach (var dir in searchDirs.Where(Directory.Exists))
+            {
+                var file = Directory.GetFiles(dir, "*.txt", SearchOption.TopDirectoryOnly)
+                    .FirstOrDefault(f => Path.GetFileNameWithoutExtension(f).Contains(tag, StringComparison.OrdinalIgnoreCase));
+
+                if (file != null)
+                    return file;
+            }
+
+            return null;
         }
-
         /// <summary>
         /// Парсит файл истории одной страны по относительному пути из tags
         /// </summary>
@@ -194,22 +262,10 @@ namespace Application.Composers
                 }
             }
 
-            // add_core / set_owner / set_controller и т.д. — здесь только add_core как в оригинале
-            var coreBracket = file.Brackets.FirstOrDefault(b => b.Name == "add_core");
-            if (coreBracket != null)
+            foreach(StateConfig state in ModDataStorage.Mod.Map.States.SelectMany(s => s.Entities).Where(s => s.OwnerTag == country.Id.ToString()))
             {
-                foreach (Var v in coreBracket.SubVars)
-                {
-                    if (int.TryParse(v.Name, out int stateId) &&
-                        int.TryParse(v.Value?.ToString(), out int isCore))
-                    {
-                        var state = ModDataStorage.Mod.Map.States.FileEntitiesToList().FindById(stateId.ToString());
-                        if (state != null)
-                            country.StateCores[state] = isCore != 0;
-                    }
-                }
+                country.States.Add(state);
             }
-
             // Простые переменные
             country.Convoys = file.Vars.FirstOrDefault(v => v.Name == "set_convoys")?.Value.ToInt() ?? 0;
             country.Stab = file.Vars.FirstOrDefault(v => v.Name == "set_stability")?.Value.ToDouble() ?? 0.0;
@@ -251,9 +307,5 @@ namespace Application.Composers
 
             return country;
         }
-
-       
-
-        
     }
 }
