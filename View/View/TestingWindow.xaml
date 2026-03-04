@@ -9,11 +9,6 @@
         mc:Ignorable="d"
         Title="TestingWindow" Height="450" Width="800">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="209*"/>
-            <RowDefinition Height="225*"/>
-        </Grid.RowDefinitions>
-        <controls:ErrorPanel x:Name="errTest"> </controls:ErrorPanel>
-        <controls:FilesStripeControl x:Name="filesStripe" Margin="0,209,0,166" Grid.RowSpan="2"/>
+        <controls:MapViewer x:Name="MpViewr"/>
     </Grid>
 </base:BaseWindow>

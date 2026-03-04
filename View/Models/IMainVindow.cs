@@ -30,7 +30,7 @@ namespace View.Models
 
         /// <summary>Получить все панели DockManager</summary>
         System.Collections.Generic.IEnumerable<DockPanelInfo> GetAllDockPanels();
-
+        DockManager GetDockManager();
         /// <summary>Сериализовать/десериализовать layout через LayoutSerializer</summary>
         void LoadLayout(string layoutPath);
         void SaveLayout(string layoutPath);

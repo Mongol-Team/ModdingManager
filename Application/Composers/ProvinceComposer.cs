@@ -112,7 +112,9 @@ namespace Application.Composers
                         Type = line[2] != null ? (ProvinceType)line[2] : ProvinceType.Land,
                         IsCoastal = line[3] != null ? (bool)line[3] : false,
                         Terrain = line[4]?.ToString() ?? "plains",  // Проверка на null
+                        FileFullPath = fileFullPath,
                         ContinentId = line[5] != null ? (int)line[5] : 0
+
                     };
 
                     if (province.Type == ProvinceType.Sea)

@@ -36,7 +36,7 @@ namespace Application.Debugging
     public struct Logger
     {
         private static readonly object _logLock = new object();
-        public static bool IsDebug = false;
+        public static bool IsDebug { get; set; } = false;
         public class LogEntry
         {
             public string Message { get; set; } = "";
@@ -63,7 +63,7 @@ namespace Application.Debugging
         /// <summary>
         /// Цель для отладочных логов. Если не null, AddDbgLog игнорирует все логи, кроме тех, где dbgSource совпадает с этим значением.
         /// </summary>
-        public static string DbgTarget { get; set; } = null;
+        public static List<string> DbgTargets { get; set; } = new List<string>();
 
         private static bool HasConsole =>
             Console.OpenStandardOutput(1) != Stream.Null;
@@ -230,10 +230,12 @@ namespace Application.Debugging
                 return;
             }
 
-            if (DbgTarget != null && (dbgSource == null || dbgSource != DbgTarget))
+            if (DbgTargets != null &&
+     (dbgSource == null || !DbgTargets.Contains(dbgSource)))
             {
                 return;
             }
+
 
             msgType ??= LogLevel.Info;
 

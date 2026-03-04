@@ -135,7 +135,6 @@ namespace Application.Composers
                 LocalSupply = DataDefaultValues.NullInt
             };
 
-            // Провинции
             var provincesArray = stateBracket.Arrays.FirstOrDefault(a => a.Name == "provinces");
             if (provincesArray?.Values != null)
             {
@@ -146,9 +145,13 @@ namespace Application.Composers
                     string provIdStr = provIdObj.ToString();
                     if (!int.TryParse(provIdStr, out int provId)) continue;
 
-                    var province = ModDataStorage.Mod.Map.Provinces.SearchConfigInFile(provId.ToString());
+                    var province = ModDataStorage.Mod.Map.Basic.FirstOrDefault(p => p.Id.ToString() == provId.ToString());
                     if (province != null)
-                        state.Provinces.Add(province);
+                    {
+                        state.Provinces.Add((ProvinceConfig)province);
+                        state.Color = province.Color;
+                    }
+                       
                     else
                         Logger.AddDbgLog($"Провинция {provId} не найдена для штата {id} (файл: {fileFullPath})");
                 }

@@ -26,7 +26,7 @@ namespace View
         public event Action<StateTransferArg> StateTransferRequested;
         public event Action<string, int> SearchElement;
         public event Action<MarkEventArg> MarkEvent;
-        private StateWorkerPresenter _presenter;
+        //private MapWorkerPresenter _presenter;
         public event Action<string> MapChanged;
         public MarkEventArg _markedElement;
         public string CurrentMapLayer { get; set; } = "PROVINCE"; // Начальный слой по умолчанию
@@ -40,9 +40,9 @@ namespace View
         public MapWorkerWindow()
         {
             InitializeComponent();
-            _presenter = new StateWorkerPresenter(this);
-            DisplayIdsBox.Checked += (s, e) => ShowIdsChanged?.Invoke(true, CurrentMapState);
-            DisplayIdsBox.Unchecked += (s, e) => ShowIdsChanged?.Invoke(false, CurrentMapState);
+            //_presenter = new MapWorkerPresenter(this);
+            //DisplayIdsBox.Checked += (s, e) => ShowIdsChanged?.Invoke(true, CurrentMapState);
+            //DisplayIdsBox.Unchecked += (s, e) => ShowIdsChanged?.Invoke(false, CurrentMapState);
         }
         public event RoutedEventHandler Loaded
         {
@@ -141,7 +141,7 @@ namespace View
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon polygon && polygon.Tag is int provinceId)
             {
-                _draggedProvince = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().FirstOrDefault(p => p.Id.ToInt() == provinceId);
+                //_draggedProvince = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().FirstOrDefault(p => p.Id.ToInt() == provinceId);
                 _dragStartPoint = e.GetPosition(Display);
             }
         }
@@ -163,20 +163,20 @@ namespace View
             var hit = VisualTreeHelper.HitTest(Display, e.GetPosition(Display));
             if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is int targetProvinceId)
             {
-                var targetProvince = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
+                //var targetProvince = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList().FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
 
-                switch (CurrentMapLayer)
-                {
-                    case "STATE":
-                        HandleStateTransfer(_draggedProvince, targetProvince);
-                        break;
-                    case "STRATEGIC":
-                        HandleRegionTransfer(_draggedProvince, targetProvince);
-                        break;
-                    case "COUNTRY":
-                        HandleCountryTransfer(_draggedProvince, targetProvince);
-                        break;
-                }
+                //switch (CurrentMapLayer)
+                //{
+                //    case "STATE":
+                //        HandleStateTransfer(_draggedProvince, targetProvince);
+                //        break;
+                //    case "STRATEGIC":
+                //        HandleRegionTransfer(_draggedProvince, targetProvince);
+                //        break;
+                //    case "COUNTRY":
+                //        HandleCountryTransfer(_draggedProvince, targetProvince);
+                //        break;
+                //}
             }
 
             _draggedProvince = null;
@@ -275,14 +275,14 @@ namespace View
                     }
                     break;
 
-                case "PROVINCE":
-                    var province = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList()
-                        .FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
-                    if (province != null)
-                    {
-                        _markedElement = new MarkEventArg { MarkedProvince = province };
-                    }
-                    break;
+                //case "PROVINCE":
+                //    //var province = ModDataStorage.Mod.Map.Provinces.FileEntitiesToList()
+                //        .FirstOrDefault(p => p.Id.ToInt() == targetProvinceId);
+                //    if (province != null)
+                //    {
+                //        _markedElement = new MarkEventArg { MarkedProvince = province };
+                //    }
+                //    break;
 
                 case "STRATEGIC":
                     var region = ModDataStorage.Mod.Map.StrategicRegions.FileEntitiesToList()

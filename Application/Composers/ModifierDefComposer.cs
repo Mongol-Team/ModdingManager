@@ -1,22 +1,15 @@
 ﻿using Application.Debugging;
 using Application.Extentions;
-using Application.Settings;
 using Application.utils.Pathes;
-using Data;
 using Models.Configs;
 using Models.EntityFiles;
 using Models.Enums;
 using Models.Types.HtmlFilesData;
-using Models.Types.LocalizationData;
 using Models.Types.ObjectCacheData;
 using Models.Types.Utils;
 using RawDataWorker.Parsers;
 using RawDataWorker.Parsers.Patterns;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 
 namespace Application.Composers
 {

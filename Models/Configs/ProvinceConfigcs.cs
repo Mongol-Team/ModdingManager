@@ -10,14 +10,14 @@ using System.Text.Json.Serialization;
 namespace Models.Configs
 {
     [ConfigCreator(ConfigCreatorType.GenericCreator)]
-    public class ProvinceConfig : IConfig
+    public class ProvinceConfig : IConfig, IBasicMapEntity
     {
         [JsonIgnore]
         public Identifier Id { get; set; }
         public IGfx Gfx { get; set; }
         public ConfigLocalisation Localisation { get; set; }
         public string Name { get; set; }
-        public Color Color { get; set; }
+        public Color? Color { get; set; }
         public bool IsCore { get; set; }
         public bool IsOverride { get; set; }
         public string FileFullPath { get; set; }

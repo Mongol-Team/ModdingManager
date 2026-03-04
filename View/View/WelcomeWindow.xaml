@@ -76,21 +76,15 @@
                                     <ItemsControl ItemsSource="{Binding Value}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="Transparent" 
+                                                <Border Style="{StaticResource ListItemHoverBorder}"
                                                         Margin="0,2"
                                                         Padding="8,6"
-                                                        Cursor="Hand"
-                                                        MouseLeftButtonDown="ProjectItem_MouseLeftButtonDown">
-                                                    <Border.Style>
-                                                        <Style TargetType="Border">
-                                                            <Setter Property="Background" Value="Transparent"/>
-                                                            <Style.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="{StaticResource BackgroundHover}"/>
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Border.Style>
+                                                        Cursor="Hand">
+                                                    <Border.InputBindings>
+                                                        <MouseBinding MouseAction="LeftClick"
+                                                                      Command="{Binding OpenProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                      CommandParameter="{Binding}"/>
+                                                    </Border.InputBindings>
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="Auto"/>
@@ -115,12 +109,18 @@
                                                                        Margin="0,2,0,0"/>
                                                         </StackPanel>
                                                         
-                                                        <TextBlock Grid.Column="2" 
-                                                                   Text="{Binding LastOpened}" 
-                                                                   FontSize="11"
-                                                                   Foreground="{StaticResource TextTertiary}"
-                                                                   VerticalAlignment="Center"
-                                                                   Margin="12,0,0,0"/>
+                                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="12,0,0,0">
+                                                            <TextBlock Text="{Binding LastOpened}" 
+                                                                       FontSize="11"
+                                                                       Foreground="{StaticResource TextTertiary}"
+                                                                       HorizontalAlignment="Right"/>
+                                                            <Button Style="{StaticResource SmallDeleteIconButton}"
+                                                                    Margin="0,2,0,0"
+                                                                    HorizontalAlignment="Right"
+                                                                    ToolTip="{loc:LocalizeExtension Key=Menu.Delete}"
+                                                                    Command="{Binding RemoveProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                    CommandParameter="{Binding}"/>
+                                                        </StackPanel>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>
@@ -132,62 +132,73 @@
                     </ItemsControl>
                 </ScrollViewer>
             </Grid>
-            
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                
-                <TextBlock x:Name="ActionsTextBlock" Grid.Row="0" Text="{loc:LocalizeExtension Key=Window.Actions}" 
-                           FontSize="20" FontWeight="Light"
-                           Foreground="{StaticResource TextPrimary}"
-                           Margin="0,0,0,24"/>
-                
-                <StackPanel Grid.Row="1">
-                    <Button x:Name="CreateProjectButton" 
-                            Style="{StaticResource ButtonDark}"
-                            Height="60"
-                            FontSize="14"
-                            Click="CreateProjectButton_Click"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,0"
-                            Margin="0,0,0,12">
-                        <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="24" Height="24" 
-                                     Fill="#4CAF50" 
-                                     Margin="0,0,12,0"/>
-                            <TextBlock x:Name="CreateProjectTextBlock" Text="{loc:LocalizeExtension Key=Button.CreateNewProject}" 
-                                       VerticalAlignment="Center"
-                                       Foreground="{StaticResource ButtonDarkText}"/>
-                        </StackPanel>
-                    </Button>
-                    
-                    <Button x:Name="OpenProjectButton" 
-                            Style="{StaticResource ButtonDark}"
-                            Height="60"
-                            FontSize="14"
-                            Click="OpenProjectButton_Click"
-                            HorizontalContentAlignment="Left"
-                            Padding="16,0"
-                            Margin="0,0,0,12">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" 
-                                  Fill="#2196F3" 
-                                  Width="24" Height="24"
-                                  Margin="0,0,12,0"
-                                  Stretch="Uniform"/>
-                            <TextBlock x:Name="OpenProjectTextBlock" Text="{loc:LocalizeExtension Key=Button.OpenProject}" 
-                                       VerticalAlignment="Center"
-                                       Foreground="{StaticResource ButtonDarkText}"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
 
-                <controls:SettingsControl x:Name="WelcomeSettingsControl" SaveClicked="WelcomeSettingsControl_SaveClicked" Grid.Row="2"/>
+            <Grid Grid.Column="2">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Name="ActionsTextBlock"
+                       Grid.Row="0"
+                       Text="{loc:LocalizeExtension Key=Window.Actions}" 
+                       FontSize="20" FontWeight="Light"
+                       Foreground="{StaticResource TextPrimary}"
+                       Margin="0,0,0,24"/>
+
+                        <StackPanel Grid.Row="1">
+                            <Button x:Name="CreateProjectButton" 
+                        Style="{StaticResource ButtonDark}"
+                        Height="60"
+                        FontSize="14"
+                        Click="CreateProjectButton_Click"
+                        HorizontalContentAlignment="Left"
+                        Padding="16,0"
+                        Margin="0,0,0,12">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="24" Height="24" 
+                                 Fill="#4CAF50" 
+                                 Margin="0,0,12,0"/>
+                                    <TextBlock x:Name="CreateProjectTextBlock"
+                                   Text="{loc:LocalizeExtension Key=Button.CreateNewProject}" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource ButtonDarkText}"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="OpenProjectButton" 
+                        Style="{StaticResource ButtonDark}"
+                        Height="60"
+                        FontSize="14"
+                        Click="OpenProjectButton_Click"
+                        HorizontalContentAlignment="Left"
+                        Padding="16,0"
+                        Margin="0,0,0,12">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" 
+                              Fill="#2196F3" 
+                              Width="24" Height="24"
+                              Margin="0,0,12,0"
+                              Stretch="Uniform"/>
+                                    <TextBlock x:Name="OpenProjectTextBlock"
+                                   Text="{loc:LocalizeExtension Key=Button.OpenProject}" 
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource ButtonDarkText}"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <controls:SettingsControl x:Name="WelcomeSettingsControl"
+                                      Grid.Row="2"
+                                      SaveClicked="WelcomeSettingsControl_SaveClicked"/>
+                    </Grid>
+                </ScrollViewer>
             </Grid>
+
+
         </Grid>
         
         <Grid Grid.Row="2" Background="{StaticResource BackgroundSidebar}">

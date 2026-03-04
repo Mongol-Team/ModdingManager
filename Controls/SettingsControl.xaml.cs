@@ -1,11 +1,16 @@
 using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Win32;
 
 namespace Controls
 {
     public partial class SettingsControl : UserControl
     {
+        public static readonly DependencyProperty GameDirectoryProperty =
+            DependencyProperty.Register(nameof(GameDirectory), typeof(string), typeof(SettingsControl),
+                new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnGameDirectoryChanged));
+
         public static readonly DependencyProperty ParallelismPercentProperty =
             DependencyProperty.Register(nameof(ParallelismPercent), typeof(int), typeof(SettingsControl),
                 new FrameworkPropertyMetadata(50, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnParallelismPercentChanged));
@@ -25,6 +30,10 @@ namespace Controls
         public static readonly DependencyProperty EffectiveLanguageProperty =
             DependencyProperty.Register(nameof(EffectiveLanguage), typeof(object), typeof(SettingsControl),
                 new PropertyMetadata(null, OnEffectiveLanguageChanged));
+
+        public static readonly DependencyProperty ClassDebugNamesProperty =
+            DependencyProperty.Register(nameof(ClassDebugNames), typeof(List<string>), typeof(SettingsControl),
+                new FrameworkPropertyMetadata(new List<string>(), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         public static readonly RoutedEvent SaveClickedEvent =
             EventManager.RegisterRoutedEvent(nameof(SaveClicked), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SettingsControl));
@@ -65,6 +74,16 @@ namespace Controls
             set => SetValue(EffectiveLanguageProperty, value);
         }
 
+        public string GameDirectory
+        {
+            get => (string)GetValue(GameDirectoryProperty);
+            set => SetValue(GameDirectoryProperty, value);
+        }
+        public List<string> ClassDebugNames
+        {
+            get => (List<string>)GetValue(ClassDebugNamesProperty);
+            set => SetValue(ClassDebugNamesProperty, value);
+        }
         public SettingsControl()
         {
             InitializeComponent();
@@ -102,6 +121,19 @@ namespace Controls
         {
             if (d is SettingsControl c)
                 c.UpdateLanguageRestartHintVisibility();
+        }
+
+        private static void OnGameDirectoryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is SettingsControl c && c.GameDirectoryTextBox != null)
+                c.GameDirectoryTextBox.Text = (string)e.NewValue ?? string.Empty;
+        }
+
+        private void BrowseGameDirectory_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFolderDialog();
+            if (dialog.ShowDialog() == true)
+                GameDirectory = dialog.FolderName;
         }
 
         private void UpdateLanguageRestartHintVisibility()
@@ -142,6 +174,7 @@ namespace Controls
 
         private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
         {
+            DebugListNamesTextBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
             RaiseEvent(new RoutedEventArgs(SaveClickedEvent));
         }
     }

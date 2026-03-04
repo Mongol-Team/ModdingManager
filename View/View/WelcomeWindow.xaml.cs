@@ -1,4 +1,5 @@
 using Application;
+using Application.Debugging;
 using Application.Settings;
 using Application.utils;
 using Microsoft.Win32;
@@ -16,8 +17,13 @@ namespace View
         public string SelectedProjectPath { get; private set; } = string.Empty;
         private List<RecentProject> _allProjects = new();
 
+        public ICommand RemoveProjectCommand { get; }
+        public ICommand OpenProjectCommand { get; }
+
         public WelcomeWindow()
         {
+            RemoveProjectCommand = new RelayCommand(RemoveProjectExecute, p => p is RecentProject);
+            OpenProjectCommand = new RelayCommand(OpenProjectExecute, p => p is RecentProject);
             InitializeComponent();
             LoadRecentProjects();
             SetupSearchPlaceholder();
@@ -155,26 +161,35 @@ namespace View
             UpdateProjectsDisplay(filtered);
         }
 
-        private async void ProjectItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void RemoveProjectExecute(object? parameter)
         {
-            if (sender is Border border && border.DataContext is RecentProject project)
+            if (parameter is not RecentProject project) return;
+            var list = ModManagerSettings.RecentProjects ?? new List<RecentProject>();
+            list.RemoveAll(p => string.Equals(p.Path, project.Path, StringComparison.OrdinalIgnoreCase));
+            ModManagerSettings.RecentProjects = list;
+            ModManagerSettingsLoader.Save(ModManagerSettings.ModDirectory ?? string.Empty, ModManagerSettings.GameDirectory ?? string.Empty);
+            _allProjects = _allProjects.Where(p => !string.Equals(p.Path, project.Path, StringComparison.OrdinalIgnoreCase)).ToList();
+            UpdateProjectsDisplay(_allProjects);
+        }
+
+        private async void OpenProjectExecute(object? parameter)
+        {
+            if (parameter is not RecentProject project) return;
+            SelectedProjectPath = project.Path;
+            try
             {
-                SelectedProjectPath = project.Path;
-                try
-                {
-                    await LoadModData();
-                    MainWindow mainWindow = new();
-                    System.Windows.Application.Current.MainWindow = mainWindow;
-                    mainWindow.Show();
-                    mainWindow.Activate();
-                    this.Close();
-                }
-                catch (Exception ex)
-                {
-                    ShowError(
-                        string.Format(StaticLocalisation.GetString("Error.LoadModDataFailed"), ex.Message),
-                        NotificationCorner.TopRight);
-                }
+                await LoadModData();
+                var mainWindow = new MainWindow();
+                System.Windows.Application.Current.MainWindow = mainWindow;
+                mainWindow.Show();
+                mainWindow.Activate();
+                Close();
+            }
+            catch (Exception ex)
+            {
+                ShowError(
+                    string.Format(StaticLocalisation.GetString("Error.LoadModDataFailed"), ex.Message),
+                    NotificationCorner.TopRight);
             }
         }
 
@@ -210,6 +225,7 @@ namespace View
             await System.Threading.Tasks.Task.Run(() =>
             {
                 ModDataStorage.RegisterTypes();
+
                 ModDataStorage.ComposeMod((current, total, message) =>
                 {
                     Dispatcher.Invoke(() =>
@@ -308,15 +324,20 @@ namespace View
 
         private void LoadSettings()
         {
+            WelcomeSettingsControl.GameDirectory = ModManagerSettings.GameDirectory ?? string.Empty;
             WelcomeSettingsControl.ParallelismPercent = ModManagerSettings.MaxPercentForParallelUsage;
             WelcomeSettingsControl.IsDebugMode = ModManagerSettings.IsDebugRunning;
             WelcomeSettingsControl.LanguageItemsSource = Enum.GetValues(typeof(Language)).Cast<Language>();
             WelcomeSettingsControl.EffectiveLanguage = ModManagerSettings.CurrentLanguage;
             WelcomeSettingsControl.SelectedLanguage = ModManagerSettings.CurrentLanguage;
+            WelcomeSettingsControl.ClassDebugNames = ModManagerSettings.ClassDebugNames;
+            Logger.DbgTargets = WelcomeSettingsControl.ClassDebugNames;
+            Logger.IsDebug = WelcomeSettingsControl.IsDebugMode;
         }
 
         private void WelcomeSettingsControl_SaveClicked(object sender, RoutedEventArgs e)
         {
+            ModManagerSettings.GameDirectory = (WelcomeSettingsControl.GameDirectory ?? string.Empty).Trim();
             ModManagerSettings.MaxPercentForParallelUsage = WelcomeSettingsControl.ParallelismPercent;
             ModManagerSettings.IsDebugRunning = WelcomeSettingsControl.IsDebugMode;
 
@@ -324,7 +345,7 @@ namespace View
             {
                 ModManagerSettings.CurrentLanguage = language;
             }
-
+            ModManagerSettings.ClassDebugNames = WelcomeSettingsControl.ClassDebugNames ?? new List<string>();
             ModManagerSettingsLoader.Save(ModManagerSettings.ModDirectory ?? string.Empty, ModManagerSettings.GameDirectory ?? string.Empty);
 
             ShowSuccess(

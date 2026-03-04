@@ -9,6 +9,7 @@ namespace Application.Settings
         public static int MaxPercentForParallelUsage { get; set; }
         public static string GameDirectory { get; set; }
         public static Language CurrentLanguage { get; set; }
+        public static List<string> ClassDebugNames { get; set; }
         public static List<RecentProject> RecentProjects { get; set; }
     }
 }
