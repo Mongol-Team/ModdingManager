@@ -1,3 +1,5 @@
+using Application.Debugging;
+using Application.utils;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -62,9 +64,7 @@ namespace Controls.Docking
         private static void OnIsCollapsedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is DockZone zone)
-            {
                 zone.UpdateVisibility();
-            }
         }
 
         private void Panels_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -79,27 +79,93 @@ namespace Controls.Docking
 
             if (!_panels.Contains(panel))
             {
-                var existingPanel = _panels.FirstOrDefault(p => p.Title == panel.Title);
+                var existingPanel = _panels.FirstOrDefault(p => ReferenceEquals(p, panel));
                 if (existingPanel == null)
-                {
                     _panels.Add(panel);
-                }
             }
         }
+        /// <summary>
+        /// Обновляет Content у TabItem связанного с данной панелью.
+        /// Нужно вызывать когда panel.Content меняется уже после построения TabItem-ов
+        /// (DockPanelInfo.Content — обычное свойство без уведомления DockZone).
+        /// </summary>
+        public void RefreshPanelContent(DockPanelInfo panel)
+        {
+            if (panel == null) return;
 
+            foreach (TabItem item in PanelsTabControl.Items)
+            {
+                if (ReferenceEquals(item.Tag, panel))
+                {
+                    item.Content = panel.Content;
+                    Logger.AddDbgLog(StaticLocalisation.GetString(
+                        "Log.DockZone.PanelContentRefreshed", panel.Title));
+                    return;
+                }
+            }
+
+            Logger.AddDbgLog(StaticLocalisation.GetString(
+                "Log.DockZone.RefreshPanelContentNotFound", panel.Title));
+        }
         public void RemovePanel(DockPanelInfo panel)
         {
             _panels.Remove(panel);
         }
 
+        /// <summary>
+        /// Активирует (выбирает) вкладку соответствующую указанной панели.
+        /// </summary>
+        public void SelectPanel(DockPanelInfo panel)
+        {
+            if (panel == null) return;
+
+            foreach (TabItem item in PanelsTabControl.Items)
+            {
+                if (ReferenceEquals(item.Tag, panel))   
+                {
+                    PanelsTabControl.SelectedItem = item;
+                    return;
+                }
+            }
+        }
+        private DockPanelInfo _selectedPanel;
+
+        // ── 2. Событие (после существующих DP) ───────────────────────────
+        /// <summary>
+        /// Срабатывает когда пользователь или код переключает активную вкладку.
+        /// </summary>
+        public event Action<DockPanelInfo> PanelSelectionChanged;
+
+
+
+        // ── 4. Обработчик SelectionChanged ───────────────────────────────
+        // Добавить в UpdatePanels() ДО строки PanelsTabControl.Items.Clear():
+        //   PanelsTabControl.SelectionChanged -= OnTabSelectionChanged;
+        // Добавить в UpdatePanels() В КОНЦЕ (после HasPanels = ...):
+        //   PanelsTabControl.SelectionChanged += OnTabSelectionChanged;
+
+        private void OnTabSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (PanelsTabControl.SelectedItem is not TabItem selected) return;
+
+            var panel = selected.Tag as DockPanelInfo;
+            if (panel == null || ReferenceEquals(panel, _selectedPanel)) return;
+
+            _selectedPanel = panel;
+            PanelSelectionChanged?.Invoke(panel);
+        }
+
+        // ── 5. Итоговый UpdatePanels — заменить существующий ─────────────
+
         private void UpdatePanels()
         {
+            PanelsTabControl.SelectionChanged -= OnTabSelectionChanged;
             PanelsTabControl.Items.Clear();
-
+            
             foreach (var panel in _panels)
             {
                 var headerPanel = new StackPanel { Orientation = Orientation.Horizontal };
-                
+
                 var titleBlock = new TextBlock
                 {
                     Text = panel.Title,
@@ -146,11 +212,12 @@ namespace Controls.Docking
                 var tabItem = new TabItem
                 {
                     Header = headerPanel,
-                    Content = panel.Content
+                    Content = panel.Content,
+                    Tag = panel
                 };
                 PanelsTabControl.Items.Add(tabItem);
             }
-
+            PanelsTabControl.SelectionChanged += OnTabSelectionChanged;
             HasPanels = _panels.Count > 0;
         }
 
@@ -162,4 +229,3 @@ namespace Controls.Docking
         }
     }
 }
-

@@ -15,7 +15,43 @@ namespace Controls
         private Type _configType;
         private object _configInstance;
         private PropertyInfo _listProperty;
+        /// <summary>
+        /// Вызывается при смене отображаемой сущности через <see cref="ShowEntity"/>.
+        /// Аргумент — новый объект (может быть null).
+        /// </summary>
+        public event Action<object> EntityChanged;
 
+        // ─── Свойство ────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Текущий отображаемый объект.
+        /// </summary>
+        public object CurrentEntity => _configInstance;
+
+        // ─── Метод ───────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Меняет отображаемую сущность без пересоздания контрола.
+        /// Вызывает <see cref="EntityChanged"/> после смены.
+        /// </summary>
+        /// <param name="entity">Новый объект. Если null — очищает viewer.</param>
+        public void ShowEntity(object entity)
+        {
+            _configInstance = entity;
+
+            if (entity != null)
+            {
+                _configType = entity.GetType();
+                _listProperty = FindListPropertyInModConfig(_configType);
+                ConfigViewer.BuildingContent = entity;
+            }
+            else
+            {
+                ConfigViewer.BuildingContent = null;
+            }
+
+            EntityChanged?.Invoke(entity);
+        }
         public GenericViewer(Type configType, object configInstance)
         {
             InitializeComponent();

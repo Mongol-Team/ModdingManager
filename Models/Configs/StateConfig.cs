@@ -29,27 +29,27 @@ namespace Models.Configs
         public List<string> CoresTag { get; set; }
         public Dictionary<int, int> VictoryPoints { get; set; }
         public Dictionary<BuildingConfig, int> Buildings { get; set; }
-
         public void AddChild(object child)
         {
             Provinces.Add((ProvinceConfig)child);
         }
-
         public IEnumerable<IBasicMapEntity> GetAllBasicEntities()
         {
             return Provinces;
         }
-
         public IEnumerable<object> GetChildren()
         {
             return Provinces;
         }
 
+        public Type GetChildType()
+        {
+            return typeof(ProvinceConfig);
+        }
         public void RemoveChild(object child)
         {
             Provinces.Remove((ProvinceConfig)child);
         }
-
         public override string ToString()
         {
             return this.Id.ToString();

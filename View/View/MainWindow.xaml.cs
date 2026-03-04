@@ -48,7 +48,7 @@ namespace View
             }
             return null;
         }
-
+        public DockManager GetDockManager() => DockManager;
         public void AddDockPanel(DockPanelInfo panel, DockSide side)
             => DockManager.AddPanel(panel, side);
 

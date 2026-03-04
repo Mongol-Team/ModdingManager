@@ -33,6 +33,12 @@ namespace Models.Interfaces
         IEnumerable<IBasicMapEntity> GetAllBasicEntities();
 
         /// <summary>
+        /// Возврщает тип дочерних сущностей (например для State это будет ProvinceConfig)
+        /// </summary>
+        /// <returns>Список дочерних сущностей</returns>
+        Type GetChildType();
+
+        /// <summary>
         /// Получить прямые дочерние сущности
         /// Может возвращать как IBasicMapEntity, так и IMapEntity
         /// </summary>

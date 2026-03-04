@@ -57,7 +57,10 @@ namespace Models.Configs
         {
             States.Remove((StateConfig)child);
         }
-
+        public Type GetChildType()
+        {
+            return typeof(StateConfig);
+        }
         public override string ToString()
         {
             return this.Id.ToString();

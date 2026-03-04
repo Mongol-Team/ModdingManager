@@ -40,7 +40,10 @@ namespace Models.Configs
         {
             Provinces.Remove((ProvinceConfig)child);
         }
-
+        public Type GetChildType()
+        {
+            return typeof(ProvinceConfig);
+        }
         public override string ToString()
         {
             return this.Id.ToString();

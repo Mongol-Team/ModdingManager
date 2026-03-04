@@ -43,9 +43,11 @@ namespace Controls
         private Point _dragStartPoint;
         private readonly DispatcherTimer _clickTimer;
         private MouseButton _lastClickButton;
+        private PolygonTag _draggedPolygonTag;
         private Point _lastClickPosition;
         private bool _isDoubleClick = false;
         public bool _showIds = false;
+        public bool IsIntilized = false;
         // Кэш полигонов: BasicEntity.Id -> Polygon
         private readonly Dictionary<string, BasicShapeCache> _pointsCache = new();
 
@@ -96,7 +98,7 @@ namespace Controls
             DrawLayers();
             CreateLayerButtons();
             SwitchToLayer("Basic");
-
+            IsIntilized = true;
             Logger.AddLog(StaticLocalisation.GetString("MapViewer.Initialized"));
         }
 
@@ -274,6 +276,7 @@ namespace Controls
             layerInfo.RenderCanvas.Children.Clear();
             layerInfo.IdCanvas.Children.Clear();
 
+            // Отображаем MapEntity сущности
             foreach (var entity in layerInfo.Entities)
             {
                 // Рекурсивно собираем Basic, фильтруем по наличию в кэше
@@ -281,7 +284,7 @@ namespace Controls
                     .Where(b => _pointsCache.ContainsKey(b.Id.ToString()))
                     .ToList();
 
-                if (allBasicEntities.Count == 0) continue;
+                if (allBasicEntities == null || allBasicEntities.Count == 0) continue;
 
                 var color = entity.Color ?? GenerateRandomColor();
 
@@ -300,7 +303,26 @@ namespace Controls
                     layerInfo.IdCanvas.Children.Add(tb);
             }
 
-            Logger.AddLog($"Layer '{layerInfo.Name}' drawn: {layerInfo.Entities.Count} entities, {layerInfo.RenderCanvas.Children.Count} polygons");
+            // Отображаем неприсвоенные Basic сущности серым цветом
+            var unassignedBasics = GetUnassignedBasicEntities(layerInfo);
+            var grayColor = System.Drawing.Color.FromArgb(255, 128, 128, 128); // Серый цвет
+
+            foreach (var basic in unassignedBasics)
+            {
+                var poly = CreatePolygon(basic, null);
+                if (poly == null) continue;
+
+                poly.Fill = new SolidColorBrush(grayColor.ToMediaColor());
+                poly.ToolTip = $"{StaticLocalisation.GetString("MapViewer.UnassignedProvince")} | ID: {basic.Id}";
+                poly.Opacity = 0.7; // Делаем чуть прозрачнее для визуального отличия
+                layerInfo.RenderCanvas.Children.Add(poly);
+            }
+
+            Logger.AddLog(StaticLocalisation.GetString("MapViewer.LayerDrawnWithUnassigned",
+                layerInfo.Name,
+                layerInfo.Entities.Count,
+                layerInfo.RenderCanvas.Children.Count,
+                unassignedBasics.Count));
         }
 
         private System.Drawing.Color GenerateRandomColor()
@@ -402,7 +424,304 @@ namespace Controls
 
         #endregion
 
-        #region Helper Methods для TextBlock
+        #region Helper Methods
+
+        // Добавить в регион #region Публичные методы после метода SearchAndCenter:
+
+        /// <summary>
+        /// Обновляет отображение entity на карте — tooltip и текстовый лейбл (ID/имя).
+        /// Вызывать после изменения данных entity через GenericViewer,
+        /// чтобы изменения (например, переименование) отразились на карте.
+        /// </summary>
+        /// <param name="entity">
+        ///     Изменённая сущность. Принимает <see cref="IBasicMapEntity"/> или <see cref="IMapEntity"/>.
+        /// </param>
+        public void RefreshEntityDisplay(object entity)
+        {
+            if (entity == null) return;
+
+            if (entity is IBasicMapEntity basicEntity)
+            {
+                RefreshBasicEntityDisplay(basicEntity);
+            }
+            else if (entity is IMapEntity mapEntity)
+            {
+                RefreshMapEntityDisplay(mapEntity);
+            }
+
+            Logger.AddDbgLog(StaticLocalisation.GetString(
+                "MapViewer.EntityDisplayRefreshed", entity.GetType().Name), caller: "MapViewer");
+        }
+
+        /// <summary>
+        /// Обновляет tooltip и текстовый лейбл для одной Basic entity.
+        /// Проходит по всем полигонам Basic-слоя, ищет совпадение по BasicEntity.Id.
+        /// </summary>
+        private void RefreshBasicEntityDisplay(IBasicMapEntity basic)
+        {
+            if (!_layers.TryGetValue("Basic", out var layer)) return;
+
+            var entityId = basic.Id.ToString();
+
+            // Обновляем tooltip у полигона
+            foreach (var child in layer.RenderCanvas.Children)
+            {
+                if (child is Polygon poly && poly.Tag is PolygonTag tag
+                    && tag.BasicEntity?.Id.ToString() == entityId)
+                {
+                    poly.ToolTip = $"ID: {basic.Id}";
+                }
+            }
+
+            // Обновляем текстовый лейбл в IdCanvas
+            foreach (var child in layer.IdCanvas.Children)
+            {
+                if (child is TextBlock tb && tb.Tag?.ToString() == entityId)
+                {
+                    tb.Text = basic.Id.ToString();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Обновляет tooltip и текстовые лейблы для всех полигонов связанных с MapEntity.
+        /// Ищет во всех не-Basic слоях по ParentEntity.Id.
+        /// </summary>
+        private void RefreshMapEntityDisplay(IMapEntity mapEntity)
+        {
+            var entityId = mapEntity.Id.ToString();
+
+            foreach (var (layerName, layer) in _layers)
+            {
+                if (layerName == "Basic") continue;
+
+                // Обновляем tooltip у полигонов этой entity
+                foreach (var child in layer.RenderCanvas.Children)
+                {
+                    if (child is Polygon poly && poly.Tag is PolygonTag tag
+                        && tag.ParentEntity?.Id.ToString() == entityId)
+                    {
+                        poly.ToolTip = $"{layerName}: {mapEntity.Id} | Province: {tag.BasicEntity?.Id}";
+                    }
+                }
+
+                // Обновляем групповой текстовый лейбл (Tag == "Group" + позиция,
+                // поэтому ищем по содержимому текста — это Id группы)
+                foreach (var child in layer.IdCanvas.Children)
+                {
+                    if (child is TextBlock tb && tb.Text == entityId)
+                    {
+                        tb.Text = mapEntity.Id.ToString();
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Находит прямого child в parent, который содержит basic и соответствует targetType
+        /// </summary>
+        private object FindDirectChildByType(IMapEntity parent, IBasicMapEntity basic, Type targetType)
+        {
+            var children = parent.GetChildren();
+
+            foreach (var child in children)
+            {
+                // Проверяем соответствие типа
+                if (targetType.IsAssignableFrom(child.GetType()))
+                {
+                    // Если это Basic - проверяем по ID
+                    if (child is IBasicMapEntity basicChild && basicChild.Id == basic.Id)
+                    {
+                        return child;
+                    }
+
+                    // Если это MapEntity - проверяем содержит ли она нашу basic
+                    if (child is IMapEntity mapChild)
+                    {
+                        var allBasic = mapChild.GetAllBasicEntities();
+                        if (allBasic != null && allBasic.Any(b => b.Id == basic.Id))
+                        {
+                            return child;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+
+        /// <summary>
+        /// Рекурсивный поиск дочернего элемента нужного типа
+        /// </summary>
+        private object FindDirectChildByTypeRecursive(IMapEntity current, IBasicMapEntity basic, Type targetType, Type currentChildType)
+        {
+            var children = current.GetChildren();
+
+            // Если текущий уровень содержит нужный тип
+            if (currentChildType == targetType || targetType.IsAssignableFrom(currentChildType))
+            {
+                foreach (var child in children)
+                {
+                    if (child.GetType() == targetType || targetType.IsAssignableFrom(child.GetType()))
+                    {
+                        if (child is IBasicMapEntity basicChild && basicChild.Id == basic.Id)
+                        {
+                            return child;
+                        }
+                        else if (child is IMapEntity mapChild)
+                        {
+                            var allBasic = mapChild.GetAllBasicEntities();
+                            if (allBasic != null && allBasic.Any(b => b.Id == basic.Id))
+                            {
+                                return child;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Идем глубже
+            foreach (var child in children)
+            {
+                if (child is IMapEntity mapChild)
+                {
+                    var childType = mapChild.GetChildType();
+                    var result = FindDirectChildByTypeRecursive(mapChild, basic, targetType, childType);
+                    if (result != null)
+                    {
+                        return result;
+                    }
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Находит child нужного типа, который содержит указанную Basic сущность
+        /// </summary>
+        /// <param name="basic">Basic сущность для поиска</param>
+        /// <param name="targetChildType">Тип дочернего элемента, который ищем</param>
+        /// <param name="sourceParent">Родитель источника (может быть null для unassigned)</param>
+        /// <returns>Child нужного типа или null</returns>
+        private object FindChildContainingBasic(IBasicMapEntity basic, Type targetChildType, IMapEntity sourceParent)
+        {
+            // Если есть sourceParent, ищем в его children
+            if (sourceParent != null)
+            {
+                var result = FindDirectChildByType(sourceParent, basic, targetChildType);
+                if (result != null)
+                    return result;
+            }
+            else
+            {
+                // Для unassigned - ищем в других слоях
+                // Сначала проверяем - может basic сам подходит по типу
+                if (targetChildType.IsAssignableFrom(basic.GetType()))
+                {
+                    return basic;
+                }
+
+                // Ищем слой, где child тип соответствует targetChildType
+                foreach (var layer in _layers.Values)
+                {
+                    if (layer.Name == "Basic" || layer.Entities == null)
+                        continue;
+
+                    // Проверяем каждую entity в слое
+                    foreach (var entity in layer.Entities)
+                    {
+                        var entityType = entity.GetType();
+
+                        // Если child тип этой entity соответствует искомому типу
+                        if (entityType == targetChildType || targetChildType.IsAssignableFrom(entityType))
+                        {
+                            // Ищем рекурсивно child, который содержит наш basic
+                            var result = FindChildInHierarchyByBasic(entity, basic);
+                            if (result != null)
+                            {
+                                Logger.AddDbgLog(StaticLocalisation.GetString("MapViewer.FoundChildInLayer",
+                                    result.GetType().Name,
+                                    layer.Name),
+                                    caller: "MapViewer");
+                                return result;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Рекурсивно ищет в иерархии entity объект указанного типа, который содержит basic
+        /// Спускается по иерархии пока не найдет объект нужного типа
+        /// </summary>
+        /// <param name="entity">Сущность для поиска</param>
+        /// <param name="basic">Basic сущность которую ищем</param>
+        /// <returns>Найденный child или null</returns>
+        private object FindChildInHierarchyByBasic(IMapEntity entity, IBasicMapEntity basic)
+        {
+            var children = entity.GetChildren();
+
+            foreach (var child in children)
+            {
+                // Проверяем, подходит ли child по типу
+                if (basic == child)
+                {
+                    return entity;
+                }
+                // Если child не подходит по типу, но это MapEntity - спускаемся глубже
+                if (child is IMapEntity mapChildForRecursion)
+                {
+                    var result = FindChildInHierarchyByBasic(mapChildForRecursion, basic);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Рекурсивно ищет в иерархии entity объект нужного типа, содержащий basic
+        /// </summary>
+        private object SearchInEntityHierarchy(IMapEntity entity, IBasicMapEntity basic, Type targetType)
+        {
+            var children = entity.GetChildren();
+
+            foreach (var child in children)
+            {
+                // Проверяем соответствие типа
+                if (targetType.IsAssignableFrom(child.GetType()))
+                {
+                    // Если это Basic - проверяем по ID
+                    if (child is IBasicMapEntity basicChild && basicChild.Id == basic.Id)
+                    {
+                        return child;
+                    }
+
+                    // Если это MapEntity - проверяем содержит ли она нашу basic
+                    if (child is IMapEntity mapChild)
+                    {
+                        var allBasic = mapChild.GetAllBasicEntities();
+                        if (allBasic != null && allBasic.Any(b => b.Id == basic.Id))
+                        {
+                            return child;
+                        }
+                    }
+                }
+
+                // Рекурсивно идем глубже
+                if (child is IMapEntity mapChildForRecursion)
+                {
+                    var result = SearchInEntityHierarchy(mapChildForRecursion, basic, targetType);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            return null;
+        }
         private void CreatePolygonCache()
         {
             _pointsCache.Clear();
@@ -434,7 +753,7 @@ namespace Controls
                 Points = cache.Points,
                 StrokeThickness = 0,
                 Fill = Brushes.Gray,
-                Tag = new PolygonTag { BasicEntity = basic, ParentEntity = parentEntity }
+                Tag = new PolygonTag { BasicEntity = basic, ParentEntity = parentEntity, IsUnassigned = parentEntity == null }
             };
         }
         private double CalculateFontSize(double size)
@@ -481,24 +800,58 @@ namespace Controls
             }
             return result;
         }
+        /// <summary>
+        /// Получает все базовые сущности, которые не входят ни в один MapEntity текущего слоя
+        /// </summary>
+        private List<IBasicMapEntity> GetUnassignedBasicEntities(LayerInfo layerInfo)
+        {
+            if (layerInfo.Entities == null || _politicalMap.Basic == null)
+                return new List<IBasicMapEntity>();
+
+            // Собираем все Basic ID, которые уже присвоены MapEntity
+            var assignedBasicIds = new HashSet<string>();
+
+            foreach (var entity in layerInfo.Entities)
+            {
+                var allBasic = entity.GetAllBasicEntities();
+                if (allBasic != null)
+                {
+                    foreach (var basic in allBasic)
+                    {
+                        assignedBasicIds.Add(basic.Id.ToString());
+                    }
+                }
+            }
+
+            // Фильтруем Basic сущности, исключая те что уже присвоены
+            var unassigned = _politicalMap.Basic
+                .Where(b => !assignedBasicIds.Contains(b.Id.ToString()) &&
+                            _pointsCache.ContainsKey(b.Id.ToString()))
+                .ToList();
+
+            Logger.AddDbgLog(StaticLocalisation.GetString("MapViewer.UnassignedBasicFound",
+                unassigned.Count, layerInfo.Name), caller: "MapViewer");
+
+            return unassigned;
+        }
 
         /// <summary>
         /// Обновление позиции и размера TextBlock при изменении состава entity
         /// </summary>
-        public void UpdateEntityLabel(string layerName, int entityId)
+        public void UpdateEntityLabel(string layerName, string entityId)
         {
             if (!_layers.TryGetValue(layerName, out var layerInfo)) return;
 
             // Находим ВСЕ TextBlock с этим текстом и удаляем их
             var oldLabels = layerInfo.IdCanvas.Children
                 .OfType<TextBlock>()
-                .Where(tb => tb.Text == entityId.ToString())
+                .Where(tb => tb.Text == entityId)
                 .ToList();
 
             foreach (var tb in oldLabels)
                 layerInfo.IdCanvas.Children.Remove(tb);
 
-            var entity = layerInfo.Entities?.FirstOrDefault(e => e.Id.ToInt() == entityId);
+            var entity = layerInfo.Entities?.FirstOrDefault(e => e.Id.ToString() == entityId);
             if (entity == null) return;
 
             var allBasic = entity.GetAllBasicEntities()?.ToList();
@@ -665,57 +1018,118 @@ namespace Controls
 
         private void Display_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_draggedBasicEntity == null) return;
+            if (_draggedBasicEntity == null || _draggedPolygonTag == null) return;
 
             var hit = VisualTreeHelper.HitTest(DisplayView, e.GetPosition(DisplayView));
             if (hit?.VisualHit is Polygon targetPolygon && targetPolygon.Tag is PolygonTag targetTag)
             {
-                HandleEntityMove(_draggedBasicEntity, targetTag.BasicEntity);
+                HandleEntityMove(_draggedBasicEntity, targetTag.BasicEntity, _draggedPolygonTag, targetTag);
             }
 
             _draggedBasicEntity = null;
+            _draggedPolygonTag = null; // Очищаем тег
             Cursor = Cursors.Arrow;
         }
 
-        private void HandleEntityMove(IBasicMapEntity draggedBasic, IBasicMapEntity targetBasic)
+        private void HandleEntityMove(IBasicMapEntity draggedBasic, IBasicMapEntity targetBasic, PolygonTag draggedTag, PolygonTag targetTag)
         {
             if (_currentLayer == "Basic") return;
 
             var layerInfo = _layers[_currentLayer];
             if (layerInfo.Entities == null) return;
 
+            // Определяем родителей источника и цели
             IMapEntity sourceParent = FindParentEntity(draggedBasic, layerInfo.Entities);
             IMapEntity targetParent = FindParentEntity(targetBasic, layerInfo.Entities);
 
-            if (sourceParent == null || targetParent == null || sourceParent.Id == targetParent.Id) return;
+            // Если цель - неприсвоенная сущность, не разрешаем перемещение
+            if (targetTag.IsUnassigned)
+            {
+                Logger.AddLog(StaticLocalisation.GetString("MapViewer.CannotMoveToUnassigned"));
+                return;
+            }
 
-            object childToMove = FindDirectChild(sourceParent, draggedBasic);
-            if (childToMove == null) return;
+            // Если источник и цель совпадают, выходим
+            if (sourceParent != null && targetParent != null && sourceParent.Id == targetParent.Id) return;
 
+            // Определяем какого типа дочерние элементы ожидает целевая сущность
+            Type targetChildType = targetParent.GetChildType();
+
+            // Ищем child нужного типа, который содержит draggedBasic
+            object childToMove = FindChildContainingBasic(draggedBasic, targetChildType, sourceParent);
+
+            if (childToMove == null)
+            {
+                Logger.AddLog(StaticLocalisation.GetString("MapViewer.ChildNotFoundForType",
+                    draggedBasic.Id,
+                    targetChildType.Name));
+                return;
+            }
+
+            // Проверяем совместимость типов
+            if (!targetChildType.IsAssignableFrom(childToMove.GetType()))
+            {
+                Logger.AddLog(StaticLocalisation.GetString("MapViewer.CannotMoveIncompatibleType",
+                    childToMove.GetType().Name,
+                    targetChildType.Name));
+                return;
+            }
+
+            // Определяем, является ли источник unassigned (нет родителя на текущем слое)
+            bool isUnassignedSource = sourceParent == null;
+
+            // Создаем аргумент события
             var moveArg = new EntityMoveEventArg
             {
                 BasicEntityId = draggedBasic.Id.ToInt(),
                 SourceParent = sourceParent,
                 TargetParent = targetParent,
                 LayerName = _currentLayer,
-                MovedChild = childToMove
+                MovedChild = childToMove,
+                IsUnassignedSource = isUnassignedSource
             };
 
-            OnEntityMove?.Invoke(moveArg);
+            // Вызываем событие и проверяем результат
+            bool moveAllowed = true;
 
-            sourceParent.RemoveChild(childToMove);
-            targetParent.AddChild(childToMove);
+            if (OnEntityMove != null)
+            {
+                OnEntityMove?.Invoke(moveArg);
+                moveAllowed = moveArg.AllowMove;
+            }
 
-            // Обновляем лейблы после перемещения
-            UpdateEntityLabel(_currentLayer, sourceParent.Id.ToInt());
-            UpdateEntityLabel(_currentLayer, targetParent.Id.ToInt());
+            // Если перемещение разрешено, выполняем его
+            if (moveAllowed)
+            {
+                if (sourceParent != null)
+                {
+                    sourceParent.RemoveChild(childToMove);
+                }
 
-            // Перерисовываем слой
-            DrawMapEntityLayer(layerInfo);
+                targetParent.AddChild(childToMove);
 
-            Logger.AddLog(StaticLocalisation.GetString("MapViewer.EntityMoved", childToMove, sourceParent.Id, targetParent.Id));
+                // Обновляем лейблы после перемещения
+                if (sourceParent != null)
+                {
+                    UpdateEntityLabel(_currentLayer, sourceParent.Id.ToString());
+                }
+                UpdateEntityLabel(_currentLayer, targetParent.Id.ToString());
+
+                // Перерисовываем слой (это пересоздаст все теги)
+                DrawMapEntityLayer(layerInfo);
+
+                Logger.AddLog(StaticLocalisation.GetString("MapViewer.EntityMoved",
+                    childToMove.GetType().Name,
+                    sourceParent?.Id.ToString() ?? StaticLocalisation.GetString("MapViewer.Unassigned"),
+                    targetParent.Id));
+            }
+            else
+            {
+                Logger.AddLog(StaticLocalisation.GetString("MapViewer.EntityMoveBlocked",
+                    childToMove.GetType().Name,
+                    targetParent.Id));
+            }
         }
-
         private IMapEntity FindParentEntity(IBasicMapEntity basic, List<IMapEntity> entities)
         {
             foreach (var entity in entities)
@@ -729,29 +1143,7 @@ namespace Controls
             return null;
         }
 
-        private object FindDirectChild(IMapEntity parent, IBasicMapEntity basic)
-        {
-            var children = parent.GetChildren();
-
-            foreach (var child in children)
-            {
-                if (child is IBasicMapEntity basicChild && basicChild.Id == basic.Id)
-                {
-                    return child;
-                }
-                else if (child is IMapEntity mapChild)
-                {
-                    var allBasic = mapChild.GetAllBasicEntities();
-                    if (allBasic != null && allBasic.Any(b => b.Id == basic.Id))
-                    {
-                        return child;
-                    }
-                }
-            }
-
-            return null;
-        }
-
+        
         #endregion
 
         #region Обработка кликов
@@ -781,12 +1173,15 @@ namespace Controls
                 _clickTimer.Stop();
                 HandleDoubleClick(e.GetPosition(DisplayView));
             }
-            else if (e.ClickCount == 1 && _draggedBasicEntity == null)
+            else if (e.ClickCount == 1)
             {
-                _isDoubleClick = false;
-                _lastClickButton = MouseButton.Right;
-                _lastClickPosition = e.GetPosition(DisplayView);
-                _clickTimer.Start();
+                var hit = VisualTreeHelper.HitTest(DisplayView, e.GetPosition(DisplayView));
+                if (hit?.VisualHit is Polygon polygon && polygon.Tag is PolygonTag tag)
+                {
+                    _draggedBasicEntity = tag.BasicEntity;
+                    _draggedPolygonTag = tag; // Сохраняем весь тег
+                    _dragStartPoint = e.GetPosition(DisplayView);
+                }
             }
         }
 
@@ -880,6 +1275,7 @@ namespace Controls
         {
             public IBasicMapEntity BasicEntity { get; set; }
             public IMapEntity ParentEntity { get; set; }
+            public bool IsUnassigned { get; set; }
         }
 
         #endregion

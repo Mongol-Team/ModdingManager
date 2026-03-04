@@ -28,35 +28,16 @@ namespace Models.Args
         public IMapEntity MapEntity { get; set; }
     }
 
-    /// <summary>
-    /// Аргументы события перемещения сущности
-    /// </summary>
+    // Добавить в Models.Args или в существующий файл с аргументами событий
     public class EntityMoveEventArg
     {
-        /// <summary>
-        /// ID перемещаемой базовой сущности
-        /// </summary>
         public int BasicEntityId { get; set; }
-
-        /// <summary>
-        /// Исходная родительская сущность
-        /// </summary>
-        public IMapEntity SourceParent { get; set; }
-
-        /// <summary>
-        /// Целевая родительская сущность
-        /// </summary>
+        public IMapEntity SourceParent { get; set; } // null если источник - неприсвоенная сущность
         public IMapEntity TargetParent { get; set; }
-
-        /// <summary>
-        /// Название слоя
-        /// </summary>
         public string LayerName { get; set; }
-        /// <summary>
-        /// Перемещаемая дочерняя сущность (может быть IBasicMapEntity или IMapEntity)
-        /// Это непосредственный ребёнок SourceParent
-        /// </summary>
         public object MovedChild { get; set; }
+        public bool IsUnassignedSource { get; set; } // true если перемещаем неприсвоенную сущность
+        public bool AllowMove { get; set; } = true; // По умолчанию разрешаем перемещение
     }
 
     /// <summary>

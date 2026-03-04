@@ -95,7 +95,6 @@ public static class OverrideManager
 
 
             }
-            var layers = 1;
         }
     }
 
