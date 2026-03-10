@@ -5,7 +5,7 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.GfxTypes;
 using Models.Interfaces;
@@ -46,7 +46,7 @@ namespace Application.Composers
                 foreach (string file in files)
                 {
                     string content = File.ReadAllText(file);
-                    HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                    FuncFile hoiFuncFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                     bool isOverride = path.StartsWith(ModPathes.IdeasPath);
 
@@ -67,7 +67,7 @@ namespace Application.Composers
             return ideaFiles;
         }
 
-        private static ConfigFile<IdeaConfig> ParseFile(HoiFuncFile file, string fileFullPath, bool isOverride)
+        private static ConfigFile<IdeaConfig> ParseFile(FuncFile file, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<IdeaConfig>
             {

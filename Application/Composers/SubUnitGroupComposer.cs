@@ -1,4 +1,4 @@
-﻿using Models.Configs;
+﻿using Models.Interfaces;
 
 namespace Application.Composers
 {

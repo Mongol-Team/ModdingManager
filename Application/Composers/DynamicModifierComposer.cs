@@ -5,7 +5,7 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Interfaces;
 using Models.Types;
@@ -45,7 +45,7 @@ namespace Application.Composers
                 foreach (string file in files)
                 {
                     string content = File.ReadAllText(file);
-                    HoiFuncFile funcFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                    FuncFile funcFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                     bool isOverride = path.StartsWith(ModPathes.DynamicModifiersPath);
 
@@ -68,7 +68,7 @@ namespace Application.Composers
             return modifierFiles;
         }
 
-        private static ConfigFile<DynamicModifierConfig> ParseFile(HoiFuncFile funcFile, string fileFullPath, bool isOverride)
+        private static ConfigFile<DynamicModifierConfig> ParseFile(FuncFile funcFile, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<DynamicModifierConfig>
             {

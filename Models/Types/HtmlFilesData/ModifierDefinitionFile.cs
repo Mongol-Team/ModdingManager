@@ -1,4 +1,4 @@
-﻿using Models.Configs;
+﻿using Models.Configs.HoiConfigs;
 using Models.Interfaces;
 
 namespace Models.Types.HtmlFilesData

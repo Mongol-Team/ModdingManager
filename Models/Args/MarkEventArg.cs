@@ -1,4 +1,4 @@
-﻿using Models.Configs;
+﻿using Models.Configs.HoiConfigs;
 
 namespace Models.Args
 {

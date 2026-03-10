@@ -5,7 +5,7 @@ using Models.Interfaces;
 using Models.Types.HtmlFilesData;
 using Models.Types.Utils;
 using System.Text.RegularExpressions;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 
 public class HtmlModifierParser : Parser
 {

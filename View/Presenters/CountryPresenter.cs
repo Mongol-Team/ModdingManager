@@ -1,5 +1,5 @@
 ﻿using Application.Extentions;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using System.Drawing;
 using System.Windows;
 using View.Interfaces;

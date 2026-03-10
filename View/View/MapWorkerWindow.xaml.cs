@@ -2,7 +2,6 @@
 using Application.Extensions;
 using Application.Extentions;
 using Models.Args;
-using Models.Configs;
 using Models.Types.Utils;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +13,7 @@ using ViewPresenters;
 using Cursors = System.Windows.Input.Cursors;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using View.Models;
+using Models.Configs.HoiConfigs;
 
 
 namespace View
@@ -30,7 +30,7 @@ namespace View
         public event Action<string> MapChanged;
         public MarkEventArg _markedElement;
         public string CurrentMapLayer { get; set; } = "PROVINCE"; // Начальный слой по умолчанию
-        public MapConfig Map
+        public HoiMapConfig Map
         {
             get;
             set;

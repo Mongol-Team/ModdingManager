@@ -1,4 +1,4 @@
-﻿using Models.Configs;
+﻿using Models.Configs.HoiConfigs;
 using Models.Interfaces;
 using Models.Types.Utils;
 using System;

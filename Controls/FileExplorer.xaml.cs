@@ -5,7 +5,7 @@ using Application.Extentions;
 using Application.utils;
 using Controls.Args;
 using Controls.Docking;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Interfaces;
 using System.Collections;
@@ -289,11 +289,11 @@ namespace Controls
             RestoreExpansionState();
         }
 
-        private List<ModCategoryNode> GetModCategories(ModConfig modConfig)
+        private List<ModCategoryNode> GetModCategories(HoiModConfig modConfig)
         {
             var categories = new List<ModCategoryNode>();
 
-            foreach (var prop in typeof(ModConfig).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            foreach (var prop in typeof(HoiModConfig).GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (prop.PropertyType.IsGenericType)
                 {
@@ -315,15 +315,15 @@ namespace Controls
                         }
                     }
                 }
-                else if (prop.PropertyType == typeof(MapConfig) &&
-                         prop.GetValue(modConfig) is MapConfig map)
+                else if (prop.PropertyType == typeof(HoiMapConfig) &&
+                         prop.GetValue(modConfig) is HoiMapConfig map)
                 {
                     categories.Add(new ModCategoryNode
                     {
                         Name = "Map",
                         DisplayName = "Map",
                         Items = new List<object> { map },
-                        ItemType = typeof(MapConfig),
+                        ItemType = typeof(HoiMapConfig),
                         PropertyInfo = prop
                     });
                 }

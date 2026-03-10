@@ -1,5 +1,6 @@
 ﻿using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
+using Models.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

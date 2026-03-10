@@ -6,7 +6,7 @@ using Application.Settings;
 using Application.utils.Pathes;
 using Data;
 using Data.Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
@@ -46,7 +46,7 @@ namespace Application.Composers
                 foreach (string file in files)
                 {
                     string fileContent = File.ReadAllText(file);
-                    HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
+                    FuncFile hoiFuncFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
 
                     bool isOverride = path.StartsWith(ModPathes.CommonCharacterPath); // или более точная логика
 
@@ -68,7 +68,7 @@ namespace Application.Composers
             return characterFiles;
         }
 
-        private static ConfigFile<CountryCharacterConfig> ParseFile(HoiFuncFile funcFile, string fileFullPath, bool isOverride)
+        private static ConfigFile<CountryCharacterConfig> ParseFile(FuncFile funcFile, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<CountryCharacterConfig>
             {

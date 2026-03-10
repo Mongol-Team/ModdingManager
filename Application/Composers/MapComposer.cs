@@ -1,14 +1,14 @@
 ﻿using Application.utils.Pathes;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using System.Drawing;
 
 namespace Application.Composers
 {
     public class MapComposer
     {
-        public static MapConfig Parse()
+        public static HoiMapConfig Parse()
         {
-            MapConfig mapConfig = new MapConfig();
+            HoiMapConfig mapConfig = new HoiMapConfig();
             string bmPath = "";
             if (File.Exists(ModPathes.ProvinceImagePath))
             {

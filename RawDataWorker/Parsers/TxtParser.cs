@@ -28,7 +28,7 @@ namespace RawDataWorker.Parsers
         {
             Normalize(ref content);
 
-            var result = new HoiFuncFile();
+            var result = new FuncFile();
 
             // Проверка баланса скобок
             var (openCount, closeCount) = CountBraces(content, pattern.OpenChar[0], pattern.CloseChar[0]);

@@ -99,11 +99,11 @@ namespace Application.Loaders
                 IsOverride = isOverride
             };
 
-            HoiFuncFile funcFile;
+            FuncFile funcFile;
             try
             {
                 var parser = new TxtParser(new TxtPattern());
-                funcFile = parser.Parse(gfxFilePath) as HoiFuncFile;
+                funcFile = parser.Parse(gfxFilePath) as FuncFile;
 
                 if (parser.healer?.Errors?.Any() == true)
                 {

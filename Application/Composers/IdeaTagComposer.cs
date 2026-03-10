@@ -5,7 +5,7 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Enums;
 using Models.Types.LocalizationData;
@@ -46,7 +46,7 @@ namespace Application.Composers
                     try
                     {
                         string content = File.ReadAllText(file);
-                        HoiFuncFile hoiFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                        FuncFile hoiFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                         bool isOverride = path.StartsWith(ModPathes.IdeaTagsPath);
 
@@ -73,7 +73,7 @@ namespace Application.Composers
             return tagFiles;
         }
 
-        private static ConfigFile<IdeaTagConfig> ParseFile(HoiFuncFile file, string fileFullPath, bool isOverride)
+        private static ConfigFile<IdeaTagConfig> ParseFile(FuncFile file, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<IdeaTagConfig>
             {

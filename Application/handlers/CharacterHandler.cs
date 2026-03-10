@@ -5,7 +5,7 @@ using Models.SubModels;
 using System.Text;
 using System.Windows;
 using MessageBox = System.Windows.MessageBox;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 
 namespace ModdingManager.classes.handlers
 {

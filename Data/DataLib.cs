@@ -9,6 +9,9 @@ namespace Data
         public static readonly string RulesCoreDefenitions;
         public static readonly string BaisicUnitGroupsDefenitions;
         public static readonly string ErrorTypesDefenitions;
+        public static readonly string HoiModTags;
+        public static readonly string CkModTags;
+        public static readonly string VictoriaModTags;
         static DataLib()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -29,6 +32,15 @@ namespace Data
                         case "BaisicUnitGroupsDefenitions.txt":
                             BaisicUnitGroupsDefenitions = ReadResource(assembly, resourceName);
                             break;
+                        case "HoiModTags.txt":
+                            HoiModTags = ReadResource(assembly, resourceName);
+                            break;
+                        case "CkModTags.txt":
+                            CkModTags = ReadResource(assembly, resourceName);
+                            break;
+                        case "VictoriaModTags.txt":
+                            VictoriaModTags = ReadResource(assembly, resourceName);
+                            break;
                     }
                 }
 
@@ -47,7 +59,6 @@ namespace Data
                 }
             }
         }
-
 
         private static string ReadResource(Assembly assembly, string resourceName)
         {

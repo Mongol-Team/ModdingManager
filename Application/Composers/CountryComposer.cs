@@ -5,7 +5,7 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Enums;
 using Models.Types.LocalizationData;
@@ -41,7 +41,7 @@ namespace Application.Composers
                 foreach (string tagFilePath in modTagFiles)
                 {
                     string content = File.ReadAllText(tagFilePath);
-                    var tagFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                    var tagFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                     foreach (Var tagVar in tagFile.Vars)
                     {
@@ -56,7 +56,7 @@ namespace Application.Composers
                             continue;
 
                         string historyContent = File.ReadAllText(actualHistoryPath);
-                        var historyFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(historyContent);
+                        var historyFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(historyContent);
 
                         var country = ParseCountryHistory(tag, countryFileRelative, actualHistoryPath, historyFile);
                         if (country == null)
@@ -95,7 +95,7 @@ namespace Application.Composers
 
 
                     string content = File.ReadAllText(tagFilePath);
-                    var tagFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                    var tagFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                     foreach (Var tagVar in tagFile.Vars)
                     {
@@ -118,7 +118,7 @@ namespace Application.Composers
                             continue;
 
                         string historyContent = File.ReadAllText(actualHistoryPath);
-                        var historyFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(historyContent);
+                        var historyFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(historyContent);
 
                         var country = ParseCountryHistory(tag, countryFileRelative, actualHistoryPath, historyFile);
                         if (country == null)
@@ -196,7 +196,7 @@ namespace Application.Composers
         /// <summary>
         /// Парсит файл истории одной страны по относительному пути из tags
         /// </summary>
-        private static CountryConfig ParseCountryHistory(string tag, string relativePath, string actualHistoryPath, HoiFuncFile file)
+        private static CountryConfig ParseCountryHistory(string tag, string relativePath, string actualHistoryPath, FuncFile file)
         {
            
 

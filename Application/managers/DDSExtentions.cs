@@ -3,7 +3,7 @@ using Pfim;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using Application.Settings;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 namespace Application.managers
 {
     public static class DDSExtentions

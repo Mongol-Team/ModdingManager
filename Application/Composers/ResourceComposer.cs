@@ -4,7 +4,7 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
@@ -50,7 +50,7 @@ namespace Application.Composers
                     try
                     {
                         string content = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                        FuncFile hoiFuncFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                         bool isOverride = path.StartsWith(ModPathes.ResourcesPath);
 
@@ -76,7 +76,7 @@ namespace Application.Composers
             return resourceFiles;
         }
 
-        private static ConfigFile<ResourceConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
+        private static ConfigFile<ResourceConfig> ParseFile(FuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<ResourceConfig>
             {

@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Text;
 using System.Windows;
 using MessageBox = System.Windows.MessageBox;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 
 
 public class CountryHandler

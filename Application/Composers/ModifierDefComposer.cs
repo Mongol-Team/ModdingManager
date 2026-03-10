@@ -1,7 +1,7 @@
 ﻿using Application.Debugging;
 using Application.Extentions;
 using Application.utils.Pathes;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Enums;
 using Models.Types.HtmlFilesData;
@@ -40,7 +40,7 @@ namespace Application.Composers
                     try
                     {
                         string content = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                        FuncFile hoiFuncFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                         bool isOverride = path.StartsWith(ModPathes.ModifierDefFirstPath);
 
@@ -71,7 +71,7 @@ namespace Application.Composers
             return modifierFiles;
         }
 
-        private static ConfigFile<ModifierDefinitionConfig> ParseTxtFile(HoiFuncFile file, string fileFullPath, bool isOverride)
+        private static ConfigFile<ModifierDefinitionConfig> ParseTxtFile(FuncFile file, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<ModifierDefinitionConfig>
             {

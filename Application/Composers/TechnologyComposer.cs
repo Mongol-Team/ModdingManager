@@ -4,7 +4,6 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
 using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
@@ -20,6 +19,7 @@ using System.Diagnostics;
 using System.IO;
 using DDF = Data.DataDefaultValues;
 using System.Linq;
+using Models.Configs.HoiConfigs;
 
 namespace Application.Composers
 {
@@ -56,7 +56,7 @@ namespace Application.Composers
                     try
                     {
                         string content = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                        FuncFile hoiFuncFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                         bool isOverride = defPath.StartsWith(ModPathes.TechDefPath);
 
@@ -82,7 +82,7 @@ namespace Application.Composers
             return techTreeFiles;
         }
 
-        private static ConfigFile<TechTreeConfig> ParseDefFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
+        private static ConfigFile<TechTreeConfig> ParseDefFile(FuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<TechTreeConfig>
             {

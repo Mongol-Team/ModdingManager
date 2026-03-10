@@ -1,5 +1,4 @@
 using Application;
-using Models.Configs;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -7,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Controls;
 using UserControl = System.Windows.Controls.UserControl;
+using Models.Configs.HoiConfigs;
 
 namespace Controls
 {
@@ -69,7 +69,7 @@ namespace Controls
 
         private PropertyInfo FindListPropertyInModConfig(Type configType)
         {
-            var modConfigType = typeof(ModConfig);
+            var modConfigType = typeof(HoiModConfig);
             var properties = modConfigType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             
             foreach (var prop in properties)

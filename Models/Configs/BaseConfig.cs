@@ -15,7 +15,7 @@ namespace Models.Configs
 
         public override string ToString()
         {
-            return this.Id.ToString();
+            return Id.ToString();
         }
     }
 }

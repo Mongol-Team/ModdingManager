@@ -1,7 +1,8 @@
 ﻿using Application;
 using Application.Extensions;
 using Application.Settings;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
+using Models.Interfaces;
 using Models.Types.LocalizationData;
 using System.Text;
 using UserControl = System.Windows.Controls.UserControl;

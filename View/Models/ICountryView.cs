@@ -1,4 +1,4 @@
-﻿using Models.Configs;
+﻿using Models.Configs.HoiConfigs;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
 using System.Drawing;

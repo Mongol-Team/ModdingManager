@@ -44,6 +44,7 @@
   <ItemGroup>
     <Folder Include="Interfaces\" />
     <Folder Include="Properties\" />
+    <Folder Include="Compiler\" />
   </ItemGroup>
 
 </Project>

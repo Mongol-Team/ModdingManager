@@ -5,7 +5,7 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Enums;
 using Models.Types.LocalizationData;
@@ -42,7 +42,7 @@ namespace Application.Composers
                 foreach (string file in files)
                 {
                     string fileContent = File.ReadAllText(file);
-                    HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
+                    FuncFile hoiFuncFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
 
                     bool isOverride = path.StartsWith(ModPathes.TraitsPath); // или более точная логика
 
@@ -64,7 +64,7 @@ namespace Application.Composers
             return traitFiles;
         }
 
-        private static ConfigFile<CharacterTraitConfig> ParseFile(HoiFuncFile file, string fileFullPath, bool isOverride)
+        private static ConfigFile<CharacterTraitConfig> ParseFile(FuncFile file, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<CharacterTraitConfig>
             {

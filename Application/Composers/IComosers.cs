@@ -1,5 +1,5 @@
-﻿using Models.Configs;
-using Models.EntityFiles;
+﻿using Models.EntityFiles;
+using Models.Interfaces;
 
 namespace Application.Composers
 {

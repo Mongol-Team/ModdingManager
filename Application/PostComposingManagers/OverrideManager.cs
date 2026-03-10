@@ -3,19 +3,19 @@ using Application.Debugging;
 using Application.utils;
 using Application.utils.Math;
 using Application.utils.Pathes;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Interfaces;
 using System.Collections;
 
 public static class OverrideManager
 {
-    public static void HandleOverride(ModConfig modConfig)
+    public static void HandleOverride(HoiModConfig modConfig)
     {
         Logger.AddLog(StaticLocalisation.GetString("Log.OverrideManager.Started"));
 
         int maxDegree = ParallelTaskCounter.CalculateMaxDegreeOfParallelism();
-        var modType = typeof(ModConfig);
+        var modType = typeof(HoiModConfig);
 
         // Обработка обычных списков IFile
         ProcessFileCollections(modType, maxDegree);
@@ -80,7 +80,7 @@ public static class OverrideManager
 
             switch(politicalMap)
             {
-                case MapConfig mapConfig:
+                case HoiMapConfig mapConfig:
                     var sratRegsDubles = FindConfigDuplicatesById(
                         mapConfig.StrategicRegions
                                  .SelectMany(f => f.Entities)

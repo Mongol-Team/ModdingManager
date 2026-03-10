@@ -1,5 +1,5 @@
 ﻿using Application.Extensions;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.Interfaces;
 using System.Collections.ObjectModel;
 
@@ -60,7 +60,7 @@ namespace Application.Extentions
             return null;
         }
 
-        public static TechTreeConfig GetTechTree(this ModConfig mod, string id)
+        public static TechTreeConfig GetTechTree(this HoiModConfig mod, string id)
         {
             return mod.TechTreeLedgers.FileEntitiesToList()?.FirstOrDefault(t => t.Id.ToString() == id);
         }
@@ -105,15 +105,15 @@ namespace Application.Extentions
 
         #endregion
         #region ModCfgMethods
-        public static CountryConfig GetCountry(this ModConfig mod, string id)
+        public static CountryConfig GetCountry(this HoiModConfig mod, string id)
         {
             return mod.Countries.FileEntitiesToList()?.FirstOrDefault(c => c.Id.ToString() == id);
         }
-        public static IdeaConfig GetIdea(this ModConfig mod, string id)
+        public static IdeaConfig GetIdea(this HoiModConfig mod, string id)
         {
             return mod.Ideas.FileEntitiesToList()?.FirstOrDefault(i => i.Id.ToString() == id);
         }
-        public static IModifier GetModifier(this ModConfig mod, string id)
+        public static IModifier GetModifier(this HoiModConfig mod, string id)
         {
             StaticModifierConfig st = mod.StaticModifiers.FileEntitiesToList()?.FirstOrDefault(s => s.Id.ToString() == id);
             if (st != null) return st;
@@ -123,11 +123,11 @@ namespace Application.Extentions
             if (dm != null) return dm;
             return null;
         }
-        public static StateConfig GetState(this ModConfig mod, int id)
+        public static StateConfig GetState(this HoiModConfig mod, int id)
         {
             return mod.Map.States.FileEntitiesToList()?.FirstOrDefault(s => s.Id.ToInt() == id);
         }
-        public static IdeologyConfig GetIdeology(this ModConfig mod, string id)
+        public static IdeologyConfig GetIdeology(this HoiModConfig mod, string id)
         {
             return mod.Ideologies.FileEntitiesToList().FirstOrDefault();
         }

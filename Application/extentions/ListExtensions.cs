@@ -1,5 +1,4 @@
-﻿using Models.Configs;
-using Models.EntityFiles;
+﻿using Models.EntityFiles;
 using Models.Interfaces;
 using System.Collections.ObjectModel;
 

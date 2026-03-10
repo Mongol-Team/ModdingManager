@@ -16,7 +16,7 @@ using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Windows.Point;
 using UserControl = System.Windows.Controls.UserControl;
 using Data.Properties;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 
 namespace Controls
 {

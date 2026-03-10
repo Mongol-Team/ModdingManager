@@ -1,7 +1,6 @@
 ﻿using Application;
 using Application.Extensions;
 using Application.Extentions;
-using Models.Configs;
 using Models.Enums;
 using Models.Types.LocalizationData;
 using Models.Types.Utils;
@@ -15,6 +14,7 @@ using ViewPresenters;
 using DataFormats = System.Windows.DataFormats;
 using DragEventArgs = System.Windows.DragEventArgs;
 using MessageBox = System.Windows.MessageBox;
+using Models.Configs.HoiConfigs;
 
 namespace View
 {

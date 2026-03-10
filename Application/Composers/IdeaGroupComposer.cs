@@ -5,7 +5,7 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.Enums;
 using Models.GfxTypes;
@@ -45,7 +45,7 @@ namespace Application.Composers
                 foreach (string file in files)
                 {
                     string content = File.ReadAllText(file);
-                    HoiFuncFile hoiFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                    FuncFile hoiFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                     bool isOverride = path.StartsWith(ModPathes.IdeasPath);
 
@@ -58,6 +58,7 @@ namespace Application.Composers
                     }
                 }
             }
+            var govno = 1;
 
             PaseDynamicModifierDefenitions(groupFiles);
 
@@ -68,7 +69,7 @@ namespace Application.Composers
             return groupFiles;
         }
 
-        private static ConfigFile<IdeaGroupConfig> ParseSingleFile(HoiFuncFile file, string fileFullPath, bool isOverride,
+        private static ConfigFile<IdeaGroupConfig> ParseSingleFile(FuncFile file, string fileFullPath, bool isOverride,
             List<ConfigFile<IdeaGroupConfig>> allGroupFiles)
         {
             var configFile = new ConfigFile<IdeaGroupConfig>

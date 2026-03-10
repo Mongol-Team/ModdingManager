@@ -6,7 +6,7 @@ using Application.utils;
 using Application.utils.Pathes;
 using Data;
 using Models.Args;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.GfxTypes;
 using Models.Interfaces;
@@ -451,7 +451,7 @@ namespace Controls
                 else if (prop.PropertyType.GetInterface("IConfig") != null)
                 {
                     var t = prop.PropertyType;
-                    var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                    var listProp = typeof(HoiModConfig).GetProperties().FirstOrDefault(p =>
                         p.PropertyType.IsGenericType &&
                         (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
                          p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
@@ -814,7 +814,7 @@ namespace Controls
                     }
                     else if (itemType.GetInterface("IConfig") != null)
                     {
-                        var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                        var listProp = typeof(HoiModConfig).GetProperties().FirstOrDefault(p =>
                             p.PropertyType.IsGenericType &&
                             (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
                              p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
@@ -1013,7 +1013,7 @@ namespace Controls
                         // ─── Ключ ────────────────────────────────────────────────────────
                         if (keyType.GetInterface("IGfx") != null || keyType.GetInterface("IConfig") != null)
                         {
-                            var collectionProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                            var collectionProp = typeof(HoiModConfig).GetProperties().FirstOrDefault(p =>
                                 p.PropertyType.IsGenericType &&
                                 (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
                                  p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
@@ -1050,7 +1050,7 @@ namespace Controls
                         // ─── Значение ────────────────────────────────────────────────────
                         if (valueType.GetInterface("IGfx") != null || valueType.GetInterface("IConfig") != null)
                         {
-                            var collectionProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                            var collectionProp = typeof(HoiModConfig).GetProperties().FirstOrDefault(p =>
                                 p.PropertyType.IsGenericType &&
                                 (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
                                  p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&
@@ -1317,7 +1317,7 @@ namespace Controls
             }
             else if (type.GetInterface("IConfig") != null)
             {
-                var listProp = typeof(ModConfig).GetProperties().FirstOrDefault(p =>
+                var listProp = typeof(HoiModConfig).GetProperties().FirstOrDefault(p =>
                     p.PropertyType.IsGenericType &&
                     (p.PropertyType.GetGenericTypeDefinition() == typeof(List<>) ||
                      p.PropertyType.GetGenericTypeDefinition() == typeof(ObservableCollection<>)) &&

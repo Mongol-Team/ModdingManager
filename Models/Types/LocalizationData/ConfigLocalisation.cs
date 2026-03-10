@@ -1,5 +1,5 @@
-﻿using Models.Configs;
-using Models.Enums;
+﻿using Models.Enums;
+using Models.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,7 +1,7 @@
 ﻿using Application.Extentions;
 using Application.handlers;
 using Controls;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.GfxTypes;
 using View.Interfaces;
 

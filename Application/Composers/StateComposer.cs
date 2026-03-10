@@ -4,7 +4,7 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles;
 using Models.GfxTypes;
 using Models.Types.LocalizationData;
@@ -52,7 +52,7 @@ namespace Application.Composers
                     try
                     {
                         string content = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                        FuncFile hoiFuncFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                         bool isOverride = folder.StartsWith(ModPathes.StatesPath);
 
@@ -84,7 +84,7 @@ namespace Application.Composers
         /// <summary>
         /// Парсит один файл штатов (принимает HoiFuncFile)
         /// </summary>
-        public static ConfigFile<StateConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
+        public static ConfigFile<StateConfig> ParseFile(FuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<StateConfig>
             {

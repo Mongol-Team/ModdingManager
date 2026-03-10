@@ -9,8 +9,11 @@
   <ItemGroup>
     <EmbeddedResource Include="Embedded\JSON\ErrorTypesDefenitions.json" />
     <EmbeddedResource Include="Embedded\Text\BaisicUnitGroupsDefenitions.txt" />
+    <EmbeddedResource Include="Embedded\Text\CkModTags.txt" />
+    <EmbeddedResource Include="Embedded\Text\HoiModTags.txt" />
     <EmbeddedResource Include="Embedded\Text\OtherModifierDefenitions.txt" />
     <EmbeddedResource Include="Embedded\Text\RulesCoreDefenitions.txt" />
+    <EmbeddedResource Include="Embedded\Text\VictoriaModTags.txt" />
     <EmbeddedResource Include="Resources\Localizations\english.loc" />
     <EmbeddedResource Include="Resources\Localizations\russian.loc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -18,7 +21,10 @@
     <None Remove="Data\Text\OtherModifierDefenitions.txt" />
     <None Remove="Embedded\Images\Controls\warn.png" />
     <None Remove="Embedded\JSON\ErrorTypesDefenitions.json" />
+    <None Remove="Embedded\Text\CkModTags.txt" />
+    <None Remove="Embedded\Text\HoiModTags.txt" />
     <None Remove="Embedded\Text\OtherModifierDefenitions.txt" />
+    <None Remove="Embedded\Text\VictoriaModTags.txt" />
   </ItemGroup>
 
   <ItemGroup>

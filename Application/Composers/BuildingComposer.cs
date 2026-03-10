@@ -5,7 +5,7 @@ using Application.Extentions;
 using Application.Settings;
 using Application.utils.Pathes;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.EntityFiles; // Добавлен для ConfigFile<T>
 using Models.Enums;
 using Models.GfxTypes;
@@ -41,7 +41,7 @@ namespace Application.Composers
                         if (File.Exists(file))
                         {
                             string fileContent = File.ReadAllText(file);
-                            HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
+                            FuncFile hoiFuncFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(fileContent);
                             ConfigFile<BuildingConfig> configFile = ParseFile(hoiFuncFile, file, path == ModPathes.BuildingsPath); // Передаем путь для определения IsOverride
                             buildingFiles.Add(configFile);
                             Logger.AddDbgLog($"Добавлен файл: {configFile.FileName} с {configFile.Entities.Count} конфигами.");
@@ -63,7 +63,7 @@ namespace Application.Composers
             return buildingFiles; // Теперь возвращаем список файлов, а не конфигов
         }
 
-        public static ConfigFile<BuildingConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
+        public static ConfigFile<BuildingConfig> ParseFile(FuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
             ConfigFile<BuildingConfig> configFile = new ConfigFile<BuildingConfig>
             {

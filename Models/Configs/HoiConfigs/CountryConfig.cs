@@ -1,0 +1,71 @@
+﻿using Models.Attributes;
+using Models.Interfaces;
+using Models.Types.LocalizationData;
+using Models.Types.Utils;
+using System.Drawing;
+using System.Text.Json.Serialization;
+
+namespace Models.Configs.HoiConfigs
+{
+    [ConfigCreator(ConfigCreatorType.CountryCreator)]
+    public class CountryConfig : IConfig, IMapEntity
+    {
+        public IGfx Gfx { get; set; }
+        public Identifier Id { get; set; }
+        public ConfigLocalisation Localisation { get; set; } = new ConfigLocalisation();
+        public int? Capital { get; set; } 
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
+        public string? CountryFileName { get; set; }
+        public string? GraphicalCulture { get; set; }
+        public Color? Color { get; set; }
+        public Dictionary<TechTreeItemConfig, int>? Technologies { get; set; } = new Dictionary<TechTreeItemConfig, int>();
+        public int? Convoys { get; set; }
+        public string? OOB { get; set; }
+        public double? Stab { get; set; }
+        public double? WarSup { get; set; }
+        public int? ResearchSlots { get; set; }
+        public IdeologyConfig? RulingParty { get; set; }
+        public DateOnly? LastElection { get; set; }
+        public int? ElectionFrequency { get; set; }
+        public bool? ElectionsAllowed { get; set; }
+        [JsonIgnore]
+        public List<StateConfig> States { get; set; } = new List<StateConfig>();
+        public Dictionary<IdeologyConfig, Bitmap>? CountryFlags { get; set; } = new Dictionary<IdeologyConfig, Bitmap>();
+        public Dictionary<IdeologyConfig, int>? PartyPopularities { get; set; } = new Dictionary<IdeologyConfig, int>();
+        public List<IdeaConfig>? Ideas { get; set; } = new List<IdeaConfig>();
+        public List<CountryCharacterConfig>? Characters { get; set; } = new List<CountryCharacterConfig>();
+        public Dictionary<StateConfig, bool>? StateCores { get; set; } = new Dictionary<StateConfig, bool>();
+
+        public void AddChild(object child)
+        {
+            States.Add((StateConfig)child);
+        }
+
+        public IEnumerable<IBasicMapEntity> GetAllBasicEntities()
+        {
+            return States.SelectMany(s => s.GetAllBasicEntities());
+        }
+
+        public IEnumerable<object> GetChildren()
+        {
+            return States;
+        }
+
+        public void RemoveChild(object child)
+        {
+            States.Remove((StateConfig)child);
+        }
+        public Type GetChildType()
+        {
+            return typeof(StateConfig);
+        }
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
+        
+    }
+
+}

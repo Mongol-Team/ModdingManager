@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Models.Configs.HoiConfigs
+{
+    public class CountryLocalisationConfig
+    {
+        public string NameValue { get; set; }
+        public string AdjValue { get; set; }
+        public string DefValue { get; set; }
+        public Tuple<IdeologyConfig, string, string> IdeologyValues { get; set; }
+        public bool IsCore { get; set; }
+        public bool IsOverride { get; set; }
+        public string FileFullPath { get; set; }
+    }
+}

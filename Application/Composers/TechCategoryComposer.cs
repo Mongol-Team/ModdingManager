@@ -12,12 +12,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DDF = Data.DataDefaultValues;
-using Models.Configs;
 using Application.Debugging;
 using Models.EntityFiles;
 using System.Diagnostics;
 using Models.Types.Utils;
 using Data;
+using Models.Configs.HoiConfigs;
 namespace Application.Composers
 {
 
@@ -51,7 +51,7 @@ namespace Application.Composers
                     try
                     {
                         string content = File.ReadAllText(file);
-                        HoiFuncFile hoiFuncFile = (HoiFuncFile)new TxtParser(new TxtPattern()).Parse(content);
+                        FuncFile hoiFuncFile = (FuncFile)new TxtParser(new TxtPattern()).Parse(content);
 
                         bool isOverride = path.StartsWith(ModPathes.TechDefPath);
 
@@ -77,7 +77,7 @@ namespace Application.Composers
             return categoryFiles;
         }
 
-        private static ConfigFile<TechCategoryConfig> ParseFile(HoiFuncFile hoiFuncFile, string fileFullPath, bool isOverride)
+        private static ConfigFile<TechCategoryConfig> ParseFile(FuncFile hoiFuncFile, string fileFullPath, bool isOverride)
         {
             var configFile = new ConfigFile<TechCategoryConfig>
             {

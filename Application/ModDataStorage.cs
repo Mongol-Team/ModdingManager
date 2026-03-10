@@ -5,7 +5,7 @@ using Application.Extentions;
 using Application.Loaders;
 using Application.utils;
 using Data;
-using Models.Configs;
+using Models.Configs.HoiConfigs;
 using Models.GfxTypes;
 using Models.Interfaces;
 using System.Diagnostics;
@@ -14,7 +14,7 @@ namespace Application;
 
 public static class ModDataStorage
 {
-    public static ModConfig Mod = new();
+    public static HoiModConfig Mod = new();
     public static LocalisationRegistry Localisation = new();
     public static List<IError> CsvErrors = new();
     public static List<IError> TxtErrors = new();
@@ -22,7 +22,7 @@ public static class ModDataStorage
     public static void ComposeMod(Action<int, int, string>? progressCallback = null)
     {
         var steps = new List<(Action action, string locKey)>();
-        steps.Add((() => { Mod = new ModConfig(); Localisation = new LocalisationRegistry(); }, "Progress.InitLocalisation"));
+        steps.Add((() => { Mod = ModComposer.ParseMod() as HoiModConfig; Localisation = new LocalisationRegistry(); }, "Progress.InitLocalisation"));
         steps.Add((() => { Mod.Gfxes = GfxLoader.LoadAll().ToObservableCollection(); }, "Progress.LoadingGraphics"));
         steps.Add((() => { Mod.Resources = ResourceComposer.Parse().ToObservableCollection(); }, "Progress.LoadingResources"));
         steps.Add((() => { Mod.ModifierDefinitions = ModifierDefComposer.Parse().ToObservableCollection(); }, "Progress.LoadingModifierDefs"));
@@ -45,7 +45,7 @@ public static class ModDataStorage
         steps.Add((() => { Mod.Equipments = EquipmentComposer.Parse().ToObservableCollection(); }, "Progress.LoadingEquipments"));
         steps.Add((() => { Mod.TechCategories = TechCategoryComposer.Parse().ToObservableCollection(); }, "Progress.LoadingTechCategories"));
         steps.Add((() => { Mod.TechTreeItems = TechTreeItemComposer.Parse().ToObservableCollection(); }, "Progress.LoadingTechTreeDefinitions"));
-        steps.Add((() => { Mod.Map = MapComposer.Parse() as MapConfig; }, "Progress.LoadingMap"));
+        steps.Add((() => { Mod.Map = MapComposer.Parse() as HoiMapConfig; }, "Progress.LoadingMap"));
         steps.Add((() => { Mod.Map.Basic = ProvinceComposer.Parse().SelectMany(p => p.Entities); }, "Progress.LoadingMap"));
         steps.Add((() => { Mod.Map.States = StateComposer.Parse(); }, "Progress.LoadingMap"));
         steps.Add((() => { Mod.Map.StrategicRegions = SRegionComposer.Parse(); }, "Progress.LoadingMap"));
@@ -151,7 +151,7 @@ public static class ModDataStorage
         Logger.AddLog(StaticLocalisation.GetString("Log.TypeRegistration.Started"));
 
         // Регистрация Config типов
-        TypeRegistry.RegisterType<IConfig, MapConfig>();
+        TypeRegistry.RegisterType<IConfig, HoiMapConfig>();
 
         TypeRegistry.RegisterType<IGfx, ArrowType>();
         TypeRegistry.RegisterType<IGfx, CircularProgressBarType>();

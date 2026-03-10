@@ -49,7 +49,16 @@ namespace Controls.Docking
             AttachSplitterHandlers();
 
             QueueLayoutUpdate();
+            Loaded += (s, e) =>
+            {
+                foreach (var zone in _zones.Values)
+                {
+                    var side = _zones.First(kv => kv.Value == zone).Key;
+                    zone.PanelSelectionChanged += p => PanelSelectionChanged?.Invoke(side, p);
+                }
+            };
         }
+        
 
         // ──────────────────────────────────────────────
         // Публичный API
@@ -221,10 +230,6 @@ namespace Controls.Docking
             {
                 zone.Panels.CollectionChanged += OnZonePanelsChanged;
 
-                // Захватываем side в локальной переменной чтобы замыкание работало правильно
-                var capturedSide = side;
-                zone.PanelSelectionChanged += panel =>
-                    PanelSelectionChanged?.Invoke(capturedSide, panel);
             }
 
             Unloaded += (_, __) => Cleanup();

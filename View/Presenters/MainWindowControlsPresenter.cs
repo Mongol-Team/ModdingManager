@@ -6,12 +6,12 @@ using Controls;
 using Controls.Args;
 using Controls.Docking;
 using Models.Attributes;
-using Models.Configs;
 using Models.Interfaces;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using View.Models;
 
 namespace ViewPresenters
@@ -52,7 +52,7 @@ namespace ViewPresenters
 
         // Задаётся в InitializeMapViewerPanel после добавления инспектора в DockManager
         private DockPanelInfo _mapInspectorPanel;
-
+        public bool IsMapViewerPanelInitialized = false;
         // ─── Состояние режима ────────────────────────────────────────────────────
         private string _currentMode = ModeEntity;
         private MapViewer _mapViewer;
@@ -141,6 +141,65 @@ namespace ViewPresenters
             // 3. Переключаем центр
             if (newMode == ModeMap && _mapViewer != null)
             {
+                if (!IsMapViewerPanelInitialized)
+                {
+                    var window = new Window
+                    {
+                        Title = StaticLocalisation.GetString("Window.Debug"),
+                        Width = 100,
+                        Height = 50,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        WindowStyle = WindowStyle.None,
+                        Background = Brushes.Black
+                    };
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                      
+
+                        var grid = new Grid();
+                        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(30) });
+                        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+                        var titleBar = new WindowTitleBar();
+                        var tb = new TextBox
+                        {
+                            Text = StaticLocalisation.GetString("MapLoading.PleaseWait"),
+                            IsReadOnly = true,
+                            Style = (Style)System.Windows.Application.Current.TryFindResource("GenericViewerTextBox")
+                        };
+
+                        Grid.SetRow(titleBar, 0);
+                        grid.Children.Add(titleBar);
+                        grid.Children.Add(tb);
+                        window.Show();
+                    });
+
+                    // Загружаем карту асинхронно
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                _mapViewer.Initialize(ModDataStorage.Mod.Map);
+                            });
+
+                            IsMapViewerPanelInitialized = true;
+                            Logger.AddLog(StaticLocalisation.GetString("Log.MapLoadingCompleted"));
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.AddLog(StaticLocalisation.GetString("Log.MapLoadingFailed", ex.Message));
+                        }
+                        finally
+                        {
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                window?.Close();
+                            });
+                        }
+                    });
+                }
                 _dockManager.SetContent(_mapViewer);
                 Logger.AddDbgLog(StaticLocalisation.GetString("Log.MainWindow.CenterSwitchedToMap"));
             }
@@ -255,7 +314,10 @@ namespace ViewPresenters
                 inspectorPanel,
                 _fileExplorerPanel,
                 _dockManager);
-
+            if (_mapInspectorPanel != null && _fileExplorerPanel != null)
+            {
+                _dockManager.ActivatePanel(_fileExplorerPanel);
+            }
             Logger.AddLog(StaticLocalisation.GetString("Log.MapViewerPanel.PanelReady"));
         }
 
@@ -269,7 +331,7 @@ namespace ViewPresenters
             {
                 var mapViewer = new MapViewer();
                 Logger.AddLog(StaticLocalisation.GetString("Log.MapViewerPanel.InitializingData"));
-                mapViewer.Initialize(ModDataStorage.Mod.Map);
+                
                 Logger.AddLog(StaticLocalisation.GetString("Log.MapViewerPanel.DataInitialized"));
                 Logger.AddDbgLog(StaticLocalisation.GetString("Log.MapViewerPanel.MapViewerCreated"));
                 return mapViewer;
