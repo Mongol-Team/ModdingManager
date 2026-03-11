@@ -8,7 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using DDF = Data.DataDefaultValues;
 
-namespace Application.managers
+namespace Application.StaticExtentions
+
 {
     public static class ImageExtentions
     {

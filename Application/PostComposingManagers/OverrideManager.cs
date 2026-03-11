@@ -17,10 +17,7 @@ public static class OverrideManager
         int maxDegree = ParallelTaskCounter.CalculateMaxDegreeOfParallelism();
         var modType = typeof(HoiModConfig);
 
-        // Обработка обычных списков IFile
         ProcessFileCollections(modType, maxDegree);
-
-        // Обработка политических карт
         ProcessPoliticalMaps(modType, maxDegree);
 
         Logger.AddLog(StaticLocalisation.GetString("Log.OverrideManager.Completed"));
@@ -44,13 +41,10 @@ public static class OverrideManager
 
             Logger.AddDbgLog(StaticLocalisation.GetString("Log.OverrideManager.ProcessingProperty", prop.Name, files.Count));
 
-            // Собираем относительные пути из мода
             var modRelatives = CollectModRelativePaths(files);
 
-            // Находим файлы для удаления (оверрайд по пути)
             var toRemove = FindFilesToRemove(files, modRelatives, maxDegree);
 
-            // Удаляем найденные файлы
             RemoveFilesFromCollection(value, toRemove);
 
             Logger.AddDbgLog(StaticLocalisation.GetString("Log.OverrideManager.RemovedFiles", toRemove.Count, prop.Name));
@@ -72,7 +66,6 @@ public static class OverrideManager
 
             Logger.AddDbgLog(StaticLocalisation.GetString("Log.OverrideManager.ProcessingMap", prop.Name));
 
-            // Обработка базовых сущностей
             if (politicalMap.Basic != null)
             {
                 ProcessBasicMapEntities(politicalMap.Basic, "Basic");
@@ -107,7 +100,6 @@ public static class OverrideManager
 
         Logger.AddDbgLog(StaticLocalisation.GetString("Log.OverrideManager.ProcessingBasicEntities", layerName, entitiesList.Count));
 
-        // Проверяем, реализуют ли сущности IConfig
         var configs = entitiesList.OfType<IConfig>().ToList();
         if (configs.Count == 0)
         {
@@ -115,10 +107,8 @@ public static class OverrideManager
             return;
         }
 
-        // Удаляем дубликаты по Id
         var toRemove = FindConfigDuplicatesById(configs);
 
-        // Удаляем из исходной коллекции
         if (entities is IList list)
         {
             foreach (var item in toRemove)
@@ -142,13 +132,10 @@ public static class OverrideManager
 
         Logger.AddDbgLog(StaticLocalisation.GetString("Log.OverrideManager.ProcessingLayerEntities", layerName, entitiesList.Count));
 
-        // IMapEntity теперь наследуется от IConfig, поэтому приводим напрямую
         var configs = entitiesList.Cast<IConfig>().ToList();
 
-        // Удаляем дубликаты по Id
         var toRemove = FindConfigDuplicatesById(configs);
 
-        // Удаляем из исходной коллекции, если она изменяемая
         if (entities is IList<IMapEntity> genericList)
         {
             foreach (var item in toRemove.OfType<IMapEntity>())
@@ -178,7 +165,6 @@ public static class OverrideManager
         var toRemove = new List<IConfig>();
         var seenIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        // Сначала собираем все Id из мода
         var modIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var config in configs)
         {
@@ -192,7 +178,6 @@ public static class OverrideManager
             }
         }
 
-        // Затем удаляем дубликаты
         foreach (var config in configs)
         {
             if (config.Id == null || string.IsNullOrEmpty(config.Id.ToString())) continue;
@@ -201,7 +186,6 @@ public static class OverrideManager
 
             var idString = config.Id.ToString();
 
-            // Если это файл из игры и его Id есть в моде - удаляем
             if (config.FileFullPath.StartsWith(GamePathes.RootPath, StringComparison.OrdinalIgnoreCase)
                 && modIds.Contains(idString))
             {
@@ -209,7 +193,6 @@ public static class OverrideManager
                 continue;
             }
 
-            // Удаляем полные дубликаты по Id (если встречается второй раз)
             if (seenIds.Contains(idString))
             {
                 toRemove.Add(config);

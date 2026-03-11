@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Enums\GameEnums\**" />
+    <EmbeddedResource Remove="Enums\GameEnums\**" />
+    <None Remove="Enums\GameEnums\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Interfaces\IHoiType.cs" />
     <Compile Remove="Types\ObectCacheData\HoiFile.cs" />
   </ItemGroup>
@@ -25,10 +31,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Data\Data.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Enums\GameEnums\" />
   </ItemGroup>
 
 </Project>

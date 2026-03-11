@@ -1546,7 +1546,6 @@ namespace Controls
 
                     expander.IsExpanded = false;
 
-                    // Сброс формы
                     tbName.Text = string.Empty;
                     dropImage.Source = null;
                     dropImage.Visibility = Visibility.Collapsed;
@@ -1592,8 +1591,8 @@ namespace Controls
         }
 
         private FrameworkElement CreateBitmapControl(
-    System.Drawing.Bitmap initialBitmap,
-    Action<System.Drawing.Bitmap> onBitmapChanged)
+            System.Drawing.Bitmap initialBitmap,
+            Action<System.Drawing.Bitmap> onBitmapChanged)
         {
             var root = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
 

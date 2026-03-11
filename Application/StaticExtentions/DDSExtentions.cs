@@ -4,7 +4,8 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using Application.Settings;
 using Models.Configs.HoiConfigs;
-namespace Application.managers
+
+namespace Application.StaticExtentions
 {
     public static class DDSExtentions
     {
