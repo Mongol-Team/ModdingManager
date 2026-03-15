@@ -1,5 +1,6 @@
 ﻿using Models.Enums.Gui;
 using Models.Interfaces;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,7 +20,7 @@ namespace Models.GuiTypes
         public bool? Fixedsize { get; set; }
         public int? BorderSize { get; set; }
         public bool? IgnoreTabNavigation { get; set; }
-        public string Name { get ; set ; }
+        public Identifier Id { get ; set ; }
         public Point Position { get ; set ; }
         public GuiOrientationType? Orientation { get ; set ; }
         public bool? AlwaysTransparent { get ; set ; }

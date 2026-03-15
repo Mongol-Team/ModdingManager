@@ -1,5 +1,6 @@
 ﻿using Models.Enums.Gui;
 using Models.Interfaces;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -17,10 +18,10 @@ namespace Models.GuiTypes
         public int? MaxHeight { get; set; }
         public GuiTextFormatType? Format { get; set; }
         public bool? Fixedsize { get; set; }
-        public int? BorderSize { get; set; }
+        public Point? BorderSize { get; set; }
         public ScrollbarType Scrollbar { get; set; }
         public string TextureFile { get; set; } // Rarely used
-        public string Name { get; set; }
+        public Identifier Id { get; set; }
         public Point Position { get; set; }
         public GuiOrientationType? Orientation { get; set; }
         public bool? AlwaysTransparent { get; set; }

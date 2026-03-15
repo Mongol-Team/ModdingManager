@@ -1,5 +1,7 @@
 ﻿using Models.Enums.Gui;
+using Models.GfxTypes;
 using Models.Interfaces;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,8 +13,8 @@ namespace Models.GuiTypes
 {
     public class ButtonType : IGui
     {
-        public string SpriteType { get; set; }
-        public string QuadTextureSprite { get; set; }
+        public SpriteType SpriteType { get; set; }
+        public CorneredTileSpriteType QuadTextureSprite { get; set; }
         public int? Frame { get; set; }
         public string ButtonText { get; set; }
         public string ButtonFont { get; set; }
@@ -20,12 +22,9 @@ namespace Models.GuiTypes
         public string ClickSound { get; set; }
         public string OverSound { get; set; }
         public string HintTag { get; set; }
-        public float? Scale { get; set; }
+        public double? Scale { get; set; }
         public string WebLink { get; set; }
-        public string Tooltip { get; set; } // Never used
-        public string TooltipText { get; set; } // Never used
-        public string DelayedTooltipText { get; set; } // Never used
-        public string Name { get ; set ; }
+        public Identifier Id { get ; set ; }
         public Point Position { get ; set ; }
         public GuiOrientationType? Orientation { get ; set ; }
         public bool? AlwaysTransparent { get ; set ; }

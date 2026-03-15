@@ -50,7 +50,7 @@ public static class ModDataStorage
         steps.Add((() => { Mod.Map.States = StateComposer.Parse(); }, "Progress.LoadingMap"));
         steps.Add((() => { Mod.Map.StrategicRegions = SRegionComposer.Parse(); }, "Progress.LoadingMap"));
         steps.Add((() => { Mod.Map.Countries = CountryComposer.Parse(); }, "Progress.LoadingMap"));
-
+        steps.Add((() => { Mod.GuiFiles = GuiComposer.Parse().ToObservableCollection(); }, "Progress.LoadingGui"));
         steps.Add((() => { OverrideManager.HandleOverride(Mod); }, "Progress.HandlingOverrides"));
         
 

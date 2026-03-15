@@ -13,9 +13,9 @@ namespace Models.GuiTypes.Defenitions
     {
         public int? Height { get; set; }
         public int? Width { get; set; }
-        public string HeightPercent { get; set; }
-        public string WidthPercent { get; set; }
-        public bool IsHeightPercent => !string.IsNullOrEmpty(HeightPercent);
-        public bool IsWidthPercent => !string.IsNullOrEmpty(WidthPercent);
+        public string MinHeightPercent { get; set; }
+        public string MinWidthPercent { get; set; }
+        public string MaxHeightPercent { get; set; }
+        public string MaxWidthPercent { get; set; }
     }
 }

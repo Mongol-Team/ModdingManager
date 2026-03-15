@@ -1,4 +1,5 @@
 ﻿using Models.Enums.Gui;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,7 +14,7 @@ namespace Models.Interfaces
     /// </summary>
     public interface IGui
     {
-        public string Name { get; set; }
+        public Identifier Id { get; set; }
         public Point Position { get; set; }
         public GuiOrientationType? Orientation { get; set; }
         public bool? AlwaysTransparent { get; set; }

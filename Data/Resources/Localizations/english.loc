@@ -27,6 +27,7 @@
   "ClassViewer.Label.Language": "Language",
   "ClassViewer.Label.Localisation": "Localisation",
   "DebugWindow.Button.SaveToFile": "Save to file",
+  "DbgLog.FailedToParseGuiFile": "Failed to parse GUI file: {0},cause {1}",
   "Error.DeleteFailed": "Error deleting: {0}",
   "Error.DirectoryNotExists": "The specified directory does not exist.",
   "Error.EnterBothDirectories": "Enter both directories.",
@@ -119,6 +120,7 @@
   "Progress.LoadingProvinces": "Loading provinces...",
   "Progress.LoadingResources": "Loading resources...",
   "Progress.LoadingRules": "Loading rules...",
+  "Progress.LoadingGui": "Loading GUI...",
   "Progress.LoadingStateCategories": "Loading state categories...",
   "Progress.LoadingStaticModifiers": "Loading static modifiers...",
   "Progress.LoadingSubUnitGroups": "Loading sub unit groups...",
@@ -519,5 +521,6 @@
   "Window.ModdingManager": "Modding Manager",
   "Window.Settings": "Settings",
   "Window.MapEntityInspector": "Political Map Explorer",
-  "MapLoading.PleaseWait" : "Loading map, please wait..."
+  "MapLoading.PleaseWait": "Loading map, please wait..."
+
 }

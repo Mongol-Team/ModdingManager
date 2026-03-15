@@ -35,7 +35,7 @@ namespace Models.Configs.HoiConfigs
         public ObservableCollection<ConfigFile<SubUnitGroupConfig>> SubUnitGroups { get; set; } = new();
         public ObservableCollection<ConfigFile<SubUnitCategoryConfig>> SubUnitChategories { get; set; } = new();
         public ObservableCollection<ConfigFile<ResourceConfig>> Resources { get; set; } = new();
-
+        public ObservableCollection<GuiFile<IGui>> GuiFiles { get; set; } = new();
 
         public ModTypes Type { get; set; }
         public Bitmap? Image { get; set; }

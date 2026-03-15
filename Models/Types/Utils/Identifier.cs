@@ -64,15 +64,26 @@ namespace Models.Types.Utils
 
         public static bool operator ==(Identifier? left, Identifier? right)
         {
+            // сравнение по ссылке
             if (ReferenceEquals(left, right)) return true;
             if (left is null || right is null) return false;
             return left.Equals(right);
         }
 
-        public static bool operator !=(Identifier? left, Identifier? right)
+        public static bool operator !=(Identifier? left, Identifier? right) => !(left == right);
+
+
+        public static bool operator ==(string? left, Identifier? right)
         {
-            return !(left == right);
+            // если сравниваем с null → только по ссылке
+            if (left is null) return right is null;
+            if (right is null) return false;
+            return left == right.RawItendifier?.ToString();
         }
+
+        public static bool operator !=(string? left, Identifier? right) => !(left == right);
+
 
     }
 }
+

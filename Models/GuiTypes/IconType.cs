@@ -1,6 +1,7 @@
 ﻿using Models.Enums.Gui;
 using Models.GfxTypes;
 using Models.Interfaces;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Models.GuiTypes.Defenitions
+namespace Models.GuiTypes
 {
     /// <summary>
     /// Элемент для статических изображений
@@ -20,7 +21,7 @@ namespace Models.GuiTypes.Defenitions
         public int? Frame { get; set; }
         public string HintTag { get; set; }
         public bool? CenterPosition { get; set; }
-        public string Name { get; set; }
+        public Identifier Id { get; set; }
         public Point Position { get; set; }
         public GuiOrientationType? Orientation { get; set; }
         public bool? AlwaysTransparent { get; set; }

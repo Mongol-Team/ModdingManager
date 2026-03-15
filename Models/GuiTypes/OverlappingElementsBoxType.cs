@@ -1,5 +1,7 @@
 ﻿using Models.Enums.Gui;
+using Models.GuiTypes.Defenitions;
 using Models.Interfaces;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,13 +13,13 @@ namespace Models.GuiTypes
 {
     public class OverlappingElementsBoxType : IGui
     {
-        public string Name { get ; set ; }
+        public Identifier Id { get; set; }
         public Point Position { get ; set ; }
         public GuiOrientationType? Orientation { get ; set ; }
         public bool? AlwaysTransparent { get ; set ; }
         public string PdxTooltip { get ; set ; }
         public string PdxTooltipDelayed { get ; set ; }
-        public Size Size { get; set; }
+        public SizeDefinition Size { get; set; }
         public int? Spacing { get; set; }
         public bool? Horizontal { get; set; }
         public int? BorderSize { get; set; }

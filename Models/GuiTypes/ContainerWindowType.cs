@@ -1,6 +1,7 @@
 ﻿using Models.Enums.Gui;
 using Models.GuiTypes.Defenitions;
 using Models.Interfaces;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -55,7 +56,7 @@ namespace Models.GuiTypes
 
         public bool IsIndependent => NestedContainers.Count == 0; // Simplified logic
 
-        public string Name { get ; set; }
+        public Identifier Id { get; set; }
         public Point Position { get; set; }
         public GuiOrientationType? Orientation { get; set; }
         public bool? AlwaysTransparent { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Models.Enums.Gui;
 using Models.Interfaces;
+using Models.Types.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,11 +20,11 @@ namespace Models.GuiTypes
         public string Shortcut { get; set; }
         public string ClickSound { get; set; }
         public string HintTag { get; set; }
-        public float? Scale { get; set; }
+        public double? Scale { get; set; }
         public string Tooltip { get; set; } // Never used
         public string TooltipText { get; set; } // Never used
         public string DelayedTooltipText { get; set; } // Never used
-        public string Name { get ; set ; }
+        public Identifier Id { get; set; }
         public Point Position { get ; set ; }
         public GuiOrientationType? Orientation { get ; set ; }
         public bool? AlwaysTransparent { get ; set ; }
